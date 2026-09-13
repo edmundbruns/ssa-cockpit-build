@@ -1,0 +1,34 @@
+[package]
+name = "ssa-cockpit-ludgerusschule"
+version = "0.8.0"
+description = "Lokale verschlüsselte Arbeitsanwendung für die Schulsozialarbeit"
+authors = ["Ludgerusschule"]
+edition = "2021"
+
+[lib]
+name = "ssa_cockpit_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[features]
+default = ["desktop-app", "bundled-sqlite"]
+desktop-app = ["dep:tauri"]
+bundled-sqlite = ["rusqlite/bundled"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+aes-gcm = "0.10"
+argon2 = "0.5"
+base64 = "0.22"
+rand = "0.8"
+rusqlite = { version = "0.32", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+tauri = { version = "2", features = [], optional = true }
+thiserror = "2"
+zeroize = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+tempfile = "3"
