@@ -11,7 +11,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 
 [features]
 default = ["desktop-app", "bundled-sqlite"]
-desktop-app = ["dep:tauri"]
+desktop-app = ["dep:tauri", "dep:tauri-plugin-single-instance"]
 bundled-sqlite = ["rusqlite/bundled"]
 
 [build-dependencies]
@@ -27,6 +27,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
 tauri = { version = "2", features = [], optional = true }
+tauri-plugin-single-instance = { version = "2", optional = true }
 thiserror = "2"
 zeroize = { version = "1", features = ["derive"] }
 
