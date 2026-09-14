@@ -103,6 +103,11 @@
 .kanban-aktionen .btn{flex:1;min-width:78px;justify-content:center}
 .kanban-hinweis{margin:4px 0 8px;font-size:11px;color:var(--muted);line-height:1.35}
 #verlaufForm textarea{min-height:58px}
+
+.avatar.offen{background:var(--amber);color:#3a2500}
+
+.bausteinwahl{margin-bottom:7px;font-size:13px;color:var(--muted);background:var(--surface-2,transparent)}
+.bausteinwahl:focus{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -147,7 +152,7 @@
         </div>
       </div>
     </nav>
-    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.6</span></div>
+    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.7</span></div>
   </aside>
   <main>
     <header class="topbar"><div><h1 id="pageTitle">Guten Morgen, Dr. Bruns</h1><p id="pageSubtitle">Freitag, 11. September 2026 · Schuljahr 2026/27</p></div><div class="kopfsuche"><input class="field" id="globalSearch" type="search" autocomplete="off" placeholder="Schüler:in suchen: Name, Vorname, Klasse oder Klassenleitung" oninput="globalSearchTippen()" onfocus="globalSearchTippen()"><div id="globalSearchResults"></div></div><div class="actions"><button class="btn" onclick="lockPrivacyScreen()">🔒 Sperren</button><button class="btn" onclick="openModal('taskModal')">＋ Aufgabe</button><button class="btn primary" onclick="verlaufOeffnen()">＋ Fallverlauf</button><button class="btn" onclick="dokuWaehlen()">＋ Anderes</button></div></header>
@@ -271,6 +276,7 @@
           <div class="card"><h3>Praxis-Einstellungen</h3><div class="formgrid"><div class="formgroup"><label>Trainingsraum-Hinweis ab Besuchen</label><input class="field" id="trainingThreshold" type="number" min="2" max="10" value="3" onchange="savePracticeSettings()"></div><div class="formgroup"><label>Zeitraum in Tagen</label><input class="field" id="trainingWindow" type="number" min="7" max="180" value="28" onchange="savePracticeSettings()"></div><div class="formgroup"><label>Automatische Sperre nach Minuten</label><input class="field" id="idleMinutes" type="number" min="1" max="120" value="10" onchange="savePracticeSettings()"><span class="hint">Die erneute Eingabe des Kennworts ist erforderlich.</span></div></div></div>
           <div class="card"><h3>Vorgangsdaten zurücksetzen</h3><p class="subtle">Löscht den aktuellen Arbeitsbestand nach vorheriger verschlüsselter Sicherung.</p><button class="btn danger" onclick="resetData()">Arbeitsbestand zurücksetzen</button></div>
         </div>
+        <div id="sicherungsKarte" style="margin-top:17px"></div>
         <div id="beispielfallKarte" style="margin-top:17px"></div>
         <div class="card" style="margin-top:17px"><h3>Lokale Spracherkennung</h3><p class="subtle">Das Mikrofon sendet die Aufnahme ausschließlich an einen Transkriptionsdienst auf diesem Computer.</p><div class="formgroup"><label>Lokale Adresse</label><input class="field" id="speechEndpoint" value="http://127.0.0.1:8173/transcribe" onchange="saveSpeechSettings()"></div><div class="actions" style="margin-top:12px"><button class="btn" onclick="testSpeechService()">Verbindung prüfen</button><span class="tag gray" id="speechStatus">noch nicht geprüft</span><button class="btn primary" onclick="diktatStartdateiSpeichern()">Startdatei für den Diktatdienst speichern</button></div><div class="notice" style="margin-top:12px"><strong>Sofort nutzbar, ganz ohne Einrichtung:</strong> Klicke in ein Textfeld und drücke die <strong>Windows-Taste zusammen mit H</strong>. Windows schreibt dann mit. Erneut drücken beendet die Aufnahme.</div><p class="hint">Die Schaltfläche Diktat in den Textfeldern braucht den lokalen Dienst. Solange er nicht läuft, erscheint dort eine Anleitung statt einer Fehlermeldung.</p></div>
       </section>
@@ -286,10 +292,10 @@
  <div class="formgroup"><label>Art des Eintrags</label><select class="field" name="vorlage" id="verlaufVorlage" onchange="verlaufVorlageWechseln()"></select></div>
  <div class="formgroup"><label>Datum</label><input class="field" type="date" name="date" required></div>
  <div class="formgroup full"><label>Schüler:in</label><input class="field" id="verlaufSuche" placeholder="Name eintippen, dann wird unten ausgewählt" oninput="jumpToStudent(this.value,'verlaufStudent','verlaufTreffer')"><select class="field" name="studentId" id="verlaufStudent" required style="margin-top:7px"></select><span class="hint" id="verlaufTreffer">Nach zwei Buchstaben wird der erste passende Name ausgewählt.</span></div>
- <div class="formgroup full"><label>Was ist passiert?</label><textarea class="field" name="content" id="verlaufEreignis" rows="2" required></textarea></div>
- <div class="formgroup full"><label>Was wurde getan?</label><textarea class="field" name="measureDetail" id="verlaufMassnahme" rows="2"></textarea></div>
- <div class="formgroup full"><label>Wie ging es aus?</label><textarea class="field" name="resultDetail" id="verlaufErgebnis" rows="2"></textarea></div>
- <div class="formgroup"><label>Nächster Schritt</label><input class="field" name="nextStep" id="verlaufNext"></div>
+ <div class="formgroup full"><label>Was ist passiert?</label><select class="field bausteinwahl" id="bsEreignis" onchange="verlaufBaustein(this,'verlaufEreignis')"></select><textarea class="field" name="content" id="verlaufEreignis" rows="2" required></textarea></div>
+ <div class="formgroup full"><label>Was wurde getan?</label><select class="field bausteinwahl" id="bsMassnahme" onchange="verlaufBaustein(this,'verlaufMassnahme')"></select><textarea class="field" name="measureDetail" id="verlaufMassnahme" rows="2"></textarea></div>
+ <div class="formgroup full"><label>Wie ging es aus?</label><select class="field bausteinwahl" id="bsErgebnis" onchange="verlaufBaustein(this,'verlaufErgebnis')"></select><textarea class="field" name="resultDetail" id="verlaufErgebnis" rows="2"></textarea></div>
+ <div class="formgroup"><label>Nächster Schritt</label><select class="field bausteinwahl" id="bsSchritt" onchange="verlaufBaustein(this,'verlaufNext')"></select><input class="field" name="nextStep" id="verlaufNext"></div>
  <div class="formgroup"><label>Wiedervorlage</label><input class="field" type="date" name="due" id="verlaufDue"><span class="hint">Leer lassen, wenn nichts nachzuhalten ist.</span></div>
 </div>
 <div class="actions" style="margin:14px 0"><button type="button" class="btn" id="verlaufMehr" onclick="verlaufVertiefen()">Fachlich ergänzen</button><span class="hint">Einschätzung, Ziel, Beteiligte, Weitervermittlung, Dauer und Sicherheitsprüfung.</span></div>
@@ -458,6 +464,8 @@ const seed={
   "grade1StartDate": "2026-08-17",
   "additionalNonSchoolDays": [],
   "lastBackupAt": "",
+  "lastBackupPath": "",
+  "lastBackupReason": "",
   "speechEndpoint": "http://127.0.0.1:8173/transcribe",
   "signalImportNote": "",
   "timetableImportNote": "",
@@ -563,6 +571,60 @@ const NETZWERK_GRUNDBESTAND=[
   note:'Führt im Präventionsplan der Schule die Einheiten zu Medien (Jg. 5), Vapes (Jg. 7), Alkohol gemeinsam mit der Polizei (Jg. 8) und Cannabis (Jg. 9) durch. Zugleich Beratungsstelle für einzelne Jugendliche und Erziehungsberechtigte. Stand der Recherche: September 2026.'}
 ];
 const NETZWERK_BASIS=[
+ {id:'NW-SCHU-DR-EDMUND-BRUNS',area:'Schulintern',region:'Schulintern',category:'Schulsozialarbeit',organization:'Dr. Edmund Bruns',contact:'Schulsozialpädagoge; Beratung, Fallarbeit, Prävention',address:'Ludgerusschule Rhede, Schulstraße 8, 26899 Rhede (Ems)',phone:'04964 9588817',email:'edmund.bruns@iserv.ludgerusschule-rhede.de',website:'https://ludgerusschule-rhede.de/schulsozialarbeit/',priority:'sehr hoch',note:'Einsatz im Cockpit: Fallverantwortung, Fallverlauf, Weitervermittlung'},
+ {id:'NW-SCHU-SABINE-THIEN',area:'Schulintern',region:'Schulintern',category:'Schulsozialarbeit',organization:'Sabine Thien',contact:'Schulsozialpädagogin; Beratung, Fallarbeit, Prävention',address:'Ludgerusschule Rhede, Schulstraße 8, 26899 Rhede (Ems)',phone:'04964 9588817',email:'sabine.thien@iserv.ludgerusschule-rhede.de',website:'https://ludgerusschule-rhede.de/schulsozialarbeit/',priority:'sehr hoch',note:'Einsatz im Cockpit: Fallverantwortung, Fallverlauf, Weitervermittlung'},
+ {id:'NW-SCHU-CAROLINE-GERDES',area:'Schulintern',region:'Schulintern',category:'Schulpsychologie',organization:'Caroline Gerdes',contact:'Schulpsychologische Beratung',address:'RLSB Osnabrück / regional zuständig',phone:'05931 9337-42',email:'Caroline.Gerdes@rlsb-os.niedersachsen.de',website:'https://ludgerusschule-rhede.de/schulsozialarbeit/',priority:'sehr hoch',note:'Einsatz im Cockpit: Fallverlauf, Beratung, Weitervermittlung'},
+ {id:'NW-SCHU-ANDREAS-KRZEWITZA-UND-CHRISTINE-VA',area:'Schulintern',region:'Schulintern',category:'SV / Schülervertretung',organization:'Andreas Krzewitza und Christine Varnhorst',contact:'SV-Lehrkräfte; Ansprechpartner bei persönlichen, familiären und schulischen Anliegen',address:'Ludgerusschule Rhede',phone:'',email:'',website:'https://ludgerusschule-rhede.de/sv-lehrkraefte/',priority:'hoch',note:'Einsatz im Cockpit: Ansprechpartner, Konflikte, Schülerbeteiligung'},
+ {id:'NW-SCHU-MEDIENBUDDIES',area:'Schulintern',region:'Schulintern',category:'Medienhilfe',organization:'Medienbuddies',contact:'Peer-Beratung zu Cybermobbing, IServ, WebUntis, Social Media und Medienproblemen',address:'Ludgerusschule Rhede',phone:'',email:'',website:'https://ludgerusschule-rhede.de/medienscouts/',priority:'mittel',note:'Einsatz im Cockpit: Intervention bei Medienproblemen, Prävention'},
+ {id:'NW-SCHU-OTTO-BUNING-IMKE-WEBER-CHRISTEL-OS',area:'Schulintern',region:'Schulintern',category:'Schulleitung',organization:'Otto Büning, Imke Weber, Christel Osteresch',contact:'Schulleitung und pädagogisch-didaktische Steuerung',address:'Ludgerusschule Rhede',phone:'04964 958880',email:'info@ludgerusschule-rhede.de',website:'https://ludgerusschule-rhede.de/schulleitung/',priority:'hoch',note:'Einsatz im Cockpit: Fallkonferenz, Schulentwicklung, Eskalationsweg'},
+ {id:'NW-SCHU-KLASSENLEITUNGEN-UND-KOLLEGIUM',area:'Schulintern',region:'Schulintern',category:'SV / Schülervertretung',organization:'Klassenleitungen und Kollegium',contact:'Klassenleitungen, Fachlehrkräfte und Rückmeldungen zum Schulalltag',address:'Ludgerusschule Rhede',phone:'04964 958880',email:'info@ludgerusschule-rhede.de',website:'https://ludgerusschule-rhede.de/kollegium/',priority:'sehr hoch',note:'Einsatz im Cockpit: Beteiligte Personen, Rückmeldungen, Maßnahmen'},
+ {id:'NW-SCHU-GTS-VGS-TEAM',area:'Schulintern',region:'Schulintern',category:'Ganztag',organization:'GTS/VGS-Team',contact:'Ganztagsbetreuung, VGS und ergänzende Betreuung',address:'Ludgerusschule Rhede',phone:'04964 958880',email:'info@ludgerusschule-rhede.de',website:'https://ludgerusschule-rhede.de/kollegium/',priority:'hoch',note:'Einsatz im Cockpit: Betreuung, Übergänge, Rückmeldungen'},
+ {id:'NW-EMSL-LANDKREIS-EMSLAND-FACHBEREICH-JUGE',area:'Kooperationspartner',region:'Emsland',category:'Jugendamt / ASD',organization:'Landkreis Emsland - Fachbereich Jugend',contact:'Allgemeiner Sozialdienst, Hilfen zur Erziehung, Kinderschutz, Sorge- und Umgangsfragen',address:'Ordeniederung 1, 49716 Meppen',phone:'05931 44-0',email:'jugendamt@emsland.de',website:'https://www.emsland.de/buerger-behoerde/organisationsstruktur/dezernat-ii/fachbereich-jugend/',priority:'sehr hoch',note:'Einsatz im Cockpit: Fallverlauf, Weitervermittlung, Kinderschutz'},
+ {id:'NW-EMSL-KOOPERATION-IM-KINDERSCHUTZ-LANDKR',area:'Krise und Notfall',region:'Emsland',category:'Kinderschutz',organization:'Kooperation im Kinderschutz - Landkreis Emsland',contact:'Verfahrenswege, Meldebogen, Einschätzung möglicher Kindeswohlgefährdung, Netzwerkkoordination',address:'Landkreis Emsland',phone:'05931 44-0',email:'jugendamt@emsland.de',website:'https://www.emsland.de/leben-freizeit/familien/netzwerkkoordination-fruehe-hilfen/kooperation-im-kinderschutz/kooperation-im-kinderschutz.html',priority:'sehr hoch',note:'Einsatz im Cockpit: Kinderschutz, Fachberatung, Dokumentvorlagen'},
+ {id:'NW-EMSL-KINDERSCHUTZBUND-EMSLAND-MITTE-BER',area:'Krise und Notfall',region:'Emsland',category:'Kinderschutz / Gewalt',organization:'Kinderschutzbund Emsland-Mitte - Beratungsstelle',contact:'Fachberatung bei Gewalt gegen Kinder und Jugendliche; insoweit erfahrene Fachkräfte',address:'Emsstraße 1-3, 49716 Meppen',phone:'05931 876580',email:'info@kinderschutzbund-emsland-mitte.de',website:'https://www.kinderschutzbund-emsland-mitte.de/',priority:'sehr hoch',note:'Einsatz im Cockpit: Kinderschutz, Weitervermittlung, Fachberatung'},
+ {id:'NW-EMSL-LOGO-KINDERSCHUTZ-ZENTRUM-LINGEN',area:'Krise und Notfall',region:'Emsland',category:'Kinderschutz / Gewalt',organization:'LOGO - Kinderschutz-Zentrum Lingen',contact:'Beratung und Therapie bei sexueller, körperlicher und psychischer Gewalt, Cybermobbing und Vernachlässigung',address:'Wilhelmstraße 40a, 49808 Lingen',phone:'0591 2262',email:'info@logolingen.de',website:'https://www.logolingen.de/',priority:'sehr hoch',note:'Einsatz im Cockpit: Kinderschutz, Gewalt, Fachberatung'},
+ {id:'NW-EMSL-PSYCHOLOGISCHE-BERATUNGSSTELLEN-EF',area:'Kooperationspartner',region:'Emsland',category:'Psychologische Beratung',organization:'Psychologische Beratungsstellen EFLE im Emsland',contact:'Ehe-, Familien-, Lebens- und Erziehungsberatung für Eltern, Kinder und Jugendliche',address:'Standorte u. a. Meppen, Lingen, Sögel, Papenburg',phone:'',email:'',website:'https://www.caritas-os.de/el/beratungundhilfe/beratung-und-hilfe',priority:'sehr hoch',note:'Einsatz im Cockpit: Erziehungsberatung, Trennung, Familienkonflikte'},
+ {id:'NW-EMSL-CARITAS-FACHAMBULANZ-SUCHT-EMSLAND',area:'Kooperationspartner',region:'Emsland',category:'Suchtberatung',organization:'Caritas - Fachambulanz Sucht Emsland',contact:'Suchtberatung, Suchtprävention, Rehabilitation, Angehörigenberatung',address:'Meppen, Lingen, Papenburg, Sögel',phone:'05931 98150',email:'',website:'https://www.caritas-os.de/el/meppen/fachambulanzsucht/',priority:'hoch',note:'Einsatz im Cockpit: Sucht, Angehörige, Prävention'},
+ {id:'NW-EMSL-DIAKONISCHES-WERK-EMSLAND-BENTHEIM',area:'Kooperationspartner',region:'Emsland',category:'Suchtberatung',organization:'Diakonisches Werk Emsland-Bentheim - Fachambulanz Sucht',contact:'Suchtberatung und Suchtprävention, auch bei Sucht in der Familie',address:'Meppen, Lingen, Papenburg',phone:'05931 98150 / 04961 98880',email:'',website:'https://www.diakonie-emsland.de/fachbereiche/fachambulanz-sucht',priority:'hoch',note:'Einsatz im Cockpit: Sucht, Angehörige, Prävention'},
+ {id:'NW-EMSL-DIAKONISCHES-WERK-EMSLAND-BENTHEIM2',area:'Kooperationspartner',region:'Emsland',category:'Soziale Beratung',organization:'Diakonisches Werk Emsland-Bentheim',contact:'Kirchenkreissozialarbeit, Schuldner- und Insolvenzberatung, soziale Beratung',address:'Standorte Meppen, Lingen, Papenburg',phone:'05931 98150',email:'',website:'https://www.diakonie-emsland.de/fachbereiche/kirchenkreissozialarbeit',priority:'hoch',note:'Einsatz im Cockpit: Armut, Schulden, Existenzsicherung'},
+ {id:'NW-EMSL-SOZIALPSYCHIATRISCHER-DIENST-LANDK',area:'Krise und Notfall',region:'Emsland',category:'Psychische Gesundheit',organization:'Sozialpsychiatrischer Dienst Landkreis Emsland',contact:'Beratung für Betroffene, Angehörige und Fachkräfte; Vermittlung weiterer Hilfen',address:'Landkreis Emsland',phone:'05931 44-0',email:'',website:'https://www.emsland.de/leben-freizeit/gesundheit/psychische-gesundheit/psychische-gesundheit.html',priority:'sehr hoch',note:'Einsatz im Cockpit: Psychische Krisen, Angehörige, Weitervermittlung'},
+ {id:'NW-EMSL-MARIEN-HOSPITAL-PAPENBURG-ASCHENDO',area:'Krise und Notfall',region:'Emsland',category:'Kinder- und Jugendpsychiatrie',organization:'Marien Hospital Papenburg Aschendorf - KJP',contact:'Kinder- und Jugendpsychiatrische Diagnostik, Behandlung, Institutsambulanz, Tagesklinik',address:'Marienstraße 8, 26871 Papenburg/Aschendorf',phone:'04962 502-137 / Tagesklinik 04962 502-180',email:'',website:'https://www.marien-hospital-papenburg.de/medizin-pflege/fachabteilungen/kinder-jugendpsychiatrie/willkommen/kinder-jugendpsychiatrie.html',priority:'sehr hoch',note:'Einsatz im Cockpit: Krisen, Diagnostik, Behandlung'},
+ {id:'NW-EMSL-SOZIALPADIATRISCHES-ZENTRUM-MARIEN',area:'Kooperationspartner',region:'Emsland',category:'Kinder- und Jugendmedizin',organization:'Sozialpädiatrisches Zentrum Marien Hospital Papenburg',contact:'Diagnostik, Beratung und Begleitung bei Entwicklungs-, Verhaltens- und seelischen Auffälligkeiten',address:'Papenburg/Aschendorf',phone:'',email:'',website:'https://www.marien-hospital-papenburg.de/medizin-pflege/einrichtungen/sozialpaediatrisches-zentrum-spz/sozialpaediatrisches-zentrum.html',priority:'hoch',note:'Einsatz im Cockpit: Entwicklung, Verhalten, Diagnostik'},
+ {id:'NW-EMSL-DIE-2-CHANCE-VHS-MEPPEN',area:'Kooperationspartner',region:'Emsland',category:'Schulabsentismus',organization:'Die 2. Chance - VHS Meppen',contact:'Schulberatungsstelle für schulmüde junge Menschen, Wiedereingliederung ins Regelschulsystem',address:'VHS Meppen',phone:'05931 9220-16',email:'',website:'https://www.vhs-meppen.de/',priority:'sehr hoch',note:'Einsatz im Cockpit: Schulabsentismus, Rückkehr, Fallziel'},
+ {id:'NW-EMSL-JUGENDBERUFSHILFE-EMSLAND',area:'Übergang Schule und Beruf',region:'Emsland',category:'Übergang Schule-Beruf',organization:'Jugendberufshilfe Emsland',contact:'Beratung und Begleitung von Jugendlichen von 14 bis 26 beim Übergang Schule-Beruf',address:'Landkreis Emsland',phone:'',email:'',website:'https://www.emsland.de/service-angebot/jugendberufshilfe-emsland.html',priority:'hoch',note:'Einsatz im Cockpit: Schulabschluss, Ausbildung, Übergang'},
+ {id:'NW-EMSL-JUGENDBERUFSAGENTUR-EMSLAND',area:'Übergang Schule und Beruf',region:'Emsland',category:'Übergang Schule-Beruf',organization:'Jugendberufsagentur Emsland',contact:'Berufs-, Ausbildungs- und Studienberatung bis 25 Jahre',address:'Emsland',phone:'05931 44-2711',email:'info@jba-emsland.de',website:'https://www.jba-emsland.de/',priority:'hoch',note:'Einsatz im Cockpit: Berufsorientierung, Ausbildung, Studium'},
+ {id:'NW-EMSL-JOHANNESBURG-GMBH-SURWOLD',area:'Übergang Schule und Beruf',region:'Emsland',category:'Jugendhilfe / Bildung',organization:'Johannesburg GmbH Surwold',contact:'Ambulante, teilstationäre und stationäre Jugendhilfe, Jugendberufshilfe, eigene Schulen, betreutes Wohnen',address:'Burgstraße 1-12, 26903 Surwold',phone:'',email:'info@johannesburg.de',website:'https://www.johannesburg.de/kinder-jugendhilfe/',priority:'hoch',note:'Einsatz im Cockpit: Hilfen zur Erziehung, Übergang, Wohnen'},
+ {id:'NW-EMSL-POLIZEIINSPEKTION-EMSLAND-GRAFSCHA',area:'Kooperationspartner',region:'Emsland',category:'Polizei / Prävention',organization:'Polizeiinspektion Emsland/Grafschaft Bentheim - Präventionsteam',contact:'Kriminalprävention, Jugendsachen, Medien, Gewalt, Verkehr und Schulveranstaltungen',address:'Wilhelm-Berning-Straße 8, 49809 Lingen',phone:'0591 87-209',email:'praevention@pi-el.polizei.niedersachsen.de',website:'https://www.pd-os.polizei-nds.de/startseite/dienststellen/polizeiinspektion_emsland_grafschaft_bentheim/praevention/praventionsteam-lingen-117002.html',priority:'hoch',note:'Einsatz im Cockpit: Prävention, Gewalt, Medien, Verkehr'},
+ {id:'NW-EMSL-AMTSGERICHT-MEPPEN',area:'Kooperationspartner',region:'Emsland',category:'Justiz',organization:'Amtsgericht Meppen',contact:'Familien-, Jugend- und Strafsachen; zentrale Vermittlung',address:'49716 Meppen',phone:'05931 888-100',email:'',website:'https://amtsgericht-meppen.niedersachsen.de/startseite/',priority:'mittel',note:'Einsatz im Cockpit: Gericht, Jugendstrafrecht, Familienrecht'},
+ {id:'NW-EMSL-JUGENDHILFE-IM-STRAFVERFAHREN-JUGE',area:'Kooperationspartner',region:'Emsland',category:'Justiz',organization:'Jugendhilfe im Strafverfahren / Jugendgerichtshilfe Emsland',contact:'Begleitung junger Menschen in Strafverfahren, soziale Diagnostik und Hilfen',address:'Landkreis Emsland',phone:'05931 44-0',email:'fb51@emsland.de',website:'https://www.emsland.de/buerger-behoerde/organisationsstruktur/dezernat-ii/fachbereich-jugend/',priority:'hoch',note:'Einsatz im Cockpit: Jugenddelinquenz, Auflagen, Hilfen'},
+ {id:'NW-EMSL-FRUHE-HILFEN-FAMILIENSPRECHSTUNDE-',area:'Sozialraum',region:'Emsland',category:'Frühe Hilfen',organization:'Frühe Hilfen / Familiensprechstunde Landkreis Emsland',contact:'Niedrigschwellige Beratung für werdende Eltern und Familien mit kleinen Kindern',address:'Emsland, auch Rhede',phone:'',email:'',website:'https://www.emsland.de/service-angebot/familiensprechstunde-fruehe-hilfen.html',priority:'mittel',note:'Einsatz im Cockpit: Frühe Hilfen, Familie, Übergang Kita-Schule'},
+ {id:'NW-EMSL-PRO-FAMILIA-LINGEN',area:'Sozialraum',region:'Emsland',category:'Schwangerschaft / Familie',organization:'pro familia Lingen',contact:'Schwangerschafts-, Sexualitäts- und Familienberatung für Emsland und Grafschaft Bentheim',address:'Lingen',phone:'',email:'lingen@profamilia.de',website:'https://www.profamilia.de/lingen',priority:'mittel',note:'Einsatz im Cockpit: Schwangerschaft, Sexualität, Familie'},
+ {id:'NW-EMSL-DONUM-VITAE-EMSLAND',area:'Sozialraum',region:'Emsland',category:'Schwangerschaft / Familie',organization:'donum vitae Emsland',contact:'Schwangerschafts- und Schwangerschaftskonfliktberatung, finanzielle Hilfen',address:'Lingen, Meppen, Papenburg, Werlte',phone:'',email:'lingen@emsland.donumvitae.org / meppen@emsland.donumvitae.org / papenburg@emsland.donumvitae.org',website:'https://emsland.donumvitae.org/beratung-und-hilfe/',priority:'mittel',note:'Einsatz im Cockpit: Schwangerschaft, Familie, finanzielle Hilfen'},
+ {id:'NW-EMSL-FRAUEN-UND-KINDERSCHUTZHAUS-EMSLAN',area:'Krise und Notfall',region:'Emsland',category:'Häusliche Gewalt',organization:'Frauen- und Kinderschutzhaus Emsland',contact:'Schutz, Beratung und Zuflucht für Frauen und Kinder bei häuslicher Gewalt',address:'Emsland Mitte/Nord; Adresse nicht öffentlich',phone:'',email:'',website:'https://www.emsland.de/service-angebot/frauen-und-kinderschutzhaus.html',priority:'sehr hoch',note:'Einsatz im Cockpit: Gewalt, Schutz, Krisen'},
+ {id:'NW-EMSL-SELBSTHILFE-UND-FREIWILLIGENZENTRU',area:'Sozialraum',region:'Emsland',category:'Selbsthilfe',organization:'Selbsthilfe- und Freiwilligenzentrum Emsland',contact:'Vermittlung in Selbsthilfegruppen und ehrenamtliche Unterstützung',address:'Bahnhofstraße 2, 49716 Meppen',phone:'05931 14000',email:'kontakt@selbsthilfe-emsland.de',website:'https://www.selbsthilfe-emsland.de/',priority:'mittel',note:'Einsatz im Cockpit: Selbsthilfe, Angehörige, soziale Teilhabe'},
+ {id:'NW-EMSL-CTC-COMMUNITIES-THAT-CARE-EMSLAND',area:'Sozialraum',region:'Emsland',category:'Prävention',organization:'CTC - Communities That Care Emsland',contact:'Regionale Präventionsstrategie, Risiko- und Schutzfaktoren, kommunale Präventionsnetzwerke',address:'Landkreis Emsland',phone:'05931 44-0',email:'',website:'https://www.emsland.de/leben-freizeit/jugend/adressen-und-kontakte/ctc-communities-care/ctc.html',priority:'mittel',note:'Einsatz im Cockpit: Schulweite Prävention, Auswertung, Netzwerkarbeit'},
+ {id:'NW-OSTF-LANDKREIS-LEER-AMT-FUR-KINDER-JUGE',area:'Kooperationspartner',region:'Ostfriesland',category:'Jugendamt / ASD',organization:'Landkreis Leer - Amt für Kinder, Jugend und Familie',contact:'ASD, Beratung, Hilfen zur Erziehung, Kinderschutz, Pflegekinder, Sorgen in Schule und Familie',address:'Bergmannstraße 37, 26789 Leer',phone:'0491 926-0',email:'',website:'https://www.landkreis-leer.de/Themen/Kinder-Familie/',priority:'sehr hoch',note:'Einsatz im Cockpit: Kinderschutz, Hilfen zur Erziehung, Familie'},
+ {id:'NW-OSTF-EVANGELISCHE-BERATUNGSSTELLE-LEER',area:'Kooperationspartner',region:'Ostfriesland',category:'Psychologische Beratung',organization:'Evangelische Beratungsstelle Leer',contact:'Erziehungs-, Ehe- und Lebensberatung für Eltern, Kinder und Jugendliche',address:'Friesenstraße 65a, 26789 Leer',phone:'0491 9604881',email:'beratungsstelle.leer@evlka.de',website:'https://www.diakonie-in-ostfriesland.de/ev-beratungsstelle-fur-erziehungs--ehe--und-lebensfragen',priority:'sehr hoch',note:'Einsatz im Cockpit: Erziehungsberatung, Trennung, Familie'},
+ {id:'NW-OSTF-SOZIALPSYCHIATRISCHER-DIENST-LANDK',area:'Krise und Notfall',region:'Ostfriesland',category:'Sozialpsychiatrischer Dienst',organization:'Sozialpsychiatrischer Dienst Landkreis Leer',contact:'Beratung bei psychischen Krisen und Erkrankungen, Vermittlung von Hilfen',address:'Gesundheitsamt, Jahnstraße 4, 26789 Leer',phone:'0491 926-1102',email:'',website:'https://www.landkreis-leer.de/Themen/Gesundheit/Erwachsene/Psychische-Krise/',priority:'sehr hoch',note:'Einsatz im Cockpit: Psychische Krisen, Angehörige'},
+ {id:'NW-OSTF-JUGENDBERUFSAGENTUR-LANDKREIS-LEER',area:'Übergang Schule und Beruf',region:'Ostfriesland',category:'Jugendberufsagentur',organization:'Jugendberufsagentur Landkreis Leer',contact:'Übergang Schule-Beruf, Jobcenter, Jugendamt, Agentur für Arbeit, BBS, PACE',address:'Leer',phone:'',email:'',website:'https://www.landkreis-leer.de/Themen/Arbeit-Wirtschaft/Jobcenter/JugendBerufsAgentur/',priority:'hoch',note:'Einsatz im Cockpit: Schulabschluss, Ausbildung, Beruf'},
+ {id:'NW-OSTF-LANDKREIS-AURICH-AMT-FUR-JUGEND-UN',area:'Kooperationspartner',region:'Ostfriesland',category:'Jugendamt / Beratung',organization:'Landkreis Aurich - Amt für Jugend und Soziales',contact:'Jugendhilfe, Kinderschutz, Hilfen zur Erziehung, Beratung und Prävention',address:'Fischteichweg 7-13, 26603 Aurich',phone:'04941 16-5101',email:'jugendamt@landkreis-aurich.de',website:'https://www.landkreis-aurich.de/verwaltungsgliederung/dezernat-2/amt-fuer-jugend-und-soziales/',priority:'sehr hoch',note:'Einsatz im Cockpit: Kinderschutz, Hilfen zur Erziehung'},
+ {id:'NW-OSTF-BERATUNGSSTELLE-FUR-KINDER-JUGENDL',area:'Kooperationspartner',region:'Ostfriesland',category:'Psychologische Beratung',organization:'Beratungsstelle für Kinder, Jugendliche und Eltern - Landkreis Aurich',contact:'Erziehungs- und Familienberatung, Trennung/Scheidung, Beratung junger Menschen',address:'Bahnhofstraße 27, 26506 Norden',phone:'04941 165250',email:'eb-norden@landkreis-aurich.de',website:'https://www.landkreis-aurich.de/verwaltungsgliederung/dezernat-2/amt-fuer-jugend-und-soziales/52-3-jugendhilfe-unterbringung-beratung-und-praevention/beratungsstelle/',priority:'sehr hoch',note:'Einsatz im Cockpit: Erziehungsberatung, Familie, Trennung'},
+ {id:'NW-OSTF-PRO-AKTIV-CENTER-JUGENDBURO-LANDKR',area:'Übergang Schule und Beruf',region:'Ostfriesland',category:'Übergang Schule-Beruf',organization:'Pro-Aktiv-Center / Jugendbüro Landkreis Aurich',contact:'Freiwillige Beratung und Begleitung von 14- bis unter 27-Jährigen bei persönlichen, schulischen und beruflichen Anliegen',address:'Landkreis Aurich',phone:'',email:'',website:'https://www.landkreis-aurich.de/verwaltungsgliederung/dezernat-2/amt-fuer-jugend-und-soziales/52-3-jugendhilfe-unterbringung-beratung-und-praevention/pro-aktiv-center/',priority:'hoch',note:'Einsatz im Cockpit: Schulabsentismus, Ausbildung, persönliche Krisen'},
+ {id:'NW-OSTF-FRUHERKENNUNGSTEAM-LANDKREIS-AURIC',area:'Kooperationspartner',region:'Ostfriesland',category:'Früherkennung / Entwicklung',organization:'Früherkennungsteam Landkreis Aurich',contact:'Interdisziplinäre Entwicklungsdiagnostik und Beratung für Kinder und Familien',address:'Landkreis Aurich, Aurich/Norden',phone:'',email:'',website:'https://www.landkreis-aurich.de/verwaltungsgliederung/dezernat-2/amt-fuer-gesundheitswesen/frueherkennungsteam/',priority:'hoch',note:'Einsatz im Cockpit: Entwicklung, Verhalten, frühe Hilfen'},
+ {id:'NW-OSTF-LANDKREIS-WITTMUND-SOZIAL-UND-JUGE',area:'Kooperationspartner',region:'Ostfriesland',category:'Jugendamt / ASD',organization:'Landkreis Wittmund - Sozial- und Jugendamt',contact:'Jugendhilfe, Kinderschutz, Beratung, Hilfen zur Erziehung',address:'Am Markt 9, 26409 Wittmund',phone:'04462 86-1305',email:'jugendamt@lk.wittmund.de',website:'https://www.agjae.de/agjae/jugendaemter',priority:'sehr hoch',note:'Einsatz im Cockpit: Kinderschutz, Jugendhilfe, Familie'},
+ {id:'NW-OSTF-STADT-EMDEN-ALLGEMEINER-SOZIALER-D',area:'Kooperationspartner',region:'Ostfriesland',category:'Jugendamt / ASD',organization:'Stadt Emden - Allgemeiner Sozialer Dienst',contact:'Beratung bei Erziehung, Trennung, Sorgerecht, Umgang und Hilfen zur Erziehung',address:'Maria-Wilts-Straße 3, 26721 Emden',phone:'04921 87-0',email:'',website:'https://www.emden.de/rathaus/verwaltung/fb-600-jugend-schule-und-sport/fd-6512-sozialer-dienst/allgemeiner-sozialer-dienst-asd',priority:'sehr hoch',note:'Einsatz im Cockpit: Kinderschutz, Sorge, Familie'},
+ {id:'NW-OSTF-BERATUNGSSTELLE-FUR-KINDER-JUGENDL2',area:'Kooperationspartner',region:'Ostfriesland',category:'Psychologische Beratung',organization:'Beratungsstelle für Kinder, Jugendliche und Eltern - Stadt Emden',contact:'Erziehungs-, Familien-, Trennungs- und Jugendberatung',address:'Ysaac-Brons-Straße 16, 26721 Emden',phone:'04921 87-2450',email:'erziehungsberatung@emden.de',website:'https://www.emden.de/rathaus/verwaltung/fb-600-jugend-schule-und-sport/fd-6511-jugendhilfe/beratungsstelle-fuer-kinder-jugendliche-und-eltern',priority:'sehr hoch',note:'Einsatz im Cockpit: Erziehungsberatung, Familie, Konflikte'},
+ {id:'NW-OSTF-DIAKONIEVERBAND-OSTFRIESLAND-SUCHT',area:'Kooperationspartner',region:'Ostfriesland',category:'Suchtberatung',organization:'Diakonieverband Ostfriesland - Suchtberatung',contact:'Suchtberatung, Suchtprävention und ambulante Therapie in Leer und Emden',address:'Leer / Emden',phone:'',email:'suchtberatung.leer@evlka.de / suchtberatung.emden@evlka.de',website:'https://www.diakonie-in-ostfriesland.de/fachstelle-fur-sucht-und-suchtpravention-leer',priority:'hoch',note:'Einsatz im Cockpit: Sucht, Angehörige, Prävention'},
+ {id:'NW-OSTF-CARITASVERBAND-OSTFRIESLAND',area:'Kooperationspartner',region:'Ostfriesland',category:'Soziale Beratung',organization:'Caritasverband Ostfriesland',contact:'Allgemeine Sozialberatung, Jugendmigrationsdienst, psychosoziale Beratung, Kurberatung und Wiedereingliederung',address:'Aurich, Emden, Leer, Wittmund',phone:'04941 6983370 / 04921 8203220 / 0491 9279560 / 04462 2042666',email:'sroetgert@caritas-os.de',website:'https://www.caritas-os.de/ostfriesland/beratungundhilfe/beratungundhilfe',priority:'hoch',note:'Einsatz im Cockpit: Armut, Migration, Familie, soziale Hilfen'},
+ {id:'NW-OSTF-KJPP-LEER',area:'Krise und Notfall',region:'Ostfriesland',category:'Kinder- und Jugendpsychiatrie',organization:'KJPP Leer',contact:'Facharztpraxis für Kinder- und Jugendpsychiatrie und -psychotherapie, sozialpsychiatrische Versorgung',address:'Leer',phone:'',email:'',website:'https://kjpp-leer.de/',priority:'sehr hoch',note:'Einsatz im Cockpit: Diagnostik, Therapie, Krisen'},
+ {id:'NW-OSTF-KJP-EMDEN-ANEVITA',area:'Krise und Notfall',region:'Ostfriesland',category:'Kinder- und Jugendpsychiatrie',organization:'KJP Emden - Anevita',contact:'Kinder- und Jugendpsychiatrie und -psychotherapie',address:'Emden',phone:'',email:'',website:'https://www.anevita.de/versorgungszentrum/mvz-emden/aerzte-praxen/kinder-und-jugendpsychiatrie',priority:'sehr hoch',note:'Einsatz im Cockpit: Diagnostik, Therapie, Krisen'},
+ {id:'NW-OSTF-KJP-TAGESKLINIK-LEER-MARIEN-HOSPIT',area:'Krise und Notfall',region:'Ostfriesland',category:'Kinder- und Jugendpsychiatrie',organization:'KJP / Tagesklinik Leer - Marien Hospital Papenburg Aschendorf',contact:'Regionale kinder- und jugendpsychiatrische Versorgung für Emsland und Ostfriesland',address:'Leer / Papenburg-Aschendorf',phone:'04962 502-137',email:'',website:'https://www.marien-hospital-papenburg.de/medizin-pflege/fachabteilungen/kinder-jugendpsychiatrie/willkommen/kinder-jugendpsychiatrie.html',priority:'sehr hoch',note:'Einsatz im Cockpit: Diagnostik, Behandlung, Krisen'},
+ {id:'NW-OSTF-POLIZEIINSPEKTION-AURICH-WITTMUND-',area:'Kooperationspartner',region:'Ostfriesland',category:'Polizei / Prävention',organization:'Polizeiinspektion Aurich/Wittmund - Präventionsteam',contact:'Kriminalprävention, Jugendsachen, Opferschutz, Schulveranstaltungen',address:'Fischteichweg 1-5, 26603 Aurich',phone:'04941 606-108 / 04941 606-107',email:'bfk@pi-aur.polizei.niedersachsen.de / bfj@pi-aur.polizei.niedersachsen.de',website:'https://www.pd-os.polizei-nds.de/startseite/dienststellen/polizeiinspektion_aurich_wittmund/praevention/praventionsteam-der-polizeiinspektion-aurich-wittmund-1523.html',priority:'hoch',note:'Einsatz im Cockpit: Prävention, Gewalt, Medien, Opferschutz'},
+ {id:'NW-OSTF-POLIZEIINSPEKTION-LEER-EMDEN-PRAVE',area:'Kooperationspartner',region:'Ostfriesland',category:'Polizei / Prävention',organization:'Polizeiinspektion Leer/Emden - Prävention',contact:'Kriminalprävention und Beauftragte für Jugendsachen',address:'Leer / Emden',phone:'0491 97690-107 / 0491 97690-108',email:'praevention@pi-ler.polizei.niedersachsen.de',website:'https://www.pd-os.polizei-nds.de/startseite/praevention/kriminalpraevention/die-praeventionsteams-in-der-polizeidirektion-osnabrueck-554.html',priority:'hoch',note:'Einsatz im Cockpit: Prävention, Jugend, Opferschutz'},
+ {id:'NW-OSTF-KINDERSCHUTZBUND-AURICH-NORDEN',area:'Krise und Notfall',region:'Ostfriesland',category:'Kinderschutz',organization:'Kinderschutzbund Aurich / Norden',contact:'Kinder- und Jugendtreff, Beratung und Unterstützung',address:'Aurich / Norden',phone:'',email:'siebels@kinderschutzbund-aurich.de',website:'https://kinderschutzbund-aurich.de/kontakt/',priority:'hoch',note:'Einsatz im Cockpit: Kinderschutz, Beteiligung, Beratung'},
+ {id:'NW-OSTF-KINDERSCHUTZ-HILFE-UND-BERATUNGSSY',area:'Krise und Notfall',region:'Ostfriesland',category:'Kinderschutz',organization:'Kinderschutz / Hilfe- und Beratungssystem Landkreis Leer',contact:'Fachberatung im Kinderschutz, Gewalt- und Opferschutz, Beratungsnetzwerk',address:'Landkreis Leer',phone:'0491 926-0',email:'',website:'https://www.landkreis-leer.de/Services/Hilfe-Beratung/',priority:'sehr hoch',note:'Einsatz im Cockpit: Kinderschutz, Gewalt, Fachberatung'},
+ {id:'NW-OSTF-JUGENDGERICHTSHILFE-LANDKREIS-LEER',area:'Kooperationspartner',region:'Ostfriesland',category:'Justiz / Jugendhilfe',organization:'Jugendgerichtshilfe Landkreis Leer',contact:'Soziale Diagnostik, Beratung und Unterstützung junger Menschen im Strafverfahren, Auflagen und Weisungen',address:'Landkreis Leer',phone:'0491 926-0',email:'',website:'https://www.landkreis-leer.de/Themen/Kinder-Familie/Hilfen-Finanzielle-Leistungen/Gerichtshilfen.php',priority:'hoch',note:'Einsatz im Cockpit: Jugenddelinquenz, Gericht, Auflagen'},
+ {id:'NW-OSTF-BILDUNGSREGION-OSTFRIESLAND',area:'Sozialraum',region:'Ostfriesland',category:'Netzwerk / Prävention',organization:'Bildungsregion Ostfriesland',contact:'Akteure und Angebote der Berufs- und Studienorientierung, Jugendberufsagenturen, PACE und Jugendwerkstätten',address:'Ostfriesland',phone:'',email:'',website:'https://bildung.ostfriesischelandschaft.de/bildungsregion-ostfriesland/berufs-und-studienorientierung/',priority:'mittel',note:'Einsatz im Cockpit: Netzwerk, Übergang Schule-Beruf'},
  {id:'NW-INTERN-VERTRAUEN',area:'Schulintern',category:'Schulinterne Unterstützung',organization:'Vertrauenslehrkraft der Ludgerusschule',contact:'siehe Aushang im Lehrerzimmer',phone:'',email:'',address:'Ludgerusschule Rhede (Ems)',website:'',priority:'hoch',
   note:'Zusätzliche schulinterne Ansprechmöglichkeit für Schüler:innen. Rolle, Vertraulichkeit und Informationswege vorher klären.'},
  {id:'NW-INTERN-MEDIENBUDDYS',area:'Schulintern',category:'Schulinterne Unterstützung',organization:'Medienbuddys',contact:'Peer-Team der Schule',phone:'',email:'',address:'Ludgerusschule Rhede (Ems)',website:'',priority:'mittel',
@@ -586,7 +648,7 @@ const NETZWERK_BASIS=[
 ];
 function ensureNetzwerkbasis(state){
  if(!Array.isArray(state.partners))state.partners=[];
- for(const p of NETZWERK_BASIS)if(!state.partners.some(x=>x.id===p.id))state.partners.push(Object.assign({active:true,favorite:false,checkedAt:'2026-09-14'},p));
+ for(const p of NETZWERK_BASIS)if(!state.partners.some(x=>x.id===p.id))state.partners.push(Object.assign({active:true,favorite:false,checkedAt:'2026-09-14',source:'Grundbestand Emsland und Ostfriesland, Stand 14.09.2026'},p));
  return state;
 }
 function ensureNetzwerkpartner(state){
@@ -656,14 +718,14 @@ let data=load();
 let vaultReady=false;
 const invoke=(command,args={})=>window.__TAURI__?.core?.invoke(command,args)??Promise.reject(new Error('Diese Datei muss als Desktopanwendung gestartet werden.'));
 async function persistState(){if(!vaultReady)return;await invoke('save_state',{stateJson:JSON.stringify(data)})}
-function save(){void persistState().catch(showVaultError);renderAll()}
+function save(){void persistState().catch(showVaultError);renderAll();sicherungNachSpeichern()}
 const fmt=d=>new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(d+'T12:00:00'));
 const initials=c=>(c?.first?.[0]||'?')+(c?.last?.[0]||''); const studentOfCase=c=>data.students.find(s=>s.id===c?.studentId);const cname=id=>{const c=data.cases.find(x=>x.id===id),s=studentOfCase(c);return s?s.first+' '+s.last:c?c.first+' '+c.last:'Anonymer Kontakt'};const classOf=c=>studentOfCase(c)?.className||c.className||'';
 function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===(id==='kanban'?'cases':id)));const names={dashboard:'Übersicht',requests:'Schüler-Anfragen',cases:'Fallarbeit',kanban:'Fallarbeit als Board',students:'Schüler:innen',classes:'Klassen und Klassenlisten',trainingroom:'Sozialer Trainingsraum',signals:'Frühindikatoren',workflows:'Fachverfahren',teachers:'Lehrkräfte',projects:'Projekte',ctc:'CTC-Bedarfsplanung',network:'Gruppengespräche und Netzwerk',tasks:'Aufgaben und Wiedervorlagen',statistics:'Interne Statistik',settings:'Daten und Sicherung'};document.getElementById('pageTitle').textContent=id==='dashboard'?'Guten Morgen, Dr. Bruns':names[id];document.getElementById('pageSubtitle').textContent=id==='dashboard'?`${new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).format(new Date())} · Schuljahr ${data.settings.currentSchoolYear}`:'SSA-Cockpit Ludgerusschule · verschlüsselte Desktopversion';scrollTo(0,0)}
 document.querySelectorAll('.nav button[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));
 document.querySelectorAll('.nav .navgroup').forEach(g=>{const head=g.querySelector('.navhead');if(head)head.onclick=()=>g.classList.toggle('collapsed')});
 function kpi(label,value,trend){return `<div class="card kpi"><div class="label">${label}</div><div class="value">${value}</div><div class="trend">${trend}</div></div>`}
-function renderAll(){hilfeSchaltflaechenSetzen();renderNetzwerkBereiche();renderSelects();renderDashboard();renderBeispielKarte();renderPraeventionsplan();renderRequests();renderCases();renderKanban();renderStudents();renderClasses();renderTrainingRoom();renderSignals();renderWorkflows();renderTeachers();renderProjects();renderCTC();renderNetwork();renderTasks();renderStats()}
+function renderAll(){hilfeSchaltflaechenSetzen();personenAuswahlFuellen();renderSicherungsKarte();renderNetzwerkBereiche();renderSelects();renderDashboard();renderBeispielKarte();renderPraeventionsplan();renderRequests();renderCases();renderKanban();renderStudents();renderClasses();renderTrainingRoom();renderSignals();renderWorkflows();renderTeachers();renderProjects();renderCTC();renderNetwork();renderTasks();renderStats()}
 function renderSelects(){
  ['quickCase','taskCase'].forEach((id,i)=>{const el=document.getElementById(id);const first=i?' <option value="">Ohne Fallbezug</option>':'<option value="">Anonymer Kontakt</option>';const caseOpts=data.cases.filter(c=>c.status!=='Abgeschlossen').map(c=>`<option value="${c.id}">${cname(c.id)} · ${classOf(c)}</option>`).join('');let studentOpts='';if(!i){const openStudents=data.students.filter(s=>s.active&&!data.cases.some(c=>c.studentId===s.id&&c.status!=='Abgeschlossen')).sort((a,b)=>a.className.localeCompare(b.className)||a.last.localeCompare(b.last));if(openStudents.length)studentOpts='<optgroup label="Schüler:in ohne Fallakte – legt automatisch eine Fallakte an">'+openStudents.map(s=>`<option value="student:${s.id}">${s.last}, ${s.first} · ${s.className}</option>`).join('')+'</optgroup>';}el.innerHTML=first+(caseOpts?'<optgroup label="Bestehende Fallakten">'+caseOpts+'</optgroup>':'')+studentOpts});
  document.getElementById('caseStudent').innerHTML='<option value="">Bitte auswählen</option>'+data.students.filter(s=>s.active&&!data.cases.some(c=>c.studentId===s.id&&c.status!=='Abgeschlossen')).sort((a,b)=>a.className.localeCompare(b.className)||a.last.localeCompare(b.last)).map(s=>`<option value="${s.id}">${s.last}, ${s.first} · ${s.className}</option>`).join('');
@@ -698,7 +760,7 @@ function renderDashboardStart(){const el=document.getElementById('dashboardStart
   el.innerHTML=`<div class="alertitem" style="margin-bottom:17px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="grow"><strong>${neu} neue Schüler-Anfrage${neu===1?'':'n'}</strong> im getrennten Eingang. Erst fachlich prüfen, dann zuordnen.</span><button class="btn" onclick="go('requests')">Anfragen öffnen</button></div>`;
  } else { el.innerHTML=''; }
  if(!beispielfallVorhanden()&&!data.students.length)el.innerHTML+=beispielfallKarte();
- el.innerHTML=beispielfallBanner()+el.innerHTML;
+ el.innerHTML=sicherungWarnung()+beispielfallBanner()+el.innerHTML;
 }
 function renderDashboard(){renderDashboardStart();renderStartKacheln();const active=data.cases.filter(c=>c.status!=='Abgeschlossen').length,mins=data.contacts.reduce((a,c)=>a+Number(c.duration),0),open=data.tasks.filter(t=>!t.done).length;
  document.getElementById('kpis').innerHTML=kpi('Aktive Fälle',active,'davon '+data.cases.filter(c=>c.status==='Beobachtung').length+' in Beobachtung')+kpi('Kontakte',data.contacts.length,'im laufenden Schuljahr')+kpi('Beratungszeit',Math.round(mins/60)+' Std.','aus Kurz- und Fallkontakten')+kpi('Offene Aufgaben',open,'nächste 14 Tage');
@@ -763,7 +825,7 @@ function showStudent(studentId){
  selectedStudentId=studentId;
  const s=data.students.find(x=>x.id===studentId),c=data.cases.find(x=>x.studentId===studentId),events=studentEvents(studentId);
  document.getElementById('studentDetailTitle').innerHTML=`<span data-person>${s.first} ${s.last}</span> · ${s.className}${s.id===BEISPIEL_ID?' <span class="tag amber">Beispielfall</span>':''}`;
- document.getElementById('studentDetailBody').dataset.gegliedert='';document.getElementById('studentDetailBody').innerHTML=`<div class="notice">${studentId===BEISPIEL_ID?'<strong>◆ Beispielfall.</strong> Ein ausformulierter Übungsfall ohne echte Falldaten. Unter Daten und Sicherung lässt er sich vollständig entfernen.':'Personenbezogene Arbeitsansicht für Edmund und Sabine.'}</div><div class="detailgrid"><div class="detailitem"><span>Schüler-ID</span><strong>${s.id}</strong></div><div class="detailitem"><span>Schuljahr und Klasse</span><strong>${s.schoolYear} · ${s.className}</strong></div><div class="detailitem"><span>Anschrift</span><strong>${s.address||'–'}${s.district?' · '+s.district:''}</strong></div><div class="detailitem"><span>Telefon</span><strong>${s.phone||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 1</span><strong data-person>${s.guardian1||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 2</span><strong data-person>${s.guardian2||'–'}</strong></div><div class="detailitem"><span>Klassenleitung</span><strong>${data.settings.classLeads?.[s.className]||'–'}</strong></div><div class="detailitem"><span>Fallstatus</span><strong>${c?c.status:'keine Fallakte'}</strong></div></div><div class="actions" style="margin:12px 0"><button class="btn primary" onclick="verlaufOeffnen('${studentId}')">✎ Fallverlauf erfassen</button></div><h3>Beteiligte und Weitervermittlungen</h3>${netzwerkVorschlag(studentId)}<h3>Ziel- und Maßnahmenplan</h3>${planSummary(studentId)}<h3>Offene Aufgaben und Ergebnisse</h3>${taskSummary(studentId)}<h3>Entwicklung des Kindes</h3>${outcomeSummary(studentId)}<h3>Bezugspersonen und Netzwerk</h3>${relatedSummary(studentId)}<h3>Familienkonstellation</h3>${familySummary(s)}${studentAbsencePanel(studentId)}<h3>Fachliche Entwicklung aus Kontakten</h3>${trendSummary(studentId)}<h3>Schuljahresverlauf</h3><div class="list">${(s.enrollments||[]).map(e=>`<div class="row"><div class="grow"><strong>${e.schoolYear}</strong><span class="subtle">Klasse ${e.className}</span></div></div>`).join('')}</div><h3>Fallverlauf</h3><p class="subtle">Gespräche, Elternkontakte, Rückmeldungen, Fehlzeitenereignisse, Vereinbarungen, Maßnahmen, Weitervermittlungen, Statusänderungen, Wirkungseinschätzungen, Aufgaben und Dokumente werden gemeinsam dargestellt.</p><div class="chronicle-tools"><input class="field" type="search" placeholder="Verlauf vollständig durchsuchen" oninput="filterTimeline(this,'studentTimeline')"></div><div class="timeline" id="studentTimeline">${timelineHtml(events)}</div>`;
+ document.getElementById('studentDetailBody').dataset.gegliedert='';document.getElementById('studentDetailBody').innerHTML=`<div class="notice">${studentId===BEISPIEL_ID?'<strong>◆ Beispielfall.</strong> Ein ausformulierter Übungsfall ohne echte Falldaten. Unter Daten und Sicherung lässt er sich vollständig entfernen.':'Personenbezogene Arbeitsansicht für Edmund und Sabine.'}</div><div class="detailgrid"><div class="detailitem"><span>Schüler-ID</span><strong>${s.id}</strong></div><div class="detailitem"><span>Schuljahr und Klasse</span><strong>${s.schoolYear} · ${s.className}</strong></div><div class="detailitem"><span>Anschrift</span><strong>${s.address||'–'}${s.district?' · '+s.district:''}</strong></div><div class="detailitem"><span>Telefon</span><strong>${s.phone||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 1</span><strong data-person>${s.guardian1||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 2</span><strong data-person>${s.guardian2||'–'}</strong></div><div class="detailitem"><span>Klassenleitung</span><strong>${data.settings.classLeads?.[s.className]||'–'}</strong></div><div class="detailitem"><span>Fallstatus</span><strong>${c?c.status:'keine Fallakte'}</strong></div></div><div class="actions" style="margin:12px 0"><button class="btn primary" onclick="verlaufOeffnen('${studentId}')">✎ Fallverlauf erfassen</button>${c&&c.status!=='Abgeschlossen'?`<button class="btn" onclick="fallAbschlussFuehren('${studentId}')">Fall abschließen</button>`:''}</div><h3>Beteiligte und Weitervermittlungen</h3>${netzwerkVorschlag(studentId)}<h3>Ziel- und Maßnahmenplan</h3>${planSummary(studentId)}<h3>Offene Aufgaben und Ergebnisse</h3>${taskSummary(studentId)}<h3>Entwicklung des Kindes</h3>${outcomeSummary(studentId)}<h3>Bezugspersonen und Netzwerk</h3>${relatedSummary(studentId)}<h3>Familienkonstellation</h3>${familySummary(s)}${studentAbsencePanel(studentId)}<h3>Fachliche Entwicklung aus Kontakten</h3>${trendSummary(studentId)}<h3>Schuljahresverlauf</h3><div class="list">${(s.enrollments||[]).map(e=>`<div class="row"><div class="grow"><strong>${e.schoolYear}</strong><span class="subtle">Klasse ${e.className}</span></div></div>`).join('')}</div><h3>Fallverlauf</h3><p class="subtle">Gespräche, Elternkontakte, Rückmeldungen, Fehlzeitenereignisse, Vereinbarungen, Maßnahmen, Weitervermittlungen, Statusänderungen, Wirkungseinschätzungen, Aufgaben und Dokumente werden gemeinsam dargestellt.</p><div class="chronicle-tools"><input class="field" type="search" placeholder="Verlauf vollständig durchsuchen" oninput="filterTimeline(this,'studentTimeline')"></div><div class="timeline" id="studentTimeline">${timelineHtml(events)}</div>`;
  const statusButton=document.getElementById('studentStatusButton');statusButton.textContent=s.active?'Archivieren':'Reaktivieren';statusButton.classList.toggle('danger',s.active);
  openModal('studentModal')
 
@@ -884,11 +946,11 @@ function downloadAnnualReportDoc(){const body=annualReportHtml(),doc=`<!doctype 
 function saveAnnualNarrative(value){data.settings.annualNarrative=clean(value);void persistState().catch(showVaultError)}
 function savePracticeSettings(){data.settings.trainingThreshold=Math.max(2,Math.min(10,Number(document.getElementById('trainingThreshold').value)||3));data.settings.trainingWindowDays=Math.max(7,Math.min(180,Number(document.getElementById('trainingWindow').value)||28));data.settings.idleMinutes=Math.max(0,Math.min(120,Number(document.getElementById('idleMinutes').value)||0));void persistState().catch(showVaultError);renderTrainingRoom();resetIdleTimer();toast('Praxis-Einstellungen wurden gespeichert.')}
 let modalReturnFocus=null;
-function openModal(id){if(id==='quickModal')setupQuickForm();enhanceDictationFields();const modal=document.getElementById(id);if(id==='quickModal'){const form=document.getElementById('quickForm'),date=form.elements.date,time=form.elements.time;if(!date.value)date.value=today();if(!time.value)time.value=new Date().toTimeString().slice(0,5)}modalReturnFocus=document.activeElement;modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');const title=modal.querySelector('h2');if(title){if(!title.id)title.id=id+'Title';modal.setAttribute('aria-labelledby',title.id)}modal.classList.add('open');setTimeout(()=>{const focusable=modal.querySelector('button,input,select,textarea');focusable?.focus()},0)}
+function openModal(id){if(id==='quickModal')setupQuickForm();enhanceDictationFields();personenAuswahlFuellen();const modal=document.getElementById(id);if(id==='quickModal'){const form=document.getElementById('quickForm'),date=form.elements.date,time=form.elements.time;if(!date.value)date.value=today();if(!time.value)time.value=new Date().toTimeString().slice(0,5)}modalReturnFocus=document.activeElement;modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');const title=modal.querySelector('h2');if(title){if(!title.id)title.id=id+'Title';modal.setAttribute('aria-labelledby',title.id)}modal.classList.add('open');setTimeout(()=>{const focusable=modal.querySelector('button,input,select,textarea');focusable?.focus()},0)}
 function closeModal(id){const modal=document.getElementById(id);modal.classList.remove('open');if(modalReturnFocus?.focus)modalReturnFocus.focus();modalReturnFocus=null}
 let idleTimer=null;
 function resetIdleTimer(){clearTimeout(idleTimer);const minutes=Math.max(1,Number(data.settings.idleMinutes||10));if(vaultReady)idleTimer=setTimeout(lockPrivacyScreen,minutes*60000)}
-async function lockPrivacyScreen(){if(!vaultReady)return;await persistState().catch(()=>{});await invoke('lock_vault').catch(()=>{});vaultReady=false;document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'));document.getElementById('authGate').classList.remove('hidden');document.getElementById('setupVaultForm').hidden=true;document.getElementById('unlockVaultForm').hidden=false;document.getElementById('unlockPassword').value='';setTimeout(()=>document.getElementById('unlockPassword').focus(),0)}
+async function lockPrivacyScreen(){if(!vaultReady)return;await persistState().catch(()=>{});await autoSicherung('sperren',true).catch(()=>{});await invoke('lock_vault').catch(()=>{});vaultReady=false;document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'));document.getElementById('authGate').classList.remove('hidden');document.getElementById('setupVaultForm').hidden=true;document.getElementById('unlockVaultForm').hidden=false;document.getElementById('unlockPassword').value='';setTimeout(()=>document.getElementById('unlockPassword').focus(),0)}
 function unlockPrivacyScreen(){document.getElementById('unlockPassword').focus()}
 for(const name of ['pointerdown','keydown','touchstart'])document.addEventListener(name,()=>{if(vaultReady)resetIdleTimer()},{passive:true});
 document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)}));document.addEventListener('keydown',e=>{const openModals=[...document.querySelectorAll('.modal.open')],top=openModals.at(-1);if(e.key==='Escape'&&top){e.preventDefault();closeModal(top.id);return}if(e.key==='Tab'&&top){const focusable=[...top.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),a[href]')].filter(el=>el.offsetParent!==null);if(focusable.length){const first=focusable[0],last=focusable.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}return}if(!e.altKey||e.ctrlKey||e.metaKey)return;const key=e.key.toLowerCase();if(key==='k'){e.preventDefault();openModal('quickModal')}else if(key==='a'){e.preventDefault();openModal('taskModal')}else if(key==='t'){e.preventDefault();openTrainingRoom()}else if(key==='l'){e.preventDefault();lockPrivacyScreen()}});
@@ -2124,6 +2186,7 @@ function verlaufVorlageWechseln(behalten){
  const dauer=document.getElementById('verlaufDauer');if(dauer&&!dauer.value)dauer.value=v.dauer;
  const due=document.getElementById('verlaufDue');
  if(!due.value)due.value=addSchoolDays(today(),2);
+ verlaufBausteineFuellen();
 }
 function verlaufVertiefen(){
  const box=document.getElementById('verlaufDetail'),b=document.getElementById('verlaufMehr');
@@ -2376,6 +2439,235 @@ function netzwerkVorlageSpeichern(){
  toast('Die Vorlage wurde gespeichert. Semikolon als Trennzeichen, UTF-8 mit BOM.');
 }
 
+
+/* ===== Automatische Sicherung und Speicherort ===== */
+let vaultOrt=null,speicherZaehler=0,sicherungLaeuft=false;
+function zeitstempelDatei(){
+ const d=new Date(),z=n=>String(n).padStart(2,'0');
+ return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())+'-'+z(d.getHours())+z(d.getMinutes());
+}
+async function vaultOrtLaden(){
+ try{vaultOrt=await invoke('vault_location')}catch{vaultOrt=null}
+ renderSicherungsKarte();return vaultOrt;
+}
+function letzteSicherungAlter(){
+ const iso=data.settings.lastBackupAt;if(!iso)return null;
+ return Math.floor((Date.now()-new Date(iso).getTime())/86400000);
+}
+async function autoSicherung(grund,leise){
+ if(sicherungLaeuft||!vaultReady)return null;
+ sicherungLaeuft=true;
+ try{
+  await persistState();
+  const kuerzel=String(grund||'automatisch').replace(/[^A-Za-z]/g,'').slice(0,14)||'automatisch';
+  const datei='SSA-Cockpit-'+zeitstempelDatei()+'-'+kuerzel+'.ssa-vault.json';
+  const r=await invoke('write_backup',{fileName:datei});
+  data.settings.lastBackupAt=new Date().toISOString();
+  data.settings.lastBackupPath=String(r.path||'');
+  data.settings.lastBackupReason=grund||'automatisch';
+  speicherZaehler=0;
+  await persistState().catch(()=>{});
+  await vaultOrtLaden();
+  renderDashboardStart();
+  if(!leise)toast('Sicherung gespeichert: '+datei);
+  return r;
+ }catch(err){
+  if(!leise)appAlert('Die automatische Sicherung konnte nicht geschrieben werden.\n\n'+String(err&&err.message||err)+'\n\nBitte erstelle über „Gesamtsicherung exportieren“ eine Sicherung von Hand.');
+  return null;
+ }finally{sicherungLaeuft=false}
+}
+async function sicherungJetzt(){await autoSicherung('manuell',false)}
+function sicherungPruefen(){
+ const alter=letzteSicherungAlter();
+ if(alter===null||alter>=1)void autoSicherung(alter===null?'ersteSicherung':'tageswechsel',true);
+}
+function sicherungNachSpeichern(){
+ speicherZaehler++;
+ if(speicherZaehler>=15)void autoSicherung('zwischenstand',true);
+}
+function ortKopieren(wert){
+ if(!wert){toast('Es ist noch kein Speicherort bekannt.');return}
+ navigator.clipboard?.writeText(wert).then(()=>toast('Pfad kopiert. Im Explorer in die Adresszeile einfügen.'),()=>toast('Kopieren war nicht möglich.'));
+}
+function sicherungWarnung(){
+ const alter=letzteSicherungAlter();
+ if(alter===null)return '<div class="alertitem" style="margin-bottom:17px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="grow"><strong>Noch keine Sicherung vorhanden.</strong> Eine Sicherung schützt deine Falldaten, wenn dieser Computer ausfällt.</span><button class="btn primary" onclick="sicherungJetzt()">Jetzt sichern</button></div>';
+ if(alter>=3)return `<div class="alertitem" style="margin-bottom:17px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="grow"><strong>Die letzte Sicherung ist ${alter} Tage alt.</strong> Bitte sichere deinen Arbeitsbestand und lege gelegentlich eine Kopie außerhalb dieses Computers ab.</span><button class="btn primary" onclick="sicherungJetzt()">Jetzt sichern</button></div>`;
+ return '';
+}
+function renderSicherungsKarte(){
+ const el=document.getElementById('sicherungsKarte');if(!el)return;
+ const alter=letzteSicherungAlter();
+ const stand=data.settings.lastBackupAt
+  ? new Intl.DateTimeFormat('de-DE',{dateStyle:'full',timeStyle:'short'}).format(new Date(data.settings.lastBackupAt))+(alter===0?' (heute)':alter===1?' (gestern)':' (vor '+alter+' Tagen)')
+  : 'noch keine Sicherung in diesem Datentresor';
+ const liste=(vaultOrt&&Array.isArray(vaultOrt.backups)?vaultOrt.backups:[]).slice(0,8);
+ el.innerHTML=`<div class="card"><div class="cardhead"><h3>Automatische Sicherung und Speicherort</h3><span class="tag ${alter===null||alter>=3?'red':alter>=2?'amber':''}">${alter===null?'keine Sicherung':'zuletzt vor '+alter+' Tagen'}</span></div>
+  <p class="subtle">Das Cockpit legt beim ersten Start des Tages und nach längerem Arbeiten von selbst eine verschlüsselte Sicherung an. Es werden die zwölf jüngsten Sicherungen aufbewahrt, ältere werden automatisch gelöscht.</p>
+  <div class="detailgrid">
+   <div class="detailitem" style="grid-column:1/-1"><span>Letzte Sicherung</span><strong>${stand}</strong></div>
+   <div class="detailitem" style="grid-column:1/-1"><span>Sicherungsordner</span><strong style="word-break:break-all">${vaultOrt?.backupDir||'wird nach dem Entsperren angezeigt'}</strong></div>
+   <div class="detailitem" style="grid-column:1/-1"><span>Datentresor</span><strong style="word-break:break-all">${vaultOrt?.database||'wird nach dem Entsperren angezeigt'}</strong></div>
+  </div>
+  <div class="actions" style="margin-top:14px">
+   <button class="btn primary" onclick="sicherungJetzt()">Jetzt sichern</button>
+   <button class="btn" onclick="ortKopieren('${(vaultOrt?.backupDir||'').replace(/\\/g,'\\\\').replace(/'/g,'')}')">Pfad des Sicherungsordners kopieren</button>
+   <button class="btn" onclick="vaultOrtLaden()">Liste aktualisieren</button>
+  </div>
+  ${liste.length?`<div class="tablewrap" style="margin-top:14px"><table><thead><tr><th>Sicherungsdatei</th><th>Größe</th><th>Erstellt</th></tr></thead><tbody>${liste.map(b=>`<tr><td style="word-break:break-all">${b.name}</td><td>${Math.max(1,Math.round(b.size/1024))} KB</td><td>${new Intl.DateTimeFormat('de-DE',{dateStyle:'short',timeStyle:'short'}).format(new Date(b.modified*1000))}</td></tr>`).join('')}</tbody></table></div>`:'<p class="hint" style="margin-top:12px">Noch keine Sicherungsdatei im Ordner.</p>'}
+  <div class="notice warning" style="margin-top:14px"><strong>Wichtig:</strong> Diese Sicherungen liegen auf demselben Computer. Lege zusätzlich in regelmäßigen Abständen eine Kopie an einem zweiten, für dich zulässigen Ort ab. Kläre den Sicherungsort vorher mit Schulleitung und Datenschutz.</div></div>`;
+}
+
+
+/* ===== Mitarbeiterliste in allen Auswahlfeldern ===== */
+function ssaPersonen(){
+ const aus=data.teachers.map(teacherName).filter(Boolean);
+ const leitungen=Object.values(data.settings.classLeads||{}).filter(Boolean);
+ return [...new Set([...aus,...leitungen])].sort((a,b)=>String(a).localeCompare(String(b),'de'));
+}
+function personenAuswahlFuellen(){
+ const namen=ssaPersonen();
+ const marke=String(namen.length);
+ document.querySelectorAll('select[name="responsible"],select[name="assignedTo"],select[name="completedBy"],select[name="reviewedBy"],select[name="facilitator"]').forEach(sel=>{
+  if(sel.dataset.personen===marke)return;
+  sel.dataset.personen=marke;
+  const wert=sel.value;
+  sel.querySelectorAll('optgroup[data-personen]').forEach(g=>g.remove());
+  if(namen.length)sel.insertAdjacentHTML('beforeend','<optgroup data-personen="1" label="Aus der Mitarbeiterliste">'+namen.map(n=>'<option>'+n+'</option>').join('')+'</optgroup>');
+  if(wert)sel.value=wert;
+ });
+ document.querySelectorAll('input[name="participantsOther"],input[name="facilitator"],input[name="referringTeacher"],input[name="involved"],input[name="contact"]').forEach(f=>{
+  if(!f.getAttribute('list'))f.setAttribute('list','teacherOptions');
+ });
+}
+
+/* ===== Geführter Fallabschluss ===== */
+function fallAbschlussPruefen(studentId){
+ const fall=currentCaseForStudent(studentId);if(!fall)return null;
+ const events=studentEvents(studentId);
+ const kontakte=data.contacts.filter(c=>c.caseId===fall.id);
+ const offeneAufgaben=data.tasks.filter(t=>t.caseId===fall.id&&!t.done);
+ const plaene=data.casePlans.filter(p=>p.studentId===studentId);
+ const offeneZiele=plaene.filter(p=>!['Erreicht','Verworfen'].includes(p.status));
+ const eltern=kontakte.some(c=>['Elterngespräch durchgeführt','Gemeinsame Vereinbarung getroffen','Erziehungsberechtigte informiert'].includes(c.familyInvolvement)||c.type==='Elterngespräch');
+ const kindGehoert=kontakte.some(c=>String(c.type||'').includes('Schüler:in'));
+ const auswertung=kontakte.some(c=>c.phase==='Auswertung und Zielüberprüfung'||c.vorlage==='Abschluss');
+ const einschaetzung=data.outcomeAssessments.some(o=>o.studentId===studentId&&o.phase!=='Beginn');
+ return {fall,events,kontakte,offeneAufgaben,plaene,offeneZiele,eltern,kindGehoert,auswertung,einschaetzung};
+}
+function abschlussSchliessen(){document.querySelectorAll('.modal.open').forEach(m=>{if(!m.id)m.remove()})}
+function abschlussZuAufgaben(){abschlussSchliessen();go('tasks')}
+function abschlussAuswertung(sid){abschlussSchliessen();verlaufOeffnen(sid,'Abschluss')}
+function fallAbschlussFuehren(studentId){
+ const p=fallAbschlussPruefen(studentId||selectedStudentId);
+ if(!p){appAlert('Zu dieser Person ist keine Fallakte vorhanden.');return}
+ if(p.fall.status==='Abgeschlossen'){appAlert('Diese Fallakte ist bereits abgeschlossen. Über den Fallstatus kannst du sie bei Bedarf wieder aufnehmen.');return}
+ const sid=studentId||selectedStudentId;
+ const s=data.students.find(x=>x.id===sid);
+ const knopfAufgaben="<button class='btn kleiner' onclick='abschlussZuAufgaben()'>Aufgaben</button>";
+ const knopfAuswertung="<button class='btn kleiner' onclick=\"abschlussAuswertung('SID')\">Jetzt erfassen</button>".replace('SID',sid);
+ const punkt=(ok,titel,text,knopf)=>`<div class="row"><div class="avatar ${ok?'':'offen'}">${ok?'✓':'!'}</div><div class="grow"><strong>${titel}</strong><span class="subtle">${text}</span></div>${!ok&&knopf?knopf:''}</div>`;
+ const html=`<p class="subtle">Ein Abschluss ist kein Formfehler, wenn etwas offen bleibt. Die Liste zeigt nur, worüber du vor dem Abschluss kurz nachgedacht haben solltest.</p>
+  <div class="list">
+   ${punkt(p.kontakte.length>0,'Fallverlauf dokumentiert',p.kontakte.length+' Eintrag'+(p.kontakte.length===1?'':'e')+' im Verlauf')}
+   ${punkt(p.offeneAufgaben.length===0,'Offene Aufgaben',p.offeneAufgaben.length?p.offeneAufgaben.length+' offen: '+p.offeneAufgaben.slice(0,3).map(t=>t.title).join(', '):'keine offene Wiedervorlage',knopfAufgaben)}
+   ${punkt(p.plaene.length===0||p.offeneZiele.length===0,'Ziele bewertet',p.plaene.length?(p.offeneZiele.length?p.offeneZiele.length+' Ziel'+(p.offeneZiele.length===1?'':'e')+' ohne abschließende Bewertung':'alle Ziele bewertet'):'kein Ziel- und Maßnahmenplan angelegt')}
+   ${punkt(p.kindGehoert,'Kind oder Jugendliche:r einbezogen',p.kindGehoert?'mindestens ein direktes Gespräch dokumentiert':'bisher kein direktes Gespräch dokumentiert')}
+   ${punkt(p.eltern,'Erziehungsberechtigte einbezogen',p.eltern?'Elternkontakt dokumentiert':'bisher kein Elternkontakt dokumentiert')}
+   ${punkt(p.auswertung,'Auswertung erfolgt',p.auswertung?'Auswertung im Verlauf vorhanden':'noch kein Auswertungsgespräch dokumentiert',knopfAuswertung)}
+   ${punkt(p.einschaetzung,'Verlaufseinschätzung',p.einschaetzung?'Einschätzung im Verlauf oder Abschluss vorhanden':'nur Eingangswerte oder gar keine Einschätzung')}
+  </div>
+  <div class="notice" style="margin-top:14px">Im nächsten Schritt trägst du Abschlussgrund, Zielerreichung, Rückmeldung des Kindes und eine mögliche Nachkontrolle ein. Der Fall bleibt vollständig lesbar und kann jederzeit wieder aufgenommen werden.</div>`;
+ appDialog({titel:'Fallabschluss vorbereiten'+(s?': '+s.last+', '+s.first:''),html:html,jaText:'Abschluss jetzt dokumentieren'})
+  .then(ok=>{if(!ok)return;selectedStudentId=sid;
+   const form=document.getElementById('caseStatusForm');form.reset();
+   form.elements.status.value='Abgeschlossen';form.elements.date.value=today();
+   openModal('caseStatusModal');});
+}
+
+
+/* ===== Textbausteine in einfacher Sprache ===== */
+const BAUSTEIN_BASIS={
+ passiert:['Mir ist etwas aufgefallen, das ich festhalten möchte.','Eine Lehrkraft hat mich angesprochen.','Die Erziehungsberechtigten haben sich gemeldet.','Die Schülerin oder der Schüler ist von sich aus gekommen.','Die Schulleitung hat um Klärung gebeten.'],
+ getan:['Ich habe zugehört und entlastet.','Wir haben die Lage gemeinsam sortiert.','Wir haben eine Vereinbarung getroffen.','Ich habe über mögliche Hilfen informiert.','Ich habe mit der Klassenleitung gesprochen.','Ich habe mit den Erziehungsberechtigten telefoniert.','Ich habe zunächst nur beobachtet.'],
+ aus:['Das Anliegen ist geklärt.','Das Anliegen ist teilweise geklärt.','Es wurde eine Vereinbarung getroffen.','Alle Beteiligten wirken entlastet.','Es hat sich nichts verändert.','Wie es weitergeht, ist noch offen.','Der Unterricht konnte fortgesetzt werden.'],
+ schritt:['Rückmeldung der Klassenleitung einholen','Gespräch mit den Erziehungsberechtigten führen','Vereinbarung in einer Woche überprüfen','Situation weiter beobachten','Erneutes Gespräch mit der Schülerin oder dem Schüler','Im Team besprechen','Kein weiterer Schritt nötig']
+};
+const BAUSTEIN_VORLAGE={
+ 'Schülergespräch':{
+  passiert:['Es ging um einen Streit mit Mitschülerinnen und Mitschülern.','Es ging um Sorgen zu Hause.','Es ging um Angst oder Druck in der Schule.','Es ging um Ärger mit einer Lehrkraft.','Die Schülerin oder der Schüler wollte einfach reden.'],
+  getan:['Wir haben nach einer Lösung gesucht, die für sie oder ihn machbar ist.','Wir haben aufgeschrieben, was als Nächstes hilft.','Ich habe die Perspektive der anderen Seite ins Gespräch gebracht.'],
+  aus:['Die Schülerin oder der Schüler wirkt spürbar erleichtert.','Wir haben einen konkreten nächsten Schritt vereinbart.','Das Gespräch endete ohne klares Ergebnis.']},
+ 'Elterngespräch':{
+  passiert:['Die Erziehungsberechtigten haben um ein Gespräch gebeten.','Ich habe das Gespräch angeboten.','Die Klassenleitung hat das Gespräch angeregt.','Es ging um das Verhalten in der Schule.','Es ging um Fehlzeiten.','Es ging um die Situation zu Hause.'],
+  getan:['Ich habe die schulische Sicht geschildert und zugehört.','Wir haben gemeinsam überlegt, was zu Hause helfen kann.','Ich habe auf eine passende Beratungsstelle hingewiesen.','Wir haben Absprachen für den Schulalltag getroffen.'],
+  aus:['Die Erziehungsberechtigten sind einverstanden.','Wir haben eine gemeinsame Absprache getroffen.','Die Sichtweisen liegen noch auseinander.','Ein weiteres Gespräch wurde vereinbart.']},
+ 'Lehrkräfterückmeldung':{
+  passiert:['Die Klassenleitung berichtet von Unruhe im Unterricht.','Die Lehrkraft berichtet von Rückzug.','Die Lehrkraft berichtet von Streit in der Pause.','Die Lehrkraft berichtet, dass Aufgaben nicht bearbeitet werden.','Die Rückmeldung ist positiv, die Lage hat sich gebessert.'],
+  getan:['Wir haben das weitere Vorgehen abgestimmt.','Ich habe erklärt, was die Schulsozialarbeit übernimmt und was nicht.','Wir haben festgelegt, wer was tut.'],
+  aus:['Die Zuständigkeiten sind geklärt.','Die Lage hat sich gebessert.','Die Lage ist unverändert.','Wir schauen in zwei Wochen erneut.']},
+ 'Übergangsschwierigkeit':{
+  passiert:['Das Kind weint beim Abschied und möchte nach Hause.','Das Kind bleibt vor dem Klassenraum stehen.','Das Kind verlässt den Unterricht und geht Richtung Ausgang.','Der Wechsel nach der Pause fällt schwer.','Der Morgen verlief heute ruhig.'],
+  getan:['Ich habe das Kind begleitet und kurz abgelenkt.','Wir sind gemeinsam in den Klassenraum gegangen.','Das Kind durfte kurz an einen vertrauten Ort.','Ich habe die Zeit bis zur Rückkehr notiert.','Die Erziehungsberechtigten haben sich wie vereinbart verabschiedet.'],
+  aus:['Das Kind nimmt ab der ersten Stunde am Unterricht teil.','Die Rückkehr in den Unterricht hat geklappt.','Die Rückkehr hat heute länger gedauert als sonst.','Der Übergang gelang heute ohne Begleitung.']},
+ 'Konflikt':{
+  passiert:['Es gab einen Streit in der Pause.','Es gab eine körperliche Auseinandersetzung.','Es ging um Beleidigungen.','Es ging um Ausgrenzung in der Klasse.','Es ging um einen Vorfall im Chat.'],
+  getan:['Wir haben beide Seiten getrennt angehört.','Wir haben den Konflikt gemeinsam besprochen.','Wir haben eine Wiedergutmachung vereinbart.','Ich habe deutlich gemacht, wo die Grenze liegt.'],
+  aus:['Die Beteiligten haben sich geeinigt.','Eine Wiedergutmachung wurde vereinbart.','Der Konflikt ist noch nicht gelöst.','Die Klassenleitung wurde informiert.']},
+ 'Fehlzeiten':{
+  passiert:['Die Fehlzeiten haben deutlich zugenommen.','Es gibt unentschuldigte Stunden.','Es gibt wiederholte Verspätungen.','Die Fehlzeiten treten vor allem an einzelnen Wochentagen auf.','Die Fehlzeiten sind entschuldigt, aber auffällig viele.'],
+  getan:['Ich habe die Zahlen mit der Klassenleitung besprochen.','Ich habe die Erziehungsberechtigten informiert.','Ich habe mit der Schülerin oder dem Schüler gesprochen.','Ich habe die Zahlen zunächst nur fachlich geprüft.'],
+  aus:['Die Ursache ist noch unklar.','Es gibt eine nachvollziehbare Erklärung.','Eine Absprache zur Rückkehr wurde getroffen.','Die Schulleitung wurde einbezogen.']},
+ 'Maßnahme':{
+  passiert:['Die Maßnahme wurde wie vereinbart umgesetzt.','Die Maßnahme wurde angepasst.','Die Maßnahme konnte nicht stattfinden.'],
+  getan:['Ich habe die Maßnahme selbst durchgeführt.','Die Klassenleitung hat die Maßnahme übernommen.','Wir haben die Maßnahme gemeinsam durchgeführt.'],
+  aus:['Die Maßnahme hat geholfen.','Die Maßnahme hat teilweise geholfen.','Die Maßnahme zeigt noch keine Wirkung.','Die Maßnahme wird angepasst.']},
+ 'Weitervermittlung':{
+  passiert:['Der Bedarf geht über die schulischen Möglichkeiten hinaus.','Die Erziehungsberechtigten haben um eine Empfehlung gebeten.','Es besteht ein Bedarf an fachlicher Beratung außerhalb der Schule.'],
+  getan:['Ich habe die Kontaktdaten weitergegeben.','Ich habe den Erstkontakt mit Einverständnis hergestellt.','Wir haben gemeinsam angerufen.','Ich habe über das Angebot der Stelle informiert.'],
+  aus:['Die Familie nimmt selbst Kontakt auf.','Ein Termin wurde vereinbart.','Die Familie möchte es sich überlegen.','Die Weitervermittlung wurde abgelehnt.']},
+ 'Fallbesprechung':{
+  passiert:['Wir haben den Fall im Team besprochen.','Wir haben mit der Klassenleitung und der Schulleitung beraten.','Eine externe Stelle war beteiligt.'],
+  getan:['Wir haben die Beobachtungen zusammengetragen.','Wir haben Zuständigkeiten verteilt.','Wir haben eine gemeinsame Arbeitshypothese festgehalten.','Wir haben das weitere Vorgehen festgelegt.'],
+  aus:['Das Vorgehen ist abgestimmt.','Es bleiben Fragen offen.','Ein weiterer Termin wurde vereinbart.']},
+ 'Vereinbarung':{
+  passiert:['Wir haben eine Absprache für den Schulalltag gebraucht.','Die bisherige Absprache hat nicht getragen.'],
+  getan:['Wir haben die Vereinbarung gemeinsam formuliert.','Die Vereinbarung wurde schriftlich festgehalten.','Alle Beteiligten wurden informiert.'],
+  aus:['Die Vereinbarung wurde angenommen.','Die Vereinbarung wurde nur teilweise angenommen.','Die Vereinbarung gilt ab sofort.']},
+ 'Rückmeldung':{
+  passiert:['Ich habe nachgefragt, wie es seit dem letzten Eintrag läuft.','Die Klassenleitung hat unaufgefordert zurückgemeldet.','Die Erziehungsberechtigten haben sich gemeldet.'],
+  getan:['Ich habe die Rückmeldung aufgenommen und eingeordnet.','Wir haben die Maßnahme angepasst.','Wir lassen alles unverändert weiterlaufen.'],
+  aus:['Die Entwicklung ist positiv.','Die Lage ist unverändert.','Die Lage hat sich verschlechtert.','Die Maßnahme wird reduziert.']},
+ 'Abschluss':{
+  passiert:['Das Anliegen hat sich erledigt.','Die vereinbarten Ziele sind erreicht.','Die Begleitung wird an eine andere Stelle übergeben.','Der Kontakt ist abgebrochen.','Die Schülerin oder der Schüler verlässt die Schule.'],
+  getan:['Wir haben den Verlauf gemeinsam ausgewertet.','Ich habe die Beteiligten über den Abschluss informiert.','Wir haben besprochen, was bei Bedarf zu tun ist.'],
+  aus:['Die Fallarbeit wird abgeschlossen.','Die Fallarbeit wird abgeschlossen, eine Nachkontrolle ist vereinbart.','Die Begleitung geht an eine andere Stelle über.']}
+};
+const BAUSTEIN_SCHRITTE={
+ 'Übergangsschwierigkeit':['Rückmeldung der Klassenleitung einholen','Zeit am Ankerort verkürzen','Morgen weiter beobachten','Mit den Erziehungsberechtigten telefonieren'],
+ 'Weitervermittlung':['Nachfragen, ob der Erstkontakt zustande kam','Rückmeldung der Beratungsstelle abwarten','Erneut auf das Angebot hinweisen'],
+ 'Fehlzeiten':['Fehlzeiten im nächsten Zeitraum erneut prüfen','Gespräch mit den Erziehungsberechtigten führen','Schulleitung einbeziehen'],
+ 'Konflikt':['Einhaltung der Vereinbarung prüfen','Beide Seiten in einer Woche erneut sprechen','Klassenleitung um Rückmeldung bitten'],
+ 'Abschluss':['Nachkontrolle nach vier bis sechs Wochen','Kein weiterer Schritt nötig']
+};
+function verlaufBausteineFuellen(){
+ const name=document.getElementById('verlaufVorlage')?.value||'';
+ const extra=BAUSTEIN_VORLAGE[name]||{};
+ const setze=(id,liste)=>{const sel=document.getElementById(id);if(!sel)return;
+  sel.innerHTML='<option value="">Textbaustein einfügen</option>'+liste.map(x=>'<option>'+x+'</option>').join('');};
+ setze('bsEreignis',[...(extra.passiert||[]),...BAUSTEIN_BASIS.passiert]);
+ setze('bsMassnahme',[...(extra.getan||[]),...BAUSTEIN_BASIS.getan]);
+ setze('bsErgebnis',[...(extra.aus||[]),...BAUSTEIN_BASIS.aus]);
+ setze('bsSchritt',[...(BAUSTEIN_SCHRITTE[name]||[]),...BAUSTEIN_BASIS.schritt]);
+}
+function verlaufBaustein(sel,zielId){
+ const wert=sel.value;sel.selectedIndex=0;if(!wert)return;
+ const ziel=document.getElementById(zielId);if(!ziel)return;
+ if(ziel.tagName==='INPUT'){ziel.value=wert}
+ else{const alt=ziel.value.trim();ziel.value=alt?alt.replace(/[.;]?\s*$/,'. ')+wert:wert}
+ ziel.focus();
+}
+
 function setupQuickForm(){const grid=document.querySelector('#quickForm .formgrid');if(!grid||grid.dataset.zweistufig)return;
  grid.dataset.zweistufig='1';
  [...grid.children].forEach(k=>{if(!k.querySelector('[required]'))k.classList.add('qf-detail')});
@@ -2439,7 +2731,7 @@ async function resetData(){if(!await appConfirm('Alle lokal erfassten Vorgänge 
 function showVaultError(error){const message=String(error||'Unbekannter Fehler');const el=document.getElementById('authError');if(el)el.textContent=message;else alert(message)}
 async function bootstrapDesktop(){const gate=document.getElementById('authGate');try{const status=await invoke('vault_status');document.getElementById('setupVaultForm').hidden=status.configured;document.getElementById('unlockVaultForm').hidden=!status.configured;document.getElementById('authIntro').textContent=status.configured?'Kennwort eingeben, um das SSA-Cockpit zu öffnen.':'Lege beim ersten Start ein Kennwort mit mindestens 12 Zeichen fest.'}catch(err){showVaultError(err);document.getElementById('setupVaultForm').hidden=true;document.getElementById('unlockVaultForm').hidden=true}gate.classList.remove('hidden')}
 document.getElementById('setupVaultForm').onsubmit=async e=>{e.preventDefault();const p=document.getElementById('setupPassword').value,r=document.getElementById('setupPasswordRepeat').value;if(p!==r){showVaultError('Die Kennwörter stimmen nicht überein.');return}try{await invoke('setup_vault',{password:p,initialStateJson:JSON.stringify(data)});vaultReady=true;document.getElementById('authGate').classList.add('hidden');renderAll();enhanceDictationFields();resetIdleTimer();toast('Der verschlüsselte Datentresor ist eingerichtet.')}catch(err){showVaultError(err)}};
-document.getElementById('unlockVaultForm').onsubmit=async e=>{e.preventDefault();try{const result=await invoke('unlock_vault',{password:document.getElementById('unlockPassword').value});data=normalize(cleanObject(JSON.parse(result.stateJson)));vaultReady=true;document.getElementById('authError').textContent='';document.getElementById('authGate').classList.add('hidden');renderAll();enhanceDictationFields();resetIdleTimer()}catch(err){showVaultError(err)}};
+document.getElementById('unlockVaultForm').onsubmit=async e=>{e.preventDefault();try{const result=await invoke('unlock_vault',{password:document.getElementById('unlockPassword').value});data=normalize(cleanObject(JSON.parse(result.stateJson)));vaultReady=true;document.getElementById('authError').textContent='';document.getElementById('authGate').classList.add('hidden');renderAll();enhanceDictationFields();resetIdleTimer();void vaultOrtLaden().then(()=>sicherungPruefen())}catch(err){showVaultError(err)}};
 async function changeVaultPassword(){const oldPassword=document.getElementById('oldPassword').value,newPassword=document.getElementById('newPassword').value;if(!oldPassword||!newPassword){alert('Bitte aktuelles und neues Kennwort eingeben.');return}try{await invoke('change_password',{oldPassword,newPassword});document.getElementById('oldPassword').value='';document.getElementById('newPassword').value='';toast('Kennwort wurde geändert. Bestehende ältere Sicherungen benötigen weiterhin das damalige Kennwort.')}catch(err){alert('Kennwort konnte nicht geändert werden: '+String(err))}}
 bootstrapDesktop();
 </script>
