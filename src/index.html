@@ -63,6 +63,19 @@
 .formgrid>*,.detailgrid>*,.formgroup{min-width:0}
 .dialog .field,.dialog input,.dialog select,.dialog textarea{min-width:0;max-width:100%}
 .dialog select{text-overflow:ellipsis}
+.kopfsuche{position:relative;flex:0 1 380px;min-width:210px}
+.kopfsuche .field{width:100%}
+#globalSearchResults{position:absolute;z-index:30;left:0;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;display:none;max-height:340px;overflow-y:auto}
+#globalSearchResults.offen{display:block}
+#globalSearchResults button{display:block;width:100%;text-align:left;border:0;background:none;padding:9px 13px;cursor:pointer;font:inherit}
+#globalSearchResults button:hover,#globalSearchResults button:focus{background:#eef6f6}
+#globalSearchResults .leer{padding:11px 13px;color:var(--muted);font-size:13px}
+.aktereiter{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin:0 0 17px}
+.aktereiter button{border:0;background:none;padding:9px 13px;border-radius:10px 10px 0 0;font-weight:700;font-size:13px;color:var(--muted);cursor:pointer}
+.aktereiter button.aktiv{background:#eef6f6;color:var(--teal);box-shadow:inset 0 -2px 0 var(--teal)}
+.aktepanel[hidden]{display:none}
+@media(max-width:1150px){.kopfsuche{flex-basis:250px}}
+
 .formgrid.qf-kompakt .qf-detail{display:none}
 .field,.formgroup>input,.formgroup>select,.formgroup>textarea{min-width:0}
 .signal-metric{grid-template-columns:105px minmax(0,1fr) 45px}
@@ -128,11 +141,11 @@
         </div>
       </div>
     </nav>
-    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.8.4</span></div>
+    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.1</span></div>
   </aside>
   <main>
     <div class="testbar"><strong>VERTRAULICHE PERSONENBEZOGENE ARBEITSVERSION</strong> · Enthält echte Schülerdaten. Nur lokal und ausschließlich durch berechtigte Personen verwenden. Nicht online stellen.</div>
-    <header class="topbar"><div><h1 id="pageTitle">Guten Morgen, Dr. Bruns</h1><p id="pageSubtitle">Freitag, 11. September 2026 · Schuljahr 2026/27</p></div><div class="actions"><button class="btn" onclick="lockPrivacyScreen()">🔒 Sperren</button><button class="btn" onclick="openModal('taskModal')">＋ Aufgabe</button><button class="btn primary" onclick="dokuWaehlen()">＋ Dokumentieren</button></div></header>
+    <header class="topbar"><div><h1 id="pageTitle">Guten Morgen, Dr. Bruns</h1><p id="pageSubtitle">Freitag, 11. September 2026 · Schuljahr 2026/27</p></div><div class="kopfsuche"><input class="field" id="globalSearch" type="search" autocomplete="off" placeholder="Schüler:in suchen: Name, Vorname, Klasse oder Klassenleitung" oninput="globalSearchTippen()" onfocus="globalSearchTippen()"><div id="globalSearchResults"></div></div><div class="actions"><button class="btn" onclick="lockPrivacyScreen()">🔒 Sperren</button><button class="btn" onclick="openModal('taskModal')">＋ Aufgabe</button><button class="btn primary" onclick="dokuWaehlen()">＋ Dokumentieren</button></div></header>
     <div class="content">
       <section class="page active" id="dashboard">
         <div id="dashboardStart"></div>
@@ -180,7 +193,7 @@
         <div class="card tablewrap"><table><thead><tr><th>Datum</th><th>Schüler:in</th><th>Klasse</th><th>Anlass</th><th>Meldende Lehrkraft</th><th>Ergebnis</th><th>Plan</th><th>Druck</th></tr></thead><tbody id="trainingTable"></tbody></table></div>
       </section>
       <section class="page" id="signals">
-        <div class="sectionhead"><div><h2>Frühindikatoren</h2><div class="subtle">Fehlzeiten und Leistungsentwicklung regelbasiert auswerten</div></div><div class="actions"><button class="btn" onclick="downloadSignalTemplate()">Fehlzeiten-Vorlage</button><label class="btn primary">WebUntis-Fehlzeiten importieren<input type="file" accept=".csv,.txt,text/csv,text/plain" hidden onchange="importSchoolSignals(event)"></label><button class="btn" onclick="downloadTimetableTemplate()">Stundenplan-Vorlage</button><label class="btn primary">Stundenplan-CSV importieren<input type="file" accept=".csv,.txt,text/csv,text/plain" hidden onchange="importTimetable(event)"></label><button class="btn danger" onclick="resetTimetable()">Stundenplan leeren</button></div></div>
+        <div class="sectionhead"><div><h2>Frühindikatoren</h2><div class="subtle">Fehlzeiten und Leistungsentwicklung regelbasiert auswerten</div></div><div class="actions"><button class="btn primary" onclick="classEmailOeffnen()">Sammel-E-Mail an Klassenleitung</button><button class="btn" onclick="downloadSignalTemplate()">Fehlzeiten-Vorlage</button><label class="btn primary">WebUntis-Fehlzeiten importieren<input type="file" accept=".csv,.txt,text/csv,text/plain" hidden onchange="importSchoolSignals(event)"></label><button class="btn" onclick="downloadTimetableTemplate()">Stundenplan-Vorlage</button><label class="btn primary">Stundenplan-CSV importieren<input type="file" accept=".csv,.txt,text/csv,text/plain" hidden onchange="importTimetable(event)"></label><button class="btn danger" onclick="resetTimetable()">Stundenplan leeren</button></div></div>
         <div class="notice warning">Diese Hinweise sind keine Diagnose und keine automatische Fallentscheidung. Sie markieren ausschließlich vorher festgelegte Schwellenwerte. Zugriff, Zweck, Zuständigkeit und Löschfrist müssen vor einem regulären Import mit Schulleitung und Datenschutz geklärt werden.</div>
         <div class="notice" id="signalImportInfo">WebUntis-Dateien im alten XLS-Format bitte einmal in Excel als CSV UTF-8 speichern. Die detaillierten Einzelzeilen werden beim Import automatisch pro Schüler:in und Zeitraum zusammengefasst.</div>
         <div class="notice" id="timetableImportInfo">Noch kein Stundenplan importiert. Bis dahin wird keine pauschale Zahl von Unterrichtsstunden pro Tag angenommen. Nach dem Import berechnet das Cockpit den Anteil der Fehlminuten an den tatsächlich vorgesehenen Unterrichtsminuten.</div>
@@ -199,8 +212,8 @@
         <div class="grid three" id="workflowGrid"></div>
       </section>
       <section class="page" id="teachers">
-        <div class="sectionhead"><div><h2>Lehrkräfte</h2><div class="subtle">Klassenleitungen aus der Schülerliste. Weitere Lehrkräfte und Kontaktdaten können ergänzt werden.</div></div><button class="btn primary" onclick="openModal('teacherModal')">＋ Lehrkraft</button></div>
-        <div class="card tablewrap"><table><thead><tr><th>Name</th><th>Funktion</th><th>Klassenleitung</th><th>Fächer</th><th>Dienstliche E-Mail</th><th>Telefon</th></tr></thead><tbody id="teacherTable"></tbody></table></div>
+        <div class="sectionhead"><div><h2>Lehrkräfte</h2><div class="subtle">Klassenleitungen aus der Schülerliste. Weitere Lehrkräfte und Kontaktdaten können ergänzt werden.</div></div><div class="actions"><button class="btn" onclick="staffProtokollZeigen()">Importprotokoll</button><button class="btn" onclick="staffImportRueckgaengig()">Letzten Import rückgängig machen</button><button class="btn primary" onclick="staffImportOeffnen()">Lehrkräfte-/Mitarbeiterliste importieren</button><button class="btn" onclick="openModal('teacherModal')">＋ Einzelne Person</button></div></div>
+        <div class="card tablewrap"><table><thead><tr><th>Name</th><th>Funktion</th><th>Status</th><th>Klassenleitung</th><th>Fächer</th><th>Dienstliche E-Mail</th><th>Telefon</th></tr></thead><tbody id="teacherTable"></tbody></table></div>
       </section>
       
       <section class="page" id="projects">
@@ -292,6 +305,8 @@
 
 <div class="modal" id="projectModal"><div class="dialog wide"><div class="dialoghead"><h2>Präventionsprojekt planen</h2><button class="close" onclick="closeModal('projectModal')">×</button></div><form id="projectForm"><div class="dialogbody"><div class="notice">Die Planung folgt den Beccaria-Schritten: Bedarf, Ursachen, Ziele, Zielgruppe, Maßnahme, Umsetzung und Evaluation.</div><div class="formgrid"><div class="formgroup full"><label>Projekt oder Programm. Schnellauswahl</label><select class="field" onchange="applyPreset(this,'projectName')"><option value="">Bitte auswählen</option><option>Sozialtraining durch die SSA</option><option>Medienbuddys</option><option>Palaverzelt</option><option>Klasse2000</option><option>EIGENSTÄNDIG WERDEN</option><option>Gemeinsam Klasse sein</option><option>HEYLiFE</option><option>IGEL</option><option>MaiStep</option><option>BASS</option><option value="">Eigenes Angebot</option></select><input class="field" id="projectName" name="name" required placeholder="Name des Vorhabens"></div><div class="formgroup"><label>Zielgruppe</label><input class="field" name="group" required placeholder="z. B. Klasse 5a"></div><div class="formgroup"><label>Teilnehmende</label><input class="field" type="number" name="participants" min="1" value="12"></div><div class="formgroup"><label>Evidenz- und Verbindlichkeitsstatus</label><select class="field" name="evidence"><option>E Lokale Praxisoption</option><option>D1 Theoretisch gut begründet</option><option>D2 Wirksamkeit wahrscheinlich</option><option>D3 Wirksamkeit nachgewiesen</option><option>C Professioneller Standard</option><option>B Offizieller Fachrahmen</option><option>A Verbindliche Vorgabe</option><option>Noch zu prüfen</option></select></div><div class="formgroup"><label>Geplante Einheiten</label><input class="field" type="number" name="total" min="1" value="6"></div><div class="formgroup full"><label>Bedarf und Ausgangslage</label><textarea class="field" name="need" required placeholder="Welcher klassen- oder gruppenbezogene Bedarf soll bearbeitet werden? Keine personenbezogenen Einzelfalldaten."></textarea></div><div class="formgroup full"><label>Ursachenannahmen und Schutzfaktoren</label><textarea class="field" name="factors" placeholder="Welche beeinflussbaren Risiko- und Schutzfaktoren sind fachlich begründet?"></textarea></div><div class="formgroup full"><label>Zielsetzung. Schnellauswahl</label><select class="field" onchange="applyPreset(this,'projectGoal')"><option value="">Bitte auswählen</option><option>Die soziale Kompetenz, Kooperation und gegenseitige Unterstützung der Teilnehmenden werden gestärkt.</option><option>Die Teilnehmenden entwickeln konstruktive Strategien zur Konfliktklärung und Deeskalation.</option><option>Selbstwirksamkeit, Beteiligung und Verantwortungsübernahme der Teilnehmenden werden gefördert.</option><option>Die Klassengemeinschaft beziehungsweise Gruppengemeinschaft wird nachhaltig gestärkt.</option><option>Die Teilnehmenden werden für respektvolle Kommunikation, Vielfalt und persönliche Grenzen sensibilisiert.</option><option>Medienkompetenz und ein verantwortungsvoller Umgang mit digitalen Angeboten werden gefördert.</option><option>Belastungen werden frühzeitig erkannt und niedrigschwellige Unterstützungswege bekannt gemacht.</option><option>Schulische Übergänge werden vorbereitet und die Orientierung der Teilnehmenden wird gestärkt.</option><option>Das Projekt schafft verlässliche Begegnungsräume und fördert die Einbindung in Schule und Sozialraum.</option><option value="">Eigene Zielsetzung formulieren</option></select><textarea class="field" id="projectGoal" name="goal" required placeholder="Beobachtbar, realistisch und mit Prüfzeitpunkt formulieren"></textarea></div><div class="formgroup"><label>Umsetzungstreue prüfen durch</label><select class="field" name="fidelity"><option>Einheiten und Dauer dokumentieren</option><option>Manual- oder Ablaufcheck nach jeder Einheit</option><option>Regelmäßige Teamreflexion</option><option>Teilnehmenden-Rückmeldung</option><option>Kombination mehrerer Verfahren</option><option>Noch festzulegen</option></select></div><div class="formgroup"><label>Ergebnisprüfung</label><select class="field" name="evaluation"><option>Qualitative Abschlussrunde</option><option>Anonyme Vorher-Nachher-Kurzbefragung</option><option>Klassenklima-Kurzmaß</option><option>Zielerreichung durch SSA und Lehrkraft getrennt einschätzen</option><option>Follow-up nach vier bis acht Wochen</option><option>Kombination mehrerer Verfahren</option><option>Noch festzulegen</option></select></div><div class="formgroup"><label>Status</label><select class="field" name="status"><option>Geplant</option><option>In Vorbereitung</option><option>Laufend</option><option>Auswertung</option><option>Abgeschlossen</option><option>Angepasst</option><option>Beendet</option></select></div><div class="formgroup"><label>Nächster Review</label><input class="field" type="date" name="reviewDate"></div></div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('projectModal')">Abbrechen</button><button class="btn primary">Projekt speichern</button></div></form></div></div>
 
+<div class="modal" id="classEmailModal"><div class="dialog wide"><div class="dialoghead"><h2>Sammel-E-Mail an die Klassenleitung</h2><button class="close" onclick="closeModal('classEmailModal')">×</button></div><div class="dialogbody"><div class="notice warning">Der Entwurf wird nur lokal erstellt. Er wird weder versendet noch als Kontakt dokumentiert. Prüfe den Text und beschränke ihn auf das Erforderliche.</div><div class="formgrid"><div class="formgroup"><label>Klasse</label><select class="field" id="classEmailClass" onchange="classEmailErzeugen()"></select></div><div class="formgroup"><label>Auswertungszeitraum der Daten</label><select class="field" id="classEmailPeriod" onchange="classEmailErzeugen()"></select></div><div class="formgroup"><label>Zeitraum von</label><input class="field" type="date" id="classEmailFrom" onchange="classEmailErzeugen()"></div><div class="formgroup"><label>Zeitraum bis</label><input class="field" type="date" id="classEmailTo" onchange="classEmailErzeugen()"></div><div class="formgroup"><label>Klassenleitung</label><input class="field" id="classEmailTeacher" readonly></div><div class="formgroup"><label>Dienstliche E-Mail</label><input class="field" type="email" id="classEmailAddress" placeholder="Falls bekannt, dienstliche Adresse"></div><div class="formgroup full"><label><input type="checkbox" id="classEmailOnlyFlagged" checked onchange="classEmailErzeugen()"> Nur Schüler:innen aufnehmen, die einen eingestellten Schwellenwert erreichen</label><span class="hint" id="classEmailCount"></span></div><div class="formgroup full"><label>Betreff</label><input class="field" id="classEmailSubject"></div><div class="formgroup full"><label>E-Mail-Text</label><textarea class="field email-preview" id="classEmailBody"></textarea><span class="hint">Du kannst den Entwurf frei verändern. Beratungsinhalte, Diagnosen und Vermutungen werden nicht eingefügt.</span></div></div></div><div class="dialogfoot"><button class="btn" onclick="closeModal('classEmailModal')">Schließen</button><button class="btn" onclick="classEmailErzeugen()">Entwurf neu erzeugen</button><button class="btn primary" onclick="classEmailKopieren()">Betreff und Text kopieren</button></div></div></div>
+<div class="modal" id="staffImportModal"><div class="dialog wide"><div class="dialoghead"><h2>Lehrkräfte- und Mitarbeiterliste importieren</h2><button class="close" onclick="closeModal('staffImportModal')">×</button></div><div class="dialogbody"><div class="helpbox"><strong>So geht es in vier Schritten:</strong><br>1. CSV-Datei auswählen &nbsp;·&nbsp; 2. Vorschau prüfen &nbsp;·&nbsp; 3. Import bestätigen &nbsp;·&nbsp; 4. Bericht kontrollieren<br>Erkannt werden die Spalten NAME, OFFIZIELLER VORNAME, ANZEIGENAME, FUNKTION, KLASSENLEITUNG FÜR, STATUS, HINWEIS und QUELLE. Pflicht ist nur NAME. Zusätzliche Spalten stören nicht. Semikolon und Komma werden automatisch erkannt.</div><div class="actions" style="margin-bottom:15px"><label class="btn primary">Schritt 1: CSV-Datei auswählen<input type="file" accept=".csv,text/csv" hidden onchange="staffImportVorschau(event)"></label><button class="btn" onclick="downloadStaffTemplate()">CSV-Vorlage herunterladen</button><button class="btn" onclick="staffBeispielZeigen()">Beispiel anzeigen</button></div><div id="staffPreview"><div class="empty">Noch keine Datei gewählt. Beginne mit Schritt 1.</div></div></div><div class="dialogfoot"><button class="btn" onclick="closeModal('staffImportModal')">Abbrechen</button><button class="btn primary" id="staffConfirmBtn" disabled onclick="staffImportBestaetigen()">Schritt 3: Import bestätigen</button></div></div></div>
 <div class="modal" id="teacherModal"><div class="dialog"><div class="dialoghead"><h2>Lehrkraft anlegen</h2><button class="close" onclick="closeModal('teacherModal')">×</button></div><form id="teacherForm"><div class="dialogbody"><div class="formgrid"><div class="formgroup"><label>Vorname</label><input class="field" name="first" required></div><div class="formgroup"><label>Nachname</label><input class="field" name="last" required></div><div class="formgroup"><label>Funktion</label><select class="field" name="role"><option>Lehrkraft</option><option>Schulleitung</option><option>Didaktische Leitung</option><option>Förderschullehrkraft</option></select></div><div class="formgroup"><label>Klassenleitung</label><input class="field" name="classLead" placeholder="z. B. 6a oder leer"></div><div class="formgroup"><label>Fächer</label><input class="field" name="subjects" placeholder="z. B. Deutsch, Geschichte"></div><div class="formgroup"><label>Dienstliche E-Mail</label><input class="field" type="email" name="email"></div><div class="formgroup full"><label>Dienstliches Telefon</label><input class="field" name="phone"></div></div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('teacherModal')">Abbrechen</button><button class="btn primary">Lehrkraft speichern</button></div></form></div></div>
 
 
@@ -311,7 +326,7 @@
 
 <div class="modal" id="trainingRoomModal"><div class="dialog"><div class="dialoghead"><h2>Trainingsraumbesuch dokumentieren</h2><button class="close" onclick="closeModal('trainingRoomModal')">×</button></div><form id="trainingRoomForm"><div class="dialogbody"><div class="notice">Nur den schulischen Vorgang festhalten. Persönliche Beratungsinhalte werden nicht in dieses Modul übernommen.</div><div class="formgrid">
 <div class="formgroup full"><label>Schüler:in suchen</label><input class="field" type="search" id="trainingStudentSearch" placeholder="Nachname oder Vorname eingeben" autocomplete="off" oninput="jumpToStudent(this.value,'trainingStudent','trainingStudentHit')"><span class="hint" id="trainingStudentHit">Nach zwei Buchstaben wird der erste passende Name ausgewählt.</span></div><div class="formgroup full"><label>Ausgewählte Person</label><select class="field" name="studentId" id="trainingStudent" required></select></div>
-<div class="formgroup"><label>Datum</label><input class="field" type="date" name="date" required></div><div class="formgroup"><label>Unterrichtsstunde</label><select class="field" name="lesson"><option>1. Stunde</option><option>2. Stunde</option><option>3. Stunde</option><option>4. Stunde</option><option>5. Stunde</option><option>6. Stunde</option><option>Pause</option><option>Ganztag</option></select></div><div class="formgroup"><label>Meldende Lehrkraft</label><input class="field" name="referringTeacher" list="teacherOptions" required></div><div class="formgroup"><label>Begleitet von</label><select class="field" name="responsible"><option>Edmund</option><option>Sabine</option><option>Edmund und Sabine</option><option>Lehrkraft</option><option>Andere Person oder Institution</option></select></div>
+<div class="formgroup"><label>Datum</label><input class="field" type="date" name="date" required></div><div class="formgroup"><label>Unterrichtsstunde</label><select class="field" name="lesson"><option>1. Stunde</option><option>2. Stunde</option><option>3. Stunde</option><option>4. Stunde</option><option>5. Stunde</option><option>6. Stunde</option><option>Pause</option><option>Ganztag</option></select></div><div class="formgroup"><label>Meldende Lehrkraft</label><input class="field" name="referringTeacher" list="teacherOptions" required></div><div class="formgroup"><label>Begleitet von</label><select class="field" name="responsible"><option>Edmund</option><option>Sabine</option><option>Praktikantin</option></select></div>
 <div class="formgroup"><label>Anlass</label><select class="field" name="reason"><option>Unterrichtsstörung</option><option>Konflikt</option><option>Regelverstoß</option><option>Arbeitsverweigerung</option><option>Respektloses Verhalten</option><option>Eigen- oder Fremdgefährdung</option><option>Sonstiges</option></select></div><div class="formgroup"><label>Dauer in Minuten</label><input class="field" type="number" name="duration" min="1" step="1" value="20"></div><div class="formgroup full"><label>Ergänzung zum Anlass</label><input class="field" name="reasonDetail" placeholder="Freie Ergänzung, falls die Auswahl nicht ausreicht"></div>
 <div class="formgroup full"><label>Sachliche Situationsbeschreibung. Schnellauswahl</label><select class="field" onchange="applyPreset(this,'trainingNote')"><option value="">Bitte auswählen</option><option>Unterricht wiederholt gestört.</option><option>Anweisungen trotz mehrfacher Erinnerung nicht befolgt.</option><option>Konflikt mit Mitschüler:innen eskaliert.</option><option>Respektlose oder beleidigende Äußerungen.</option><option>Arbeitsaufnahme verweigert.</option><option>Regelverstoß im Unterricht oder in der Pause.</option><option>Eigen- oder Fremdgefährdung.</option><option value="">Eigener Eintrag</option></select><textarea class="field" id="trainingNote" name="note" required placeholder="Auswahl übernehmen oder eigenen Text eingeben"></textarea></div>
 <div class="formgroup full"><label>Reflexion. Schnellauswahl</label><select class="field" onchange="applyPreset(this,'trainingReflection')"><option value="">Bitte auswählen</option><option>Schüler:in kann das eigene Verhalten nachvollziehen.</option><option>Schüler:in erkennt eigene Anteile teilweise.</option><option>Schüler:in weist Verantwortung derzeit zurück.</option><option>Schüler:in benötigt Unterstützung beim Perspektivwechsel.</option><option>Gespräch ist derzeit nicht möglich.</option><option value="">Eigener Eintrag</option></select><textarea class="field" id="trainingReflection" name="reflection" placeholder="Auswahl kann frei verändert oder ergänzt werden"></textarea></div>
@@ -643,11 +658,14 @@ function showStudent(studentId){
  selectedStudentId=studentId;
  const s=data.students.find(x=>x.id===studentId),c=data.cases.find(x=>x.studentId===studentId),events=studentEvents(studentId);
  document.getElementById('studentDetailTitle').innerHTML=`<span data-person>${s.first} ${s.last}</span> · ${s.className}`;
- document.getElementById('studentDetailBody').innerHTML=`<div class="notice">Personenbezogene Arbeitsansicht für Edmund und Sabine.</div><div class="detailgrid"><div class="detailitem"><span>Schüler-ID</span><strong>${s.id}</strong></div><div class="detailitem"><span>Schuljahr und Klasse</span><strong>${s.schoolYear} · ${s.className}</strong></div><div class="detailitem"><span>Anschrift</span><strong>${s.address||'–'}${s.district?' · '+s.district:''}</strong></div><div class="detailitem"><span>Telefon</span><strong>${s.phone||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 1</span><strong data-person>${s.guardian1||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 2</span><strong data-person>${s.guardian2||'–'}</strong></div><div class="detailitem"><span>Klassenleitung</span><strong>${data.settings.classLeads?.[s.className]||'–'}</strong></div><div class="detailitem"><span>Fallstatus</span><strong>${c?c.status:'keine Fallakte'}</strong></div></div><h3>Ziel- und Maßnahmenplan</h3>${planSummary(studentId)}<h3>Offene Aufgaben und Ergebnisse</h3>${taskSummary(studentId)}<h3>Entwicklung des Kindes</h3>${outcomeSummary(studentId)}<h3>Bezugspersonen und Netzwerk</h3>${relatedSummary(studentId)}<h3>Familienkonstellation</h3>${familySummary(s)}${studentAbsencePanel(studentId)}<h3>Fachliche Entwicklung aus Kontakten</h3>${trendSummary(studentId)}<h3>Schuljahresverlauf</h3><div class="list">${(s.enrollments||[]).map(e=>`<div class="row"><div class="grow"><strong>${e.schoolYear}</strong><span class="subtle">Klasse ${e.className}</span></div></div>`).join('')}</div><h3>Chronologische Fallzeitachse</h3><p class="subtle">Gespräche, Elternkontakte, Rückmeldungen, Fehlzeitenereignisse, Vereinbarungen, Maßnahmen, Weitervermittlungen, Statusänderungen, Wirkungseinschätzungen, Aufgaben und Dokumente werden gemeinsam dargestellt.</p><div class="chronicle-tools"><input class="field" type="search" placeholder="Verlauf vollständig durchsuchen" oninput="filterTimeline(this,'studentTimeline')"></div><div class="timeline" id="studentTimeline">${timelineHtml(events)}</div>`;
+ document.getElementById('studentDetailBody').dataset.gegliedert='';document.getElementById('studentDetailBody').innerHTML=`<div class="notice">Personenbezogene Arbeitsansicht für Edmund und Sabine.</div><div class="detailgrid"><div class="detailitem"><span>Schüler-ID</span><strong>${s.id}</strong></div><div class="detailitem"><span>Schuljahr und Klasse</span><strong>${s.schoolYear} · ${s.className}</strong></div><div class="detailitem"><span>Anschrift</span><strong>${s.address||'–'}${s.district?' · '+s.district:''}</strong></div><div class="detailitem"><span>Telefon</span><strong>${s.phone||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 1</span><strong data-person>${s.guardian1||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 2</span><strong data-person>${s.guardian2||'–'}</strong></div><div class="detailitem"><span>Klassenleitung</span><strong>${data.settings.classLeads?.[s.className]||'–'}</strong></div><div class="detailitem"><span>Fallstatus</span><strong>${c?c.status:'keine Fallakte'}</strong></div></div><h3>Ziel- und Maßnahmenplan</h3>${planSummary(studentId)}<h3>Offene Aufgaben und Ergebnisse</h3>${taskSummary(studentId)}<h3>Entwicklung des Kindes</h3>${outcomeSummary(studentId)}<h3>Bezugspersonen und Netzwerk</h3>${relatedSummary(studentId)}<h3>Familienkonstellation</h3>${familySummary(s)}${studentAbsencePanel(studentId)}<h3>Fachliche Entwicklung aus Kontakten</h3>${trendSummary(studentId)}<h3>Schuljahresverlauf</h3><div class="list">${(s.enrollments||[]).map(e=>`<div class="row"><div class="grow"><strong>${e.schoolYear}</strong><span class="subtle">Klasse ${e.className}</span></div></div>`).join('')}</div><h3>Fallverlauf</h3><p class="subtle">Gespräche, Elternkontakte, Rückmeldungen, Fehlzeitenereignisse, Vereinbarungen, Maßnahmen, Weitervermittlungen, Statusänderungen, Wirkungseinschätzungen, Aufgaben und Dokumente werden gemeinsam dargestellt.</p><div class="chronicle-tools"><input class="field" type="search" placeholder="Verlauf vollständig durchsuchen" oninput="filterTimeline(this,'studentTimeline')"></div><div class="timeline" id="studentTimeline">${timelineHtml(events)}</div>`;
  const statusButton=document.getElementById('studentStatusButton');statusButton.textContent=s.active?'Archivieren':'Reaktivieren';statusButton.classList.toggle('danger',s.active);
  openModal('studentModal')
+
+ gliedereSchuelerakte();
 }
-async function toggleStudentStatus(){const s=data.students.find(x=>x.id===selectedStudentId);if(!s)return;const action=s.active?'archivieren':'reaktivieren';if(!await appConfirm(`${s.last}, ${s.first} wirklich ${action}?\n\nDie Schülerakte und alle Verläufe bleiben erhalten.`))return;s.active=!s.active;save();showStudent(s.id);toast(s.active?'Schüler:in wurde reaktiviert.':'Schüler:in wurde archiviert und aus aktuellen Listen entfernt.')}
+async function toggleStudentStatus(){const s=data.students.find(x=>x.id===selectedStudentId);if(!s)return;const action=s.active?'archivieren':'reaktivieren';if(!await appConfirm(`${s.last}, ${s.first} wirklich ${action}?\n\nDie Schülerakte und alle Verläufe bleiben erhalten.`))return;s.active=!s.active;save();showStudent(s.id);toast(s.active?'Schüler:in wurde reaktiviert.':'Schüler:in wurde archiviert und aus aktuellen Listen entfernt.')
+}
 let selectedClass='';
 function currentClasses(){return [...new Set(data.students.filter(s=>s.active).map(s=>s.className))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}))}
 function renderClasses(){const classes=currentClasses();document.getElementById('activityClass').innerHTML=classes.map(c=>`<option>${c}</option>`).join('');document.getElementById('classGrid').innerHTML=classes.map(c=>{const pupils=data.students.filter(s=>s.active&&s.className===c),manual=data.teachers.filter(t=>t.classLead===c).map(t=>(t.first+' '+t.last).trim()).join(', '),lead=manual||data.settings.classLeads?.[c]||'nicht eingetragen';const measures=data.classActivities.filter(a=>a.className===c&&a.schoolYear===data.settings.currentSchoolYear).length;return `<article class="card clickrow ${measures>0?'hasactivity':''}" onclick="showClass('${c}')"><div class="cardhead"><h3>Klasse ${c}</h3><span class="tag ${measures>0?'green':'gray'}">${pupils.length} Kinder</span></div>${measures>0?'<span class="tag green">✓ Projekt oder Prävention läuft</span>':''}<p class="subtle">Klassenleitung: ${lead}</p><div class="detailgrid"><div class="detailitem"><span>SSA-Maßnahmen</span><strong>${measures}</strong></div><div class="detailitem"><span>Schuljahr</span><strong>${data.settings.currentSchoolYear}</strong></div></div></article>`}).join('');if(selectedClass&&classes.includes(selectedClass))showClass(selectedClass,false)}
@@ -690,8 +708,8 @@ function renderSignals(){
  document.getElementById('signalImportInfo').innerHTML=data.settings.signalImportNote||'WebUntis-Dateien im alten XLS-Format bitte einmal in Excel als <strong>CSV UTF-8</strong> speichern. Die detaillierten Einzelzeilen werden beim Import automatisch pro Schüler:in und Zeitraum zusammengefasst.';
  const classCounts={};for(const r of withNotice){const c=data.students.find(s=>s.id===r.studentId)?.className||'ohne Klasse';classCounts[c]=(classCounts[c]||0)+1}
  document.getElementById('classSignalAlerts').innerHTML=Object.entries(classCounts).filter(([,count])=>count>=3).sort((a,b)=>b[1]-a[1]).map(([c,count])=>`<div class="alertitem"><strong>Klassenmuster ${c}</strong>: Bei ${count} Schüler:innen ist mindestens ein eingestellter Schwellenwert erreicht. Dies ist keine Bewertung der Klasse. Eine präventive Maßnahme kann fachlich geprüft werden.</div>`).join('');
- document.getElementById('signalTable').innerHTML=list.map(r=>{const s=data.students.find(x=>x.id===r.studentId),a=signalAssessment(r),review=r.reviewStatus||'Noch nicht geprüft',sourceDate=r.importedAt?new Intl.DateTimeFormat('de-DE',{dateStyle:'short'}).format(new Date(r.importedAt)):'Datum unbekannt',facts=signalFacts(r),reviewed=review!=='Noch nicht geprüft';return `<tr class="${reviewed?'reviewed':(a.notices.length?'':'muted')}"><td class="namecell"><button class="linkbutton" data-person onclick="showSignalDetail('${r.studentId}','${r.id}')">${s?s.last+', '+s.first:'Unbekannte Person'}</button><br><span class="subtle">Auswertung öffnen</span></td><td>${s?.className||r.className||'–'}${r.sourceClassName&&r.sourceClassName!==(s?.className||r.className)?`<br><span class="tag amber">WebUntis: ${r.sourceClassName}</span>`:''}</td><td><strong>${r.period||'–'}</strong><br><span class="subtle">${r.sourceFile||'manueller Import'} · importiert ${sourceDate}</span></td><td>${a.notices.length?a.notices.map(n=>`<span class="tag amber">${n}</span>`).join(' '):'<span class="tag gray">kein Schwellenwert erreicht</span>'}<br><span class="subtle">${facts.join(' · ')}</span></td><td><span class="tag ${reviewed?'green':'amber'}">${reviewed?'✓ fachlich geprüft':review}</span>${reviewed?`<br><span class="subtle">Ergebnis: ${review}</span>`:''}${r.absenceStage?` <span class="tag gray">${r.absenceStage}</span>`:''}${r.reviewedAt?`<br><span class="subtle">${fmt(r.reviewedAt)} · ${r.reviewedBy||'SSA'}</span>`:''}${r.absenceAction?`<br><span class="subtle">${r.absenceAction}</span>`:''}${r.reviewNote?`<br><span class="subtle">${r.reviewNote}</span>`:''}</td><td><button class="btn ${reviewed?'reviewed':''}" onclick="openSignalReview('${r.id}')">${reviewed?'✓ Fachlich geprüft':'Fachlich prüfen'}</button></td></tr>`}).join('')||'<tr><td colspan="6" class="empty">Keine passenden Daten importiert.</td></tr>'
- document.querySelectorAll('#signalTable button').forEach((button,index)=>{const record=list[index],reviewed=record&&(record.reviewStatus||'Noch nicht geprüft')!=='Noch nicht geprüft';if(reviewed){button.textContent='Prüfung bearbeiten';button.classList.add('reviewed');button.title=`Bereits geprüft: ${record.reviewStatus}. Zum Bearbeiten öffnen.`}})
+ document.getElementById('signalTable').innerHTML=list.map(r=>{const s=data.students.find(x=>x.id===r.studentId),a=signalAssessment(r),review=r.reviewStatus||'Noch nicht geprüft',sourceDate=r.importedAt?new Intl.DateTimeFormat('de-DE',{dateStyle:'short'}).format(new Date(r.importedAt)):'Datum unbekannt',facts=signalFacts(r),reviewed=review!=='Noch nicht geprüft';return `<tr class="${reviewed?'reviewed':(a.notices.length?'':'muted')}"><td class="namecell"><button class="linkbutton" data-person onclick="showSignalDetail('${r.studentId}','${r.id}')">${s?s.last+', '+s.first:'Unbekannte Person'}</button><br><span class="subtle">Auswertung öffnen</span></td><td>${s?.className||r.className||'–'}${r.sourceClassName&&r.sourceClassName!==(s?.className||r.className)?`<br><span class="tag amber">WebUntis: ${r.sourceClassName}</span>`:''}</td><td><strong>${r.period||'–'}</strong><br><span class="subtle">${r.sourceFile||'manueller Import'} · importiert ${sourceDate}</span></td><td>${a.notices.length?a.notices.map(n=>`<span class="tag amber">${n}</span>`).join(' '):'<span class="tag gray">kein Schwellenwert erreicht</span>'}<br><span class="subtle">${facts.join(' · ')}</span></td><td><span class="tag ${reviewed?'green':'amber'}">${reviewed?'✓ fachlich geprüft':review}</span>${reviewed?`<br><span class="subtle">Ergebnis: ${review}</span>`:''}${r.absenceStage?` <span class="tag gray">${r.absenceStage}</span>`:''}${r.reviewedAt?`<br><span class="subtle">${fmt(r.reviewedAt)} · ${r.reviewedBy||'SSA'}</span>`:''}${r.absenceAction?`<br><span class="subtle">${r.absenceAction}</span>`:''}${r.reviewNote?`<br><span class="subtle">${r.reviewNote}</span>`:''}</td><td><button class="btn ${reviewed?'reviewed':''}" data-review="${r.id}" onclick="openSignalReview('${r.id}')">${reviewed?'✓ Fachlich geprüft':'Fachlich prüfen'}</button></td></tr>`}).join('')||'<tr><td colspan="6" class="empty">Keine passenden Daten importiert.</td></tr>'
+ document.querySelectorAll('#signalTable button[data-review]').forEach(button=>{const record=list.find(x=>x.id===button.dataset.review),reviewed=record&&(record.reviewStatus||'Noch nicht geprüft')!=='Noch nicht geprüft';if(reviewed){button.textContent='Prüfung bearbeiten';button.classList.add('reviewed');button.title=`Bereits geprüft: ${record.reviewStatus}. Zum Bearbeiten öffnen.`}})
 }
 let selectedSignalId='',selectedSignalStudentId='',selectedSignalEmailId='';
 function signalPeriodTime(r){if(r.startDate)return new Date(r.startDate+'T12:00').getTime();const hit=String(r.period||'').match(/(\d{2})\.(\d{2})\.(\d{4})/);return hit?new Date(`${hit[3]}-${hit[2]}-${hit[1]}T12:00`).getTime():new Date(r.importedAt||0).getTime()}
@@ -719,7 +737,7 @@ function renderWorkflows(){const q=(document.getElementById('workflowSearch').va
 function openWorkflow(id){const w=WORKFLOWS.find(x=>x.id===id);if(!w)return;document.getElementById('workflowTitle').textContent=w.title;document.getElementById('workflowBody').innerHTML=`<div class="notice ${w.critical?'warning':''}"><strong>${w.status}</strong> · ${w.category}<br>Startkriterium: ${w.start}</div>${w.critical?'<div class="notice warning"><strong>Sicherheitsregel:</strong> Bei unmittelbarer Gefahr zuerst Schutz und gegebenenfalls 112 oder 110 sicherstellen. Die Dokumentation darf die Hilfe nicht verzögern.</div>':''}<h3>Standardablauf</h3><div class="step-list">${w.steps.map(step=>`<div>${step}</div>`).join('')}</div><div class="detailgrid"><div class="detailitem"><span>Empfohlene Dokumentationsfelder</span><strong>${w.fields}</strong></div><div class="detailitem"><span>Qualitätsindikatoren</span><strong>${w.quality}</strong></div><div class="detailitem" style="grid-column:1/-1"><span>Schutzregel und Grenze</span><strong>${w.protection}</strong></div></div><p class="hint" style="margin-top:16px">Grundlage: SSA-Cockpit Fachkonzept 2026. Vor produktiver Anwendung müssen lokale Vereinbarungen, Zuständigkeiten und aktuelle Rechtsstände geprüft und freigegeben werden.</p>`;openModal('workflowModal')}
 document.getElementById('workflowSearch').oninput=renderWorkflows;document.getElementById('workflowFilter').onchange=renderWorkflows;
 function teacherName(t){return t.displayName||(t.first?`${t.last}, ${t.first}`:t.last)}
-function renderTeachers(){document.getElementById('teacherTable').innerHTML=data.teachers.sort((a,b)=>teacherName(a).localeCompare(teacherName(b))).map(t=>`<tr><td class="namecell">${teacherName(t)}</td><td>${t.role}</td><td>${t.classLead||'–'}</td><td>${t.subjects||'–'}</td><td>${t.email?`<a href="mailto:${t.email}">${t.email}</a>`:'–'}</td><td>${t.phone||'–'}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">Noch keine Lehrkräfte eingetragen. Sie werden für die Klassenleitung und für E-Mail-Entwürfe an die Klassenleitung gebraucht.</td></tr>'}
+function renderTeachers(){document.getElementById('teacherTable').innerHTML=data.teachers.sort((a,b)=>teacherName(a).localeCompare(teacherName(b))).map(t=>`<tr><td class="namecell">${teacherName(t)}</td><td>${t.role}</td><td>${staffStatusTag(t.status)}</td><td>${t.classLead||'–'}</td><td>${t.subjects||'–'}</td><td>${t.email?`<a href="mailto:${t.email}">${t.email}</a>`:'–'}</td><td>${t.phone||'–'}</td></tr>`).join('')||'<tr><td colspan="7" class="empty">Noch keine Lehrkräfte eingetragen. Sie werden für die Klassenleitung und für E-Mail-Entwürfe an die Klassenleitung gebraucht.</td></tr>'}
 function renderProjects(){document.getElementById('preventionCatalog').innerHTML=PREVENTION_CATALOG.map(p=>`<tr><td><strong>${p.name}</strong></td><td>${p.group}</td><td>${p.focus}</td><td><span class="tag ${p.evidence.startsWith('D3')?'':p.evidence.startsWith('E')?'gray':'amber'}">${p.evidence}</span></td><td>${p.fit}</td></tr>`).join('');document.getElementById('projectGrid').innerHTML=data.projects.map(p=>`<article class="card project"><div class="projecticon">${p.icon||'◉'}</div><h3>${p.name}</h3><div class="meta">${p.group} · ${p.participants} Teilnehmende</div><div class="eventmeta"><span class="tag gray">${p.evidence||'Noch zu prüfen'}</span>${p.reviewDate?`<span class="tag amber">Review ${fmt(p.reviewDate)}</span>`:''}</div><p>${p.goal}</p>${p.need?`<p class="subtle"><strong>Bedarf:</strong> ${p.need}</p>`:''}<div class="projectfoot"><div class="cardhead"><span class="tag">${p.status}</span><span class="subtle">${p.sessions} von ${p.total} Einheiten</span></div><div class="progress"><span style="width:${Math.min(100,p.sessions/Math.max(1,p.total)*100)}%"></span></div><div class="subtle" style="margin-top:9px">Fidelity: ${p.fidelity||'offen'} · Evaluation: ${p.evaluation||'offen'}</div></div></article>`).join('')||'<div class="card empty">Noch kein konkretes Präventionsprojekt angelegt.</div>'}
 function ctcLevel(a){const risk=a.factorType==='Risikofaktor',rating=a.rating||'Mittel';if(risk&&rating==='Hoch'||!risk&&rating==='Niedrig')return {color:'red',label:'Rot'};if(rating==='Mittel')return {color:'amber',label:'Gelb'};return {color:'green',label:'Grün'}}
 function ctcRecommendation(a){const d=a.domain||'';if(d.includes('Konflikte'))return 'Bei geeigneten, freiwillig klärbaren Konflikten Palaverzelt prüfen. Bei klassenweiten Mustern Sozialtraining durch die SSA planen. Bei Mobbing, Gewalt, Schutzfragen oder Machtungleichgewicht das passende Fachverfahren nutzen.';if(d.includes('Medien'))return 'Medienbuddys als niedrigschwellige Peer-Unterstützung und ein begleitetes Medienpräventionsangebot prüfen. Schutz- und Mobbinghinweise bleiben bei verantwortlichen Erwachsenen.';if(d.includes('Klassenklima'))return 'Sozialtraining durch die SSA mit konkretem Ziel, ausreichender Dauer und einem Reviewtermin planen; Klassenleitung beteiligen.';if(d.includes('Schulbindung'))return 'Beteiligungsmöglichkeiten, verlässliche Bezugspersonen und niedrigschwellige Angebote stärken; Wirkung nach einem festgelegten Zeitraum erneut prüfen.';if(d.includes('Substanz'))return 'Qualifizierte Suchtprävention und bei Bedarf eine Fachstelle einbeziehen. Keine individuelle Zuschreibung aus Gruppendaten ableiten.';if(d.includes('Familie'))return 'Niedrigschwellige Familienunterstützung und passende Netzwerkangebote sichtbar machen; Zugänge und soziale Barrieren prüfen.';if(d.includes('Übergänge'))return 'Übergangsplanung, Berufsorientierung, Patenschaften und verlässliche Anschlusswege gemeinsam mit den zuständigen schulischen Stellen stärken.';return 'Niedrigschwellige Gesprächs- und Unterstützungswege bekannt machen, Schutzfaktoren stärken und bei konkreten Einzelfallhinweisen getrennt fachlich prüfen.'}
@@ -812,7 +830,7 @@ document.getElementById('teacherForm').onsubmit=e=>{e.preventDefault();const f=c
 
 document.getElementById('classActivityForm').onsubmit=e=>{e.preventDefault();const f=cleanObject(Object.fromEntries(new FormData(e.target))),participantIds=data.students.filter(s=>s.active&&s.className===f.className).map(s=>s.id),external=f.externalFacilitator?.trim()||'',facilitator=f.facilitator==='Andere Person oder Institution'?external:f.facilitator+(external?' · '+external:'');if(!facilitator){alert('Bitte die durchführende Person oder Institution eintragen.');return}data.classActivities.push({...f,id:id('ka'),facilitator,duration:Number(f.duration),weeklySessions:Number(f.weeklySessions||0),weeklyDuration:Number(f.weeklyDuration||0),totalWeeks:Number(f.totalWeeks||0),schoolYear:data.settings.currentSchoolYear,participantIds});save();selectedClass=f.className;e.target.reset();closeModal('classActivityModal');showClass(selectedClass);toast(`Maßnahme mit ${f.duration} Minuten je Aktion und ${f.weeklyDuration} Minuten pro Woche wurde gespeichert.`)};
 document.getElementById('groupTalkForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target),f=cleanObject(Object.fromEntries(fd));const participantIds=fd.getAll('participantIds').map(clean);if(participantIds.length<2){alert('Bitte mindestens zwei Schüler:innen auswählen.');return}participantIds.forEach(studentId=>ensureCaseForStudent(studentId,'Teilnahme an einem dokumentierten Gruppengespräch',f.date||today(),f.responsible||'Edmund oder Sabine'));data.groupTalks.push({...f,id:id('g'),participantIds,duration:Number(f.duration)});if(f.due)data.tasks.push({id:id('t'),title:`Wiedervorlage: ${f.type}`,due:f.due,priority:'Normal',caseId:'',done:false});save();e.target.reset();closeModal('groupTalkModal');toast(`Gruppengespräch wurde ${participantIds.length} Chroniken zugeordnet.`)};
-document.getElementById('trainingRoomForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target),f=cleanObject(Object.fromEntries(fd)),s=data.students.find(x=>x.id===f.studentId);const autoCase=ensureCaseForStudent(f.studentId,'Dokumentierter Trainingsraumvorgang',f.date||today(),f.responsible||'Edmund oder Sabine');data.trainingRoom.push({...f,id:id('tr'),duration:Number(f.duration),planAccepted:fd.get('planAccepted')==='ja',className:s?.className||'',schoolYear:data.settings.currentSchoolYear});if(f.due)data.tasks.push({id:id('t'),title:`Trainingsraum-Nachgespräch: ${s?s.first+' '+s.last:'Schüler:in'}`,due:f.due,priority:f.result==='Nachgespräch erforderlich'?'Hoch':'Normal',caseId:autoCase?.id||'',done:false});const series=trainingSeries(f.studentId,f.date).length;save();e.target.reset();closeModal('trainingRoomModal');toast(series>=Number(data.settings.trainingThreshold||3)?`Gespeichert. Dies ist Besuch ${series} im eingestellten Zeitraum. Bitte Folgemaßnahme prüfen.`:'Trainingsraumvorgang wurde gespeichert und der Schülerchronik zugeordnet.')};
+document.getElementById('trainingRoomForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target),f=cleanObject(Object.fromEntries(fd)),s=data.students.find(x=>x.id===f.studentId);const autoCase=ensureCaseForStudent(f.studentId,'Dokumentierter Trainingsraumvorgang',f.date||today(),f.responsible||'Edmund oder Sabine');data.trainingRoom.push({...f,id:id('tr'),duration:Number(f.duration),planAccepted:fd.get('planAccepted')==='ja',className:s?.className||'',schoolYear:data.settings.currentSchoolYear});if(f.due)data.tasks.push({id:id('t'),title:`Trainingsraum-Nachgespräch: ${s?s.first+' '+s.last:'Schüler:in'}`,due:f.due,priority:f.result==='Nachgespräch erforderlich'?'Hoch':'Normal',caseId:autoCase?.id||'',done:false});const series=trainingSeries(f.studentId,f.date).length;save();e.target.reset();closeModal('trainingRoomModal');trainingMailPruefen(f.studentId,series,f.date||today());toast(series>=Number(data.settings.trainingThreshold||3)?`Gespeichert. Dies ist Besuch ${series} im eingestellten Zeitraum. Bitte Folgemaßnahme prüfen.`:'Trainingsraumvorgang wurde gespeichert und der Schülerchronik zugeordnet.')};
 document.getElementById('partnerForm').onsubmit=e=>{e.preventDefault();const f=cleanObject(Object.fromEntries(new FormData(e.target)));if(f.website&&!safeWebUrl(f.website)){alert('Die Internetadresse muss mit http:// oder https:// beginnen.');return}f.website=f.website?safeWebUrl(f.website):'';data.partners.push({...f,id:id('n')});save();e.target.reset();closeModal('partnerModal');toast('Kooperationspartner wurde gespeichert.')};
 function openFamilyModal(){const s=data.students.find(x=>x.id===selectedStudentId);if(!s)return;const form=document.getElementById('familyForm'),family=s.family||{};for(const el of form.elements)if(el.name)el.value=family[el.name]||'';if(!form.elements.verifiedAt.value)form.elements.verifiedAt.value=today();openModal('familyModal')}
 document.getElementById('familyForm').onsubmit=e=>{e.preventDefault();const s=data.students.find(x=>x.id===selectedStudentId);if(!s)return;ensureCaseForStudent(selectedStudentId,'Familien- und Bezugskonstellation dokumentiert',today());s.family=cleanObject(Object.fromEntries(new FormData(e.target)));save();closeModal('familyModal');showStudent(s.id);toast('Familien- und Bezugskonstellation wurde gespeichert.')};
@@ -858,6 +876,224 @@ function dokuWaehlen(){
  wrap.addEventListener('click',e=>{if(e.target===wrap)zu()});
  wrap.querySelectorAll('[data-i]').forEach(r=>r.onclick=()=>{const w=wege[+r.dataset.i];zu();openModal(w[2])});
 }
+function globalSearchTippen(){const feld=document.getElementById('globalSearch'),box=document.getElementById('globalSearchResults');
+ const q=(feld.value||'').trim().toLocaleLowerCase('de-DE');
+ if(q.length<2){box.classList.remove('offen');box.innerHTML='';return}
+ const leads=data.settings.classLeads||{};
+ const treffer=data.students.filter(s=>{
+   const hay=[s.last,s.first,s.className,leads[s.className]||'',s.id].join(' ').toLocaleLowerCase('de-DE');
+   return hay.includes(q)}).slice(0,8);
+ if(!treffer.length){box.innerHTML='<div class="leer">Keine Schüler:in gefunden. Prüfe die Schreibweise oder lies zuerst die Klassenliste ein.</div>';box.classList.add('offen');return}
+ box.innerHTML=treffer.map(s=>'<button type="button" onclick="globalSearchOeffnen(\''+s.id+'\')"><strong data-person>'+s.last+', '+s.first+'</strong><span class="subtle"> · Klasse '+(s.className||'–')+(leads[s.className]?' · '+leads[s.className]:'')+(s.active===false?' · archiviert':'')+'</span></button>').join('');
+ box.classList.add('offen');}
+function globalSearchOeffnen(id){const box=document.getElementById('globalSearchResults');box.classList.remove('offen');box.innerHTML='';
+ document.getElementById('globalSearch').value='';showStudent(id);}
+document.addEventListener('click',e=>{const k=document.querySelector('.kopfsuche');if(k&&!k.contains(e.target)){const b=document.getElementById('globalSearchResults');if(b)b.classList.remove('offen')}});
+
+const AKTE_REITER=[['verlauf','Fallverlauf'],['uebersicht','Übersicht'],['kontakte','Kontakte'],['ziele','Ziele und Aufgaben'],['fehlzeiten','Fehlzeiten'],['dokumente','Dokumente und Notizen']];
+const AKTE_ZUORDNUNG={'Fallverlauf':'verlauf','Fachliche Entwicklung aus Kontakten':'kontakte','Ziel- und Maßnahmenplan':'ziele','Offene Aufgaben und Ergebnisse':'ziele','Fehlzeiten-Auswertung':'fehlzeiten'};
+function gliedereSchuelerakte(){const body=document.getElementById('studentDetailBody');if(!body||body.dataset.gegliedert==='1')return;
+ const gruppen={};AKTE_REITER.forEach(([k])=>gruppen[k]=[]);
+ let aktuell='uebersicht';
+ [...body.children].forEach(el=>{
+   if(/^H[34]$/.test(el.tagName)){const t=el.textContent.trim();aktuell=AKTE_ZUORDNUNG[t]||'uebersicht'}
+   gruppen[aktuell].push(el);});
+ const leiste=document.createElement('div');leiste.className='aktereiter';
+ const panels=document.createElement('div');
+ AKTE_REITER.forEach(([k,titel],i)=>{
+   const knopf=document.createElement('button');knopf.type='button';knopf.textContent=titel;knopf.dataset.r=k;
+   if(i===0)knopf.className='aktiv';
+   knopf.onclick=()=>{leiste.querySelectorAll('button').forEach(b=>b.classList.toggle('aktiv',b.dataset.r===k));
+     panels.querySelectorAll('.aktepanel').forEach(p=>p.hidden=p.dataset.r!==k)};
+   leiste.appendChild(knopf);
+   const panel=document.createElement('div');panel.className='aktepanel';panel.dataset.r=k;panel.hidden=i!==0;
+   gruppen[k].forEach(el=>panel.appendChild(el));
+   if(k==='dokumente')panel.innerHTML='<p class="subtle">Verschlüsselt gespeicherte Dateien und Notizen zu dieser Schülerin oder diesem Schüler.</p><button class="btn primary" onclick="openModal(\'attachmentModal\')">Dokumente und Notizen öffnen</button>';
+   if(!panel.children.length&&k!=='dokumente')panel.innerHTML='<div class="empty">In diesem Bereich ist noch nichts dokumentiert.</div>';
+   panels.appendChild(panel);});
+ body.innerHTML='';body.appendChild(leiste);body.appendChild(panels);body.dataset.gegliedert='1';}
+/* ---------- Lehrkräfte- und Mitarbeiterimport ---------- */
+function staffNorm(v){return String(v||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ß/g,'ss').toLowerCase().replace(/\s+/g,' ').trim()}
+function staffKey(last,first,role){return [staffNorm(last),staffNorm(first),staffNorm(role)].join('|')}
+function staffLose(last,first){return (staffNorm(last)+'|'+staffNorm(first)).replace(/ue/g,'u').replace(/oe/g,'o').replace(/ae/g,'a')}
+function staffStatusTag(st){const s=staffNorm(st);
+ if(s==='elternzeit')return '<span class="tag amber">Elternzeit</span>';
+ if(s==='extern')return '<span class="tag gray">extern</span>';
+ if(!s)return '<span class="tag gray">ohne Angabe</span>';
+ return '<span class="tag">aktiv</span>'}
+let staffPending=null;
+
+function staffImportOeffnen(){staffPending=null;
+ const v=document.getElementById('staffPreview');if(v)v.innerHTML='<div class="empty">Noch keine Datei gewählt. Beginne mit Schritt 1.</div>';
+ const b=document.getElementById('staffConfirmBtn');if(b)b.disabled=true;
+ openModal('staffImportModal')}
+
+function downloadStaffTemplate(){
+ const kopf=['NAME','OFFIZIELLER VORNAME','ANZEIGENAME','FUNKTION','KLASSENLEITUNG FÜR','STATUS','HINWEIS','QUELLE'];
+ const bsp=[['Mustermann','Anna','Mustermann, Anna','Lehrkraft / Klassenleitung','7b','aktiv','','Mitarbeiterliste'],
+            ['Beispiel','Jan','Beispiel, Jan','Schulsozialpädagoge','','aktiv','','Mitarbeiterliste']];
+ const csv='﻿'+[kopf,...bsp].map(r=>r.map(csvCell).join(';')).join('\n');
+ download('Mitarbeiterimport_Vorlage.csv',csv,'text/csv;charset=utf-8')}
+
+function staffBeispielZeigen(){appAlert('So muss die Datei aufgebaut sein.\n\nErste Zeile mit den Spaltennamen, danach je eine Zeile pro Person:\n\nNAME;OFFIZIELLER VORNAME;ANZEIGENAME;FUNKTION;KLASSENLEITUNG FÜR;STATUS;HINWEIS;QUELLE\nMustermann;Anna;Mustermann, Anna;Lehrkraft / Klassenleitung;7b;aktiv;;Mitarbeiterliste\n\nPflicht ist nur NAME. Alles Übrige darf leer bleiben.\nHINWEIS und QUELLE sind freiwillig, zusätzliche Spalten stören nicht.\nTrennzeichen Semikolon oder Komma, beides wird erkannt.')}
+
+function staffImportVorschau(event){const file=event.target.files[0];if(!file)return;
+ const reader=new FileReader();
+ reader.onload=()=>{try{
+  const rows=parseDelimited(reader.result);
+  if(rows.length<2)throw Error('Die Datei enthält keine Datenzeilen, nur eine Kopfzeile.');
+  const h=rows[0].map(headerKey),col=(...n)=>h.findIndex(x=>n.some(y=>x===y));
+  const iLast=col('NAME','NACHNAME'),iFirst=col('OFFIZIELLERVORNAME','VORNAME'),iDisp=col('ANZEIGENAME'),
+        iRole=col('FUNKTION','ROLLE'),iLead=col('KLASSENLEITUNGFUR','KLASSENLEITUNG','KLASSENLEITUNGFUER'),
+        iStat=col('STATUS'),iNote=col('HINWEIS','BEMERKUNG'),iSrc=col('QUELLE');
+  if(iLast<0)throw Error('Die Spalte NAME wurde nicht gefunden. Bitte prüfe die Kopfzeile der Datei.');
+  const zell=(r,i)=>i>=0?String(r[i]||'').trim():'';
+  const gelesen=[],fehlerhaft=[],dublettenInDatei=[];
+  const gesehen=new Set();
+  for(const r of rows.slice(1)){
+   const p={last:zell(r,iLast),first:zell(r,iFirst),displayName:zell(r,iDisp),role:zell(r,iRole),
+            classLead:zell(r,iLead),status:zell(r,iStat),note:zell(r,iNote),source:zell(r,iSrc)};
+   if(!p.last){fehlerhaft.push(p);continue}
+   const k=staffKey(p.last,p.first,p.role);
+   if(gesehen.has(k)){dublettenInDatei.push(p);continue}
+   gesehen.add(k);gelesen.push(p)}
+  const vorhanden=new Map(data.teachers.map(t=>[staffKey(t.last,t.first,t.role),t]));
+  const neu=[],aktualisieren=[];
+  gelesen.forEach(p=>{const t=vorhanden.get(staffKey(p.last,p.first,p.role));(t?aktualisieren:neu).push(p)});
+  const loseVorhanden=new Map(data.teachers.map(t=>[staffLose(t.last,t.first),t]));
+  const moeglicheDubletten=neu.filter(p=>loseVorhanden.has(staffLose(p.last,p.first)));
+  const ohneVorname=gelesen.filter(p=>!p.first);
+  const besonderer=gelesen.filter(p=>['elternzeit','extern'].includes(staffNorm(p.status)));
+  staffPending={dateiname:file.name,gelesen,neu,aktualisieren,fehlerhaft,dublettenInDatei,ohneVorname,besonderer,moeglicheDubletten};
+  const liste=(t,arr,f)=>arr.length?`<details style="margin:6px 0"><summary><strong>${t}: ${arr.length}</strong></summary><div class="subtle" style="padding:6px 0 0">${arr.slice(0,40).map(f).join('<br>')}${arr.length>40?'<br>…':''}</div></details>`:`<div class="subtle">${t}: 0</div>`;
+  const n=p=>`${p.last}${p.first?', '+p.first:''}${p.role?' · '+p.role:''}`;
+  document.getElementById('staffPreview').innerHTML=`
+   <div class="notice"><strong>Schritt 2: Vorschau prüfen.</strong> Es wurde noch nichts gespeichert. Datei: ${file.name}</div>
+   <div class="detailgrid" style="margin-bottom:12px">
+    <div class="detailitem"><span>Gelesene Datensätze</span><strong>${gelesen.length}</strong></div>
+    <div class="detailitem"><span>Neu anzulegen</span><strong>${neu.length}</strong></div>
+    <div class="detailitem"><span>Bereits vorhanden, wird aktualisiert</span><strong>${aktualisieren.length}</strong></div>
+    <div class="detailitem"><span>Übersprungen</span><strong>${fehlerhaft.length+dublettenInDatei.length}</strong></div>
+   </div>
+   ${liste('Neue Personen',neu,n)}
+   ${liste('Vorhandene Personen',aktualisieren,n)}
+   ${liste('Doppelt in der Datei, wird nur einmal übernommen',dublettenInDatei,n)}
+   ${liste('Mögliche Dubletten durch abweichende Schreibweise, bitte prüfen',moeglicheDubletten,n)}
+   ${liste('Ohne Nachname, wird übersprungen',fehlerhaft,p=>p.first||p.displayName||'(leere Zeile)')}
+   ${liste('Ohne Vornamen',ohneVorname,n)}
+   ${liste('Status Elternzeit oder extern',besonderer,p=>n(p)+' · '+p.status)}
+   <p class="hint">Leere Felder in der Datei überschreiben vorhandene Angaben nicht. Vor dem Speichern wird ein Sicherungspunkt der Mitarbeiterliste angelegt, den du danach zurückholen kannst.</p>`;
+  document.getElementById('staffConfirmBtn').disabled=gelesen.length===0;
+  event.target.value='';
+ }catch(err){document.getElementById('staffPreview').innerHTML=`<div class="alertitem">Die Datei konnte nicht gelesen werden: ${err.message}</div>`;
+  document.getElementById('staffConfirmBtn').disabled=true;event.target.value=''}};
+ reader.readAsText(file,'utf-8')}
+
+function staffImportBestaetigen(){if(!staffPending)return;
+ const p=staffPending;
+ data.settings.staffImportUndo={zeit:new Date().toISOString(),dateiname:p.dateiname,teachers:JSON.parse(JSON.stringify(data.teachers))};
+ const vorhanden=new Map(data.teachers.map(t=>[staffKey(t.last,t.first,t.role),t]));
+ let neu=0,akt=0;
+ p.gelesen.forEach(q=>{const t=vorhanden.get(staffKey(q.last,q.first,q.role));
+  if(t){['first','displayName','role','classLead','status','note','source'].forEach(f=>{if(q[f])t[f]=q[f]});akt++}
+  else{data.teachers.push({id:id('l'),last:q.last,first:q.first,displayName:q.displayName,role:q.role||'Mitarbeiter',
+        classLead:q.classLead,status:q.status||'aktiv',note:q.note,source:q.source,subjects:'',email:'',phone:''});neu++}});
+ if(!Array.isArray(data.staffImports))data.staffImports=[];
+ data.staffImports.unshift({zeit:new Date().toISOString(),dateiname:p.dateiname,gelesen:p.gelesen.length,neu:neu,
+   aktualisiert:akt,uebersprungen:p.fehlerhaft.length+p.dublettenInDatei.length,
+   fehler:p.fehlerhaft.length?p.fehlerhaft.length+' Zeile(n) ohne Nachname':''});
+ save();closeModal('staffImportModal');staffPending=null;
+ appAlert(`Import abgeschlossen.\n\nNeu angelegt: ${neu}\nAktualisiert: ${akt}\nÜbersprungen: ${p.fehlerhaft.length+p.dublettenInDatei.length}\n\nFalls etwas nicht stimmt, kannst du den Import mit „Letzten Import rückgängig machen" zurücknehmen. Schülerdaten, Fallakten, Aufgaben, Fehlzeiten und Projekte wurden nicht verändert.`)}
+
+async function staffImportRueckgaengig(){const u=data.settings.staffImportUndo;
+ if(!u){appAlert('Es liegt kein Mitarbeiterimport vor, der zurückgenommen werden könnte.');return}
+ if(!await appConfirm(`Den Import vom ${new Date(u.zeit).toLocaleString('de-DE')} (${u.dateiname}) zurücknehmen?\n\nDie Mitarbeiterliste wird auf den Stand davor zurückgesetzt. Schülerdaten, Fallakten, Aufgaben, Fehlzeiten und Projekte bleiben unverändert.`))return;
+ data.teachers=u.teachers;data.settings.staffImportUndo=null;
+ if(Array.isArray(data.staffImports))data.staffImports.shift();
+ save();appAlert('Der letzte Mitarbeiterimport wurde zurückgenommen.')}
+
+function staffProtokollZeigen(){const l=data.staffImports||[];
+ if(!l.length){appAlert('Es wurde noch kein Mitarbeiterimport durchgeführt.');return}
+ appAlert('Importprotokoll\n\n'+l.slice(0,10).map(e=>`${new Date(e.zeit).toLocaleString('de-DE')}\nDatei: ${e.dateiname}\nGelesen: ${e.gelesen} · neu: ${e.neu} · aktualisiert: ${e.aktualisiert} · übersprungen: ${e.uebersprungen}${e.fehler?'\nHinweis: '+e.fehler:''}`).join('\n\n'))}
+/* ---------- Sammel-E-Mail an die Klassenleitung ---------- */
+function classEmailKlassen(){const m=new Map();
+ (data.schoolSignals||[]).forEach(r=>{const s=data.students.find(x=>x.id===r.studentId);
+  const k=s?.className||r.className||'ohne Klasse';m.set(k,(m.get(k)||0)+1)});
+ return [...m.entries()].sort((a,b)=>a[0].localeCompare(b[0],'de'))}
+
+function classEmailOeffnen(){
+ const klassen=classEmailKlassen();
+ if(!klassen.length){appAlert('Es sind noch keine Fehlzeiten importiert. Lies zuerst unter Frühindikatoren eine WebUntis-Datei ein.');return}
+ const perioden=[...new Set((data.schoolSignals||[]).map(r=>r.period).filter(Boolean))].sort().reverse();
+ document.getElementById('classEmailClass').innerHTML=klassen.map(([k,n])=>`<option value="${k}">${k} (${n} Auswertung${n===1?'':'en'})</option>`).join('');
+ document.getElementById('classEmailPeriod').innerHTML=perioden.map(p=>`<option value="${p}">${p}</option>`).join('')||'<option value="">alle</option>';
+ const heute=new Date(),vor=new Date(heute.getTime()-29*864e5);
+ document.getElementById('classEmailFrom').value=vor.toISOString().slice(0,10);
+ document.getElementById('classEmailTo').value=heute.toISOString().slice(0,10);
+ openModal('classEmailModal');classEmailErzeugen()}
+
+function classEmailErzeugen(){
+ const klasse=document.getElementById('classEmailClass').value,
+       periode=document.getElementById('classEmailPeriod').value,
+       von=document.getElementById('classEmailFrom').value,
+       bis=document.getElementById('classEmailTo').value,
+       nurAuffaellige=document.getElementById('classEmailOnlyFlagged').checked;
+ const lead=data.settings.classLeads?.[klasse]||'',lehrkraft=teacherForClass(klasse),
+       anrede=greetingForTeacher(lehrkraft,lead)||'zusammen';
+ document.getElementById('classEmailTeacher').value=teacherName(lehrkraft||{})||lead||'noch nicht hinterlegt';
+ if(lehrkraft?.email&&!document.getElementById('classEmailAddress').value)document.getElementById('classEmailAddress').value=lehrkraft.email;
+ let saetze=(data.schoolSignals||[]).filter(r=>{
+   const s=data.students.find(x=>x.id===r.studentId);
+   return (s?.className||r.className)===klasse && (!periode||r.period===periode)});
+ if(nurAuffaellige)saetze=saetze.filter(r=>signalAssessment(r).notices.length);
+ const zeilen=saetze.map(r=>{const s=data.students.find(x=>x.id===r.studentId),i=instructionStats(r);
+   const name=s?`${s.first} ${s.last}`:'Unbekannte Person';
+   const wert=i.available?`${i.rate.toFixed(1).replace('.',',')} % versäumter Unterricht`
+             :`${compactNumber(r.absences)} Fehlstunden (Prozentwert nicht berechenbar, Stundenplan fehlt)`;
+   return {name,wert,rate:i.available?i.rate:-1,abs:Number(r.absences||0)}})
+  .sort((a,b)=>(b.rate-a.rate)||(b.abs-a.abs));
+ const fmtD=d=>d?new Intl.DateTimeFormat('de-DE').format(new Date(d+'T12:00')):'…';
+ const betreff='Kurze schulische Rücksprache';
+ const text=zeilen.length
+  ? `Hallo ${anrede},\n\nlaut WebUntis weisen folgende Schüler:innen für den Zeitraum ${fmtD(von)} bis ${fmtD(bis)} folgende Fehlzeiten auf:\n\n`
+    + zeilen.map(z=>`· ${z.name} und ${z.wert}`).join('\n')
+    + `\n\nBitte gib mir eine kurze Rückmeldung, ob dir dazu im Unterricht oder im bisherigen schulischen Kontakt etwas aufgefallen ist. Anschließend können wir uns, falls dies nötig ist, über das weitere Vorgehen abstimmen.\n\nViele Grüße\nEdmund`
+  : `Hallo ${anrede},\n\nfür die Klasse ${klasse} liegen im gewählten Zeitraum keine auffälligen Fehlzeiten vor.\n\nViele Grüße\nEdmund`;
+ document.getElementById('classEmailSubject').value=betreff;
+ document.getElementById('classEmailBody').value=text;
+ document.getElementById('classEmailCount').textContent=zeilen.length+' Schüler:in'+(zeilen.length===1?'':'nen')+' im Entwurf';
+}
+
+function classEmailKopieren(){const an=document.getElementById('classEmailAddress').value.trim(),
+ betreff=document.getElementById('classEmailSubject').value.trim(),
+ text=document.getElementById('classEmailBody').value.trim();
+ const ganz=`${an?'An: '+an+'\n':''}Betreff: ${betreff}\n\n${text}`;
+ navigator.clipboard?.writeText(ganz).then(()=>toast('Betreff und Text wurden kopiert.'),()=>appAlert('Kopieren war nicht möglich. Bitte markiere den Text und kopiere ihn von Hand.'))}
+function entwurfZeigen(titel,betreff,text,adresse){
+ const wrap=document.createElement('div');wrap.className='modal open';wrap.style.zIndex='60';
+ const esc=t=>String(t||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ wrap.innerHTML='<div class="dialog wide"><div class="dialoghead"><h2>'+esc(titel)+'</h2><button class="close" data-x="1">×</button></div>'
+  +'<div class="dialogbody"><div class="notice warning">Der Entwurf wird nur lokal erstellt. Er wird weder versendet noch als Kontakt dokumentiert.</div>'
+  +'<div class="formgrid"><div class="formgroup full"><label>Dienstliche E-Mail</label><input class="field" id="entwurfAn" value="'+esc(adresse)+'" placeholder="Falls bekannt, dienstliche Adresse"></div>'
+  +'<div class="formgroup full"><label>Betreff</label><input class="field" id="entwurfBetreff" value="'+esc(betreff)+'"></div>'
+  +'<div class="formgroup full"><label>E-Mail-Text</label><textarea class="field email-preview" id="entwurfText">'+esc(text)+'</textarea></div></div></div>'
+  +'<div class="dialogfoot"><button class="btn" data-x="1">Schließen</button><button class="btn primary" data-k="1">Betreff und Text kopieren</button></div></div>';
+ document.body.appendChild(wrap);
+ const zu=()=>wrap.remove();
+ wrap.querySelectorAll('[data-x]').forEach(b=>b.onclick=zu);
+ wrap.addEventListener('click',e=>{if(e.target===wrap)zu()});
+ wrap.querySelector('[data-k]').onclick=()=>{const an=wrap.querySelector('#entwurfAn').value.trim(),
+   bt=wrap.querySelector('#entwurfBetreff').value.trim(),tx=wrap.querySelector('#entwurfText').value.trim();
+  navigator.clipboard?.writeText((an?'An: '+an+'\n':'')+'Betreff: '+bt+'\n\n'+tx).then(()=>toast('Betreff und Text wurden kopiert.'),()=>{})};}
+
+function trainingMailPruefen(studentId,anzahl,datum){
+ if(![3,5,7].includes(anzahl))return;
+ const s=data.students.find(x=>x.id===studentId);if(!s)return;
+ const klasse=s.className||'',lead=data.settings.classLeads?.[klasse]||'',lk=teacherForClass(klasse),
+       anrede=greetingForTeacher(lk,lead)||'zusammen',
+       tage=Number(data.settings.trainingWindowDays||28);
+ const text=`Hallo ${anrede},\n\n${s.first} ${s.last} war innerhalb der letzten ${tage} Tage zum ${anzahl}. Mal im sozialen Trainingsraum, zuletzt am ${new Intl.DateTimeFormat('de-DE').format(new Date(datum+'T12:00'))}.\n\nIch melde dir das als sachlichen Hinweis, ohne Bewertung. Bitte gib mir eine kurze Rückmeldung, ob dir im Unterricht oder im bisherigen schulischen Kontakt etwas aufgefallen ist. Anschließend können wir uns, falls dies nötig ist, über das weitere Vorgehen abstimmen.\n\nViele Grüße\nEdmund`;
+ setTimeout(()=>entwurfZeigen(`Hinweis an die Klassenleitung: ${anzahl}. Trainingsraumbesuch`,'Kurze schulische Rücksprache',text,lk?.email||''),400);}
 function setupQuickForm(){const grid=document.querySelector('#quickForm .formgrid');if(!grid||grid.dataset.zweistufig)return;
  grid.dataset.zweistufig='1';
  [...grid.children].forEach(k=>{if(!k.querySelector('[required]'))k.classList.add('qf-detail')});
