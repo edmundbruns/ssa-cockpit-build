@@ -66,16 +66,17 @@ struct BackupEnvelope {
 pub struct Vault {
     conn: Connection,
     key: Option<SessionKey>,
+    path: PathBuf,
 }
 
 impl Vault {
     pub fn open_at(path: PathBuf) -> Result<Self, VaultError> {
-        let conn = Connection::open(path)?;
+        let conn = Connection::open(&path)?;
         conn.execute_batch("PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL;
           CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY,value TEXT NOT NULL);
           CREATE TABLE IF NOT EXISTS state(id INTEGER PRIMARY KEY CHECK(id=1),nonce BLOB NOT NULL,ciphertext BLOB NOT NULL);
           CREATE TABLE IF NOT EXISTS attachments(id TEXT PRIMARY KEY,student_id TEXT NOT NULL,name TEXT NOT NULL,mime_type TEXT NOT NULL,added TEXT NOT NULL,nonce BLOB NOT NULL,ciphertext BLOB NOT NULL);")?;
-        Ok(Self { conn, key: None })
+        Ok(Self { conn, key: None, path })
     }
 
     pub fn status(&mut self) -> Result<Value, VaultError> {
@@ -197,6 +198,69 @@ impl Vault {
         let digest=format!("{:x}",Sha256::digest(&ciphertext));
         let env=BackupEnvelope{backup_type:"SSA-Cockpit-Vault".into(),version:1,created_at:now(),salt,nonce:B64.encode(nonce),ciphertext:B64.encode(ciphertext),digest};
         Ok(json!({"payloadJson":serde_json::to_string_pretty(&env)?}))
+    }
+
+    fn backup_dir(&self) -> PathBuf {
+        match self.path.parent() {
+            Some(p) => p.join("Sicherungen"),
+            None => PathBuf::from("Sicherungen"),
+        }
+    }
+
+    fn backup_list(&self) -> Vec<Value> {
+        let mut list: Vec<Value> = Vec::new();
+        if let Ok(entries) = std::fs::read_dir(self.backup_dir()) {
+            for entry in entries.flatten() {
+                let p = entry.path();
+                let name = match p.file_name().and_then(|x| x.to_str()) { Some(n) => n.to_string(), None => continue };
+                if !name.starts_with("SSA-Cockpit-") || !name.ends_with(".ssa-vault.json") { continue }
+                let meta = match entry.metadata() { Ok(m) => m, Err(_) => continue };
+                let modified = meta.modified().ok()
+                    .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+                    .map(|d| d.as_secs()).unwrap_or(0);
+                list.push(json!({"name": name, "size": meta.len(), "modified": modified}));
+            }
+        }
+        list.sort_by(|a, b| b["modified"].as_u64().unwrap_or(0).cmp(&a["modified"].as_u64().unwrap_or(0)));
+        list
+    }
+
+    pub fn location_json(&mut self) -> Result<Value, VaultError> {
+        let list = self.backup_list();
+        Ok(json!({
+            "database": self.path.to_string_lossy(),
+            "backupDir": self.backup_dir().to_string_lossy(),
+            "backups": list
+        }))
+    }
+
+    pub fn write_backup_json(&mut self, file_name: String) -> Result<Value, VaultError> {
+        let safe: String = file_name.chars()
+            .filter(|c| c.is_ascii_alphanumeric() || *c == '-' || *c == '_' || *c == '.')
+            .take(80).collect();
+        if !safe.starts_with("SSA-Cockpit-") || !safe.ends_with(".ssa-vault.json") {
+            return Err(VaultError::Invalid);
+        }
+        let payload = self.export_backup_json()?;
+        let text = payload["payloadJson"].as_str().ok_or(VaultError::Invalid)?.to_string();
+        let dir = self.backup_dir();
+        std::fs::create_dir_all(&dir)?;
+        let target = dir.join(&safe);
+        std::fs::write(&target, text.as_bytes())?;
+        let mut list = self.backup_list();
+        while list.len() > 12 {
+            if let Some(old) = list.pop() {
+                if let Some(name) = old["name"].as_str() {
+                    let _ = std::fs::remove_file(dir.join(name));
+                }
+            }
+        }
+        Ok(json!({
+            "path": target.to_string_lossy(),
+            "backupDir": dir.to_string_lossy(),
+            "size": text.len(),
+            "count": list.len()
+        }))
     }
 
     pub fn import_backup_json(&mut self,payload_json:String,password:String)->Result<Value,VaultError>{

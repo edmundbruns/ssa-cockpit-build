@@ -40,6 +40,10 @@ vault_command!(delete_attachment(id: String) => delete_attachment_json);
 #[cfg(feature = "desktop-app")]
 vault_command!(export_backup() => export_backup_json);
 #[cfg(feature = "desktop-app")]
+vault_command!(vault_location() => location_json);
+#[cfg(feature = "desktop-app")]
+vault_command!(write_backup(file_name: String) => write_backup_json);
+#[cfg(feature = "desktop-app")]
 vault_command!(import_backup(payload_json: String, password: String) => import_backup_json);
 #[cfg(feature = "desktop-app")]
 vault_command!(change_password(old_password: String, new_password: String) => change_password_json);
@@ -62,7 +66,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             vault_status, setup_vault, unlock_vault, save_state, lock_vault,
             list_attachments, put_attachment, get_attachment, delete_attachment,
-            export_backup, import_backup, change_password
+            export_backup, import_backup, change_password, vault_location, write_backup
         ])
         .run(tauri::generate_context!())
         .expect("SSA-Cockpit konnte nicht gestartet werden");
