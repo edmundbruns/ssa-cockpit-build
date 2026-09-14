@@ -125,7 +125,7 @@
         </div>
       </div>
     </nav>
-    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.4</span></div>
+    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.5</span></div>
   </aside>
   <main>
     <header class="topbar"><div><h1 id="pageTitle">Guten Morgen, Dr. Bruns</h1><p id="pageSubtitle">Freitag, 11. September 2026 · Schuljahr 2026/27</p></div><div class="kopfsuche"><input class="field" id="globalSearch" type="search" autocomplete="off" placeholder="Schüler:in suchen: Name, Vorname, Klasse oder Klassenleitung" oninput="globalSearchTippen()" onfocus="globalSearchTippen()"><div id="globalSearchResults"></div></div><div class="actions"><button class="btn" onclick="lockPrivacyScreen()">🔒 Sperren</button><button class="btn" onclick="openModal('taskModal')">＋ Aufgabe</button><button class="btn primary" onclick="dokuWaehlen()">＋ Dokumentieren</button></div></header>
@@ -204,7 +204,9 @@
       <section class="page" id="projects">
         <div class="sectionhead"><div><h2>Projekte und Gruppen</h2><div class="subtle">Prävention, soziales Lernen und offene Angebote</div></div><button class="btn primary" onclick="openModal('projectModal')">＋ Projekt anlegen</button></div>
         <div class="helpbox"><strong>Wozu?</strong> Hier planst und dokumentierst du Angebote für Gruppen oder Klassen (Prävention, soziales Lernen, offene Angebote). <strong>Wie starten?</strong> „＋ Projekt anlegen“, dann Ziel, Zielgruppe und Zeitraum eintragen. <strong>Tipp:</strong> Eine für eine Klasse dokumentierte Maßnahme lässt diese Klasse unter „Klassen“ farbig aufleuchten.</div>
-        <div class="card" style="margin-bottom:17px"><div class="cardhead"><h3>Präventionsportfolio</h3><span class="tag">Evidenz und Kontextpassung getrennt prüfen</span></div><p class="subtle">Die Evidenzstufe allein entscheidet nicht. Zielgruppe, Bedarf, Umsetzbarkeit, Akzeptanz, Dosis und sichere Einbettung müssen zur Ludgerusschule passen.</p><div class="tablewrap"><table><thead><tr><th>Angebot</th><th>Zielgruppe</th><th>Schwerpunkt</th><th>Evidenz</th><th>Einordnung</th></tr></thead><tbody id="preventionCatalog"></tbody></table></div></div>
+        <div class="card" style="margin-bottom:17px"><div class="cardhead"><h3>Präventionsplan der Ludgerusschule</h3><span class="tag">jährlich im zweiten Schulhalbjahr</span></div><p class="subtle" id="praeventionsplanHinweis"></p><div class="tablewrap"><table><thead><tr><th>Jahrgang</th><th>Thema</th><th>Durchführung</th><th>Schwerpunkt</th><th>Dauer</th></tr></thead><tbody id="praeventionsplanTable"></tbody></table></div><p class="hint">Änderungen an Themen, Trägern oder Jahrgängen trägst du unten direkt im jeweiligen Projekt ein.</p></div>
+        <div class="card" style="margin-bottom:17px"><div class="cardhead"><h3>Weitere geprüfte Präventionsprogramme</h3><span class="tag">Evidenz und Kontextpassung getrennt prüfen</span></div><p class="subtle">Die Evidenzstufe allein entscheidet nicht. Zielgruppe, Bedarf, Umsetzbarkeit, Akzeptanz, Dosis und sichere Einbettung müssen zur Ludgerusschule passen.</p><div class="tablewrap"><table><thead><tr><th>Angebot</th><th>Zielgruppe</th><th>Schwerpunkt</th><th>Evidenz</th><th>Einordnung</th></tr></thead><tbody id="preventionCatalog"></tbody></table></div></div>
+        
         <div class="grid three" id="projectGrid"></div>
       </section>
       <section class="page" id="ctc">
@@ -242,6 +244,7 @@
           <div class="card"><h3>Praxis-Einstellungen</h3><div class="formgrid"><div class="formgroup"><label>Trainingsraum-Hinweis ab Besuchen</label><input class="field" id="trainingThreshold" type="number" min="2" max="10" value="3" onchange="savePracticeSettings()"></div><div class="formgroup"><label>Zeitraum in Tagen</label><input class="field" id="trainingWindow" type="number" min="7" max="180" value="28" onchange="savePracticeSettings()"></div><div class="formgroup"><label>Automatische Sperre nach Minuten</label><input class="field" id="idleMinutes" type="number" min="1" max="120" value="10" onchange="savePracticeSettings()"><span class="hint">Die erneute Eingabe des Kennworts ist erforderlich.</span></div></div></div>
           <div class="card"><h3>Vorgangsdaten zurücksetzen</h3><p class="subtle">Löscht den aktuellen Arbeitsbestand nach vorheriger verschlüsselter Sicherung.</p><button class="btn danger" onclick="resetData()">Arbeitsbestand zurücksetzen</button></div>
         </div>
+        <div id="beispielfallKarte" style="margin-top:17px"></div>
         <div class="card" style="margin-top:17px"><h3>Lokale Spracherkennung</h3><p class="subtle">Das Mikrofon sendet die Aufnahme ausschließlich an einen Transkriptionsdienst auf diesem Computer.</p><div class="formgroup"><label>Lokale Adresse</label><input class="field" id="speechEndpoint" value="http://127.0.0.1:8173/transcribe" onchange="saveSpeechSettings()"></div><div class="actions" style="margin-top:12px"><button class="btn" onclick="testSpeechService()">Verbindung prüfen</button><span class="tag gray" id="speechStatus">noch nicht geprüft</span></div></div>
       </section>
     </div>
@@ -481,6 +484,34 @@ function firstMondayOfMonth(year,month){const date=new Date(year,month,1,12),off
 function nextWebUntisDue(reference=new Date().toISOString().slice(0,10)){const current=new Date(reference+'T12:00'),thisMonth=firstMondayOfMonth(current.getFullYear(),current.getMonth());if(thisMonth>=reference)return thisMonth;return firstMondayOfMonth(current.getMonth()===11?current.getFullYear()+1:current.getFullYear(),(current.getMonth()+1)%12)}
 function followingWebUntisDue(due){const current=new Date(due+'T12:00'),nextMonth=(current.getMonth()+1)%12,year=current.getMonth()===11?current.getFullYear()+1:current.getFullYear();return firstMondayOfMonth(year,nextMonth)}
 function ensureRecurringTasks(state){const open=state.tasks.find(t=>t.recurrence==='WEBUNTIS_MONTHLY'&&!t.done);if(!open)state.tasks.push({id:'task-webuntis-'+nextWebUntisDue(),title:'WebUntis-Fehlzeiten des Vormonats importieren',due:nextWebUntisDue(),priority:'Normal',caseId:'',done:false,recurrence:'WEBUNTIS_MONTHLY',instructions:WEBUNTIS_TASK_INSTRUCTIONS});return state}
+const BEISPIEL_ID='BEISPIEL-OB';
+const BEISPIEL_FALL_ID='BEISPIEL-FALL-OB';
+const PRAEVENTION_SEIT='2025/26';
+const PRAEVENTION_DAUER=90;
+const PRAEVENTIONSPLAN=[
+ {jg:'5',thema:'Medien',traeger:'Diakonie Papenburg',fokus:'Mediennutzung, Chatregeln und Umgang mit Bildern im Netz'},
+ {jg:'5',thema:'Mobbing',traeger:'Polizei Papenburg',fokus:'Mobbing erkennen, Rolle der Zuschauenden, Hilfe holen'},
+ {jg:'6',thema:'Zivilcourage',traeger:'Polizei Papenburg',fokus:'Eingreifen ohne Selbstgefährdung, Hilfe holen, Notruf'},
+ {jg:'7',thema:'Medien',traeger:'Polizei Papenburg',fokus:'Strafbarkeit im Netz, Weiterleiten von Inhalten, Cybermobbing'},
+ {jg:'7',thema:'Vapes',traeger:'Diakonie Papenburg',fokus:'E-Zigaretten und Vapes, Gruppendruck, rechtlicher Rahmen'},
+ {jg:'8',thema:'Alkohol',traeger:'Polizei Papenburg und Diakonie Papenburg',fokus:'Alkoholkonsum im Jugendalter, Jugendschutz, Risiken und Grenzen'},
+ {jg:'8',thema:'Rauchmelder',traeger:'Polizei Papenburg',fokus:'Brandschutz und Verhalten im Notfall'},
+ {jg:'9',thema:'Cannabis',traeger:'Diakonie Papenburg',fokus:'Cannabis, Rechtslage, Wirkung und Ausstiegswege'},
+ {jg:'10',thema:'Extremismus und Vorurteile erkennen',traeger:'Polizei Papenburg',fokus:'Vorurteile, Radikalisierung und demokratische Haltung'}
+];
+const NETZWERK_GRUNDBESTAND=[
+ {id:'NW-JUGENDAMT-ASCHENDORF',category:'Jugendhilfe und Kinderschutz',organization:'Jugendamt des Landkreises Emsland, Außenstelle Aschendorf',contact:'Alena Bauer',phone:'04962 5010',email:'',address:'Große Straße 32, 26871 Papenburg',website:'https://www.emsland.de',
+  note:'Zuständig für die Ludgerusschule Rhede (Ems). Erste Anlaufstelle bei Fragen zu Hilfen zur Erziehung und bei gewichtigen Anhaltspunkten für eine Kindeswohlgefährdung. Vor einer personenbezogenen Übermittlung immer die Rechtsgrundlage und die Leitungslinie klären. Durchwahl bitte beim ersten Kontakt ergänzen.'},
+ {id:'NW-POLIZEI-PRAEVENTION-PAPENBURG',category:'Polizeiliche Prävention',organization:'Präventionsteam der Polizei Papenburg, Polizeiinspektion Emsland und Grafschaft Bentheim',contact:'Nina Vinke (Kriminalprävention), Jörg Momann (Kontaktbeamter für Schulen), Lothar Kammer (Verkehrssicherheit)',phone:'04961 926-245',email:'nina.vinke@polizei.niedersachsen.de',address:'Gasthauskanal 16, 26871 Papenburg',website:'https://www.pd-os.polizei-nds.de',
+  note:'Führt im Präventionsplan der Schule die Einheiten zu Mobbing (Jg. 5), Zivilcourage (Jg. 6), Medien (Jg. 7), Alkohol und Rauchmelder (Jg. 8) sowie Extremismus und Vorurteile (Jg. 10) durch. Weitere Durchwahlen: Jörg Momann 04961 926-173, Lothar Kammer 04961 926-124. Stand der Recherche: September 2026.'},
+ {id:'NW-DIAKONIE-PAPENBURG',category:'Suchtberatung',organization:'Diakonisches Werk Papenburg, Fachambulanz Sucht sowie Jugend- und Drogenberatung',contact:'Sekretariat der Beratungsstelle',phone:'04961 98880',email:'dw-papenburg@diakonie-emsland.de',address:'Landsbergstraße 9, 26871 Papenburg',website:'https://www.suchtberatungsstelle.de',
+  note:'Führt im Präventionsplan der Schule die Einheiten zu Medien (Jg. 5), Vapes (Jg. 7), Alkohol gemeinsam mit der Polizei (Jg. 8) und Cannabis (Jg. 9) durch. Zugleich Beratungsstelle für einzelne Jugendliche und Erziehungsberechtigte. Stand der Recherche: September 2026.'}
+];
+function ensureNetzwerkpartner(state){
+ if(!Array.isArray(state.partners))state.partners=[];
+ for(const p of NETZWERK_GRUNDBESTAND)if(!state.partners.some(x=>x.id===p.id))state.partners.push(Object.assign({},p));
+ return state;
+}
 function normalize(x){
  const fresh=structuredClone(seed);
  if(!x||typeof x!=='object')x={};
@@ -533,6 +564,8 @@ function normalize(x){
  const storedSignalKeys=new Map(x.schoolSignals.map(r=>[r.sourceKey||`${r.studentId}|${r.period}`,r]));
  for(const imported of fresh.schoolSignals){const signalKey=imported.sourceKey||`${imported.studentId}|${imported.period}`,stored=storedSignalKeys.get(signalKey);if(stored){const review={reviewStatus:stored.reviewStatus,reviewedAt:stored.reviewedAt,reviewedBy:stored.reviewedBy,reviewNote:stored.reviewNote,absenceStage:stored.absenceStage||'',absenceAction:stored.absenceAction||''};Object.assign(stored,imported,review)}else{x.schoolSignals.push(imported);storedSignalKeys.set(signalKey,imported)}}
  ensureRecurringTasks(x);
+ ensurePraeventionsplan(x);
+ ensureNetzwerkpartner(x);
  return x
 }
 function load(){return normalize(structuredClone(seed))}
@@ -547,7 +580,7 @@ function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle
 document.querySelectorAll('.nav button[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));
 document.querySelectorAll('.nav .navgroup').forEach(g=>{const head=g.querySelector('.navhead');if(head)head.onclick=()=>g.classList.toggle('collapsed')});
 function kpi(label,value,trend){return `<div class="card kpi"><div class="label">${label}</div><div class="value">${value}</div><div class="trend">${trend}</div></div>`}
-function renderAll(){renderSelects();renderDashboard();renderRequests();renderCases();renderKanban();renderStudents();renderClasses();renderTrainingRoom();renderSignals();renderWorkflows();renderTeachers();renderProjects();renderCTC();renderNetwork();renderTasks();renderStats()}
+function renderAll(){renderSelects();renderDashboard();renderBeispielKarte();renderPraeventionsplan();renderRequests();renderCases();renderKanban();renderStudents();renderClasses();renderTrainingRoom();renderSignals();renderWorkflows();renderTeachers();renderProjects();renderCTC();renderNetwork();renderTasks();renderStats()}
 function renderSelects(){
  ['quickCase','taskCase'].forEach((id,i)=>{const el=document.getElementById(id);const first=i?' <option value="">Ohne Fallbezug</option>':'<option value="">Anonymer Kontakt</option>';const caseOpts=data.cases.filter(c=>c.status!=='Abgeschlossen').map(c=>`<option value="${c.id}">${cname(c.id)} · ${classOf(c)}</option>`).join('');let studentOpts='';if(!i){const openStudents=data.students.filter(s=>s.active&&!data.cases.some(c=>c.studentId===s.id&&c.status!=='Abgeschlossen')).sort((a,b)=>a.className.localeCompare(b.className)||a.last.localeCompare(b.last));if(openStudents.length)studentOpts='<optgroup label="Schüler:in ohne Fallakte – legt automatisch eine Fallakte an">'+openStudents.map(s=>`<option value="student:${s.id}">${s.last}, ${s.first} · ${s.className}</option>`).join('')+'</optgroup>';}el.innerHTML=first+(caseOpts?'<optgroup label="Bestehende Fallakten">'+caseOpts+'</optgroup>':'')+studentOpts});
  document.getElementById('caseStudent').innerHTML='<option value="">Bitte auswählen</option>'+data.students.filter(s=>s.active&&!data.cases.some(c=>c.studentId===s.id&&c.status!=='Abgeschlossen')).sort((a,b)=>a.className.localeCompare(b.className)||a.last.localeCompare(b.last)).map(s=>`<option value="${s.id}">${s.last}, ${s.first} · ${s.className}</option>`).join('');
@@ -581,6 +614,8 @@ function renderDashboardStart(){const el=document.getElementById('dashboardStart
  } else if(neu>0){
   el.innerHTML=`<div class="alertitem" style="margin-bottom:17px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="grow"><strong>${neu} neue Schüler-Anfrage${neu===1?'':'n'}</strong> im getrennten Eingang. Erst fachlich prüfen, dann zuordnen.</span><button class="btn" onclick="go('requests')">Anfragen öffnen</button></div>`;
  } else { el.innerHTML=''; }
+ if(!beispielfallVorhanden()&&!data.students.length)el.innerHTML+=beispielfallKarte();
+ el.innerHTML=beispielfallBanner()+el.innerHTML;
 }
 function renderDashboard(){renderDashboardStart();renderStartKacheln();const active=data.cases.filter(c=>c.status!=='Abgeschlossen').length,mins=data.contacts.reduce((a,c)=>a+Number(c.duration),0),open=data.tasks.filter(t=>!t.done).length;
  document.getElementById('kpis').innerHTML=kpi('Aktive Fälle',active,'davon '+data.cases.filter(c=>c.status==='Beobachtung').length+' in Beobachtung')+kpi('Kontakte',data.contacts.length,'im laufenden Schuljahr')+kpi('Beratungszeit',Math.round(mins/60)+' Std.','aus Kurz- und Fallkontakten')+kpi('Offene Aufgaben',open,'nächste 14 Tage');
@@ -606,10 +641,10 @@ function renderCases(){
   const s=studentOfCase(c),events=s?studentEvents(s.id):[],hay=[cname(c.id),c.reason,classOf(c),c.goal,...events.flatMap(e=>[e.title,e.note,...(e.details||[]),e.measure,e.result])].join(' ').toLocaleLowerCase('de-DE');
   return (status==='all'||c.status===status)&&(classFilter==='all'||classOf(c)===classFilter)&&hay.includes(q)
  });
- document.getElementById('caseTable').innerHTML=cases.map(c=>`<tr class="clickrow" onclick="showCase('${c.id}')"><td class="namecell">${cname(c.id)}</td><td>${classOf(c)}</td><td>${c.reason}</td><td><span class="tag ${c.status==='Beobachtung'?'amber':c.status==='Abgeschlossen'?'gray':''}">${c.status}</span></td><td>${fmt(c.last)}</td><td>${c.contacts}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">Keine passenden Fälle oder Verlaufseinträge gefunden. Eine Fallakte entsteht automatisch, sobald du zu einer Person etwas dokumentierst.</td></tr>'
+ document.getElementById('caseTable').innerHTML=cases.map(c=>`<tr class="clickrow" onclick="showCase('${c.id}')"><td class="namecell">${cname(c.id)}${c.id===BEISPIEL_FALL_ID?' <span class="tag amber">Beispiel</span>':''}</td><td>${classOf(c)}</td><td>${c.reason}</td><td><span class="tag ${c.status==='Beobachtung'?'amber':c.status==='Abgeschlossen'?'gray':''}">${c.status}</span></td><td>${fmt(c.last)}</td><td>${c.contacts}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">Keine passenden Fälle oder Verlaufseinträge gefunden. Eine Fallakte entsteht automatisch, sobald du zu einer Person etwas dokumentierst.</td></tr>'
 }
 document.getElementById('caseSearch').oninput=renderCases;document.getElementById('caseFilter').onchange=renderCases;document.getElementById('caseClassFilter').onchange=renderCases;
-function renderStudents(){const q=(document.getElementById('studentSearch').value||'').toLowerCase(),f=document.getElementById('studentFilter').value;const list=data.students.filter(s=>(f==='all'||s.active)&&(`${s.id} ${s.first} ${s.last} ${s.className} ${s.phone||''} ${s.guardian1||''} ${s.guardian2||''}`).toLowerCase().includes(q)).sort((a,b)=>a.className.localeCompare(b.className,undefined,{numeric:true})||a.last.localeCompare(b.last));document.getElementById('currentYearLabel').textContent=data.settings.currentSchoolYear;document.getElementById('studentTable').innerHTML=list.map(s=>{const c=data.cases.find(x=>x.studentId===s.id);return `<tr class="clickrow" onclick="showStudent('${s.id}')"><td>${s.id}</td><td class="namecell">${s.last}, ${s.first}</td><td>${s.className}</td><td>${s.phone||'–'}</td><td><span class="tag ${s.active?'':'gray'}">${s.active?'aktiv':'Abgang'}</span></td><td>${c?`<span class="tag ${c.status==='Abgeschlossen'?'gray':''}">${c.status}</span>`:'–'}</td></tr>`}).join('')||'<tr><td colspan="6" class="empty">Keine Schüler:innen gefunden. Falls du noch keine Liste eingelesen hast, nutze oben beim Excel-kompatiblen Import die Schaltfläche Datei auswählen.</td></tr>'}
+function renderStudents(){const q=(document.getElementById('studentSearch').value||'').toLowerCase(),f=document.getElementById('studentFilter').value;const list=data.students.filter(s=>(f==='all'||s.active)&&(`${s.id} ${s.first} ${s.last} ${s.className} ${s.phone||''} ${s.guardian1||''} ${s.guardian2||''}`).toLowerCase().includes(q)).sort((a,b)=>a.className.localeCompare(b.className,undefined,{numeric:true})||a.last.localeCompare(b.last));document.getElementById('currentYearLabel').textContent=data.settings.currentSchoolYear;document.getElementById('studentTable').innerHTML=list.map(s=>{const c=data.cases.find(x=>x.studentId===s.id);return `<tr class="clickrow" onclick="showStudent('${s.id}')"><td>${s.id}</td><td class="namecell">${s.last}, ${s.first}${s.id===BEISPIEL_ID?' <span class="tag amber">Beispiel</span>':''}</td><td>${s.className}</td><td>${s.phone||'–'}</td><td><span class="tag ${s.active?'':'gray'}">${s.active?'aktiv':'Abgang'}</span></td><td>${c?`<span class="tag ${c.status==='Abgeschlossen'?'gray':''}">${c.status}</span>`:'–'}</td></tr>`}).join('')||'<tr><td colspan="6" class="empty">Keine Schüler:innen gefunden. Falls du noch keine Liste eingelesen hast, nutze oben beim Excel-kompatiblen Import die Schaltfläche Datei auswählen.</td></tr>'}
 document.getElementById('studentSearch').oninput=renderStudents;document.getElementById('studentFilter').onchange=renderStudents;
 function studentEvents(studentId){const caseIds=data.cases.filter(c=>c.studentId===studentId).map(c=>c.id);return [
  ...data.contacts.filter(x=>caseIds.includes(x.caseId)).map(x=>({...x,eventKind:'Fallverlauf',title:x.phase?x.phase+' · '+x.type:x.type,details:[x.initiatedBy&&'Kontaktanbahnung: '+x.initiatedBy,x.accessStatus&&'Zugang und Freiwilligkeit: '+x.accessStatus,x.confidentialityStatus&&'Vertraulichkeit: '+x.confidentialityStatus,x.consentStatus&&'Einwilligungs- und Informationsstand: '+x.consentStatus,x.safetyStatus&&'Sicherheitsprüfung: '+x.safetyStatus,x.internalSupport&&'Schulinterne Unterstützung: '+x.internalSupport,x.reason&&'Anlass: '+x.reason,x.channel&&'Kontaktweg: '+x.channel,x.participants?.length&&'Beteiligte: '+x.participants.join(', '),x.participantsOther&&'Weitere Beteiligte: '+x.participantsOther,x.themeFormation&&'Themen- und Auftragsklärung: '+x.themeFormation,x.studentPerspective&&'Perspektive Schüler:in: '+x.studentPerspective,x.relationshipStatus&&'Beziehungs- und Vertrauensstand: '+x.relationshipStatus,x.workFocus?.length&&'Arbeitsschwerpunkte: '+x.workFocus.join(', '),x.content&&'Inhalt und Verlauf: '+x.content,x.informationSources?.length&&'Informationsquellen: '+x.informationSources.join(', '),x.informationStatus&&'Informationsgrundlage: '+x.informationStatus,x.roleFunction&&'Funktion der SSA: '+x.roleFunction,x.cooperationForm&&'Zusammenarbeit: '+x.cooperationForm,x.familyInvolvement&&'Einbeziehung der Familie: '+x.familyInvolvement,x.intervention&&'Methode: '+x.intervention,x.measure&&'Maßnahme: '+x.measure,x.measureDetail&&'Konkrete Durchführung: '+x.measureDetail,x.agreement&&'Vereinbarungen: '+x.agreement,x.result&&'Unmittelbares Ergebnis: '+x.result,x.resultDetail&&'Auswertung: '+x.resultDetail,x.trend&&'Entwicklung: '+x.trend,x.crisisStatus&&'Krise oder Wendepunkt: '+x.crisisStatus,x.closureStatus&&'Stand der Fallarbeit: '+x.closureStatus,x.informed?.length&&'Informiert: '+x.informed.join(', ')].filter(Boolean)})),
@@ -644,8 +679,8 @@ function openRelatedPerson(){const form=document.getElementById('relatedPersonFo
 function showStudent(studentId){
  selectedStudentId=studentId;
  const s=data.students.find(x=>x.id===studentId),c=data.cases.find(x=>x.studentId===studentId),events=studentEvents(studentId);
- document.getElementById('studentDetailTitle').innerHTML=`<span data-person>${s.first} ${s.last}</span> · ${s.className}`;
- document.getElementById('studentDetailBody').dataset.gegliedert='';document.getElementById('studentDetailBody').innerHTML=`<div class="notice">Personenbezogene Arbeitsansicht für Edmund und Sabine.</div><div class="detailgrid"><div class="detailitem"><span>Schüler-ID</span><strong>${s.id}</strong></div><div class="detailitem"><span>Schuljahr und Klasse</span><strong>${s.schoolYear} · ${s.className}</strong></div><div class="detailitem"><span>Anschrift</span><strong>${s.address||'–'}${s.district?' · '+s.district:''}</strong></div><div class="detailitem"><span>Telefon</span><strong>${s.phone||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 1</span><strong data-person>${s.guardian1||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 2</span><strong data-person>${s.guardian2||'–'}</strong></div><div class="detailitem"><span>Klassenleitung</span><strong>${data.settings.classLeads?.[s.className]||'–'}</strong></div><div class="detailitem"><span>Fallstatus</span><strong>${c?c.status:'keine Fallakte'}</strong></div></div><h3>Ziel- und Maßnahmenplan</h3>${planSummary(studentId)}<h3>Offene Aufgaben und Ergebnisse</h3>${taskSummary(studentId)}<h3>Entwicklung des Kindes</h3>${outcomeSummary(studentId)}<h3>Bezugspersonen und Netzwerk</h3>${relatedSummary(studentId)}<h3>Familienkonstellation</h3>${familySummary(s)}${studentAbsencePanel(studentId)}<h3>Fachliche Entwicklung aus Kontakten</h3>${trendSummary(studentId)}<h3>Schuljahresverlauf</h3><div class="list">${(s.enrollments||[]).map(e=>`<div class="row"><div class="grow"><strong>${e.schoolYear}</strong><span class="subtle">Klasse ${e.className}</span></div></div>`).join('')}</div><h3>Fallverlauf</h3><p class="subtle">Gespräche, Elternkontakte, Rückmeldungen, Fehlzeitenereignisse, Vereinbarungen, Maßnahmen, Weitervermittlungen, Statusänderungen, Wirkungseinschätzungen, Aufgaben und Dokumente werden gemeinsam dargestellt.</p><div class="chronicle-tools"><input class="field" type="search" placeholder="Verlauf vollständig durchsuchen" oninput="filterTimeline(this,'studentTimeline')"></div><div class="timeline" id="studentTimeline">${timelineHtml(events)}</div>`;
+ document.getElementById('studentDetailTitle').innerHTML=`<span data-person>${s.first} ${s.last}</span> · ${s.className}${s.id===BEISPIEL_ID?' <span class="tag amber">Beispielfall</span>':''}`;
+ document.getElementById('studentDetailBody').dataset.gegliedert='';document.getElementById('studentDetailBody').innerHTML=`<div class="notice">${studentId===BEISPIEL_ID?'<strong>◆ Beispielfall.</strong> Ein ausformulierter Übungsfall ohne echte Falldaten. Unter Daten und Sicherung lässt er sich vollständig entfernen.':'Personenbezogene Arbeitsansicht für Edmund und Sabine.'}</div><div class="detailgrid"><div class="detailitem"><span>Schüler-ID</span><strong>${s.id}</strong></div><div class="detailitem"><span>Schuljahr und Klasse</span><strong>${s.schoolYear} · ${s.className}</strong></div><div class="detailitem"><span>Anschrift</span><strong>${s.address||'–'}${s.district?' · '+s.district:''}</strong></div><div class="detailitem"><span>Telefon</span><strong>${s.phone||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 1</span><strong data-person>${s.guardian1||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 2</span><strong data-person>${s.guardian2||'–'}</strong></div><div class="detailitem"><span>Klassenleitung</span><strong>${data.settings.classLeads?.[s.className]||'–'}</strong></div><div class="detailitem"><span>Fallstatus</span><strong>${c?c.status:'keine Fallakte'}</strong></div></div><h3>Ziel- und Maßnahmenplan</h3>${planSummary(studentId)}<h3>Offene Aufgaben und Ergebnisse</h3>${taskSummary(studentId)}<h3>Entwicklung des Kindes</h3>${outcomeSummary(studentId)}<h3>Bezugspersonen und Netzwerk</h3>${relatedSummary(studentId)}<h3>Familienkonstellation</h3>${familySummary(s)}${studentAbsencePanel(studentId)}<h3>Fachliche Entwicklung aus Kontakten</h3>${trendSummary(studentId)}<h3>Schuljahresverlauf</h3><div class="list">${(s.enrollments||[]).map(e=>`<div class="row"><div class="grow"><strong>${e.schoolYear}</strong><span class="subtle">Klasse ${e.className}</span></div></div>`).join('')}</div><h3>Fallverlauf</h3><p class="subtle">Gespräche, Elternkontakte, Rückmeldungen, Fehlzeitenereignisse, Vereinbarungen, Maßnahmen, Weitervermittlungen, Statusänderungen, Wirkungseinschätzungen, Aufgaben und Dokumente werden gemeinsam dargestellt.</p><div class="chronicle-tools"><input class="field" type="search" placeholder="Verlauf vollständig durchsuchen" oninput="filterTimeline(this,'studentTimeline')"></div><div class="timeline" id="studentTimeline">${timelineHtml(events)}</div>`;
  const statusButton=document.getElementById('studentStatusButton');statusButton.textContent=s.active?'Archivieren':'Reaktivieren';statusButton.classList.toggle('danger',s.active);
  openModal('studentModal')
 
@@ -656,7 +691,7 @@ async function toggleStudentStatus(){const s=data.students.find(x=>x.id===select
 let selectedClass='';
 function currentClasses(){return [...new Set(data.students.filter(s=>s.active).map(s=>s.className))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}))}
 function renderClasses(){const classes=currentClasses();document.getElementById('activityClass').innerHTML=classes.map(c=>`<option>${c}</option>`).join('');document.getElementById('classGrid').innerHTML=classes.map(c=>{const pupils=data.students.filter(s=>s.active&&s.className===c),manual=data.teachers.filter(t=>t.classLead===c).map(t=>(t.first+' '+t.last).trim()).join(', '),lead=manual||data.settings.classLeads?.[c]||'nicht eingetragen';const measures=data.classActivities.filter(a=>a.className===c&&a.schoolYear===data.settings.currentSchoolYear).length;return `<article class="card clickrow ${measures>0?'hasactivity':''}" onclick="showClass('${c}')"><div class="cardhead"><h3>Klasse ${c}</h3><span class="tag ${measures>0?'green':'gray'}">${pupils.length} Kinder</span></div>${measures>0?'<span class="tag green">✓ Projekt oder Prävention läuft</span>':''}<p class="subtle">Klassenleitung: ${lead}</p><div class="detailgrid"><div class="detailitem"><span>SSA-Maßnahmen</span><strong>${measures}</strong></div><div class="detailitem"><span>Schuljahr</span><strong>${data.settings.currentSchoolYear}</strong></div></div></article>`}).join('');if(selectedClass&&classes.includes(selectedClass))showClass(selectedClass,false)}
-function showClass(className,scroll=true){selectedClass=className;const pupils=data.students.filter(s=>s.active&&s.className===className).sort((a,b)=>a.last.localeCompare(b.last)),ids=new Set(pupils.map(s=>s.id));const acts=data.classActivities.filter(a=>a.className===className&&a.schoolYear===data.settings.currentSchoolYear||a.participantIds.some(id=>ids.has(id))).sort((a,b)=>b.date.localeCompare(a.date));const rows=pupils.map((s,i)=>`<tr><td>${i+1}</td><td class="namecell">${s.last}, ${s.first}</td><td>${s.id}</td><td>${data.cases.some(c=>c.studentId===s.id)?'Fallakte vorhanden':'–'}</td></tr>`).join('');document.getElementById('classDetail').innerHTML=`<div class="cardhead"><div><h2>Klasse ${className}</h2><span class="subtle">${pupils.length} Schüler:innen · ${data.settings.currentSchoolYear}</span></div><button class="btn primary" onclick="openClassActivity('${className}')">＋ Maßnahme</button></div><div class="grid two"><div><h3>Klassenliste</h3><div class="tablewrap"><table><thead><tr><th>Nr.</th><th>Name</th><th>Schüler-ID</th><th>SSA</th></tr></thead><tbody>${rows}</tbody></table></div></div><div><h3>SSA-Maßnahmen und mitgeführte Historie</h3><div class="list">${acts.map(a=>{const now=a.participantIds.filter(id=>ids.has(id)).length;const historic=a.className!==className||a.schoolYear!==data.settings.currentSchoolYear,weekly=a.weeklyDuration?` · ${a.weeklyDuration} Min./Woche`:'';return `<div class="row"><div class="datebox"><b>${new Date(a.date+'T12:00').getDate()}</b>${new Intl.DateTimeFormat('de-DE',{month:'short'}).format(new Date(a.date+'T12:00')).toUpperCase()}</div><div class="grow"><strong>${a.type}: ${a.title}</strong><span class="subtle">${a.facilitator} · ${a.duration} Min. je Aktion${weekly}${a.rhythm?' · '+a.rhythm:''}${a.totalWeeks?' · '+a.totalWeeks+' Wochen':''} · ${historic?'ursprünglich '+a.className+' ('+a.schoolYear+'), ':''}${now} heutige Klassenmitglieder nahmen teil</span></div></div>`}).join('')||'<div class="empty">Noch keine Klassenmaßnahme dokumentiert.</div>'}</div></div></div>`;if(scroll)document.getElementById('classDetail').scrollIntoView({behavior:'smooth',block:'start'})}
+function showClass(className,scroll=true){selectedClass=className;const pupils=data.students.filter(s=>s.active&&s.className===className).sort((a,b)=>a.last.localeCompare(b.last)),ids=new Set(pupils.map(s=>s.id));const acts=data.classActivities.filter(a=>a.className===className&&a.schoolYear===data.settings.currentSchoolYear||a.participantIds.some(id=>ids.has(id))).sort((a,b)=>b.date.localeCompare(a.date));const rows=pupils.map((s,i)=>`<tr><td>${i+1}</td><td class="namecell">${s.last}, ${s.first}${s.id===BEISPIEL_ID?' <span class="tag amber">Beispiel</span>':''}</td><td>${s.id}</td><td>${data.cases.some(c=>c.studentId===s.id)?'Fallakte vorhanden':'–'}</td></tr>`).join('');document.getElementById('classDetail').innerHTML=`<div class="cardhead"><div><h2>Klasse ${className}</h2><span class="subtle">${pupils.length} Schüler:innen · ${data.settings.currentSchoolYear}</span></div><button class="btn primary" onclick="openClassActivity('${className}')">＋ Maßnahme</button></div><div class="grid two"><div><h3>Klassenliste</h3><div class="tablewrap"><table><thead><tr><th>Nr.</th><th>Name</th><th>Schüler-ID</th><th>SSA</th></tr></thead><tbody>${rows}</tbody></table></div></div><div><h3>SSA-Maßnahmen und mitgeführte Historie</h3><div class="list">${acts.map(a=>{const now=a.participantIds.filter(id=>ids.has(id)).length;const historic=a.className!==className||a.schoolYear!==data.settings.currentSchoolYear,weekly=a.weeklyDuration?` · ${a.weeklyDuration} Min./Woche`:'';return `<div class="row"><div class="datebox"><b>${new Date(a.date+'T12:00').getDate()}</b>${new Intl.DateTimeFormat('de-DE',{month:'short'}).format(new Date(a.date+'T12:00')).toUpperCase()}</div><div class="grow"><strong>${a.type}: ${a.title}</strong><span class="subtle">${a.facilitator} · ${a.duration} Min. je Aktion${weekly}${a.rhythm?' · '+a.rhythm:''}${a.totalWeeks?' · '+a.totalWeeks+' Wochen':''} · ${historic?'ursprünglich '+a.className+' ('+a.schoolYear+'), ':''}${now} heutige Klassenmitglieder nahmen teil</span></div></div>`}).join('')||'<div class="empty">Noch keine Klassenmaßnahme dokumentiert.</div>'}</div></div></div>`;if(scroll)document.getElementById('classDetail').scrollIntoView({behavior:'smooth',block:'start'})}
 function updateWeeklyDuration(){const form=document.getElementById('classActivityForm'),duration=Number(form.querySelector('[name="duration"]').value||0),sessions=Number(form.querySelector('[name="weeklySessions"]').value||0);form.querySelector('[name="weeklyDuration"]').value=duration*sessions}
 function openClassActivity(className=''){document.getElementById('classActivityForm').reset();document.querySelector('#classActivityForm [name="date"]').value=today();if(className)document.getElementById('activityClass').value=className;updateWeeklyDuration();openModal('classActivityModal')}
 function applyPreset(select,targetId){if(!select.value)return;const target=document.getElementById(targetId);target.value=target.value.trim()?target.value.trim()+' '+select.value:select.value;target.focus();select.selectedIndex=0}
@@ -725,7 +760,7 @@ function openWorkflow(id){const w=WORKFLOWS.find(x=>x.id===id);if(!w)return;docu
 document.getElementById('workflowSearch').oninput=renderWorkflows;document.getElementById('workflowFilter').onchange=renderWorkflows;
 function teacherName(t){return t.displayName||(t.first?`${t.last}, ${t.first}`:t.last)}
 function renderTeachers(){document.getElementById('teacherTable').innerHTML=data.teachers.sort((a,b)=>teacherName(a).localeCompare(teacherName(b))).map(t=>`<tr><td class="namecell">${teacherName(t)}</td><td>${t.role}</td><td>${staffStatusTag(t.status)}</td><td>${t.classLead||'–'}</td><td>${t.subjects||'–'}</td><td>${t.email?`<a href="mailto:${t.email}">${t.email}</a>`:'–'}</td><td>${t.phone||'–'}</td></tr>`).join('')||'<tr><td colspan="7" class="empty">Noch keine Lehrkräfte eingetragen. Sie werden für die Klassenleitung und für E-Mail-Entwürfe an die Klassenleitung gebraucht.</td></tr>'}
-function renderProjects(){document.getElementById('preventionCatalog').innerHTML=PREVENTION_CATALOG.map(p=>`<tr><td><strong>${p.name}</strong></td><td>${p.group}</td><td>${p.focus}</td><td><span class="tag ${p.evidence.startsWith('D3')?'':p.evidence.startsWith('E')?'gray':'amber'}">${p.evidence}</span></td><td>${p.fit}</td></tr>`).join('');document.getElementById('projectGrid').innerHTML=data.projects.map(p=>`<article class="card project"><div class="projecticon">${p.icon||'◉'}</div><h3>${p.name}</h3><div class="meta">${p.group} · ${p.participants} Teilnehmende</div><div class="eventmeta"><span class="tag gray">${p.evidence||'Noch zu prüfen'}</span>${p.reviewDate?`<span class="tag amber">Review ${fmt(p.reviewDate)}</span>`:''}</div><p>${p.goal}</p>${p.need?`<p class="subtle"><strong>Bedarf:</strong> ${p.need}</p>`:''}<div class="projectfoot"><div class="cardhead"><span class="tag">${p.status}</span><span class="subtle">${p.sessions} von ${p.total} Einheiten</span></div><div class="progress"><span style="width:${Math.min(100,p.sessions/Math.max(1,p.total)*100)}%"></span></div><div class="subtle" style="margin-top:9px">Fidelity: ${p.fidelity||'offen'} · Evaluation: ${p.evaluation||'offen'}</div></div></article>`).join('')||'<div class="card empty">Noch kein konkretes Präventionsprojekt angelegt.</div>'}
+function renderProjects(){document.getElementById('preventionCatalog').innerHTML=PREVENTION_CATALOG.map(p=>`<tr><td><strong>${p.name}</strong></td><td>${p.group}</td><td>${p.focus}</td><td><span class="tag ${p.evidence.startsWith('D3')?'':p.evidence.startsWith('E')?'gray':'amber'}">${p.evidence}</span></td><td>${p.fit}</td></tr>`).join('');document.getElementById('projectGrid').innerHTML=data.projects.map(p=>`<article class="card project"><div class="projecticon">${p.icon||'◉'}</div><h3>${p.name}</h3><div class="meta">${p.group} · ${p.participants?p.participants+' Teilnehmende':'Teilnehmendenzahl noch eintragen'}</div>${p.partner?`<div class="meta">Durchführung: ${p.partner}</div>`:''}<div class="eventmeta"><span class="tag gray">${p.evidence||'Noch zu prüfen'}</span>${p.unitMinutes?`<span class="tag">${p.unitMinutes} Min. je Einheit</span>`:''}${p.rhythm?`<span class="tag">${p.rhythm}</span>`:''}${p.since?`<span class="tag gray">seit ${p.since}</span>`:''}${p.reviewDate?`<span class="tag amber">Review ${fmt(p.reviewDate)}</span>`:''}</div><p>${p.goal}</p>${p.need?`<p class="subtle"><strong>Bedarf:</strong> ${p.need}</p>`:''}<div class="projectfoot"><div class="cardhead"><span class="tag">${p.status}</span><span class="subtle">${p.sessions} von ${p.total} Einheiten</span></div><div class="progress"><span style="width:${Math.min(100,p.sessions/Math.max(1,p.total)*100)}%"></span></div><div class="subtle" style="margin-top:9px">Fidelity: ${p.fidelity||'offen'} · Evaluation: ${p.evaluation||'offen'}</div></div></article>`).join('')||'<div class="card empty">Noch kein konkretes Präventionsprojekt angelegt.</div>'}
 function ctcLevel(a){const risk=a.factorType==='Risikofaktor',rating=a.rating||'Mittel';if(risk&&rating==='Hoch'||!risk&&rating==='Niedrig')return {color:'red',label:'Rot'};if(rating==='Mittel')return {color:'amber',label:'Gelb'};return {color:'green',label:'Grün'}}
 function ctcRecommendation(a){const d=a.domain||'';if(d.includes('Konflikte'))return 'Bei geeigneten, freiwillig klärbaren Konflikten Palaverzelt prüfen. Bei klassenweiten Mustern Sozialtraining durch die SSA planen. Bei Mobbing, Gewalt, Schutzfragen oder Machtungleichgewicht das passende Fachverfahren nutzen.';if(d.includes('Medien'))return 'Medienbuddys als niedrigschwellige Peer-Unterstützung und ein begleitetes Medienpräventionsangebot prüfen. Schutz- und Mobbinghinweise bleiben bei verantwortlichen Erwachsenen.';if(d.includes('Klassenklima'))return 'Sozialtraining durch die SSA mit konkretem Ziel, ausreichender Dauer und einem Reviewtermin planen; Klassenleitung beteiligen.';if(d.includes('Schulbindung'))return 'Beteiligungsmöglichkeiten, verlässliche Bezugspersonen und niedrigschwellige Angebote stärken; Wirkung nach einem festgelegten Zeitraum erneut prüfen.';if(d.includes('Substanz'))return 'Qualifizierte Suchtprävention und bei Bedarf eine Fachstelle einbeziehen. Keine individuelle Zuschreibung aus Gruppendaten ableiten.';if(d.includes('Familie'))return 'Niedrigschwellige Familienunterstützung und passende Netzwerkangebote sichtbar machen; Zugänge und soziale Barrieren prüfen.';if(d.includes('Übergänge'))return 'Übergangsplanung, Berufsorientierung, Patenschaften und verlässliche Anschlusswege gemeinsam mit den zuständigen schulischen Stellen stärken.';return 'Niedrigschwellige Gesprächs- und Unterstützungswege bekannt machen, Schutzfaktoren stärken und bei konkreten Einzelfallhinweisen getrennt fachlich prüfen.'}
 function renderCTC(){const q=(document.getElementById('ctcSearch')?.value||'').toLocaleLowerCase('de-DE'),filter=document.getElementById('ctcFilter')?.value||'all',list=data.ctcAssessments.filter(a=>{const level=ctcLevel(a);return(filter==='all'||level.color===filter)&&[a.period,a.groupName,a.domain,a.factorType,a.rating,a.source,a.note].join(' ').toLocaleLowerCase('de-DE').includes(q)});const levels=data.ctcAssessments.map(ctcLevel);document.getElementById('ctcKpis').innerHTML=kpi('Bedarfsbeobachtungen',data.ctcAssessments.length,'ausschließlich aggregiert')+kpi('Rot',levels.filter(x=>x.color==='red').length,'zeitnah planen und prüfen')+kpi('Gelb',levels.filter(x=>x.color==='amber').length,'beobachten und unterstützen')+kpi('Grün',levels.filter(x=>x.color==='green').length,'Schutzfaktor erhalten');document.getElementById('ctcGrid').innerHTML=list.map(a=>{const level=ctcLevel(a);return `<article class="card"><div class="cardhead"><h3>${a.groupName}</h3><span class="tag ${level.color==='red'?'red':level.color==='amber'?'amber':''}">Ampel ${level.label}</span></div><div class="eventmeta"><span class="tag gray">${a.factorType}</span><span class="tag gray">${a.rating}</span><span class="tag gray">${a.participants} Personen</span></div><p><strong>${a.domain}</strong><br><span class="subtle">${a.period} · ${a.source}</span></p>${a.note?`<p>${a.note}</p>`:''}<div class="notice ${level.color==='red'||level.color==='amber'?'warning':''}"><strong>Handlungsempfehlung:</strong> ${ctcRecommendation(a)}</div></article>`}).join('')||'<div class="card empty">Noch keine zusammengefasste CTC-Bedarfsbeobachtung dokumentiert.</div>'}
@@ -797,7 +832,7 @@ function renderKanban(){
  const q=(document.getElementById('kanbanSearch')?.value||'').toLocaleLowerCase('de-DE'),classFilter=document.getElementById('kanbanClassFilter'),classes=[...new Set(data.cases.map(c=>classOf(c)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
  if(classFilter){const selected=classFilter.value;classFilter.innerHTML='<option value="all">Alle Klassen</option>'+classes.map(x=>'<option>'+x+'</option>').join('');classFilter.value=classes.includes(selected)?selected:'all'}
  const filterClass=classFilter?.value||'all';
- board.innerHTML=KANBAN_COLUMNS.map(([title,statuses])=>{const cases=data.cases.filter(c=>statuses.includes(c.status)&&(filterClass==='all'||classOf(c)===filterClass)&&[cname(c.id),classOf(c),c.reason,c.goal].join(' ').toLocaleLowerCase('de-DE').includes(q)).sort((a,b)=>String(b.last).localeCompare(String(a.last)));const drop=title==='Abgeschlossen'?'':`ondragover="event.preventDefault()" ondrop="dropCaseOnKanban(event,'${statuses[0]}')"`;return `<section class="kanban-column" ${drop}><div class="kanban-head"><span>${title}</span><span class="tag gray">${cases.length}</span></div><div class="kanban-list">${cases.map(c=>`<article class="kanban-card" draggable="${title==='Abgeschlossen'?'false':'true'}" ondragstart="event.dataTransfer.setData('text/plain','${c.id}')" onclick="showCase('${c.id}')"><h4>${cname(c.id)}</h4><p>${classOf(c)} · ${c.status}</p><p>${c.reason||'Anlass noch zu klären'}</p><p>Letzter Eintrag: ${c.last?fmt(c.last):'–'}</p></article>`).join('')||'<div class="empty">Noch keine Fälle. Eine Fallakte entsteht automatisch, sobald du zu einer Schülerin oder einem Schüler etwas dokumentierst.</div>'}</div></section>`}).join('')
+ board.innerHTML=KANBAN_COLUMNS.map(([title,statuses])=>{const cases=data.cases.filter(c=>statuses.includes(c.status)&&(filterClass==='all'||classOf(c)===filterClass)&&[cname(c.id),classOf(c),c.reason,c.goal].join(' ').toLocaleLowerCase('de-DE').includes(q)).sort((a,b)=>String(b.last).localeCompare(String(a.last)));const drop=title==='Abgeschlossen'?'':`ondragover="event.preventDefault()" ondrop="dropCaseOnKanban(event,'${statuses[0]}')"`;return `<section class="kanban-column" ${drop}><div class="kanban-head"><span>${title}</span><span class="tag gray">${cases.length}</span></div><div class="kanban-list">${cases.map(c=>`<article class="kanban-card" draggable="${title==='Abgeschlossen'?'false':'true'}" ondragstart="event.dataTransfer.setData('text/plain','${c.id}')" onclick="showCase('${c.id}')"><h4>${cname(c.id)}${c.id===BEISPIEL_FALL_ID?' <span class="tag amber">Beispiel</span>':''}</h4><p>${classOf(c)} · ${c.status}</p><p>${c.reason||'Anlass noch zu klären'}</p><p>Letzter Eintrag: ${c.last?fmt(c.last):'–'}</p></article>`).join('')||'<div class="empty">Noch keine Fälle. Eine Fallakte entsteht automatisch, sobald du zu einer Schülerin oder einem Schüler etwas dokumentierst.</div>'}</div></section>`}).join('')
 }
 async function dropCaseOnKanban(event,newStatus){event.preventDefault();const caseId=event.dataTransfer.getData('text/plain'),c=data.cases.find(x=>x.id===caseId);if(!c||c.status===newStatus)return;if(newStatus==='Abgeschlossen'){toast('Abschlüsse bitte in der vollständigen Fallakte dokumentieren.');return}const s=studentOfCase(c);if(!await appConfirm(`${s?s.last+', '+s.first:'Fall'} von „${c.status}“ nach „${newStatus}“ verschieben?`))return;const old=c.status;c.status=newStatus;c.last=today();data.statusHistory.push({id:id('sh'),caseId:c.id,studentId:c.studentId,date:today(),fromStatus:old,status:newStatus,responsible:'Edmund oder Sabine',reason:'Statusänderung über das Fallboard'});logChange(`Fallstatus über Fallboard geändert: ${old} zu ${newStatus}`,c.id,c.studentId);save();toast('Statusänderung wurde in der Fallhistorie gespeichert.')}
 function isInstructionDay(date){const iso=date.toISOString().slice(0,10),weekday=date.getDay(),extra=new Set(data.settings.additionalNonSchoolDays||[]);return weekday!==0&&weekday!==6&&!NDS_WEEKDAY_HOLIDAYS_2026_27.has(iso)&&!extra.has(iso)&&!NDS_FREE_RANGES_2026_27.some(([a,b])=>iso>=a&&iso<=b)}
@@ -1233,6 +1268,364 @@ function renderStartKacheln(){
  +startKachel('◇','Aktuelle Fälle',aktiveFaelle,'Laufende Fallakten',"go('cases')")
  +startKachel('△','Fehlzeiten',rot,rot?'mit roter Ampel':'keine rote Ampel',"go('signals')")
  +startKachel('▥','Auswertung',null,'Statistik und Jahresbericht',"go('statistics')")}
+/* ===== Beispielfall O. B. ===== */
+function beispielfallVorhanden(){return data.students.some(s=>s.id===BEISPIEL_ID)}
+function beispielKontakt(nr,o){return Object.assign({id:'BEISPIEL-K'+nr,caseId:BEISPIEL_FALL_ID,studentId:BEISPIEL_ID,responsible:'Edmund',level:'Einzelfall',visibility:'SSA-Team',beispiel:true,createdAt:'2026-09-14T07:0'+nr+':00.000Z'},o)}
+function beispielfallDaten(){
+ const schueler={id:BEISPIEL_ID,first:'O.',last:'B.',className:'1a',schoolYear:'2026/27',active:true,address:'',district:'',phone:'',
+  guardian1:'Mutter, Beispieldaten',guardian2:'Vater, Beispieldaten',beispiel:true,
+  enrollments:[{schoolYear:'2025/26',className:'SKG'},{schoolYear:'2026/27',className:'1a'}],
+  family:{custodyStatus:'Gemeinsames Sorgerecht beider Elternteile',
+   livingArrangement:'Lebt mit Eltern und der älteren Schwester in einem Haushalt',
+   contactPermission:'Beide Elternteile sind auskunftsberechtigt. Im Schulalltag ist die Mutter die erste Ansprechperson.',
+   custodians:'Mutter und Vater',households:'Ein Haushalt',
+   supportPersons:'Ältere Schwester Nele, besucht dieselbe Schule. Großmutter holt an zwei Tagen in der Woche ab.',
+   restrictions:'Keine Schutz- oder Umgangshinweise bekannt',
+   supportNeeds:'Begleitung im Übergang vom Schulkindergarten in die Grundschule, verlässliche Morgenstruktur',
+   preferredContact:'Telefonisch am Vormittag',
+   informationSource:'Übergabe aus dem Schulkindergarten und Elterngespräch am 25.08.2026',
+   verifiedAt:'2026-08-25'}};
+ const fall={id:BEISPIEL_FALL_ID,studentId:BEISPIEL_ID,first:'O.',last:'B.',className:'1a',status:'Aktive Begleitung',
+  reason:'Emotionales Wohlbefinden',
+  goal:'O. B. verabschiedet sich morgens im Eingangsbereich, geht ohne Begleitung in den Klassenraum und bleibt bis zur ersten Pause im Unterricht.',
+  last:'2026-09-11',contacts:9,createdAt:'2026-08-17T07:30:00.000Z',beispiel:true};
+ const kontakte=[
+  beispielKontakt(1,{date:'2026-08-12',time:'11:00',duration:60,phase:'Vorgeschichte und Anlassklärung',type:'Fallbesprechung',
+   channel:'Persönlich im Schulgebäude',initiatedBy:'Initiative der Schulsozialarbeit',reason:'Emotionales Wohlbefinden',
+   accessStatus:'Vorgang ohne direkten Beratungskontakt',confidentialityStatus:'Noch zu erklären',
+   consentStatus:'Konkrete Einwilligung liegt vor',safetyStatus:'Kein akuter Sicherheitshinweis in diesem Vorgang',
+   internalSupport:'Keine schulinterne Weiterleitung oder Ergänzung',
+   participants:['Weitere Lehrkraft'],participantsOther:'Leitung des Schulkindergartens',
+   themeFormation:'Von Lehrkraft oder Schule benannt',relationshipStatus:'Kein direkter Kontakt zur Schülerin oder zum Schüler',
+   workFocus:['Biografische Arbeit und Lebenssituation'],
+   content:'Übergabegespräch vor der Einschulung. Die Leitung des Schulkindergartens berichtet, dass O. B. das vergangene Jahr insgesamt gut bewältigt hat. Das Ablösen von der Mutter sei morgens jedoch fast täglich schwer gefallen. Bewährt habe sich ein fester Ankerort im Gruppenraum, eine große Spielzeug-Polizeistation. Nach dem Abschied durfte O. B. dort zunächst einige Minuten allein spielen und wechselte danach meist selbstständig in die Gruppe. Die Erziehungsberechtigten wurden über das Übergabegespräch informiert und haben zugestimmt.',
+   informationSources:['Externe Fachstelle','Schulische Dokumentation'],informationStatus:'Für diesen Schritt ausreichend',
+   roleFunction:'Beobachtung und niedrigschwelliger Kontakt',cooperationForm:'Beratung oder Rücksprache',
+   familyInvolvement:'Erziehungsberechtigte informiert',intervention:'Beobachtung',measure:'Keine konkrete Maßnahme erfolgt',
+   measureDetail:'Informationen aus dem Schulkindergarten für den Schulstart gesichert. Noch keine eigene Maßnahme.',
+   agreement:'Die Schulsozialarbeit beobachtet die ersten beiden Schulwochen und meldet sich bei Bedarf.',
+   result:'Neue Informationen oder neues Thema entstanden',
+   resultDetail:'Es liegt eine belastbare Vorgeschichte vor. Der Ankerort aus dem Schulkindergarten ist als bereits erprobte Ressource festgehalten.',
+   trend:'Nicht bewertet',crisisStatus:'Keine Krise in diesem Vorgang',closureStatus:'Fallarbeit wird fortgesetzt',
+   informed:['Klassenleitung']}),
+  beispielKontakt(2,{date:'2026-08-17',time:'07:55',duration:20,phase:'Kontaktanbahnung',type:'Beobachtung',
+   channel:'Persönlich im Schulgebäude',initiatedBy:'Fortsetzung einer bestehenden Fallarbeit',reason:'Emotionales Wohlbefinden',
+   accessStatus:'Vorgang ohne direkten Beratungskontakt',confidentialityStatus:'Noch zu erklären',
+   consentStatus:'Keine Datenweitergabe vorgesehen',safetyStatus:'Kein akuter Sicherheitshinweis in diesem Vorgang',
+   internalSupport:'Keine schulinterne Weiterleitung oder Ergänzung',
+   participants:['Schüler:in','Erziehungsberechtigte Person 1','Klassenleitung'],
+   themeFormation:'Thema noch offen oder unklar',relationshipStatus:'Erstkontakt, noch keine tragfähige Einschätzung',
+   workFocus:['Vertrauens- und Beziehungsarbeit'],
+   content:'Erster Schultag, Beobachtung im Eingangsbereich. Beobachtet wurde: O. B. hält beim Abschied die Hand der Mutter fest, weint leise und sagt mehrfach, er wolle mit nach Hause. Die Mutter verabschiedet sich nach etwa zehn Minuten. O. B. lässt sich danach von der Klassenleitung in den Klassenraum begleiten und ist dort nach wenigen Minuten ruhig. Dies ist eine Beobachtung und ausdrücklich keine Bewertung des Kindes.',
+   informationSources:['Eigene Beobachtung'],informationStatus:'Noch lückenhaft',
+   roleFunction:'Beobachtung und niedrigschwelliger Kontakt',cooperationForm:'Keine weitere Profession beteiligt',
+   familyInvolvement:'Noch nicht erfolgt',intervention:'Beobachtung',measure:'Keine konkrete Maßnahme erfolgt',
+   measureDetail:'Nur Beobachtung, kein Eingriff in die Situation. Die Klassenleitung hat die Begleitung übernommen.',
+   agreement:'Beobachtung in den nächsten Schultagen fortsetzen.',
+   result:'Ergebnis derzeit nicht einschätzbar',
+   resultDetail:'Einmalige Beobachtung am ersten Schultag. Daraus lässt sich noch kein Muster ableiten.',
+   trend:'Nicht bewertet',crisisStatus:'Keine Krise in diesem Vorgang',closureStatus:'Fallarbeit wird fortgesetzt',
+   informed:['Niemand zusätzlich informiert']}),
+  beispielKontakt(3,{date:'2026-08-21',time:'09:30',duration:45,phase:'Informationsgrundlage erweitern',type:'Beobachtung',
+   channel:'Persönlich im Schulgebäude',initiatedBy:'Fortsetzung einer bestehenden Fallarbeit',reason:'Psychische Belastung, Angst oder Rückzug',
+   accessStatus:'Vorgang ohne direkten Beratungskontakt',confidentialityStatus:'Noch zu erklären',
+   consentStatus:'Keine Datenweitergabe vorgesehen',safetyStatus:'Kein akuter Sicherheitshinweis in diesem Vorgang',
+   internalSupport:'Keine schulinterne Weiterleitung oder Ergänzung',
+   participants:['Schüler:in','Klassenleitung'],
+   themeFormation:'Von Lehrkraft oder Schule benannt',relationshipStatus:'Kontakt angenommen, vorsichtige Arbeitsbasis',
+   workFocus:['Vertrauens- und Beziehungsarbeit','Biografische Arbeit und Lebenssituation'],
+   content:'Unterrichtsbegleitende Beobachtung in der ersten und zweiten Schulwoche, insgesamt sieben Beobachtungstage. Beobachtet wurde: An vier von sieben Tagen verlässt O. B. zwischen der ersten und zweiten Stunde den Klassenraum und geht in Richtung Ausgang. Er lässt sich jedes Mal ohne Widerstand ansprechen und kehrt zurück. In diesen Situationen sind der Kopf gesenkt, die Schultern hochgezogen, die Stimme leise und die Sätze kurz. Wiederkehrend ist die Frage, wann die Mutter kommt. Im Verlauf des Vormittags nimmt er ab der dritten Stunde aktiv am Unterricht teil, meldet sich und arbeitet mit. Vermutung der Schulsozialarbeit, ausdrücklich als Vermutung gekennzeichnet: Die Belastung ist an den Morgen und an den Übergang gebunden und nicht an den Unterricht selbst.',
+   informationSources:['Eigene Beobachtung','Lehrkraft'],informationStatus:'Weitere Rücksprache erforderlich',
+   roleFunction:'Beobachtung und niedrigschwelliger Kontakt',cooperationForm:'Paralleles Handeln mit Informationsaustausch',
+   familyInvolvement:'Noch nicht erfolgt',intervention:'Beobachtung',measure:'Keine konkrete Maßnahme erfolgt',
+   measureDetail:'Beobachtung systematisch über sieben Tage dokumentiert, damit nicht nach einem Einzeltag gehandelt wird.',
+   agreement:'Elterngespräch anfragen, um die häusliche Sicht zu ergänzen.',
+   result:'Neue Informationen oder neues Thema entstanden',
+   resultDetail:'Es zeigt sich ein wiederkehrendes Muster am Morgen. Die Beobachtung reicht für eine Beschreibung, nicht für eine Erklärung.',
+   trend:'Nicht bewertet',crisisStatus:'Keine Krise in diesem Vorgang',closureStatus:'Fallarbeit wird fortgesetzt',
+   informed:['Klassenleitung']}),
+  beispielKontakt(4,{date:'2026-08-25',time:'14:00',duration:60,phase:'Einbeziehung der Familie',type:'Elterngespräch',
+   channel:'Persönlich im SSA-Büro',initiatedBy:'Hinweis oder Vermittlung durch Lehrkraft',reason:'Familie und Erziehung',
+   accessStatus:'Freiwillig nach Vermittlung oder Empfehlung',confidentialityStatus:'Vertraulichkeit und Grenzen verständlich erklärt',
+   consentStatus:'Konkrete Einwilligung liegt vor',safetyStatus:'Kein akuter Sicherheitshinweis in diesem Vorgang',
+   internalSupport:'Keine schulinterne Weiterleitung oder Ergänzung',
+   participants:['Erziehungsberechtigte Person 1','Klassenleitung'],
+   themeFormation:'Gemeinsam mit der Schülerin oder dem Schüler entwickelt',relationshipStatus:'Kontakt angenommen, vorsichtige Arbeitsbasis',
+   workFocus:['Biografische Arbeit und Lebenssituation','Aushandlung von Auftrag und Zuständigkeit'],
+   content:'Gespräch mit der Mutter im SSA-Büro, angebahnt durch die Klassenleitung und mit dem Einverständnis der Mutter. Die Mutter berichtet, dass die Trennung am Morgen zu Hause seit längerer Zeit viel Zeit braucht und dass O. B. abends häufiger fragt, ob er am nächsten Tag zu Hause bleiben darf. Sie berichtet weiter, dass ärztlich ein Wasserbruch festgestellt wurde und dass O. B. deshalb derzeit nicht am Sportunterricht teilnehmen soll. Diese gesundheitliche Angabe ist eine Auskunft der Mutter und keine eigene Feststellung der Schulsozialarbeit. Die Mutter wurde gebeten, eine ärztliche Bescheinigung in der Schule vorzulegen, damit die Sportbefreiung schulisch geregelt ist und nicht als Verweigerung eingeordnet wird. Die Mutter berichtet außerdem, dass die ältere Schwester Nele dieselbe Schule besucht und dass O. B. sie in den Pausen sucht.',
+   informationSources:['Erziehungsberechtigte'],informationStatus:'Für diesen Schritt ausreichend',
+   roleFunction:'Direkte Beratung und Begleitung',cooperationForm:'Keine weitere Profession beteiligt',
+   familyInvolvement:'Elterngespräch durchgeführt',intervention:'Aktives Zuhören und Entlastung',measure:'Elterngespräch durchgeführt',
+   measureDetail:'Entlastendes Gespräch, gemeinsame Beschreibung der Morgensituation, Trennung von schulischer und gesundheitlicher Zuständigkeit.',
+   agreement:'Die Mutter reicht die ärztliche Bescheinigung nach. Der Abschied findet künftig im Eingangsbereich statt und nicht im Klassenraum. Die Mutter meldet sich nicht zwischendurch telefonisch, damit der Vormittag nicht erneut unterbrochen wird.',
+   result:'Vereinbarung getroffen',
+   resultDetail:'Die häusliche Sicht liegt vor und deckt sich mit der schulischen Beobachtung. Die Sportfrage ist als gesundheitliche und nicht als motivationale Frage eingeordnet.',
+   trend:'stabil',crisisStatus:'Keine Krise in diesem Vorgang',closureStatus:'Fallarbeit wird fortgesetzt',
+   informed:['Klassenleitung']}),
+  beispielKontakt(5,{date:'2026-08-28',time:'13:15',duration:45,phase:'Abstimmung und Arbeitsteilung',type:'Fallbesprechung',
+   channel:'Persönlich im Schulgebäude',initiatedBy:'Initiative der Schulsozialarbeit',reason:'Emotionales Wohlbefinden',
+   accessStatus:'Vorgang ohne direkten Beratungskontakt',confidentialityStatus:'Bereits in diesem Fall erklärt',
+   consentStatus:'Konkrete Einwilligung liegt vor',safetyStatus:'Kein akuter Sicherheitshinweis in diesem Vorgang',
+   internalSupport:'Keine schulinterne Weiterleitung oder Ergänzung',
+   participants:['Klassenleitung','Weitere Lehrkraft'],participantsOther:'Frau Kruse als Klassenleitung, Frau Jansen als weitere Lehrkraft',
+   themeFormation:'Gemeinsam mit der Schülerin oder dem Schüler entwickelt',relationshipStatus:'Kontakt angenommen, vorsichtige Arbeitsbasis',
+   workFocus:['Aushandlung von Auftrag und Zuständigkeit','Ressourcenaktivierung'],
+   content:'Fallbesprechung mit Frau Kruse und Frau Jansen. Zusammengetragen wurden die Beobachtungen aus den ersten beiden Schulwochen, die Vorgeschichte aus dem Schulkindergarten und die Angaben der Mutter. Ausdrücklich festgehalten wird: Die beschriebenen Reaktionen werden als Trennungsproblematik im Übergang beschrieben. Das ist eine gemeinsame Arbeitshypothese der Beteiligten und keine Diagnose. Eine fachärztliche oder psychologische Abklärung ist nicht erfolgt, sie liegt nicht im Auftrag der Schule und wird durch diese Dokumentation auch nicht behauptet. Falls die Eltern eine Abklärung wünschen, ist der Weg über die Kinderarztpraxis beziehungsweise die Erziehungsberatung zu gehen.',
+   informationSources:['Eigene Beobachtung','Lehrkraft','Erziehungsberechtigte'],informationStatus:'Für diesen Schritt ausreichend',
+   roleFunction:'Koordination mehrerer Beteiligter',cooperationForm:'Abgestimmte Arbeitsteilung',
+   familyInvolvement:'Gemeinsame Vereinbarung getroffen',intervention:'Lösungs- und Zielklärung',measure:'Gemeinsame Fallbesprechung durchgeführt',
+   measureDetail:'Drei Maßnahmen wurden vereinbart. Erstens der bekannte Ankerort, die Polizeistation im Schulkindergarten, die O. B. nach dem Abschied für einige Minuten aufsuchen darf. Zweitens der Grundsatz Verbleib statt Rückführung nach Hause. Wenn O. B. den Klassenraum verlässt, wird er von einer festen Person begleitet, kurz abgelenkt und in den Unterricht zurückgeführt. Drittens die Mogelsteine als vereinbartes Signal, mit dem O. B. selbst anzeigen kann, dass er eine Situation gerade nicht aushält.',
+   agreement:'Frau Kruse übernimmt den Morgen im Klassenraum, Frau Jansen die Begleitung bei Verlassen des Raums, die Schulsozialarbeit die wöchentliche Auswertung mit O. B. und den Kontakt zur Mutter. Zuständigkeiten werden nicht getauscht, damit für O. B. jeden Tag dieselben Personen zuständig sind.',
+   result:'Vereinbarung getroffen',
+   resultDetail:'Alle Beteiligten arbeiten ab sofort nach derselben Absprache. Die Arbeitshypothese ist als Hypothese gekennzeichnet und wird in vier Wochen überprüft.',
+   trend:'stabil',crisisStatus:'Keine Krise in diesem Vorgang',closureStatus:'Fallarbeit wird fortgesetzt',
+   informed:['Erziehungsberechtigte','Klassenleitung']}),
+  beispielKontakt(6,{date:'2026-09-02',time:'08:10',duration:30,phase:'Konkrete Maßnahme oder Handlung',type:'Konkrete Unterstützungsmaßnahme',
+   channel:'Persönlich im Schulgebäude',initiatedBy:'Fortsetzung einer bestehenden Fallarbeit',reason:'Emotionales Wohlbefinden',
+   accessStatus:'Freiwillig nach Vermittlung oder Empfehlung',confidentialityStatus:'Bereits in diesem Fall erklärt',
+   consentStatus:'Konkrete Einwilligung liegt vor',safetyStatus:'Kein akuter Sicherheitshinweis in diesem Vorgang',
+   internalSupport:'Keine schulinterne Weiterleitung oder Ergänzung',
+   participants:['Schüler:in','Klassenleitung'],participantsOther:'Leitung des Schulkindergartens',
+   themeFormation:'Gemeinsam mit der Schülerin oder dem Schüler entwickelt',relationshipStatus:'Kontakt angenommen, vorsichtige Arbeitsbasis',
+   workFocus:['Ressourcenaktivierung'],
+   content:'Umsetzung der ersten Maßnahme. O. B. darf nach dem Abschied im Eingangsbereich für längstens zehn Minuten in den Schulkindergarten gehen und dort an der Polizeistation spielen. Der Ort ist bewusst gewählt, weil er aus dem Vorjahr bereits vertraut ist und mit einem gelungenen Übergang verbunden war. Die Leitung des Schulkindergartens hat zugestimmt, die Zeitgrenze wird von ihr im Blick behalten. Beobachtet wurde an diesem Morgen: O. B. geht ohne Aufforderung selbst dorthin, spielt etwa sechs Minuten und geht danach eigenständig in seinen Klassenraum.',
+   informationSources:['Eigene Beobachtung'],informationStatus:'Für diesen Schritt ausreichend',
+   roleFunction:'Begleitung und praktische Unterstützung',cooperationForm:'Abgestimmte Arbeitsteilung',
+   familyInvolvement:'Gemeinsame Vereinbarung getroffen',intervention:'Ressourcenaktivierung',measure:'Unterstützung im Schulalltag umgesetzt',
+   measureDetail:'Ankerort Polizeistation im Schulkindergarten, längstens zehn Minuten, danach Wechsel in den Klassenraum. Der Ort ist eine Brücke und kein Rückzugsraum auf Dauer, die Zeit wird schrittweise verkürzt.',
+   agreement:'Ab der dritten Woche wird die Zeit an der Polizeistation auf fünf Minuten reduziert, sofern der Morgen ruhig verläuft.',
+   result:'Maßnahme umgesetzt',
+   resultDetail:'Der Übergang gelingt an diesem Morgen ohne Begleitung und ohne Tränen. Ein Morgen ist noch kein Ergebnis, die Maßnahme wird über mehrere Wochen beobachtet.',
+   trend:'verbessert',crisisStatus:'Keine Krise in diesem Vorgang',closureStatus:'Fallarbeit wird fortgesetzt',
+   informed:['Erziehungsberechtigte','Klassenleitung']}),
+  beispielKontakt(7,{date:'2026-09-04',time:'09:05',duration:30,phase:'Konkrete Maßnahme oder Handlung',type:'Begleitung im Schulalltag',
+   channel:'Persönlich im Schulgebäude',initiatedBy:'Hinweis oder Vermittlung durch Lehrkraft',reason:'Verhalten im Unterricht',
+   accessStatus:'Schulischer Klärungsauftrag mit Beteiligung der Schülerin oder des Schülers',confidentialityStatus:'Bereits in diesem Fall erklärt',
+   consentStatus:'Konkrete Einwilligung liegt vor',safetyStatus:'Kein akuter Sicherheitshinweis in diesem Vorgang',
+   internalSupport:'Keine schulinterne Weiterleitung oder Ergänzung',
+   participants:['Schüler:in','Weitere Lehrkraft'],participantsOther:'Frau Jansen',
+   themeFormation:'Von Lehrkraft oder Schule benannt',relationshipStatus:'Kontakt angenommen, vorsichtige Arbeitsbasis',
+   workFocus:['Vertrauens- und Beziehungsarbeit'],
+   content:'Umsetzung der zweiten Maßnahme. O. B. verlässt in der zweiten Stunde den Klassenraum. Frau Jansen begleitet ihn, geht mit ihm eine Runde über den Flur, spricht über ein anderes Thema und führt ihn nach etwa sieben Minuten zurück in den Unterricht. Der Grundsatz lautet Verbleib in der Schule. Eine Abholung nach Hause findet in dieser Situation nicht statt, weil damit das Verlassen des Unterrichts jedes Mal belohnt würde. Beobachtet wurde: O. B. geht ohne Widerstand mit, spricht auf dem Flur wieder in normaler Lautstärke und setzt sich anschließend an seinen Platz.',
+   informationSources:['Eigene Beobachtung','Lehrkraft'],informationStatus:'Für diesen Schritt ausreichend',
+   roleFunction:'Begleitung und praktische Unterstützung',cooperationForm:'Abgestimmte Arbeitsteilung',
+   familyInvolvement:'Gemeinsame Vereinbarung getroffen',intervention:'Begleitung und praktische Unterstützung',measure:'Unterstützung im Schulalltag umgesetzt',
+   measureDetail:'Feste Begleitperson, kurze Ablenkung, Rückführung in den Unterricht. Kein Nachhausegehen, keine Diskussion über das Bleiben, keine Sanktion.',
+   agreement:'Die Begleitung übernimmt möglichst immer dieselbe Person. Die Dauer wird notiert, damit eine Entwicklung erkennbar wird.',
+   result:'Maßnahme umgesetzt',
+   resultDetail:'Der Unterricht wurde nach sieben Minuten wieder aufgenommen. In der Vorwoche dauerte eine vergleichbare Situation etwa fünfzehn Minuten.',
+   trend:'verbessert',crisisStatus:'Keine Krise in diesem Vorgang',closureStatus:'Fallarbeit wird fortgesetzt',
+   informed:['Klassenleitung']}),
+  beispielKontakt(8,{date:'2026-09-08',time:'11:30',duration:30,phase:'Konkrete Maßnahme oder Handlung',type:'Einzelgespräch mit Schüler:in',
+   channel:'Persönlich im SSA-Büro',initiatedBy:'Initiative der Schulsozialarbeit',reason:'Emotionales Wohlbefinden',
+   accessStatus:'Freiwillig nach Vermittlung oder Empfehlung',confidentialityStatus:'Vertraulichkeit und Grenzen verständlich erklärt',
+   consentStatus:'Konkrete Einwilligung liegt vor',safetyStatus:'Kein akuter Sicherheitshinweis in diesem Vorgang',
+   internalSupport:'Keine schulinterne Weiterleitung oder Ergänzung',
+   participants:['Schüler:in'],
+   themeFormation:'Gemeinsam mit der Schülerin oder dem Schüler entwickelt',relationshipStatus:'Tragfähige Vertrauens- und Arbeitsbeziehung',
+   workFocus:['Vertrauens- und Beziehungsarbeit','Ressourcenaktivierung'],
+   content:'Umsetzung der dritten Maßnahme, gemeinsam mit O. B. eingeführt. Er bekommt drei Mogelsteine für die Woche. Jeder Stein steht für eine Situation, die er an diesem Tag nicht aushalten muss. Er legt den Stein wortlos auf den Tisch der Lehrkraft, geht kurz hinaus und kommt zurück. Damit kann er selbst steuern, statt weglaufen zu müssen. O. B. hat die Regel in eigenen Worten wiederholt und die Steine selbst ausgesucht. Fachliche Anmerkung: Die Steine sind ausdrücklich ein Selbststeuerungssignal und kein Belohnungssystem. Nicht genutzte Steine werden nicht gegen etwas eingetauscht und der Verlust eines Steins ist keine Strafe. Sobald die Steine als Belohnung oder Entzug wirken, ist die Maßnahme zu beenden und neu zu besprechen.',
+   informationSources:['Schüler:in'],informationStatus:'Für diesen Schritt ausreichend',
+   roleFunction:'Direkte Beratung und Begleitung',cooperationForm:'Abgestimmte Arbeitsteilung',
+   familyInvolvement:'Erziehungsberechtigte informiert',intervention:'Ressourcenaktivierung',measure:'Konkrete Vereinbarung mit Schüler:in getroffen',
+   measureDetail:'Drei Mogelsteine pro Woche als selbst gesteuerte Auszeit von längstens fünf Minuten, ohne Begründungspflicht und ohne Bewertung.',
+   agreement:'O. B. zeigt am Freitag, wie viele Steine er gebraucht hat. Wir schauen gemeinsam, in welcher Situation der Stein nötig war, nicht wie viele übrig sind.',
+   result:'Vereinbarung getroffen',
+   resultDetail:'O. B. wirkt im Gespräch entlastet und erklärt die Regel selbst richtig. Die Wirkung ist noch offen.',
+   trend:'stabil',crisisStatus:'Keine Krise in diesem Vorgang',closureStatus:'Fallarbeit wird fortgesetzt',
+   informed:['Erziehungsberechtigte','Klassenleitung']}),
+  beispielKontakt(9,{date:'2026-09-11',time:'12:00',duration:30,phase:'Auswertung und Zielüberprüfung',type:'Auswertung oder Abschlussgespräch',
+   channel:'Persönlich im SSA-Büro',initiatedBy:'Fortsetzung einer bestehenden Fallarbeit',reason:'Emotionales Wohlbefinden',
+   accessStatus:'Freiwillig aus eigener Initiative',confidentialityStatus:'Bereits in diesem Fall erklärt',
+   consentStatus:'Konkrete Einwilligung liegt vor',safetyStatus:'Kein akuter Sicherheitshinweis in diesem Vorgang',
+   internalSupport:'Keine schulinterne Weiterleitung oder Ergänzung',
+   participants:['Schüler:in','Klassenleitung'],
+   themeFormation:'Gemeinsam mit der Schülerin oder dem Schüler entwickelt',relationshipStatus:'Tragfähige Vertrauens- und Arbeitsbeziehung',
+   workFocus:['Ressourcenaktivierung','Aushandlung von Auftrag und Zuständigkeit'],
+   content:'Wochenauswertung mit O. B. und Rückmeldung der Klassenleitung. Beobachtet wurde: In dieser Woche ist O. B. an vier von fünf Tagen ohne Begleitung in den Klassenraum gegangen. Er hat einen Mogelstein genutzt, am Dienstag vor der Sportstunde. Die Zeit an der Polizeistation lag bei etwa vier Minuten. Am Freitag ist er direkt in den Klassenraum gegangen, ohne den Ankerort zu nutzen. Auf die Frage, was geholfen habe, antwortet er, dass er jetzt wisse, wann die Mutter wiederkommt. Einordnung: Die Entwicklung ist positiv und erklärt sich aus einer verlässlichen Struktur. Eine abschließende Bewertung nach drei Wochen wäre verfrüht. Die Sportfrage bleibt offen, bis die ärztliche Bescheinigung vorliegt.',
+   informationSources:['Schüler:in','Lehrkraft','Eigene Beobachtung'],informationStatus:'Für diesen Schritt ausreichend',
+   roleFunction:'Direkte Beratung und Begleitung',cooperationForm:'Abgestimmte Arbeitsteilung',
+   familyInvolvement:'Erziehungsberechtigte informiert',intervention:'Lösungs- und Zielklärung',measure:'Einzelgespräch durchgeführt',
+   measureDetail:'Auswertung entlang der drei vereinbarten Maßnahmen, ohne Punktesystem und ohne Bewertung des Kindes.',
+   agreement:'Die Maßnahmen laufen unverändert weiter. Die Zeit an der Polizeistation wird ab der kommenden Woche auf fünf Minuten begrenzt. Wiedervorlage am 25.09.2026 mit Frau Kruse und Frau Jansen.',
+   result:'Teilweise geklärt',
+   resultDetail:'Das Arbeitsziel ist an vier von fünf Tagen erreicht. Der Fall wird weiter begleitet und nicht abgeschlossen.',
+   trend:'verbessert',crisisStatus:'Wendepunkt mit positiver Entwicklung',closureStatus:'Weitere Beobachtung vereinbart',
+   informed:['Erziehungsberechtigte','Klassenleitung']})
+ ];
+ const plaene=[
+  {id:'BEISPIEL-P1',caseId:BEISPIEL_FALL_ID,studentId:BEISPIEL_ID,beispiel:true,createdAt:'2026-08-28T11:00:00.000Z',updatedDate:'2026-09-11',startDate:'2026-08-31',targetDate:'2026-10-23',reviewDate:'2026-09-25',
+   requestedBy:'Mehrere Beteiligte',ssaMandate:'Beratung und Begleitung',
+   childWish:'O. B. sagt, er möchte morgens nicht mehr weinen und wissen, wann die Mutter ihn abholt.',
+   parentSchoolExpectation:'Die Mutter wünscht einen ruhigen Morgen ohne lange Verabschiedung. Die Schule wünscht, dass O. B. im Unterricht bleibt.',
+   assignment:'Den morgendlichen Übergang so gestalten, dass O. B. ihn allein bewältigen kann.',
+   goal:'O. B. geht nach der Verabschiedung im Eingangsbereich ohne Begleitung in den Klassenraum.',
+   measure:'Ankerort Polizeistation im Schulkindergarten für längstens zehn Minuten, schrittweise auf fünf Minuten verkürzt.',
+   successCriteria:'An mindestens vier von fünf Schultagen einer Woche ohne Begleitung im Klassenraum, über drei aufeinanderfolgende Wochen.',
+   childAssessment:'Kind stimmt dem Ziel zu',responsible:'Mehrere Beteiligte',
+   consentStatus:'Kind beteiligt und informiert',involved:'Frau Kruse, Schulkindergarten, Erziehungsberechtigte, Schulsozialarbeit',
+   status:'Teilweise erreicht',
+   result:'In der Woche vom 07.09. bis 11.09.2026 an vier von fünf Tagen erreicht. Zwei weitere Wochen sind für die Bestätigung erforderlich.'},
+  {id:'BEISPIEL-P2',caseId:BEISPIEL_FALL_ID,studentId:BEISPIEL_ID,beispiel:true,createdAt:'2026-08-28T11:10:00.000Z',updatedDate:'2026-09-11',startDate:'2026-08-31',targetDate:'2026-10-23',reviewDate:'2026-09-25',
+   requestedBy:'Schule oder Lehrkraft',ssaMandate:'Klärung und Moderation',
+   childWish:'O. B. möchte hinausgehen dürfen, wenn es ihm zu viel wird, ohne dafür Ärger zu bekommen.',
+   parentSchoolExpectation:'Die Schule erwartet, dass das Verlassen des Klassenraums nicht zum Nachhausegehen führt.',
+   assignment:'Einen verlässlichen und für alle gleichen Umgang mit dem Verlassen des Klassenraums vereinbaren.',
+   goal:'Wenn O. B. den Klassenraum verlässt, kehrt er innerhalb von zehn Minuten begleitet in den Unterricht zurück.',
+   measure:'Feste Begleitperson, kurze Ablenkung, Rückführung. Grundsatz Verbleib in der Schule statt Abholung nach Hause.',
+   successCriteria:'Jede Unterbrechung endet mit einer Rückkehr in den Unterricht. Die durchschnittliche Dauer sinkt unter zehn Minuten.',
+   childAssessment:'Kind stimmt teilweise zu',responsible:'Klassenleitung',
+   consentStatus:'Kind beteiligt und informiert',involved:'Frau Jansen, Frau Kruse, Schulsozialarbeit',
+   status:'Begonnen',
+   result:'Am 04.09.2026 nach sieben Minuten zurück im Unterricht, in der Vorwoche noch etwa fünfzehn Minuten.'},
+  {id:'BEISPIEL-P3',caseId:BEISPIEL_FALL_ID,studentId:BEISPIEL_ID,beispiel:true,createdAt:'2026-09-08T11:00:00.000Z',updatedDate:'2026-09-11',startDate:'2026-09-08',targetDate:'2026-11-06',reviewDate:'2026-09-25',
+   requestedBy:'Kind und SSA gemeinsam',ssaMandate:'Beratung und Begleitung',
+   childWish:'O. B. möchte selbst zeigen können, wann es ihm zu viel wird.',
+   parentSchoolExpectation:'Die Mutter wünscht, dass O. B. lernt, sich zu melden, statt wegzulaufen.',
+   assignment:'O. B. ein eigenes Signal geben, mit dem er die Situation steuern kann.',
+   goal:'O. B. zeigt eine Überforderung mit einem vereinbarten Signal an, statt den Raum unangekündigt zu verlassen.',
+   measure:'Drei Mogelsteine pro Woche als selbst gesteuerte Auszeit von längstens fünf Minuten, ohne Begründungspflicht.',
+   successCriteria:'Mindestens die Hälfte der Auszeiten wird über den Stein angekündigt statt durch unangekündigtes Verlassen.',
+   childAssessment:'Kind stimmt dem Ziel zu',responsible:'Edmund',
+   consentStatus:'Kind beteiligt und informiert',involved:'O. B., Frau Kruse, Schulsozialarbeit',
+   status:'Begonnen',
+   result:'In der ersten Woche ein Stein genutzt, angekündigt und ohne unangekündigtes Verlassen an diesem Tag. Wirkung noch offen.'}
+ ];
+ const aufgaben=[
+  {id:'BEISPIEL-T1',caseId:BEISPIEL_FALL_ID,beispiel:true,title:'Wiedervorlage O. B.: drei Maßnahmen mit Frau Kruse und Frau Jansen auswerten',
+   due:'2026-09-25',priority:'Hoch',taskType:'Nachkontrolle',assignedTo:'Edmund',done:false,createdAt:'2026-09-11T11:00:00.000Z',completedAt:'',result:'',
+   expectedResult:'Entscheidung, ob der Ankerort weiter verkürzt wird, ob die Begleitung reduziert werden kann und ob die Mogelsteine weiterlaufen.'},
+  {id:'BEISPIEL-T2',caseId:BEISPIEL_FALL_ID,beispiel:true,title:'Ärztliche Bescheinigung zur Sportbefreiung von O. B. nachhalten',
+   due:'2026-09-18',priority:'Normal',taskType:'Rückmeldung ausstehend',assignedTo:'Edmund',done:false,createdAt:'2026-08-25T13:00:00.000Z',completedAt:'',result:'',
+   expectedResult:'Die Bescheinigung liegt der Schule vor, damit die Nichtteilnahme am Sport geregelt ist und nicht als Verweigerung gewertet wird.'},
+  {id:'BEISPIEL-T3',caseId:BEISPIEL_FALL_ID,beispiel:true,title:'Kurzer Kontakt zur Schwester Nele, Entlastung von Verantwortung prüfen',
+   due:'2026-09-22',priority:'Normal',taskType:'Gespräch vorbereiten',assignedTo:'Edmund',done:false,createdAt:'2026-09-11T11:05:00.000Z',completedAt:'',result:'',
+   expectedResult:'Einschätzung, ob Nele in den Pausen eine Aufgabe übernimmt, die nicht ihre ist, und ob sie selbst Unterstützung braucht.'}
+ ];
+ const bezuege=[
+  {id:'BEISPIEL-R1',studentId:BEISPIEL_ID,beispiel:true,createdAt:'2026-08-25T13:00:00.000Z',role:'Sorgeberechtigte Person',name:'Mutter von O. B., Beispieldaten',
+   phone:'',email:'',mayContact:'Ja',informationScope:'Fallbezogene Abstimmung mit Einwilligung',lastContact:'2026-09-11',
+   custodyUnclear:'Nein',releaseStatus:'Nicht erforderlich',releaseUntil:'',
+   agreements:'Abschied findet im Eingangsbereich statt. Kein Anruf während des Vormittags. Rückmeldung an die Mutter freitags kurz per Telefon.'},
+  {id:'BEISPIEL-R2',studentId:BEISPIEL_ID,beispiel:true,createdAt:'2026-09-11T11:05:00.000Z',role:'Geschwister an der Schule',name:'Nele B., ältere Schwester, Beispieldaten',
+   phone:'',email:'',mayContact:'Ja, eingeschränkt',informationScope:'Nur Termin und organisatorische Angaben',lastContact:'',
+   custodyUnclear:'Nicht zutreffend',releaseStatus:'Nicht erforderlich',releaseUntil:'',
+   agreements:'Nele ist Bezugsperson in den Pausen, aber nicht für die Betreuung ihres Bruders zuständig. Sie wird nicht in die Fallarbeit einbezogen und erhält keine Informationen aus der Beratung. Falls sie selbst belastet wirkt, wird eine eigene Fallakte angelegt.'},
+  {id:'BEISPIEL-R3',studentId:BEISPIEL_ID,beispiel:true,createdAt:'2026-08-28T11:00:00.000Z',role:'Klassenleitung',name:'Frau Kruse',
+   phone:'',email:'',mayContact:'Ja',informationScope:'Nur konkret vereinbarte Sachverhalte',lastContact:'2026-09-11',
+   custodyUnclear:'Nicht zutreffend',releaseStatus:'Nicht erforderlich',releaseUntil:'',
+   agreements:'Übernimmt den Morgen im Klassenraum und meldet freitags kurz zurück, wie die Woche verlaufen ist.'},
+  {id:'BEISPIEL-R4',studentId:BEISPIEL_ID,beispiel:true,createdAt:'2026-08-28T11:05:00.000Z',role:'Weitere Lehrkraft',name:'Frau Jansen',
+   phone:'',email:'',mayContact:'Ja',informationScope:'Nur konkret vereinbarte Sachverhalte',lastContact:'2026-09-04',
+   custodyUnclear:'Nicht zutreffend',releaseStatus:'Nicht erforderlich',releaseUntil:'',
+   agreements:'Feste Begleitperson bei Verlassen des Klassenraums, notiert jeweils die Dauer bis zur Rückkehr.'},
+  {id:'BEISPIEL-R5',studentId:BEISPIEL_ID,beispiel:true,createdAt:'2026-08-12T10:00:00.000Z',role:'Verein oder Ressource',name:'Schulkindergarten der Ludgerusschule',
+   phone:'',email:'',mayContact:'Ja',informationScope:'Nur Termin und organisatorische Angaben',lastContact:'2026-09-02',
+   custodyUnclear:'Nicht zutreffend',releaseStatus:'Nicht erforderlich',releaseUntil:'',
+   agreements:'Stellt die Polizeistation als Ankerort bereit und behält die vereinbarte Zeitgrenze im Blick.'}
+ ];
+ const verlauf=[
+  {id:'BEISPIEL-SH1',caseId:BEISPIEL_FALL_ID,studentId:BEISPIEL_ID,beispiel:true,date:'2026-08-17',fromStatus:'',status:'Erste Kontaktaufnahme',responsible:'Edmund',
+   reason:'Fallakte nach der ersten dokumentierten Beobachtung am Einschulungstag angelegt.'},
+  {id:'BEISPIEL-SH2',caseId:BEISPIEL_FALL_ID,studentId:BEISPIEL_ID,beispiel:true,date:'2026-08-25',fromStatus:'Erste Kontaktaufnahme',status:'Klärungsphase',responsible:'Edmund',
+   reason:'Nach dem Elterngespräch lagen schulische und häusliche Sicht vor.'},
+  {id:'BEISPIEL-SH3',caseId:BEISPIEL_FALL_ID,studentId:BEISPIEL_ID,beispiel:true,date:'2026-08-28',fromStatus:'Klärungsphase',status:'Aktive Begleitung',responsible:'Edmund',
+   reason:'Drei Maßnahmen wurden verbindlich vereinbart und die Zuständigkeiten verteilt.'}
+ ];
+ const einschaetzungen=[
+  {id:'BEISPIEL-OA1',caseId:BEISPIEL_FALL_ID,studentId:BEISPIEL_ID,beispiel:true,createdAt:'2026-08-28T11:20:00.000Z',date:'2026-08-28',phase:'Beginn',perspective:'SSA',responsible:'Edmund',
+   schoolAttendance:'4',socialInclusion:'3',conflictSkills:'3',selfRegulation:'2',familySupport:'5',wellbeing:'2',
+   note:'Ausgangsbild zu Beginn der Begleitung. O. B. ist täglich in der Schule, die Familie trägt verlässlich mit. Belastet sind der Übergang am Morgen und das subjektive Wohlbefinden in dieser Zeit. Die Werte sind eine Verlaufseinschätzung und keine Diagnose.'},
+  {id:'BEISPIEL-OA2',caseId:BEISPIEL_FALL_ID,studentId:BEISPIEL_ID,beispiel:true,createdAt:'2026-09-11T11:20:00.000Z',date:'2026-09-11',phase:'Verlauf',perspective:'SSA',responsible:'Edmund',
+   schoolAttendance:'5',socialInclusion:'4',conflictSkills:'3',selfRegulation:'3',familySupport:'5',wellbeing:'3',
+   note:'Nach drei Wochen mit verlässlicher Struktur. Selbststeuerung und Wohlbefinden am Morgen haben sich erkennbar verbessert. Die Einschätzung beruht auf Beobachtung und Rückmeldung, nicht auf einem Testverfahren.'}
+ ];
+ return {schueler,fall,kontakte,plaene,aufgaben,bezuege,verlauf,einschaetzungen};
+}
+function beispielfallLaden(){
+ if(beispielfallVorhanden()){beispielfallOeffnen();return}
+ const d=beispielfallDaten();
+ data.students.push(d.schueler);
+ data.cases.push(d.fall);
+ data.contacts.push(...d.kontakte);
+ data.casePlans.push(...d.plaene);
+ data.tasks.push(...d.aufgaben);
+ data.relatedPersons.push(...d.bezuege);
+ data.statusHistory.push(...d.verlauf);
+ data.outcomeAssessments.push(...d.einschaetzungen);
+ logChange('Beispielfall geladen',BEISPIEL_FALL_ID,BEISPIEL_ID,'Edmund');
+ save();
+ toast('Der Beispielfall O. B. wurde geladen. Er ist überall als Beispiel gekennzeichnet und lässt sich jederzeit wieder entfernen.');
+ beispielfallOeffnen();
+}
+async function beispielfallEntfernen(){
+ if(!beispielfallVorhanden()){toast('Der Beispielfall ist derzeit nicht geladen.');return}
+ if(!await appConfirm('Beispielfall O. B. vollständig entfernen?\n\nAlle Einträge dieses Beispielfalls werden gelöscht. Echte Falldaten sind davon nicht betroffen.'))return;
+ const weg=x=>x.beispiel===true||String(x.studentId||'')===BEISPIEL_ID||String(x.caseId||'')===BEISPIEL_FALL_ID||String(x.id||'').startsWith('BEISPIEL-');
+ for(const key of ['contacts','casePlans','tasks','relatedPersons','statusHistory','outcomeAssessments','documentEvents','groupTalks','trainingRoom','schoolSignals'])
+  if(Array.isArray(data[key]))data[key]=data[key].filter(x=>!weg(x));
+ data.cases=data.cases.filter(c=>c.id!==BEISPIEL_FALL_ID&&c.studentId!==BEISPIEL_ID);
+ data.students=data.students.filter(s=>s.id!==BEISPIEL_ID);
+ logChange('Beispielfall entfernt',BEISPIEL_FALL_ID,BEISPIEL_ID,'Edmund');
+ save();
+ toast('Der Beispielfall wurde vollständig entfernt.');
+}
+function beispielfallOeffnen(){
+ if(!beispielfallVorhanden()){beispielfallLaden();return}
+ go('students');showStudent(BEISPIEL_ID);
+}
+function beispielfallBanner(){
+ if(!beispielfallVorhanden())return '';
+ return '<div class="alertitem" style="margin-bottom:17px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="grow"><strong>◆ Beispielfall O. B. ist geladen.</strong> Ein vollständig ausformulierter Übungsfall zum Anklicken. Er zählt in Listen und Statistiken mit, solange er geladen ist.</span><button class="btn" onclick="beispielfallOeffnen()">Beispielfall öffnen</button><button class="btn danger" onclick="beispielfallEntfernen()">Beispielfall entfernen</button></div>';
+}
+function beispielfallKarte(){
+ return beispielfallVorhanden()
+  ? '<div class="card"><h3>Beispielfall</h3><p class="subtle">Der Beispielfall O. B. ist geladen. Er zeigt einen vollständig ausformulierten Fallverlauf mit Beobachtung, Hypothese, drei Maßnahmen, Ziel- und Maßnahmenplan, Bezugspersonen und Wiedervorlage.</p><div class="actions"><button class="btn primary" onclick="beispielfallOeffnen()">Beispielfall öffnen</button><button class="btn danger" onclick="beispielfallEntfernen()">Beispielfall entfernen</button></div></div>'
+  : '<div class="card"><h3>Beispielfall</h3><p class="subtle">Ein vollständig ausformulierter Übungsfall zum Anklicken. Er zeigt, wie Beobachtung, Vermutung und Hypothese getrennt dokumentiert werden und wie Ziele, Maßnahmen und Wiedervorlagen zusammenhängen. Der Fall ist überall als Beispiel gekennzeichnet und lässt sich mit einem Klick wieder entfernen.</p><div class="actions"><button class="btn primary" onclick="beispielfallLaden()">Beispielfall laden</button></div></div>';
+}
+
+/* ===== Präventionsjahresplan der Ludgerusschule ===== */
+function praeventionProjektId(p,schuljahr){return 'PRAEV-'+schuljahr.replace('/','-')+'-JG'+p.jg+'-'+p.thema.toLocaleLowerCase('de-DE').replace(/[^a-z0-9]+/g,'').slice(0,14)}
+function ensurePraeventionsplan(state){
+ if(!Array.isArray(state.projects))state.projects=[];
+ const jahr=state.settings?.currentSchoolYear||'2026/27';
+ for(const p of PRAEVENTIONSPLAN){
+  const pid=praeventionProjektId(p,jahr);
+  if(state.projects.some(x=>x.id===pid))continue;
+  state.projects.push({id:pid,icon:'◈',
+   name:p.thema+' in Jahrgang '+p.jg,
+   group:'Jahrgang '+p.jg,
+   participants:0,
+   evidence:'B Offizieller Fachrahmen',
+   sessions:0,total:1,
+   unitMinutes:PRAEVENTION_DAUER,
+   partner:p.traeger,
+   rhythm:'jährlich im zweiten Schulhalbjahr',
+   since:PRAEVENTION_SEIT,
+   schoolYear:jahr,
+   plan:true,
+   need:'Fester Bestandteil des Präventionsplans der Ludgerusschule für Jahrgang '+p.jg+'. Läuft seit dem Schuljahr '+PRAEVENTION_SEIT+' jährlich im zweiten Schulhalbjahr.',
+   factors:'Schwerpunkt: '+p.fokus+'. Durchführung durch eine externe Fachstelle, Begleitung durch Klassenleitung und Schulsozialarbeit.',
+   goal:'Alle Klassen des Jahrgangs '+p.jg+' nehmen im zweiten Schulhalbjahr an einer Einheit von '+PRAEVENTION_DAUER+' Minuten zum Thema '+p.thema+' teil. Die Klassenleitung greift das Thema im Anschluss im Unterricht auf.',
+   fidelity:'Einheiten und Dauer dokumentieren',
+   evaluation:'Zielerreichung durch SSA und Lehrkraft getrennt einschätzen',
+   status:'Geplant',
+   reviewDate:''});
+ }
+ return state;
+}
+function renderBeispielKarte(){const el=document.getElementById('beispielfallKarte');if(el)el.innerHTML=beispielfallKarte()}
+function renderPraeventionsplan(){
+ const el=document.getElementById('praeventionsplanTable');if(!el)return;
+ const jahrgaenge=[...new Set(PRAEVENTIONSPLAN.map(p=>p.jg))];
+ el.innerHTML=jahrgaenge.map(jg=>{
+  const zeilen=PRAEVENTIONSPLAN.filter(p=>p.jg===jg);
+  return zeilen.map((p,i)=>`<tr>${i===0?`<td rowspan="${zeilen.length}"><strong>Jahrgang ${jg}</strong></td>`:''}<td>${p.thema}</td><td>${p.traeger}</td><td>${p.fokus}</td><td>${PRAEVENTION_DAUER} Min.</td></tr>`).join('')
+ }).join('');
+ const hinweis=document.getElementById('praeventionsplanHinweis');
+ if(hinweis)hinweis.textContent='Neun feste Angebote, jeweils eine Einheit von '+PRAEVENTION_DAUER+' Minuten. Der Plan läuft seit dem Schuljahr '+PRAEVENTION_SEIT+' jährlich im zweiten Schulhalbjahr. Für das Schuljahr '+(data.settings?.currentSchoolYear||'')+' sind die Angebote unten bereits als Projekte angelegt.';
+}
+
 function setupQuickForm(){const grid=document.querySelector('#quickForm .formgrid');if(!grid||grid.dataset.zweistufig)return;
  grid.dataset.zweistufig='1';
  [...grid.children].forEach(k=>{if(!k.querySelector('[required]'))k.classList.add('qf-detail')});
