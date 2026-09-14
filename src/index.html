@@ -80,6 +80,29 @@
 .field,.formgroup>input,.formgroup>select,.formgroup>textarea{min-width:0}
 .signal-metric{grid-template-columns:105px minmax(0,1fr) 45px}
 @media (max-width:900px){.formgrid,.detailgrid{grid-template-columns:1fr}}
+
+.ssachart{margin:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.ssachart figcaption{font-size:13px;font-weight:700;margin-bottom:6px;color:var(--ink)}
+.chartgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));gap:14px;margin-top:12px}
+.importschritte{margin:0;padding-left:22px;line-height:1.6}
+.importschritte li{margin-bottom:9px}
+.kanban-auftrag{margin:6px 0;font-size:13px}
+.kanban-meta{margin:3px 0;font-size:12px;color:var(--muted)}
+.kanban-link{margin-top:9px;width:100%;font-size:12px;padding:6px 8px}
+.hilfeknopf{font-weight:600}
+.tagbutton{cursor:pointer;border:1px solid var(--line);font:inherit;font-size:12px}
+.tagbutton:hover{filter:brightness(.94)}
+@media print{.sidebar,.topbar,.actions,.filters{display:none!important}}
+
+.netzkarte{padding:14px}
+.netzkarte h4{margin:0;font-size:15px}
+.netzkarte.intern{border-left:4px solid var(--teal)}
+.netzzeile{margin:5px 0;font-size:13px}
+.btn.kleiner{padding:5px 9px;font-size:12px}
+.kanban-aktionen{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.kanban-aktionen .btn{flex:1;min-width:78px;justify-content:center}
+.kanban-hinweis{margin:4px 0 8px;font-size:11px;color:var(--muted);line-height:1.35}
+#verlaufForm textarea{min-height:58px}
 </style>
 </head>
 <body>
@@ -117,7 +140,6 @@
           <button data-page="classes"><span class="icon">▤</span><span class="label">Klassen</span></button>
           <button data-page="teachers"><span class="icon">♧</span><span class="label">Lehrkräfte</span></button>
           <button data-page="trainingroom"><span class="icon">↺</span><span class="label">Trainingsraum</span></button>
-          <button data-page="ctc"><span class="icon">◈</span><span class="label">CTC-Bedarf</span></button>
           <button data-page="projects"><span class="icon">◫</span><span class="label">Projekte</span></button>
           <button data-page="network"><span class="icon">◎</span><span class="label">Gruppen & Netzwerk</span></button>
           <button data-page="workflows"><span class="icon">☷</span><span class="label">Fachverfahren</span></button>
@@ -125,10 +147,10 @@
         </div>
       </div>
     </nav>
-    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.5</span></div>
+    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.6</span></div>
   </aside>
   <main>
-    <header class="topbar"><div><h1 id="pageTitle">Guten Morgen, Dr. Bruns</h1><p id="pageSubtitle">Freitag, 11. September 2026 · Schuljahr 2026/27</p></div><div class="kopfsuche"><input class="field" id="globalSearch" type="search" autocomplete="off" placeholder="Schüler:in suchen: Name, Vorname, Klasse oder Klassenleitung" oninput="globalSearchTippen()" onfocus="globalSearchTippen()"><div id="globalSearchResults"></div></div><div class="actions"><button class="btn" onclick="lockPrivacyScreen()">🔒 Sperren</button><button class="btn" onclick="openModal('taskModal')">＋ Aufgabe</button><button class="btn primary" onclick="dokuWaehlen()">＋ Dokumentieren</button></div></header>
+    <header class="topbar"><div><h1 id="pageTitle">Guten Morgen, Dr. Bruns</h1><p id="pageSubtitle">Freitag, 11. September 2026 · Schuljahr 2026/27</p></div><div class="kopfsuche"><input class="field" id="globalSearch" type="search" autocomplete="off" placeholder="Schüler:in suchen: Name, Vorname, Klasse oder Klassenleitung" oninput="globalSearchTippen()" onfocus="globalSearchTippen()"><div id="globalSearchResults"></div></div><div class="actions"><button class="btn" onclick="lockPrivacyScreen()">🔒 Sperren</button><button class="btn" onclick="openModal('taskModal')">＋ Aufgabe</button><button class="btn primary" onclick="verlaufOeffnen()">＋ Fallverlauf</button><button class="btn" onclick="dokuWaehlen()">＋ Anderes</button></div></header>
     <div class="content">
       <section class="page active" id="dashboard">
         <div id="dashboardStart"></div>
@@ -150,7 +172,7 @@
         <div class="card tablewrap"><table><thead><tr><th>Eingang</th><th>Code</th><th>Person</th><th>Klasse</th><th>Thema</th><th>Wunsch</th><th>Dringlichkeit</th><th>Status</th></tr></thead><tbody id="requestTable"></tbody></table></div>
       </section>
       <section class="page" id="cases">
-        <div class="sectionhead"><div><h2>Fallarbeit</h2><div class="subtle">Verlauf, Ziele, Maßnahmen, Wirkung und Wiedervorlagen</div><div class="actions" style="margin-top:9px"><button class="btn primary" disabled>Als Tabelle</button><button class="btn" onclick="go('kanban')">Als Board</button></div></div><div class="filters"><input class="field search" id="caseSearch" placeholder="Name, Anlass, Ziel oder Maßnahme"><select class="field" id="caseFilter"><option value="all">Alle Status</option><option>Erste Kontaktaufnahme</option><option>Klärungsphase</option><option>Beratung</option><option>Aktive Begleitung</option><option>Weitervermittlung</option><option>Beobachtung</option><option>Vorläufig beendet</option><option>Abgeschlossen</option><option>Wiederaufgenommen</option></select><select class="field" id="caseClassFilter"><option value="all">Alle Klassen</option></select><button class="btn primary" onclick="openModal('caseModal')">＋ Fall anlegen</button></div></div>
+        <div class="sectionhead"><div><h2>Fallarbeit</h2><div class="subtle">Verlauf, Ziele, Maßnahmen, Wirkung und Wiedervorlagen</div><div class="actions" style="margin-top:9px"><button class="btn primary" disabled>Als Tabelle</button><button class="btn" onclick="go('kanban')">Als Board</button></div></div><div class="filters"><input class="field search" id="caseSearch" placeholder="Name, Anlass, Ziel oder Maßnahme"><select class="field" id="caseFilter"><option value="all">Alle Status</option><option>Erste Kontaktaufnahme</option><option>Klärungsphase</option><option>Beratung</option><option>Aktive Begleitung</option><option>Rückmeldung ausstehend</option><option>Weitervermittlung</option><option>Beobachtung</option><option>Vorläufig beendet</option><option>Abgeschlossen</option><option>Wiederaufgenommen</option></select><select class="field" id="caseClassFilter"><option value="all">Alle Klassen</option></select><button class="btn primary" onclick="openModal('caseModal')">＋ Fall anlegen</button></div></div>
         <div class="card tablewrap"><table><thead><tr><th>Schüler:in</th><th>Klasse</th><th>Anlass</th><th>Status</th><th>Letzter Kontakt</th><th>Kontakte</th></tr></thead><tbody id="caseTable"></tbody></table></div>
       </section>
       <section class="page" id="kanban">
@@ -175,6 +197,7 @@
         <div class="grid kpis" id="trainingKpis"></div><div class="alertlist" id="trainingAlerts"></div>
         <div class="sectionhead"><div></div><div class="filters"><input class="field search" id="trainingSearch" placeholder="Name, Klasse oder Anlass"><select class="field" id="trainingStatus"><option value="all">Alle Ergebnisse</option><option>Rückkehr vereinbart</option><option>Nachgespräch erforderlich</option><option>Abgebrochen</option></select><select class="field" id="trainingClassFilter"><option value="all">Alle Klassen</option></select></div></div>
         <div class="card tablewrap"><table><thead><tr><th>Datum</th><th>Schüler:in</th><th>Klasse</th><th>Anlass</th><th>Meldende Lehrkraft</th><th>Ergebnis</th><th>Plan</th><th>Druck</th></tr></thead><tbody id="trainingTable"></tbody></table></div>
+        <div id="trainingCharts" style="margin-top:17px"></div>
       </section>
       <section class="page" id="signals">
         <div class="sectionhead"><div><h2>Frühindikatoren</h2><div class="subtle">Fehlzeiten und Leistungsentwicklung regelbasiert auswerten</div></div><div class="actions"><button class="btn primary" onclick="classEmailOeffnen()">Sammel-E-Mail an Klassenleitung</button><button class="btn" onclick="downloadSignalTemplate()">Fehlzeiten-Vorlage</button><label class="btn primary">WebUntis-Fehlzeiten importieren<input type="file" accept=".csv,.txt,text/csv,text/plain" hidden onchange="importSchoolSignals(event)"></label><button class="btn" onclick="downloadTimetableTemplate()">Stundenplan-Vorlage</button><label class="btn primary">Stundenplan-CSV importieren<input type="file" accept=".csv,.txt,text/csv,text/plain" hidden onchange="importTimetable(event)"></label><button class="btn danger" onclick="resetTimetable()">Stundenplan leeren</button></div></div>
@@ -202,26 +225,30 @@
       </section>
       
       <section class="page" id="projects">
-        <div class="sectionhead"><div><h2>Projekte und Gruppen</h2><div class="subtle">Prävention, soziales Lernen und offene Angebote</div></div><button class="btn primary" onclick="openModal('projectModal')">＋ Projekt anlegen</button></div>
+        <div class="sectionhead"><div><h2>Projekte und Gruppen</h2><div class="subtle">Prävention, soziales Lernen und offene Angebote</div></div><div class="actions"><button class="btn" onclick="go('ctc')">Bedarf auf Gruppenebene</button><button class="btn primary" onclick="openModal('projectModal')">＋ Projekt anlegen</button></div></div>
         <div class="helpbox"><strong>Wozu?</strong> Hier planst und dokumentierst du Angebote für Gruppen oder Klassen (Prävention, soziales Lernen, offene Angebote). <strong>Wie starten?</strong> „＋ Projekt anlegen“, dann Ziel, Zielgruppe und Zeitraum eintragen. <strong>Tipp:</strong> Eine für eine Klasse dokumentierte Maßnahme lässt diese Klasse unter „Klassen“ farbig aufleuchten.</div>
         <div class="card" style="margin-bottom:17px"><div class="cardhead"><h3>Präventionsplan der Ludgerusschule</h3><span class="tag">jährlich im zweiten Schulhalbjahr</span></div><p class="subtle" id="praeventionsplanHinweis"></p><div class="tablewrap"><table><thead><tr><th>Jahrgang</th><th>Thema</th><th>Durchführung</th><th>Schwerpunkt</th><th>Dauer</th></tr></thead><tbody id="praeventionsplanTable"></tbody></table></div><p class="hint">Änderungen an Themen, Trägern oder Jahrgängen trägst du unten direkt im jeweiligen Projekt ein.</p></div>
         <div class="card" style="margin-bottom:17px"><div class="cardhead"><h3>Weitere geprüfte Präventionsprogramme</h3><span class="tag">Evidenz und Kontextpassung getrennt prüfen</span></div><p class="subtle">Die Evidenzstufe allein entscheidet nicht. Zielgruppe, Bedarf, Umsetzbarkeit, Akzeptanz, Dosis und sichere Einbettung müssen zur Ludgerusschule passen.</p><div class="tablewrap"><table><thead><tr><th>Angebot</th><th>Zielgruppe</th><th>Schwerpunkt</th><th>Evidenz</th><th>Einordnung</th></tr></thead><tbody id="preventionCatalog"></tbody></table></div></div>
         
         <div class="grid three" id="projectGrid"></div>
+        <div class="card" style="margin-top:17px"><div class="cardhead"><h3>Schulinterne Angebote</h3><span class="tag">kontextbezogen auswählen</span></div><div class="grid two"><div class="notice"><strong>Palaverzelt</strong><br>Für freiwillige Konfliktklärung bei geeigneten Konflikten. Nicht bei Mobbing, Gewalt, Schutzfragen oder erheblichem Machtungleichgewicht.</div><div class="notice"><strong>Sozialtraining durch die SSA</strong><br>Für Klassenklima, Kooperation, Kommunikation, Konfliktfähigkeit und soziale Kompetenzen.</div><div class="notice"><strong>Medienbuddys</strong><br>Für niedrigschwellige Medienfragen, digitales Miteinander und geeignete Cyberkonflikte unter Begleitung Erwachsener.</div><div class="notice"><strong>Vertrauenslehrkraft</strong><br>Als zusätzliche schulinterne Ansprechmöglichkeit, wenn Rolle, Vertraulichkeit und Informationswege geklärt sind.</div></div></div>
+      
+        <div class="card" style="margin-top:17px"><div class="cardhead"><h3>Geprüfte Präventionsprogramme der Grünen Liste</h3><span class="tag">111 Programme im Auszug</span></div><p class="subtle">Die Grüne Liste Prävention des Landespräventionsrats Niedersachsen ist die Programmdatenbank, auf die sich CTC stützt. Sie sagt dir, für welches Angebot es belastbare Wirksamkeitsnachweise gibt. Nutze sie, wenn du aus einer Bedarfsbeobachtung ein konkretes Angebot ableiten willst: Erst den Bedarf beschreiben, dann hier ein passendes Programm suchen, dann unter Projekte anlegen und dort den Evidenzstatus eintragen.</p><div class="filters" style="margin:12px 0"><input class="field search" id="grueneSuche" placeholder="Programm suchen, zum Beispiel Konflikt, Medien oder Eltern" oninput="renderGrueneListe()"><label style="display:flex;align-items:center;gap:7px"><input type="checkbox" id="grueneNurEigene" onchange="renderGrueneListe()"> Nur Programme, die bei dir schon hinterlegt sind</label></div><div id="grueneListe"></div><p class="hint">Stand 14.09.2026, übernommen aus der offiziellen Datenbank gruene-liste-praevention.de. Dort sind derzeit 127 Programme gelistet, hier sind 111 Namen hinterlegt. Für die vollständige und tagesaktuelle Fassung schau bitte in die Datenbank selbst. Stufe 1 bedeutet nachgewiesene Wirksamkeit, Stufe 2 wahrscheinliche Wirksamkeit, Stufe 3 theoretisch gute Begründung. Die Einstufung ersetzt keine fachliche Entscheidung über die Passung vor Ort.</p></div>
+      
       </section>
       <section class="page" id="ctc">
-        <div class="sectionhead"><div><h2>CTC-Bedarfsplanung</h2><div class="subtle">Risiko- und Schutzfaktoren auf Klassen-, Jahrgangs- oder Schulebene betrachten</div></div><button class="btn primary" onclick="openCTCModal()">＋ Bedarfsbeobachtung</button></div>
+        <div class="sectionhead"><div><h2>Bedarf auf Gruppenebene</h2><div class="subtle">Beobachtungen zu Klassen, Jahrgängen oder der ganzen Schule, ohne Namen</div></div><div class="actions"><button class="btn" onclick="go('projects')">Zurück zu Projekte</button><button class="btn primary" onclick="openCTCModal()">＋ Bedarfsbeobachtung</button></div></div>
         <div class="helpbox"><strong>Wann nutzen?</strong> Wenn dir bei einer ganzen Klasse oder einem Jahrgang etwas auffällt (viele Konflikte, Unruhe, Rückzug), es aber nicht um ein einzelnes Kind geht. <strong>Wie?</strong> Auf „＋ Bedarfsbeobachtung“ klicken, die Gruppe und deine Beobachtung eintragen. <strong>Warum?</strong> So erkennst du früh, wo eine Prävention sinnvoll ist, ganz ohne Namen oder Einzelbewertung.</div>
         <div class="notice warning"><strong>Keine Einzelfallbewertung:</strong> Hier werden ausschließlich zusammengefasste Beobachtungen für Gruppen ab fünf Personen dokumentiert. Namen, individuelle CTC-Werte, Diagnosen und automatische Fallanlagen gehören nicht in dieses Modul.</div>
         <div class="grid kpis" id="ctcKpis"></div>
         <div class="sectionhead"><div><h3>Bedarfslagen und Handlungsempfehlungen</h3></div><div class="filters"><input class="field search" id="ctcSearch" placeholder="Gruppe, Bereich oder Quelle"><select class="field" id="ctcFilter"><option value="all">Alle Ampelfarben</option><option value="red">Rot</option><option value="amber">Gelb</option><option value="green">Grün</option></select></div></div>
         <div class="grid two" id="ctcGrid"></div>
-        <div class="card" style="margin-top:17px"><div class="cardhead"><h3>Schulinterne Angebote</h3><span class="tag">kontextbezogen auswählen</span></div><div class="grid two"><div class="notice"><strong>Palaverzelt</strong><br>Für freiwillige Konfliktklärung bei geeigneten Konflikten. Nicht bei Mobbing, Gewalt, Schutzfragen oder erheblichem Machtungleichgewicht.</div><div class="notice"><strong>Sozialtraining durch die SSA</strong><br>Für Klassenklima, Kooperation, Kommunikation, Konfliktfähigkeit und soziale Kompetenzen.</div><div class="notice"><strong>Medienbuddys</strong><br>Für niedrigschwellige Medienfragen, digitales Miteinander und geeignete Cyberkonflikte unter Begleitung Erwachsener.</div><div class="notice"><strong>Vertrauenslehrkraft</strong><br>Als zusätzliche schulinterne Ansprechmöglichkeit, wenn Rolle, Vertraulichkeit und Informationswege geklärt sind.</div></div></div>
-      
-        <div class="card" style="margin-top:17px"><div class="cardhead"><h3>Geprüfte Präventionsprogramme der Grünen Liste</h3><span class="tag">111 Programme im Auszug</span></div><p class="subtle">Die Grüne Liste Prävention des Landespräventionsrats Niedersachsen ist die Programmdatenbank, auf die sich CTC stützt. Sie sagt dir, für welches Angebot es belastbare Wirksamkeitsnachweise gibt. Nutze sie, wenn du aus einer Bedarfsbeobachtung ein konkretes Angebot ableiten willst: Erst den Bedarf beschreiben, dann hier ein passendes Programm suchen, dann unter Projekte anlegen und dort den Evidenzstatus eintragen.</p><div class="filters" style="margin:12px 0"><input class="field search" id="grueneSuche" placeholder="Programm suchen, zum Beispiel Konflikt, Medien oder Eltern" oninput="renderGrueneListe()"><label style="display:flex;align-items:center;gap:7px"><input type="checkbox" id="grueneNurEigene" onchange="renderGrueneListe()"> Nur Programme, die bei dir schon hinterlegt sind</label></div><div id="grueneListe"></div><p class="hint">Stand 14.09.2026, übernommen aus der offiziellen Datenbank gruene-liste-praevention.de. Dort sind derzeit 127 Programme gelistet, hier sind 111 Namen hinterlegt. Für die vollständige und tagesaktuelle Fassung schau bitte in die Datenbank selbst. Stufe 1 bedeutet nachgewiesene Wirksamkeit, Stufe 2 wahrscheinliche Wirksamkeit, Stufe 3 theoretisch gute Begründung. Die Einstufung ersetzt keine fachliche Entscheidung über die Passung vor Ort.</p></div>
-      </section>
+        </section>
       <section class="page" id="network">
-        <div class="sectionhead"><div><h2>Gruppengespräche und Netzwerk</h2><div class="subtle">Mehrere Schüler:innen gemeinsam dokumentieren und passende Hilfen schnell finden</div></div><div class="actions"><button class="btn" onclick="openModal('partnerModal')">＋ Kooperationspartner</button><button class="btn primary" onclick="openGroupTalk()">＋ Gruppengespräch</button></div></div>
+        <div class="sectionhead"><div><h2>Gruppen und Netzwerk</h2><div class="subtle">Mehrere Schüler:innen gemeinsam dokumentieren und passende Hilfen schnell finden</div></div><div class="actions"><button class="btn" onclick="openModal('partnerModal')">＋ Kooperationspartner</button><button class="btn primary" onclick="openGroupTalk()">＋ Gruppengespräch</button></div></div>
+        <div class="sectionhead"><div><h3>Netzwerkpartner und schulinterne Hilfen</h3><div class="subtle" id="netzZaehler"></div></div><div class="actions"><button class="btn" onclick="netzwerkVorlageSpeichern()">CSV-Vorlage speichern</button><label class="btn primary">Netzwerkliste importieren<input type="file" accept=".csv,.txt,text/csv,text/plain" hidden onchange="netzwerkImport(event)"></label><button class="btn" onclick="openModal('partnerModal')">＋ Einzelner Kontakt</button></div></div>
+        <div class="filters" style="margin-bottom:14px"><input class="field search" id="netzSuche" placeholder="Einrichtung, Angebot, Ort oder Stichwort" oninput="renderNetzwerkBereiche()"><select class="field" id="netzRegion" onchange="renderNetzwerkBereiche()"><option value="all">Alle Regionen</option></select><select class="field" id="netzBereich" onchange="renderNetzwerkBereiche()"><option value="all">Alle Bereiche</option><option>Schulintern</option><option>Kooperationspartner</option><option>Sozialraum</option><option>Krise und Notfall</option><option>Übergang Schule und Beruf</option></select><select class="field" id="netzPrio" onchange="renderNetzwerkBereiche()"><option value="all">Alle Prioritäten</option><option value="sehr hoch">sehr hoch</option><option value="hoch">hoch</option><option value="mittel">mittel</option></select></div>
+        <div id="netzwerkBereiche"></div>
         <div class="filters" style="margin-bottom:15px"><input class="field search" id="networkSearch" placeholder="Einrichtung, Person oder Angebot suchen"><select class="field" id="networkCategory"><option value="all">Alle Bereiche</option></select><select class="field" id="networkNeed"><option value="">Passende Hilfe auswählen</option><option>Schulinterne Unterstützung</option><option>Konfliktklärung</option><option>Medien und Cyberkonflikte</option><option>Soziales Lernen und Klassenklima</option><option>Kinderschutz</option><option>Familie und Erziehung</option><option>Sucht</option><option>Schulische Krise</option><option>Gewalt und Polizei</option><option>Sexualisierte Gewalt</option><option>Soziale Notlage</option></select></div><div class="notice" id="networkSuggestion">Wähle ein Anliegen aus, um passende regionale oder schulinterne Ansprechstellen hervorzuheben.</div><div class="grid two"><div class="card"><div class="cardhead"><h3>Gruppengespräche</h3><span class="tag" id="groupTalkCount"></span></div><div class="list" id="groupTalkList"></div></div><div class="card"><div class="cardhead"><h3>Kooperationspartner und schulinterne Hilfen</h3><span class="tag" id="partnerCount"></span></div><div class="list" id="partnerList"></div></div></div>
       </section>
       <section class="page" id="tasks">
@@ -229,7 +256,7 @@
         <div class="card"><div class="list" id="taskList"></div></div>
       </section>
       <section class="page" id="statistics">
-        <div class="sectionhead"><div><h2>Interne Statistik 2026/27</h2><div class="subtle">Arbeitsübersicht für Sabine und Edmund</div></div><div class="actions"><button class="btn" onclick="printAnnualReport()">Jahresbericht / PDF</button><button class="btn" onclick="downloadAnnualReportDoc()">Word-Datei</button><button class="btn" onclick="exportCSV()">CSV exportieren</button></div></div>
+        <div class="sectionhead"><div><h2>Interne Statistik 2026/27</h2><div class="subtle">Arbeitsübersicht für Sabine und Edmund</div></div><div class="actions"><button class="btn" onclick="druckDateiSpeichern()">Bericht als Datei speichern</button><button class="btn primary" onclick="printAnnualReport()">Jahresbericht / PDF</button><button class="btn" onclick="downloadAnnualReportDoc()">Word-Datei</button><button class="btn" onclick="exportCSV()">CSV exportieren</button></div></div>
         <div class="grid kpis" id="statKpis"></div><div class="card" style="margin-bottom:17px"><div class="cardhead"><h3>Fachlicher Jahresrückblick</h3><span class="tag">erscheint anonymisiert im Bericht</span></div><textarea class="field report-note" id="annualNarrative" placeholder="Schwerpunkte, Entwicklungen, Kooperationen und fachliche Einordnung…" oninput="saveAnnualNarrative(this.value)"></textarea></div>
         <div class="card" style="margin-bottom:17px"><div class="cardhead"><h3>Prozess- und Ergebnisqualität</h3><span class="tag gray">keine Rangliste von Personen</span></div><p class="subtle">Dokumentationsqualität, Umsetzung und Ergebnisse werden getrennt betrachtet. Fallzahl und Reichweite allein sind kein Wirksamkeitsnachweis.</p><div id="qualityBars"></div></div>
         <div class="grid two"><div class="card"><div class="cardhead"><h2>Beratungen nach Monat</h2></div><div id="statMonths"></div></div><div class="card"><div class="cardhead"><h2>Themen nach Jahrgang</h2></div><div id="statGradeThemes"></div></div><div class="card"><div class="cardhead"><h2>Einzelkontakte und Gruppenangebote</h2></div><div id="statContactMix"></div></div><div class="card"><div class="cardhead"><h2>Fehlzeitenentwicklung</h2></div><div id="statAbsenceTrend"></div></div><div class="card"><div class="cardhead"><h2>Weitervermittlungen</h2></div><div id="statReferrals"></div></div><div class="card"><div class="cardhead"><h2>Zielentwicklung</h2></div><div id="statGoals"></div></div><div class="card"><div class="cardhead"><h2>Zeitaufwand nach Tätigkeitsfeld</h2></div><div id="statTimeFields"></div></div><div class="card"><div class="cardhead"><h2>Präventive und intervenierende Arbeit</h2></div><div id="statPrevention"></div></div><div class="card"><div class="cardhead"><h2>Wiederkehrende Problemlagen</h2></div><div id="statReasons"></div></div><div class="card"><div class="cardhead"><h2>Arbeitsebenen</h2></div><div id="statLevels"></div></div><div class="card"><div class="cardhead"><h2>Kontakt- und Angebotsarten</h2></div><div id="statTypes"></div></div></div>
@@ -245,12 +272,40 @@
           <div class="card"><h3>Vorgangsdaten zurücksetzen</h3><p class="subtle">Löscht den aktuellen Arbeitsbestand nach vorheriger verschlüsselter Sicherung.</p><button class="btn danger" onclick="resetData()">Arbeitsbestand zurücksetzen</button></div>
         </div>
         <div id="beispielfallKarte" style="margin-top:17px"></div>
-        <div class="card" style="margin-top:17px"><h3>Lokale Spracherkennung</h3><p class="subtle">Das Mikrofon sendet die Aufnahme ausschließlich an einen Transkriptionsdienst auf diesem Computer.</p><div class="formgroup"><label>Lokale Adresse</label><input class="field" id="speechEndpoint" value="http://127.0.0.1:8173/transcribe" onchange="saveSpeechSettings()"></div><div class="actions" style="margin-top:12px"><button class="btn" onclick="testSpeechService()">Verbindung prüfen</button><span class="tag gray" id="speechStatus">noch nicht geprüft</span></div></div>
+        <div class="card" style="margin-top:17px"><h3>Lokale Spracherkennung</h3><p class="subtle">Das Mikrofon sendet die Aufnahme ausschließlich an einen Transkriptionsdienst auf diesem Computer.</p><div class="formgroup"><label>Lokale Adresse</label><input class="field" id="speechEndpoint" value="http://127.0.0.1:8173/transcribe" onchange="saveSpeechSettings()"></div><div class="actions" style="margin-top:12px"><button class="btn" onclick="testSpeechService()">Verbindung prüfen</button><span class="tag gray" id="speechStatus">noch nicht geprüft</span><button class="btn primary" onclick="diktatStartdateiSpeichern()">Startdatei für den Diktatdienst speichern</button></div><div class="notice" style="margin-top:12px"><strong>Sofort nutzbar, ganz ohne Einrichtung:</strong> Klicke in ein Textfeld und drücke die <strong>Windows-Taste zusammen mit H</strong>. Windows schreibt dann mit. Erneut drücken beendet die Aufnahme.</div><p class="hint">Die Schaltfläche Diktat in den Textfeldern braucht den lokalen Dienst. Solange er nicht läuft, erscheint dort eine Anleitung statt einer Fehlermeldung.</p></div>
       </section>
     </div>
   </main>
 </div>
 
+<div class="modal" id="verlaufModal"><div class="dialog wide"><div class="dialoghead"><h2>Fallverlauf erfassen</h2><button class="close" onclick="closeModal('verlaufModal')">×</button></div>
+<form id="verlaufForm" onsubmit="event.preventDefault();verlaufSpeichern(true)"><div class="dialogbody">
+<div id="verlaufBezug"></div>
+<div class="notice">Vier kurze Angaben reichen: Was ist passiert, was wurde getan, wie ging es aus, was ist der nächste Schritt. Fallakte, Zeitachse, Aufgabe und Karte im Fallboard entstehen daraus von selbst.</div>
+<div class="formgrid">
+ <div class="formgroup"><label>Art des Eintrags</label><select class="field" name="vorlage" id="verlaufVorlage" onchange="verlaufVorlageWechseln()"></select></div>
+ <div class="formgroup"><label>Datum</label><input class="field" type="date" name="date" required></div>
+ <div class="formgroup full"><label>Schüler:in</label><input class="field" id="verlaufSuche" placeholder="Name eintippen, dann wird unten ausgewählt" oninput="jumpToStudent(this.value,'verlaufStudent','verlaufTreffer')"><select class="field" name="studentId" id="verlaufStudent" required style="margin-top:7px"></select><span class="hint" id="verlaufTreffer">Nach zwei Buchstaben wird der erste passende Name ausgewählt.</span></div>
+ <div class="formgroup full"><label>Was ist passiert?</label><textarea class="field" name="content" id="verlaufEreignis" rows="2" required></textarea></div>
+ <div class="formgroup full"><label>Was wurde getan?</label><textarea class="field" name="measureDetail" id="verlaufMassnahme" rows="2"></textarea></div>
+ <div class="formgroup full"><label>Wie ging es aus?</label><textarea class="field" name="resultDetail" id="verlaufErgebnis" rows="2"></textarea></div>
+ <div class="formgroup"><label>Nächster Schritt</label><input class="field" name="nextStep" id="verlaufNext"></div>
+ <div class="formgroup"><label>Wiedervorlage</label><input class="field" type="date" name="due" id="verlaufDue"><span class="hint">Leer lassen, wenn nichts nachzuhalten ist.</span></div>
+</div>
+<div class="actions" style="margin:14px 0"><button type="button" class="btn" id="verlaufMehr" onclick="verlaufVertiefen()">Fachlich ergänzen</button><span class="hint">Einschätzung, Ziel, Beteiligte, Weitervermittlung, Dauer und Sicherheitsprüfung.</span></div>
+<div class="formgrid" id="verlaufDetail" hidden>
+ <div class="formgroup"><label>Fachliche Entwicklungseinschätzung</label><select class="field" name="trend"><option>Nicht bewertet</option><option>deutlich verbessert</option><option>verbessert</option><option>stabil</option><option>wechselhaft</option><option>verschlechtert</option><option>akut zugespitzt</option><option>derzeit nicht einschätzbar</option></select></div>
+ <div class="formgroup"><label>Dauer in Minuten</label><input class="field" type="number" min="0" max="600" name="duration" id="verlaufDauer"></div>
+ <div class="formgroup"><label>Anlass</label><select class="field" name="reason"><option value="">Aus der Vorlage übernehmen</option><option>Konflikt</option><option>Emotionales Wohlbefinden</option><option>Schulbesuch und Fehlzeiten</option><option>Verhalten im Unterricht</option><option>Familie und Erziehung</option><option>Freundschaft und soziale Beziehungen</option><option>Mobbing oder Cybermobbing</option><option>Psychische Belastung, Angst oder Rückzug</option><option>Suchtmittel, Mediennutzung oder Glücksspiel</option><option>Gewalt, Bedrohung oder Waffen</option><option>Trauer, Trauma oder schweres Lebensereignis</option><option>Inklusion und Teilhabe</option><option>Armut, Grundversorgung oder Bildungsteilhabe</option><option>Berufsorientierung oder Übergang</option><option>Gesundheit</option><option>Kinderschutz</option><option>Soziales Lernen und Klassenklima</option><option>Sonstiges</option></select></div>
+ <div class="formgroup"><label>Sicherheitsprüfung</label><select class="field" name="safetyStatus"><option>Kein akuter Sicherheitshinweis in diesem Vorgang</option><option>Akute Selbstgefährdung fachlich zu klären</option><option>Akute Fremdgefährdung fachlich zu klären</option><option>Kindeswohlverfahren fachlich zu prüfen</option><option>Medizinischer Notfall oder unmittelbare Gefahr</option><option>Sicherheitsprüfung derzeit nicht abschließend möglich</option></select></div>
+ <div class="formgroup full"><label>Ziel dieser Fallarbeit</label><input class="field" name="goal" placeholder="Beobachtbar formuliert, zum Beispiel: geht ohne Begleitung in den Klassenraum"></div>
+ <div class="formgroup full"><label>Weitere Beteiligte</label><input class="field" name="participantsOther" placeholder="Klassenleitung, Erziehungsberechtigte, externe Stelle"></div>
+ <div class="formgroup full"><label>Weitervermittlung an</label><select class="field" name="partnerId" id="verlaufPartner"></select><span class="hint">Erzeugt keinen neuen Fall. Die Weitervermittlung wird als Maßnahme in diesem Fall dokumentiert.</span></div>
+ <div class="formgroup full"><label>Dokumentiert von</label><select class="field" name="responsible"><option>Edmund</option><option>Sabine</option><option>Edmund und Sabine</option></select></div>
+</div>
+</div>
+<div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('verlaufModal')">Abbrechen</button><button type="button" class="btn" onclick="verlaufSpeichern(false)">Nur speichern</button><button type="submit" class="btn primary">Speichern und Wiedervorlage anlegen</button></div>
+</form></div></div>
 <div class="modal" id="quickModal"><div class="dialog"><div class="dialoghead"><h2>Schnellerfassung</h2><button class="close" onclick="closeModal('quickModal')">×</button></div><form id="quickForm"><div class="dialogbody"><div class="helpbox"><strong>Was ist das?</strong> Hier hältst du fest, was schon passiert ist: ein Gespräch, eine Maßnahme oder eine Abstimmung. Jeder Eintrag wird datiert im Verlauf gespeichert. <strong>Neue Situation?</strong> Wähle oben einfach die Schülerin oder den Schüler. Ist dort noch keine Fallakte, wird sie beim Speichern automatisch angelegt. <strong>So geht es am schnellsten:</strong> Fülle die wenigen Felder aus, die hier stehen, und speichere. Mit <strong>Fachlich vertiefen</strong> blendest du die ausführliche Dokumentation ein, wenn du sie brauchst. <strong>Pflichtfelder</strong> sind nur die farbig markierten (Fall bzw. Schüler:in, Datum, Dauer, Sicherheitsprüfung). Alles Übrige ist Hilfestellung und kann leer bleiben.</div><div class="formgrid">
   <div class="formgroup full"><h3>1. Einordnung des Vorgangs</h3><span class="hint">Die Phasen orientieren sich am Arbeitsbogen der Fallarbeit. Sie sind eine Reflexionshilfe und keine starre Reihenfolge.</span></div>
   <div class="formgroup"><label>Schüler:in / Fall</label><select class="field" name="caseId" id="quickCase" required></select><span class="hint">Bestehende Fallakte wählen oder eine Schüler:in ohne Fallakte. Dann wird automatisch eine Fallakte angelegt.</span></div><div class="formgroup"><label>Dokumentiert von</label><select class="field" name="responsible"><option>Edmund</option><option>Sabine</option><option>Edmund und Sabine</option></select></div>
@@ -330,7 +385,7 @@
 
 <div class="modal" id="yearReviewModal"><div class="dialog"><div class="dialoghead"><h2>Schuljahreswechsel prüfen</h2><button class="close" onclick="cancelYearChange()">×</button></div><div class="dialogbody"><div class="notice warning">Noch wurden keine Daten verändert. Prüfe besonders Wiederholer, Namensabweichungen und Abgänge.</div><div class="reviewsummary" id="yearReviewSummary"></div><div class="tablewrap"><table><thead><tr><th>Name</th><th>bisher</th><th>neu</th><th>Bewertung</th></tr></thead><tbody id="yearReviewTable"></tbody></table></div></div><div class="dialogfoot"><button class="btn" onclick="cancelYearChange()">Abbrechen</button><button class="btn primary" id="applyYearButton" onclick="applyYearChange()">Geprüfte Änderungen übernehmen</button></div></div></div>
 
-<div class="modal" id="signalReviewModal"><div class="dialog"><div class="dialoghead"><h2>Frühindikator fachlich prüfen</h2><button class="close" onclick="closeModal('signalReviewModal')">×</button></div><form id="signalReviewForm"><div class="dialogbody"><div class="notice">Die Software zeigt nur dokumentierte Tatsachen. Du entscheidest, ob daraus ein Handlungsschritt folgt.</div><div id="signalReviewFacts" class="detailgrid" style="margin-bottom:16px"></div><div class="formgrid"><div class="formgroup full"><label>Fachliche Entscheidung</label><select class="field" name="reviewStatus" required><option>Noch nicht geprüft</option><option>Kein Handlungsbedarf</option><option>Rücksprache mit Klassenleitung</option><option>Gesprächsangebot</option><option>Beobachtungszeitraum</option><option>Fallarbeit fachlich prüfen</option><option>Kooperation oder Weiterleitung prüfen</option></select></div><div class="formgroup full"><label>Schulabsentismus-Stufe. Fachliche Einordnung</label><select class="field" name="absenceStage"><option value="">Noch nicht eingeordnet oder nicht erforderlich</option><option>0 Prävention und Datenqualität</option><option>1 Erstereignis</option><option>2 Wiederholung</option><option>3 Verfestigung</option><option>4 Formale Eskalation</option><option>5 Wiedereingliederung</option></select><span class="hint">Die Stufe wird nicht aus einer Zahl automatisch festgelegt.</span></div><div class="formgroup full"><label>Umgesetzter oder vereinbarter Handlungsschritt</label><select class="field" name="absenceAction"><option value="">Noch kein Handlungsschritt dokumentiert</option><option>Datenqualität und Entschuldigungsstatus geprüft</option><option>Taggleicher Kontakt durch Schule erfolgt</option><option>Rücksprache mit Klassenleitung erfolgt oder vereinbart</option><option>Gespräch mit Schüler:in angeboten oder durchgeführt</option><option>Elterngespräch angeboten oder durchgeführt</option><option>SSA-Unterstützung freiwillig angeboten</option><option>Multiprofessionelles Fallteam oder Unterstützungsnetz geplant</option><option>Rückkehrplan erstellt oder überprüft</option><option>Formaler schulischer Schritt durch die Schulleitung geprüft</option><option>Jugendamt oder andere zuständige Stelle fachlich geprüft</option><option>Kein weiterer Schritt erforderlich</option></select></div><div class="formgroup"><label>Geprüft von</label><select class="field" name="reviewedBy"><option>Edmund</option><option>Sabine</option><option>Edmund und Sabine</option></select></div><div class="formgroup"><label>Prüfdatum</label><input class="field" type="date" name="reviewedAt"></div><div class="formgroup full"><label>Kurze fachliche Begründung. Schnellauswahl</label><select class="field" onchange="applyPreset(this,'signalReviewNote')"><option value="">Bitte auswählen oder Freitext verwenden</option><option>Der eingestellte Schwellenwert ist erreicht. Vor einer weiteren Entscheidung werden Datenqualität und Entschuldigungsstatus geprüft.</option><option>Die dokumentierten Fehlzeiten machen eine sachliche Rücksprache mit der Klassenleitung erforderlich.</option><option>Zur Einordnung werden zunächst mögliche Muster nach Wochentagen, Unterrichtszeiten und Fehlgründen geprüft.</option><option>Der bisherige Verlauf wird für einen festgelegten Zeitraum beobachtet und anschließend erneut ausgewertet.</option><option>Ein freiwilliges Gesprächsangebot durch die Schulsozialarbeit erscheint als angemessener nächster Schritt.</option><option>Ein Gespräch mit der Schülerin oder dem Schüler und den Erziehungsberechtigten sollte fachlich geprüft werden.</option><option>Aufgrund wiederholter Fehlzeiten sollte ein abgestimmter Unterstützungs- oder Rückkehrplan geprüft werden.</option><option>Die Angaben erklären den individuellen Hintergrund noch nicht. Eine Diagnose oder automatische Fallanlage erfolgt nicht.</option><option>Nach fachlicher Prüfung besteht derzeit kein weiterer Handlungsbedarf; die Entscheidung wird bei neuen Tatsachen erneut geprüft.</option><option value="">Eigene fachliche Begründung formulieren</option></select><textarea class="field" id="signalReviewNote" name="reviewNote" placeholder="Auswahl frei verändern, ergänzen oder eine eigene Begründung eintragen. Keine Diagnose."></textarea></div></div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('signalReviewModal')">Abbrechen</button><button type="button" class="btn" onclick="persistSignalReview(true)">Speichern und E-Mail-Entwurf</button><button class="btn primary">Prüfung speichern</button></div></form></div></div>
+<div class="modal" id="signalReviewModal"><div class="dialog"><div class="dialoghead"><h2>Frühindikator fachlich prüfen</h2><button class="close" onclick="closeModal('signalReviewModal')">×</button></div><form id="signalReviewForm"><div class="dialogbody"><div class="notice">Die Software zeigt nur dokumentierte Tatsachen. Du entscheidest, ob daraus ein Handlungsschritt folgt.</div><div id="signalReviewFacts" class="detailgrid" style="margin-bottom:16px"></div><div class="formgrid"><div class="formgroup full"><label>Fachliche Entscheidung</label><select class="field" name="reviewStatus" required><option>Noch nicht geprüft</option><option>Fachlich prüfen</option><option>Beobachtung läuft</option><option>Maßnahme erforderlich</option><option>Rücksprache mit Klassenleitung</option><option>Gesprächsangebot</option><option>Beobachtungszeitraum</option><option>Fallarbeit fachlich prüfen</option><option>Kooperation oder Weiterleitung prüfen</option><option>Keine weitere Maßnahme</option><option>Kein Handlungsbedarf</option><option>Abgeschlossen</option></select></div><div class="formgroup full"><label>Schulabsentismus-Stufe. Fachliche Einordnung</label><select class="field" name="absenceStage"><option value="">Noch nicht eingeordnet oder nicht erforderlich</option><option>0 Prävention und Datenqualität</option><option>1 Erstereignis</option><option>2 Wiederholung</option><option>3 Verfestigung</option><option>4 Formale Eskalation</option><option>5 Wiedereingliederung</option></select><span class="hint">Die Stufe wird nicht aus einer Zahl automatisch festgelegt.</span></div><div class="formgroup full"><label>Umgesetzter oder vereinbarter Handlungsschritt</label><select class="field" name="absenceAction"><option value="">Noch kein Handlungsschritt dokumentiert</option><option>Datenqualität und Entschuldigungsstatus geprüft</option><option>Taggleicher Kontakt durch Schule erfolgt</option><option>Rücksprache mit Klassenleitung erfolgt oder vereinbart</option><option>Gespräch mit Schüler:in angeboten oder durchgeführt</option><option>Elterngespräch angeboten oder durchgeführt</option><option>SSA-Unterstützung freiwillig angeboten</option><option>Multiprofessionelles Fallteam oder Unterstützungsnetz geplant</option><option>Rückkehrplan erstellt oder überprüft</option><option>Formaler schulischer Schritt durch die Schulleitung geprüft</option><option>Jugendamt oder andere zuständige Stelle fachlich geprüft</option><option>Kein weiterer Schritt erforderlich</option></select></div><div class="formgroup"><label>Geprüft von</label><select class="field" name="reviewedBy"><option>Edmund</option><option>Sabine</option><option>Edmund und Sabine</option></select></div><div class="formgroup"><label>Prüfdatum</label><input class="field" type="date" name="reviewedAt"></div><div class="formgroup full"><label>Kurze fachliche Begründung. Schnellauswahl</label><select class="field" onchange="applyPreset(this,'signalReviewNote')"><option value="">Bitte auswählen oder Freitext verwenden</option><option>Der eingestellte Schwellenwert ist erreicht. Vor einer weiteren Entscheidung werden Datenqualität und Entschuldigungsstatus geprüft.</option><option>Die dokumentierten Fehlzeiten machen eine sachliche Rücksprache mit der Klassenleitung erforderlich.</option><option>Zur Einordnung werden zunächst mögliche Muster nach Wochentagen, Unterrichtszeiten und Fehlgründen geprüft.</option><option>Der bisherige Verlauf wird für einen festgelegten Zeitraum beobachtet und anschließend erneut ausgewertet.</option><option>Ein freiwilliges Gesprächsangebot durch die Schulsozialarbeit erscheint als angemessener nächster Schritt.</option><option>Ein Gespräch mit der Schülerin oder dem Schüler und den Erziehungsberechtigten sollte fachlich geprüft werden.</option><option>Aufgrund wiederholter Fehlzeiten sollte ein abgestimmter Unterstützungs- oder Rückkehrplan geprüft werden.</option><option>Die Angaben erklären den individuellen Hintergrund noch nicht. Eine Diagnose oder automatische Fallanlage erfolgt nicht.</option><option>Nach fachlicher Prüfung besteht derzeit kein weiterer Handlungsbedarf; die Entscheidung wird bei neuen Tatsachen erneut geprüft.</option><option value="">Eigene fachliche Begründung formulieren</option></select><textarea class="field" id="signalReviewNote" name="reviewNote" placeholder="Auswahl frei verändern, ergänzen oder eine eigene Begründung eintragen. Keine Diagnose."></textarea></div></div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('signalReviewModal')">Abbrechen</button><button type="button" class="btn" onclick="persistSignalReview(true)">Speichern und E-Mail-Entwurf</button><button class="btn primary">Prüfung speichern</button></div></form></div></div>
 
 <div class="modal" id="signalDetailModal"><div class="dialog wide"><div class="dialoghead"><h2 id="signalDetailTitle">Fehlzeiten-Detailansicht</h2><button class="close" onclick="closeModal('signalDetailModal')">×</button></div><div class="dialogbody" id="signalDetailBody"></div><div class="dialogfoot"><button class="btn" onclick="closeModal('signalDetailModal')">Schließen</button><button class="btn" id="signalDetailReviewButton" onclick="openSignalReviewFromDetail()">Fachlich prüfen</button><button class="btn primary" id="signalDetailEmailButton" onclick="openSignalEmailFromDetail()">E-Mail-Entwurf an Klassenleitung</button></div></div></div>
 
@@ -340,7 +395,7 @@
 
 <div class="modal" id="goalPlanModal"><div class="dialog wide"><div class="dialoghead"><h2>Ziel und Maßnahmenplan</h2><button class="close" onclick="closeModal('goalPlanModal')">×</button></div><form id="goalPlanForm"><div class="dialogbody"><div class="notice">Ziele und Maßnahmen werden gemeinsam geplant und regelmäßig überprüft. Vorschläge ersetzen keine fachliche Entscheidung.</div><div class="formgrid"><div class="formgroup full"><label>Arbeitsauftrag</label><select class="field" onchange="applyPreset(this,'planAssignment')"><option value="">Schnellauswahl oder Freitext</option><option>Klärung des Anliegens und eines gemeinsamen Arbeitsauftrags.</option><option>Stabilisierung des regelmäßigen Schulbesuchs.</option><option>Unterstützung bei Konfliktklärung und sozialer Einbindung.</option><option>Entlastung und Orientierung in einer belastenden Lebenssituation.</option><option>Anbahnung einer geeigneten weiterführenden Hilfe.</option></select><textarea class="field" id="planAssignment" name="assignment" required></textarea></div><div class="formgroup"><label>Wer möchte Veränderung?</label><select class="field" name="requestedBy"><option>Kind selbst</option><option>Kind und SSA gemeinsam</option><option>Erziehungsberechtigte</option><option>Schule oder Lehrkraft</option><option>Mehrere Beteiligte</option><option>Auftrag noch ungeklärt</option></select></div><div class="formgroup"><label>Auftrag der SSA</label><select class="field" name="ssaMandate"><option>Beratung und Begleitung</option><option>Klärung und Moderation</option><option>Koordination und Fallführung</option><option>Vermittlung und Übergabe</option><option>Krisen- oder Schutzklärung</option><option>Auftrag noch zu klären</option></select></div><div class="formgroup full"><label>Was möchte das Kind selbst?</label><textarea class="field" name="childWish" placeholder="Wünsche, Zustimmung, Vorbehalte oder Ablehnung"></textarea></div><div class="formgroup full"><label>Was erwarten Eltern oder Schule?</label><textarea class="field" name="parentSchoolExpectation"></textarea></div><div class="formgroup full"><label>Konkretes Ziel</label><select class="field" onchange="applyPreset(this,'planGoal')"><option value="">Sinnvolles Ziel auswählen oder Freitext</option><option>Der regelmäßige und verlässliche Schulbesuch wird schrittweise stabilisiert.</option><option>Das Kind nutzt vereinbarte Strategien zur fairen Konfliktklärung.</option><option>Das Kind kennt mindestens zwei erreichbare Unterstützungsmöglichkeiten und kann diese nutzen.</option><option>Zwischen Kind, Familie und Schule bestehen klare, überprüfbare Absprachen.</option><option>Eine passende weiterführende Hilfe ist verbindlich angebahnt und die Übergabe bestätigt.</option></select><textarea class="field" id="planGoal" name="goal" required></textarea></div><div class="formgroup"><label>Zieltermin</label><input class="field" type="date" name="targetDate"></div><div class="formgroup"><label>Status</label><select class="field" name="status"><option>Geplant</option><option>Begonnen</option><option>Teilweise erreicht</option><option>Erreicht</option><option>Verworfen</option></select></div><div class="formgroup full"><label>Erfolgskriterium</label><textarea class="field" name="successCriteria" required placeholder="Woran ist die Zielerreichung konkret erkennbar?"></textarea></div><div class="formgroup full"><label>Einschätzung des Kindes</label><select class="field" name="childAssessment"><option>Noch nicht eingeholt</option><option>Kind stimmt dem Ziel zu</option><option>Kind stimmt teilweise zu</option><option>Kind formuliert ein anderes Ziel</option><option>Kind lehnt das Ziel derzeit ab</option><option>Direkte Einschätzung derzeit nicht möglich</option></select></div><div class="formgroup full"><label>Maßnahme</label><select class="field" onchange="applyPreset(this,'planMeasure')"><option value="">Maßnahme auswählen oder Freitext</option><option>Regelmäßige Einzelgespräche mit festem Prüftermin.</option><option>Rücksprache mit der Klassenleitung und abgestimmte Beobachtung.</option><option>Elterngespräch mit klarer Vereinbarung und Rückmeldung.</option><option>Sozialtraining, Palaverzelt oder andere passende schulinterne Unterstützung.</option><option>Kontaktaufnahme und begleitete Weitervermittlung an eine Fachstelle.</option><option>Rückkehr- oder Unterstützungsplan für den Schulbesuch.</option></select><textarea class="field" id="planMeasure" name="measure" required></textarea></div><div class="formgroup"><label>Verantwortlich</label><select class="field" name="responsible"><option>Edmund</option><option>Sabine</option><option>Edmund und Sabine</option><option>Kind</option><option>Erziehungsberechtigte</option><option>Klassenleitung</option><option>Mehrere Beteiligte</option><option>Externe Stelle</option></select></div><div class="formgroup"><label>Beginn</label><input class="field" type="date" name="startDate"></div><div class="formgroup"><label>Wiedervorlage</label><input class="field" type="date" name="reviewDate"></div><div class="formgroup"><label>Zustimmung und Information</label><select class="field" name="consentStatus"><option>Keine Weitergabe erforderlich</option><option>Kind beteiligt und informiert</option><option>Einwilligung liegt vor</option><option>Einwilligung noch ausstehend</option><option>Rechtsgrundlage gesondert geprüft</option><option>Informationsstatus noch zu klären</option></select></div><div class="formgroup full"><label>Beteiligte Stellen</label><input class="field" name="involved" placeholder="z. B. Klassenleitung, Beratungsstelle, Jugendamt"></div><div class="formgroup full"><label>Ergebnis oder aktueller Stand</label><textarea class="field" name="result"></textarea></div></div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('goalPlanModal')">Abbrechen</button><button class="btn primary">Plan speichern</button></div></form></div></div>
 
-<div class="modal" id="caseStatusModal"><div class="dialog"><div class="dialoghead"><h2>Fallstatus ändern</h2><button class="close" onclick="closeModal('caseStatusModal')">×</button></div><form id="caseStatusForm"><div class="dialogbody"><div class="formgrid"><div class="formgroup full"><label>Neuer Status</label><select class="field" name="status"><option>Erste Kontaktaufnahme</option><option>Klärungsphase</option><option>Beratung</option><option>Aktive Begleitung</option><option>Weitervermittlung</option><option>Beobachtung</option><option>Vorläufig beendet</option><option>Abgeschlossen</option><option>Wiederaufgenommen</option></select></div><div class="formgroup"><label>Datum</label><input class="field" type="date" name="date" required></div><div class="formgroup"><label>Dokumentiert von</label><select class="field" name="responsible"><option>Edmund</option><option>Sabine</option><option>Edmund und Sabine</option></select></div><div class="formgroup full"><label>Begründung</label><textarea class="field" name="reason" required></textarea></div><div class="formgroup"><label>Anlass bearbeitet?</label><select class="field" name="issueProcessed"><option>Nicht geprüft</option><option>Ja</option><option>Teilweise</option><option>Nein</option><option>Nicht zutreffend</option></select></div><div class="formgroup"><label>Ziele erreicht?</label><select class="field" name="goalsReached"><option>Nicht geprüft</option><option>Ja</option><option>Teilweise</option><option>Nein</option><option>Keine Ziele vereinbart</option></select></div><div class="formgroup"><label>Weitervermittlung erfolgt?</label><select class="field" name="referralDone"><option>Nicht geprüft</option><option>Ja und Übergabe bestätigt</option><option>Angebahnt</option><option>Nein</option><option>Nicht erforderlich</option></select></div><div class="formgroup"><label>Rückmeldung des Kindes?</label><select class="field" name="childFeedback"><option>Noch nicht eingeholt</option><option>Positiv</option><option>Teilweise positiv</option><option>Keine Veränderung</option><option>Kritisch</option><option>Nicht möglich</option></select></div><div class="formgroup"><label>Rückmeldung Eltern?</label><select class="field" name="parentFeedback"><option>Nicht eingeholt</option><option>Positiv</option><option>Teilweise positiv</option><option>Keine Veränderung</option><option>Kritisch</option><option>Nicht erforderlich</option></select></div><div class="formgroup"><label>Rückmeldung Schule?</label><select class="field" name="schoolFeedback"><option>Nicht eingeholt</option><option>Positiv</option><option>Teilweise positiv</option><option>Keine Veränderung</option><option>Kritisch</option><option>Nicht erforderlich</option></select></div><div class="formgroup full"><label>Grund des Abschlusses oder Statuswechsels</label><select class="field" name="closureReason"><option>Bearbeitung wird fortgesetzt</option><option>Ziel erreicht</option><option>Ziel teilweise erreicht</option><option>Weitervermittlung abgeschlossen</option><option>Unterstützung derzeit nicht gewünscht</option><option>Kontakt abgebrochen</option><option>Schulwechsel oder Abgang</option><option>Zuständigkeit beendet</option><option>Andere fachliche Begründung</option></select></div><div class="formgroup"><label>Nachkontrolle erforderlich?</label><select class="field" name="followUpRequired"><option>Nein</option><option>Ja</option></select></div><div class="formgroup"><label>Nachkontrolle am</label><input class="field" type="date" name="followUpDate"></div></div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('caseStatusModal')">Abbrechen</button><button class="btn primary">Status speichern</button></div></form></div></div>
+<div class="modal" id="caseStatusModal"><div class="dialog"><div class="dialoghead"><h2>Fallstatus ändern</h2><button class="close" onclick="closeModal('caseStatusModal')">×</button></div><form id="caseStatusForm"><div class="dialogbody"><div class="formgrid"><div class="formgroup full"><label>Neuer Status</label><select class="field" name="status"><option>Erste Kontaktaufnahme</option><option>Klärungsphase</option><option>Beratung</option><option>Aktive Begleitung</option><option>Rückmeldung ausstehend</option><option>Weitervermittlung</option><option>Beobachtung</option><option>Vorläufig beendet</option><option>Abgeschlossen</option><option>Wiederaufgenommen</option></select></div><div class="formgroup"><label>Datum</label><input class="field" type="date" name="date" required></div><div class="formgroup"><label>Dokumentiert von</label><select class="field" name="responsible"><option>Edmund</option><option>Sabine</option><option>Edmund und Sabine</option></select></div><div class="formgroup full"><label>Begründung</label><textarea class="field" name="reason" required></textarea></div><div class="formgroup"><label>Anlass bearbeitet?</label><select class="field" name="issueProcessed"><option>Nicht geprüft</option><option>Ja</option><option>Teilweise</option><option>Nein</option><option>Nicht zutreffend</option></select></div><div class="formgroup"><label>Ziele erreicht?</label><select class="field" name="goalsReached"><option>Nicht geprüft</option><option>Ja</option><option>Teilweise</option><option>Nein</option><option>Keine Ziele vereinbart</option></select></div><div class="formgroup"><label>Weitervermittlung erfolgt?</label><select class="field" name="referralDone"><option>Nicht geprüft</option><option>Ja und Übergabe bestätigt</option><option>Angebahnt</option><option>Nein</option><option>Nicht erforderlich</option></select></div><div class="formgroup"><label>Rückmeldung des Kindes?</label><select class="field" name="childFeedback"><option>Noch nicht eingeholt</option><option>Positiv</option><option>Teilweise positiv</option><option>Keine Veränderung</option><option>Kritisch</option><option>Nicht möglich</option></select></div><div class="formgroup"><label>Rückmeldung Eltern?</label><select class="field" name="parentFeedback"><option>Nicht eingeholt</option><option>Positiv</option><option>Teilweise positiv</option><option>Keine Veränderung</option><option>Kritisch</option><option>Nicht erforderlich</option></select></div><div class="formgroup"><label>Rückmeldung Schule?</label><select class="field" name="schoolFeedback"><option>Nicht eingeholt</option><option>Positiv</option><option>Teilweise positiv</option><option>Keine Veränderung</option><option>Kritisch</option><option>Nicht erforderlich</option></select></div><div class="formgroup full"><label>Grund des Abschlusses oder Statuswechsels</label><select class="field" name="closureReason"><option>Bearbeitung wird fortgesetzt</option><option>Ziel erreicht</option><option>Ziel teilweise erreicht</option><option>Weitervermittlung abgeschlossen</option><option>Unterstützung derzeit nicht gewünscht</option><option>Kontakt abgebrochen</option><option>Schulwechsel oder Abgang</option><option>Zuständigkeit beendet</option><option>Andere fachliche Begründung</option></select></div><div class="formgroup"><label>Nachkontrolle erforderlich?</label><select class="field" name="followUpRequired"><option>Nein</option><option>Ja</option></select></div><div class="formgroup"><label>Nachkontrolle am</label><input class="field" type="date" name="followUpDate"></div></div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('caseStatusModal')">Abbrechen</button><button class="btn primary">Status speichern</button></div></form></div></div>
 
 <div class="modal" id="outcomeModal"><div class="dialog"><div class="dialoghead"><h2>Fachliche Verlaufseinschätzung</h2><button class="close" onclick="closeModal('outcomeModal')">×</button></div><form id="outcomeForm"><div class="dialogbody"><div class="notice">Die Werte dienen der Verlaufskontrolle. Sie sind keine Diagnose und werden nicht zu einem automatischen Gesamtscore zusammengefasst.</div><div class="formgrid"><div class="formgroup"><label>Zeitpunkt</label><select class="field" name="phase"><option>Beginn</option><option>Verlauf</option><option>Abschluss</option></select></div><div class="formgroup"><label>Perspektive</label><select class="field" name="perspective"><option>Kind</option><option>SSA</option><option>Eltern</option><option>Schule</option></select></div><div class="formgroup"><label>Datum</label><input class="field" type="date" name="date" required></div><div class="formgroup"><label>Dokumentiert von</label><select class="field" name="responsible"><option>Edmund</option><option>Sabine</option><option>Edmund und Sabine</option></select></div><div class="formgroup"><label>Schulbesuch</label><select class="field" name="schoolAttendance"><option value="">nicht eingeschätzt</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div><div class="formgroup"><label>Soziale Einbindung</label><select class="field" name="socialInclusion"><option value="">nicht eingeschätzt</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div><div class="formgroup"><label>Konfliktbewältigung</label><select class="field" name="conflictSkills"><option value="">nicht eingeschätzt</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div><div class="formgroup"><label>Selbststeuerung</label><select class="field" name="selfRegulation"><option value="">nicht eingeschätzt</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div><div class="formgroup"><label>Familiäre Unterstützung</label><select class="field" name="familySupport"><option value="">nicht eingeschätzt</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div><div class="formgroup"><label>Subjektives Wohlbefinden</label><select class="field" name="wellbeing"><option value="">nicht eingeschätzt</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div><div class="formgroup full"><label>Kurze Einordnung</label><textarea class="field" name="note"></textarea></div></div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('outcomeModal')">Abbrechen</button><button class="btn primary">Einschätzung speichern</button></div></form></div></div>
 
@@ -507,6 +562,33 @@ const NETZWERK_GRUNDBESTAND=[
  {id:'NW-DIAKONIE-PAPENBURG',category:'Suchtberatung',organization:'Diakonisches Werk Papenburg, Fachambulanz Sucht sowie Jugend- und Drogenberatung',contact:'Sekretariat der Beratungsstelle',phone:'04961 98880',email:'dw-papenburg@diakonie-emsland.de',address:'Landsbergstraße 9, 26871 Papenburg',website:'https://www.suchtberatungsstelle.de',
   note:'Führt im Präventionsplan der Schule die Einheiten zu Medien (Jg. 5), Vapes (Jg. 7), Alkohol gemeinsam mit der Polizei (Jg. 8) und Cannabis (Jg. 9) durch. Zugleich Beratungsstelle für einzelne Jugendliche und Erziehungsberechtigte. Stand der Recherche: September 2026.'}
 ];
+const NETZWERK_BASIS=[
+ {id:'NW-INTERN-VERTRAUEN',area:'Schulintern',category:'Schulinterne Unterstützung',organization:'Vertrauenslehrkraft der Ludgerusschule',contact:'siehe Aushang im Lehrerzimmer',phone:'',email:'',address:'Ludgerusschule Rhede (Ems)',website:'',priority:'hoch',
+  note:'Zusätzliche schulinterne Ansprechmöglichkeit für Schüler:innen. Rolle, Vertraulichkeit und Informationswege vorher klären.'},
+ {id:'NW-INTERN-MEDIENBUDDYS',area:'Schulintern',category:'Schulinterne Unterstützung',organization:'Medienbuddys',contact:'Peer-Team der Schule',phone:'',email:'',address:'Ludgerusschule Rhede (Ems)',website:'',priority:'mittel',
+  note:'Niedrigschwellige Peer-Unterstützung bei Medienfragen und geeigneten Cyberkonflikten. Immer mit erwachsener Begleitung und klarer Eskalationsgrenze.'},
+ {id:'NW-INTERN-PALAVERZELT',area:'Schulintern',category:'Schulinterne Unterstützung',organization:'Palaverzelt',contact:'Schulsozialarbeit',phone:'',email:'',address:'Ludgerusschule Rhede (Ems)',website:'',priority:'mittel',
+  note:'Strukturierte freiwillige Konfliktklärung. Nicht bei Mobbing, Gewalt, Machtungleichgewicht oder vorrangiger Schutzfrage einsetzen.'},
+ {id:'NW-INTERN-SOZIALTRAINING',area:'Schulintern',category:'Schulinterne Unterstützung',organization:'Sozialtraining durch die Schulsozialarbeit',contact:'Edmund und Sabine',phone:'',email:'',address:'Ludgerusschule Rhede (Ems)',website:'',priority:'hoch',
+  note:'Für Klassenklima, Kooperation, Kommunikation und Konfliktfähigkeit. Ziele, Dosis und Review verbindlich dokumentieren.'},
+ {id:'NW-KRISE-NOTRUF',area:'Krise und Notfall',category:'Notfall',organization:'Notruf Polizei und Rettungsdienst',contact:'bei unmittelbarer Gefahr',phone:'110 und 112',email:'',address:'',website:'',priority:'sehr hoch',
+  note:'Bei akuter Gefahr für Leib und Leben zuerst anrufen, danach Schulleitung informieren und den Vorgang dokumentieren.'},
+ {id:'NW-KRISE-KUMMER-KIND',area:'Krise und Notfall',category:'Krisenhilfe',organization:'Nummer gegen Kummer, Kinder- und Jugendtelefon',contact:'anonym und kostenfrei für Kinder und Jugendliche',phone:'116 111',email:'',address:'',website:'https://www.nummergegenkummer.de',priority:'sehr hoch',
+  note:'Kann Schüler:innen direkt empfohlen werden. Montag bis Samstag, Zeiten auf der Internetseite prüfen.'},
+ {id:'NW-KRISE-KUMMER-ELTERN',area:'Krise und Notfall',category:'Krisenhilfe',organization:'Elterntelefon der Nummer gegen Kummer',contact:'anonym und kostenfrei für Erziehungsberechtigte',phone:'0800 1110550',email:'',address:'',website:'https://www.nummergegenkummer.de',priority:'hoch',
+  note:'Für Erziehungsberechtigte in belastenden Situationen. Gute Ergänzung zum Elterngespräch.'},
+ {id:'NW-KRISE-SEELSORGE',area:'Krise und Notfall',category:'Krisenhilfe',organization:'Telefonseelsorge',contact:'rund um die Uhr, anonym und kostenfrei',phone:'0800 1110111 und 0800 1110222',email:'',address:'',website:'https://www.telefonseelsorge.de',priority:'sehr hoch',
+  note:'Rund um die Uhr erreichbar. Bei Hinweisen auf akute Selbstgefährdung immer zusätzlich Schutzkonzept und Leitungslinie beachten.'},
+ {id:'NW-KRISE-HILFETELEFON',area:'Krise und Notfall',category:'Krisenhilfe',organization:'Hilfetelefon Gewalt gegen Frauen',contact:'rund um die Uhr, mehrsprachig',phone:'116 016',email:'',address:'',website:'https://www.hilfetelefon.de',priority:'hoch',
+  note:'Für betroffene Erziehungsberechtigte und Jugendliche. Weitergabe nur mit Einverständnis und ohne Druck.'},
+ {id:'NW-KRISE-MISSBRAUCH',area:'Krise und Notfall',category:'Krisenhilfe',organization:'Hilfe-Telefon Sexueller Missbrauch',contact:'anonym und kostenfrei',phone:'0800 2255530',email:'',address:'',website:'https://www.hilfe-telefon-missbrauch.online',priority:'sehr hoch',
+  note:'Auch für Fachkräfte zur anonymen Fallberatung geeignet. Ersetzt nicht das schulische Schutzkonzept und die insoweit erfahrene Fachkraft.'}
+];
+function ensureNetzwerkbasis(state){
+ if(!Array.isArray(state.partners))state.partners=[];
+ for(const p of NETZWERK_BASIS)if(!state.partners.some(x=>x.id===p.id))state.partners.push(Object.assign({active:true,favorite:false,checkedAt:'2026-09-14'},p));
+ return state;
+}
 function ensureNetzwerkpartner(state){
  if(!Array.isArray(state.partners))state.partners=[];
  for(const p of NETZWERK_GRUNDBESTAND)if(!state.partners.some(x=>x.id===p.id))state.partners.push(Object.assign({},p));
@@ -566,6 +648,7 @@ function normalize(x){
  ensureRecurringTasks(x);
  ensurePraeventionsplan(x);
  ensureNetzwerkpartner(x);
+ ensureNetzwerkbasis(x);
  return x
 }
 function load(){return normalize(structuredClone(seed))}
@@ -580,7 +663,7 @@ function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle
 document.querySelectorAll('.nav button[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));
 document.querySelectorAll('.nav .navgroup').forEach(g=>{const head=g.querySelector('.navhead');if(head)head.onclick=()=>g.classList.toggle('collapsed')});
 function kpi(label,value,trend){return `<div class="card kpi"><div class="label">${label}</div><div class="value">${value}</div><div class="trend">${trend}</div></div>`}
-function renderAll(){renderSelects();renderDashboard();renderBeispielKarte();renderPraeventionsplan();renderRequests();renderCases();renderKanban();renderStudents();renderClasses();renderTrainingRoom();renderSignals();renderWorkflows();renderTeachers();renderProjects();renderCTC();renderNetwork();renderTasks();renderStats()}
+function renderAll(){hilfeSchaltflaechenSetzen();renderNetzwerkBereiche();renderSelects();renderDashboard();renderBeispielKarte();renderPraeventionsplan();renderRequests();renderCases();renderKanban();renderStudents();renderClasses();renderTrainingRoom();renderSignals();renderWorkflows();renderTeachers();renderProjects();renderCTC();renderNetwork();renderTasks();renderStats()}
 function renderSelects(){
  ['quickCase','taskCase'].forEach((id,i)=>{const el=document.getElementById(id);const first=i?' <option value="">Ohne Fallbezug</option>':'<option value="">Anonymer Kontakt</option>';const caseOpts=data.cases.filter(c=>c.status!=='Abgeschlossen').map(c=>`<option value="${c.id}">${cname(c.id)} · ${classOf(c)}</option>`).join('');let studentOpts='';if(!i){const openStudents=data.students.filter(s=>s.active&&!data.cases.some(c=>c.studentId===s.id&&c.status!=='Abgeschlossen')).sort((a,b)=>a.className.localeCompare(b.className)||a.last.localeCompare(b.last));if(openStudents.length)studentOpts='<optgroup label="Schüler:in ohne Fallakte – legt automatisch eine Fallakte an">'+openStudents.map(s=>`<option value="student:${s.id}">${s.last}, ${s.first} · ${s.className}</option>`).join('')+'</optgroup>';}el.innerHTML=first+(caseOpts?'<optgroup label="Bestehende Fallakten">'+caseOpts+'</optgroup>':'')+studentOpts});
  document.getElementById('caseStudent').innerHTML='<option value="">Bitte auswählen</option>'+data.students.filter(s=>s.active&&!data.cases.some(c=>c.studentId===s.id&&c.status!=='Abgeschlossen')).sort((a,b)=>a.className.localeCompare(b.className)||a.last.localeCompare(b.last)).map(s=>`<option value="${s.id}">${s.last}, ${s.first} · ${s.className}</option>`).join('');
@@ -680,7 +763,7 @@ function showStudent(studentId){
  selectedStudentId=studentId;
  const s=data.students.find(x=>x.id===studentId),c=data.cases.find(x=>x.studentId===studentId),events=studentEvents(studentId);
  document.getElementById('studentDetailTitle').innerHTML=`<span data-person>${s.first} ${s.last}</span> · ${s.className}${s.id===BEISPIEL_ID?' <span class="tag amber">Beispielfall</span>':''}`;
- document.getElementById('studentDetailBody').dataset.gegliedert='';document.getElementById('studentDetailBody').innerHTML=`<div class="notice">${studentId===BEISPIEL_ID?'<strong>◆ Beispielfall.</strong> Ein ausformulierter Übungsfall ohne echte Falldaten. Unter Daten und Sicherung lässt er sich vollständig entfernen.':'Personenbezogene Arbeitsansicht für Edmund und Sabine.'}</div><div class="detailgrid"><div class="detailitem"><span>Schüler-ID</span><strong>${s.id}</strong></div><div class="detailitem"><span>Schuljahr und Klasse</span><strong>${s.schoolYear} · ${s.className}</strong></div><div class="detailitem"><span>Anschrift</span><strong>${s.address||'–'}${s.district?' · '+s.district:''}</strong></div><div class="detailitem"><span>Telefon</span><strong>${s.phone||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 1</span><strong data-person>${s.guardian1||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 2</span><strong data-person>${s.guardian2||'–'}</strong></div><div class="detailitem"><span>Klassenleitung</span><strong>${data.settings.classLeads?.[s.className]||'–'}</strong></div><div class="detailitem"><span>Fallstatus</span><strong>${c?c.status:'keine Fallakte'}</strong></div></div><h3>Ziel- und Maßnahmenplan</h3>${planSummary(studentId)}<h3>Offene Aufgaben und Ergebnisse</h3>${taskSummary(studentId)}<h3>Entwicklung des Kindes</h3>${outcomeSummary(studentId)}<h3>Bezugspersonen und Netzwerk</h3>${relatedSummary(studentId)}<h3>Familienkonstellation</h3>${familySummary(s)}${studentAbsencePanel(studentId)}<h3>Fachliche Entwicklung aus Kontakten</h3>${trendSummary(studentId)}<h3>Schuljahresverlauf</h3><div class="list">${(s.enrollments||[]).map(e=>`<div class="row"><div class="grow"><strong>${e.schoolYear}</strong><span class="subtle">Klasse ${e.className}</span></div></div>`).join('')}</div><h3>Fallverlauf</h3><p class="subtle">Gespräche, Elternkontakte, Rückmeldungen, Fehlzeitenereignisse, Vereinbarungen, Maßnahmen, Weitervermittlungen, Statusänderungen, Wirkungseinschätzungen, Aufgaben und Dokumente werden gemeinsam dargestellt.</p><div class="chronicle-tools"><input class="field" type="search" placeholder="Verlauf vollständig durchsuchen" oninput="filterTimeline(this,'studentTimeline')"></div><div class="timeline" id="studentTimeline">${timelineHtml(events)}</div>`;
+ document.getElementById('studentDetailBody').dataset.gegliedert='';document.getElementById('studentDetailBody').innerHTML=`<div class="notice">${studentId===BEISPIEL_ID?'<strong>◆ Beispielfall.</strong> Ein ausformulierter Übungsfall ohne echte Falldaten. Unter Daten und Sicherung lässt er sich vollständig entfernen.':'Personenbezogene Arbeitsansicht für Edmund und Sabine.'}</div><div class="detailgrid"><div class="detailitem"><span>Schüler-ID</span><strong>${s.id}</strong></div><div class="detailitem"><span>Schuljahr und Klasse</span><strong>${s.schoolYear} · ${s.className}</strong></div><div class="detailitem"><span>Anschrift</span><strong>${s.address||'–'}${s.district?' · '+s.district:''}</strong></div><div class="detailitem"><span>Telefon</span><strong>${s.phone||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 1</span><strong data-person>${s.guardian1||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 2</span><strong data-person>${s.guardian2||'–'}</strong></div><div class="detailitem"><span>Klassenleitung</span><strong>${data.settings.classLeads?.[s.className]||'–'}</strong></div><div class="detailitem"><span>Fallstatus</span><strong>${c?c.status:'keine Fallakte'}</strong></div></div><div class="actions" style="margin:12px 0"><button class="btn primary" onclick="verlaufOeffnen('${studentId}')">✎ Fallverlauf erfassen</button></div><h3>Beteiligte und Weitervermittlungen</h3>${netzwerkVorschlag(studentId)}<h3>Ziel- und Maßnahmenplan</h3>${planSummary(studentId)}<h3>Offene Aufgaben und Ergebnisse</h3>${taskSummary(studentId)}<h3>Entwicklung des Kindes</h3>${outcomeSummary(studentId)}<h3>Bezugspersonen und Netzwerk</h3>${relatedSummary(studentId)}<h3>Familienkonstellation</h3>${familySummary(s)}${studentAbsencePanel(studentId)}<h3>Fachliche Entwicklung aus Kontakten</h3>${trendSummary(studentId)}<h3>Schuljahresverlauf</h3><div class="list">${(s.enrollments||[]).map(e=>`<div class="row"><div class="grow"><strong>${e.schoolYear}</strong><span class="subtle">Klasse ${e.className}</span></div></div>`).join('')}</div><h3>Fallverlauf</h3><p class="subtle">Gespräche, Elternkontakte, Rückmeldungen, Fehlzeitenereignisse, Vereinbarungen, Maßnahmen, Weitervermittlungen, Statusänderungen, Wirkungseinschätzungen, Aufgaben und Dokumente werden gemeinsam dargestellt.</p><div class="chronicle-tools"><input class="field" type="search" placeholder="Verlauf vollständig durchsuchen" oninput="filterTimeline(this,'studentTimeline')"></div><div class="timeline" id="studentTimeline">${timelineHtml(events)}</div>`;
  const statusButton=document.getElementById('studentStatusButton');statusButton.textContent=s.active?'Archivieren':'Reaktivieren';statusButton.classList.toggle('danger',s.active);
  openModal('studentModal')
 
@@ -700,7 +783,7 @@ function enhanceDictationFields(){document.querySelectorAll('textarea').forEach(
 function saveSpeechSettings(){try{data.settings.speechEndpoint=clean(document.getElementById('speechEndpoint').value.trim());localSpeechEndpoint();void persistState().catch(showVaultError);document.getElementById('speechStatus').textContent='Adresse gespeichert'}catch(err){alert(err.message)}}
 async function testSpeechService(){const status=document.getElementById('speechStatus');status.textContent='wird geprüft';try{const url=new URL(localSpeechEndpoint());url.pathname=url.pathname.replace(/\/transcribe\/?$/,'/health');const response=await fetch(url,{method:'GET'});if(!response.ok)throw Error();status.textContent='lokaler Dienst bereit';status.className='tag';}catch{status.textContent='lokaler Dienst nicht erreichbar';status.className='tag red'}}
 let dictationRecorder=null,dictationChunks=[],dictationTarget='',dictationButton=null;
-async function toggleLocalDictation(targetId,button){if(dictationRecorder&&dictationRecorder.state==='recording'){dictationRecorder.stop();return}try{localSpeechEndpoint();const stream=await navigator.mediaDevices.getUserMedia({audio:true}),options={};if(MediaRecorder.isTypeSupported('audio/webm;codecs=opus'))options.mimeType='audio/webm;codecs=opus';dictationChunks=[];dictationTarget=targetId;dictationButton=button;dictationRecorder=new MediaRecorder(stream,options);dictationRecorder.ondataavailable=e=>{if(e.data.size)dictationChunks.push(e.data)};dictationRecorder.onstop=async()=>{button.textContent='wird übertragen';button.disabled=true;stream.getTracks().forEach(t=>t.stop());try{const blob=new Blob(dictationChunks,{type:dictationRecorder.mimeType||'audio/webm'}),form=new FormData();form.append('audio',blob,'diktat.webm');form.append('language','de');const response=await fetch(localSpeechEndpoint(),{method:'POST',body:form});if(!response.ok)throw Error('Der lokale Dienst hat die Aufnahme nicht verarbeitet.');const result=await response.json(),target=document.getElementById(dictationTarget),text=clean(String(result.text||'').trim());if(!text)throw Error('Es wurde kein Text erkannt.');target.value=target.value.trim()?target.value.trim()+' '+text:text;target.dispatchEvent(new Event('input',{bubbles:true}));toast('Das lokale Diktat wurde eingefügt.')}catch(err){alert(err.message||'Lokale Spracherkennung nicht erreichbar.')}finally{button.textContent='🎙 Diktat';button.disabled=false;dictationRecorder=null;dictationButton=null}};dictationRecorder.start();button.textContent='■ Aufnahme beenden';toast('Lokale Aufnahme läuft. Zum Beenden erneut klicken.')}catch(err){if(dictationButton){dictationButton.textContent='🎙 Diktat';dictationButton.disabled=false}alert(err.message||'Das Mikrofon konnte nicht verwendet werden.')}}
+async function toggleLocalDictation(targetId,button){if(dictationRecorder&&dictationRecorder.state==='recording'){dictationRecorder.stop();return}try{localSpeechEndpoint();if(!await diktatDienstErreichbar()){appAlert(diktatHinweisText());return}const stream=await navigator.mediaDevices.getUserMedia({audio:true}),options={};if(MediaRecorder.isTypeSupported('audio/webm;codecs=opus'))options.mimeType='audio/webm;codecs=opus';dictationChunks=[];dictationTarget=targetId;dictationButton=button;dictationRecorder=new MediaRecorder(stream,options);dictationRecorder.ondataavailable=e=>{if(e.data.size)dictationChunks.push(e.data)};dictationRecorder.onstop=async()=>{button.textContent='wird übertragen';button.disabled=true;stream.getTracks().forEach(t=>t.stop());try{const blob=new Blob(dictationChunks,{type:dictationRecorder.mimeType||'audio/webm'}),form=new FormData();form.append('audio',blob,'diktat.webm');form.append('language','de');const response=await fetch(localSpeechEndpoint(),{method:'POST',body:form});if(!response.ok)throw Error('Der lokale Dienst hat die Aufnahme nicht verarbeitet.');const result=await response.json(),target=document.getElementById(dictationTarget),text=clean(String(result.text||'').trim());if(!text)throw Error('Es wurde kein Text erkannt.');target.value=target.value.trim()?target.value.trim()+' '+text:text;target.dispatchEvent(new Event('input',{bubbles:true}));toast('Das lokale Diktat wurde eingefügt.')}catch(err){alert(err.message||'Lokale Spracherkennung nicht erreichbar.')}finally{button.textContent='🎙 Diktat';button.disabled=false;dictationRecorder=null;dictationButton=null}};dictationRecorder.start();button.textContent='■ Aufnahme beenden';toast('Lokale Aufnahme läuft. Zum Beenden erneut klicken.')}catch(err){if(dictationButton){dictationButton.textContent='🎙 Diktat';dictationButton.disabled=false}appAlert('Das Mikrofon konnte nicht verwendet werden.\n\n'+(err.message||'')+'\n\nAlternative ohne Einrichtung: Klicke in das Textfeld und drücke die Windows-Taste zusammen mit H.')}}
 function jumpToStudent(value,targetId,statusId){const q=String(value||'').toLocaleLowerCase('de-DE').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(),target=document.getElementById(targetId),status=document.getElementById(statusId);if(q.length<2){status.textContent='Nach zwei Buchstaben wird der erste passende Name ausgewählt.';return}const candidates=data.students.filter(s=>s.active),norm=v=>String(v).toLocaleLowerCase('de-DE').normalize('NFD').replace(/[\u0300-\u036f]/g,'');const hit=candidates.find(s=>norm(`${s.last} ${s.first}`).startsWith(q)||norm(`${s.first} ${s.last}`).startsWith(q))||candidates.find(s=>norm(`${s.last} ${s.first} ${s.className} ${s.id}`).includes(q));if(hit){target.value=hit.id;status.textContent=`Ausgewählt: ${hit.last}, ${hit.first} · ${hit.className}`}else status.textContent='Kein passender Name gefunden.'}
 function openTrainingRoom(studentId=''){document.getElementById('trainingRoomForm').reset();document.querySelector('#trainingRoomForm [name="date"]').value=today();document.getElementById('trainingStudentSearch').value='';document.getElementById('trainingStudentHit').textContent='Nach zwei Buchstaben wird der erste passende Name ausgewählt.';if(studentId)document.getElementById('trainingStudent').value=studentId;openModal('trainingRoomModal')}
 function daysBetween(a,b){return Math.floor((new Date(b+'T12:00')-new Date(a+'T12:00'))/86400000)}
@@ -712,9 +795,9 @@ function renderTrainingRoom(){
  document.getElementById('trainingKpis').innerHTML=kpi('Besuche',current.length,'im laufenden Schuljahr')+kpi('Rückkehrpläne',plans,current.length?Math.round(plans/current.length*100)+' % akzeptiert':'noch keine Einträge')+kpi('Nachgespräche',follow,'noch besonders im Blick')+kpi('Begleitzeit',Math.floor(totalMins/60)+' h '+totalMins%60+' min','dokumentierter Aufwand');
  const threshold=Number(data.settings.trainingThreshold||3),windowDays=Number(data.settings.trainingWindowDays||28),cutoff=new Date();cutoff.setDate(cutoff.getDate()-windowDays+1);const cutoffDate=cutoff.toISOString().slice(0,10),recent=current.filter(t=>t.date>=cutoffDate),byStudent=Object.entries(recent.reduce((o,t)=>(o[t.studentId]=(o[t.studentId]||0)+1,o),{})).filter(([,count])=>count>=threshold),byClass=Object.entries(recent.reduce((o,t)=>{const s=data.students.find(x=>x.id===t.studentId),c=t.className||s?.className||'ohne Klasse';o[c]=(o[c]||0)+1;return o},{})).filter(([,count])=>count>=threshold);
  document.getElementById('trainingAlerts').innerHTML=[...byStudent.map(([studentId,count])=>{const s=data.students.find(x=>x.id===studentId);return `<div class="alertitem"><strong data-person>${s?s.first+' '+s.last:'Unbekannte Person'}</strong>: ${count}. Besuch innerhalb von ${windowDays} Tagen. Nachgespräch, Klassenleitung, Erziehungsberechtigte oder Fallanlage fachlich prüfen.</div>`}),...byClass.map(([className,count])=>`<div class="alertitem"><strong>Klassenhinweis ${className}</strong>: ${count} Trainingsraumvorgänge innerhalb von ${windowDays} Tagen. Präventives Klassenangebot prüfen.</div>`)].join('');
- document.getElementById('trainingTable').innerHTML=list.map(t=>{const s=data.students.find(x=>x.id===t.studentId),series=trainingSeries(t.studentId,t.date).length;return `<tr class="clickrow" onclick="showStudent('${t.studentId}')"><td>${fmt(t.date)}<br><span class="subtle">${t.lesson}</span></td><td class="namecell">${s?s.last+', '+s.first:'Unbekannt'}${series>=threshold?` <span class="tag amber">${series}. Besuch</span>`:''}</td><td>${t.className||s?.className||'–'}</td><td>${t.reason}</td><td>${t.referringTeacher}</td><td><span class="tag ${t.result==='Abgebrochen'?'red':t.result==='Nachgespräch erforderlich'?'amber':''}">${t.result}</span></td><td>${t.planAccepted?'akzeptiert':'offen'}</td><td><button class="btn" onclick="event.stopPropagation();printReturnPlan('${t.id}')">Rückkehrplan</button></td></tr>`}).join('')||'<tr><td colspan="8" class="empty">Noch keine passenden Trainingsraumvorgänge.</td></tr>'
+ document.getElementById('trainingTable').innerHTML=list.map(t=>{const s=data.students.find(x=>x.id===t.studentId),series=trainingSeries(t.studentId,t.date).length;return `<tr class="clickrow" onclick="showStudent('${t.studentId}')"><td>${fmt(t.date)}<br><span class="subtle">${t.lesson}</span></td><td class="namecell">${s?s.last+', '+s.first:'Unbekannt'}${series>=threshold?` <span class="tag amber">${series}. Besuch</span>`:''}</td><td>${t.className||s?.className||'–'}</td><td>${t.reason}</td><td>${t.referringTeacher}</td><td><span class="tag ${t.result==='Abgebrochen'?'red':t.result==='Nachgespräch erforderlich'?'amber':''}">${t.result}</span></td><td>${t.planAccepted?'akzeptiert':'offen'}</td><td><button class="btn" onclick="event.stopPropagation();printReturnPlan('${t.id}')">Rückkehrplan</button></td></tr>`}).join('')||'<tr><td colspan="8" class="empty">Noch keine passenden Trainingsraumvorgänge.</td></tr>';
+ trainingsraumAuswertung()
 }
-function printDocument(title,body){const w=window.open('','_blank','width=900,height=900');if(!w){alert('Das Druckfenster wurde blockiert. Bitte Pop-ups für diese Datei erlauben.');return}w.document.write(`<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${title}</title><style>body{font:14px/1.5 Arial,sans-serif;color:#172f40;max-width:820px;margin:32px auto;padding:0 24px}h1{font-size:24px}h2{font-size:18px;margin-top:24px}table{width:100%;border-collapse:collapse}th,td{padding:8px;border:1px solid #cfd8dc;text-align:left;vertical-align:top}.box{border:1px solid #9aa9b2;border-radius:8px;padding:12px;min-height:55px;margin:7px 0 16px}.sign{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:54px}.line{border-top:1px solid #333;padding-top:5px}.muted{color:#607080;font-size:12px}@media print{body{margin:0}}</style></head><body>${body}</body></html>`);w.document.close();setTimeout(()=>{w.focus();w.print()},250)}
 function printReturnPlan(id){const t=data.trainingRoom.find(x=>x.id===id);if(!t)return;const s=data.students.find(x=>x.id===t.studentId);printDocument('Rückkehrplan',`<h1>Ludgerusschule Rhede (Ems) · Rückkehrplan</h1><p><strong>${s?s.first+' '+s.last:'Unbekannte Person'}</strong> · Klasse ${t.className||s?.className||'–'} · ${fmt(t.date)} · ${t.lesson||''}</p><h2>Sachliche Situationsbeschreibung</h2><div class="box">${t.note||'–'}</div><h2>Reflexion der Schülerin / des Schülers</h2><div class="box">${t.reflection||'–'}</div><h2>Vereinbarte Rückkehr</h2><div class="box">${t.agreement||'–'}</div><h2>Folgemaßnahme</h2><div class="box">${t.followUp||'–'}</div><p><strong>Ergebnis:</strong> ${t.result||'–'} &nbsp; <strong>Plan akzeptiert:</strong> ${t.planAccepted?'ja':'noch offen'}</p><div class="sign"><div class="line">Schüler:in</div><div class="line">Begleitende Person / Lehrkraft</div></div><p class="muted">Schulische Rückkehrvereinbarung. Vertrauliche Beratungsinhalte sind nicht Bestandteil dieses Ausdrucks.</p>`)}
 function printStudentOverview(){const s=data.students.find(x=>x.id===selectedStudentId);if(!s)return;const events=studentEvents(s.id);printDocument('Schülerübersicht',`<h1>SSA-Schülerübersicht</h1><p><strong>${s.first} ${s.last}</strong> · Klasse ${s.className} · Schuljahr ${s.schoolYear}</p><h2>Familie und Bezugspersonen</h2>${familySummary(s)}<h2>Fachliche Entwicklung</h2>${trendSummary(s.id)}<h2>Verlauf</h2>${timelineHtml(events)}<p class="muted">Vertraulich. Nur für berechtigte Fachkräfte.</p>`)}
 document.getElementById('trainingSearch').oninput=renderTrainingRoom;document.getElementById('trainingStatus').onchange=renderTrainingRoom;document.getElementById('trainingClassFilter').onchange=renderTrainingRoom;
@@ -780,7 +863,7 @@ function renderNetwork(){
 document.getElementById('networkSearch').oninput=renderNetwork;document.getElementById('networkCategory').onchange=renderNetwork;document.getElementById('networkNeed').onchange=renderNetwork;
 function openGroupTalk(){document.getElementById('groupTalkForm').reset();document.querySelector('#groupTalkForm [name="date"]').value=today();openModal('groupTalkModal')}
 function taskDueLabel(t){if(t.done)return 'Erledigt '+(t.completedAt?fmt(t.completedAt):'');if(!t.due)return 'ohne Termin';if(t.due<today())return 'überfällig seit '+fmt(t.due);if(t.due===today())return 'heute fällig';return 'fällig '+fmt(t.due)}
-function renderTasks(){const sorted=[...data.tasks].sort((a,b)=>Number(a.done)-Number(b.done)||String(a.due).localeCompare(String(b.due)));document.getElementById('taskList').innerHTML=sorted.map(t=>`<div class="row ${t.done?'taskdone':''}" style="align-items:flex-start"><button class="check" aria-label="${t.done?'Aufgabe wieder öffnen':'Aufgabe abschließen'}" onclick="${t.done?`reopenTask('${t.id}')`:`openTaskComplete('${t.id}')`}">${t.done?'✓':''}</button><div class="grow"><strong>${t.title}</strong><span class="subtle">${t.caseId?cname(t.caseId):t.recurrence==='WEBUNTIS_MONTHLY'?'Monatliche Organisation':'Organisation'} · ${taskDueLabel(t)} · zuständig ${t.assignedTo||'nicht festgelegt'}</span>${t.expectedResult?`<span class="subtle">Erwartetes Ergebnis: ${t.expectedResult}</span>`:''}${t.done&&t.result?`<span class="subtle"><strong>Ergebnis:</strong> ${t.result}${t.completedBy?' · '+t.completedBy:''}</span>`:''}${t.instructions?`<details style="margin-top:8px"><summary>Anleitung anzeigen</summary><p class="eventbody subtle" style="margin-top:8px">${t.instructions}</p></details>`:''}</div>${t.recurrence==='WEBUNTIS_MONTHLY'?'<span class="tag">monatlich</span>':''}<span class="tag ${!t.done&&t.due<today()?'red':t.priority==='Hoch'?'red':t.done?'gray':''}">${t.done?'erledigt':t.due<today()?'überfällig':t.priority}</span></div>`).join('')||'<div class="empty">Noch keine Wiedervorlagen. Hier stehen verbindliche nächste Schritte mit Datum, damit nichts untergeht.</div>'}
+function renderTasks(){const sorted=[...data.tasks].sort((a,b)=>Number(a.done)-Number(b.done)||String(a.due).localeCompare(String(b.due)));document.getElementById('taskList').innerHTML=sorted.map(t=>`<div class="row ${t.done?'taskdone':''}" style="align-items:flex-start"><button class="check" aria-label="${t.done?'Aufgabe wieder öffnen':'Aufgabe abschließen'}" onclick="${t.done?`reopenTask('${t.id}')`:`openTaskComplete('${t.id}')`}">${t.done?'✓':''}</button><div class="grow"><strong>${t.title}</strong><span class="subtle">${t.caseId?cname(t.caseId):t.recurrence==='WEBUNTIS_MONTHLY'?'Monatliche Organisation':'Organisation'} · ${taskDueLabel(t)} · zuständig ${t.assignedTo||'nicht festgelegt'}</span>${t.expectedResult?`<span class="subtle">Erwartetes Ergebnis: ${t.expectedResult}</span>`:''}${t.done&&t.result?`<span class="subtle"><strong>Ergebnis:</strong> ${t.result}${t.completedBy?' · '+t.completedBy:''}</span>`:''}${t.instructions?`<details style="margin-top:8px"><summary>Anleitung anzeigen</summary><p class="eventbody subtle" style="margin-top:8px">${t.instructions}</p></details>`:''}${!t.done&&t.sourceContactId?`<div class="actions" style="margin-top:9px"><button class="btn primary kleiner" onclick="rueckmeldungDokumentieren('${t.id}')">Rückmeldung dokumentieren</button></div>`:''}${!t.done&&!t.sourceContactId&&t.caseId?`<div class="actions" style="margin-top:9px"><button class="btn kleiner" onclick="verlaufOeffnen(data.cases.find(c=>c.id==='${t.caseId}')?.studentId||'')">Eintrag zu dieser Aufgabe erfassen</button></div>`:''}</div>${t.recurrence==='WEBUNTIS_MONTHLY'?'<span class="tag">monatlich</span>':''}<span class="tag ${!t.done&&t.due<today()?'red':t.priority==='Hoch'?'red':t.done?'gray':''}">${t.done?'erledigt':t.due<today()?'überfällig':t.priority}</span></div>`).join('')||'<div class="empty">Noch keine Wiedervorlagen. Hier stehen verbindliche nächste Schritte mit Datum, damit nichts untergeht.</div>'}
 let selectedTaskId='';
 function openTaskComplete(id){const t=data.tasks.find(x=>x.id===id);if(!t)return;selectedTaskId=id;const form=document.getElementById('taskCompleteForm');form.reset();form.elements.completedAt.value=today();form.elements.completedBy.value=t.assignedTo==='Sabine'?'Sabine':t.assignedTo==='Edmund und Sabine'?'Edmund und Sabine':'Edmund';openModal('taskCompleteModal')}
 document.getElementById('taskCompleteForm').onsubmit=e=>{e.preventDefault();const t=data.tasks.find(x=>x.id===selectedTaskId);if(!t)return;const f=cleanObject(Object.fromEntries(new FormData(e.target)));t.done=true;t.completedAt=f.completedAt;t.completedBy=f.completedBy;t.result=f.result;const studentId=data.cases.find(c=>c.id===t.caseId)?.studentId||'';logChange('Wiedervorlage abgeschlossen',t.id,studentId,f.completedBy);if(t.recurrence==='WEBUNTIS_MONTHLY'){const due=followingWebUntisDue(t.due);if(!data.tasks.some(x=>x.recurrence==='WEBUNTIS_MONTHLY'&&!x.done))data.tasks.push({id:'task-webuntis-'+due,title:t.title,due,priority:t.priority||'Normal',taskType:'Datenimport',assignedTo:t.assignedTo||'Edmund und Sabine',expectedResult:'WebUntis-Fehlzeiten importiert und fachlich geprüft',caseId:'',done:false,recurrence:'WEBUNTIS_MONTHLY',instructions:WEBUNTIS_TASK_INSTRUCTIONS,createdAt:new Date().toISOString(),completedAt:'',result:''})}save();closeModal('taskCompleteModal');toast('Wiedervorlage wurde mit Ergebnis abgeschlossen.')};
@@ -827,13 +910,6 @@ function ensureCaseForStudent(studentId,reason='Personenbezogener fachlicher Ein
  logChange('Fallakte automatisch angelegt',caseId,studentId,responsible);return c
 }
 const KANBAN_COLUMNS=[['Klärung',['Erste Kontaktaufnahme','Klärungsphase']],['Beratung',['Beratung']],['Begleitung',['Aktive Begleitung','Wiederaufgenommen']],['Vermittlung',['Weitervermittlung']],['Beobachtung',['Beobachtung','Vorläufig beendet']],['Abgeschlossen',['Abgeschlossen']]];
-function renderKanban(){
- const board=document.getElementById('kanbanBoard');if(!board)return;
- const q=(document.getElementById('kanbanSearch')?.value||'').toLocaleLowerCase('de-DE'),classFilter=document.getElementById('kanbanClassFilter'),classes=[...new Set(data.cases.map(c=>classOf(c)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
- if(classFilter){const selected=classFilter.value;classFilter.innerHTML='<option value="all">Alle Klassen</option>'+classes.map(x=>'<option>'+x+'</option>').join('');classFilter.value=classes.includes(selected)?selected:'all'}
- const filterClass=classFilter?.value||'all';
- board.innerHTML=KANBAN_COLUMNS.map(([title,statuses])=>{const cases=data.cases.filter(c=>statuses.includes(c.status)&&(filterClass==='all'||classOf(c)===filterClass)&&[cname(c.id),classOf(c),c.reason,c.goal].join(' ').toLocaleLowerCase('de-DE').includes(q)).sort((a,b)=>String(b.last).localeCompare(String(a.last)));const drop=title==='Abgeschlossen'?'':`ondragover="event.preventDefault()" ondrop="dropCaseOnKanban(event,'${statuses[0]}')"`;return `<section class="kanban-column" ${drop}><div class="kanban-head"><span>${title}</span><span class="tag gray">${cases.length}</span></div><div class="kanban-list">${cases.map(c=>`<article class="kanban-card" draggable="${title==='Abgeschlossen'?'false':'true'}" ondragstart="event.dataTransfer.setData('text/plain','${c.id}')" onclick="showCase('${c.id}')"><h4>${cname(c.id)}${c.id===BEISPIEL_FALL_ID?' <span class="tag amber">Beispiel</span>':''}</h4><p>${classOf(c)} · ${c.status}</p><p>${c.reason||'Anlass noch zu klären'}</p><p>Letzter Eintrag: ${c.last?fmt(c.last):'–'}</p></article>`).join('')||'<div class="empty">Noch keine Fälle. Eine Fallakte entsteht automatisch, sobald du zu einer Schülerin oder einem Schüler etwas dokumentierst.</div>'}</div></section>`}).join('')
-}
 async function dropCaseOnKanban(event,newStatus){event.preventDefault();const caseId=event.dataTransfer.getData('text/plain'),c=data.cases.find(x=>x.id===caseId);if(!c||c.status===newStatus)return;if(newStatus==='Abgeschlossen'){toast('Abschlüsse bitte in der vollständigen Fallakte dokumentieren.');return}const s=studentOfCase(c);if(!await appConfirm(`${s?s.last+', '+s.first:'Fall'} von „${c.status}“ nach „${newStatus}“ verschieben?`))return;const old=c.status;c.status=newStatus;c.last=today();data.statusHistory.push({id:id('sh'),caseId:c.id,studentId:c.studentId,date:today(),fromStatus:old,status:newStatus,responsible:'Edmund oder Sabine',reason:'Statusänderung über das Fallboard'});logChange(`Fallstatus über Fallboard geändert: ${old} zu ${newStatus}`,c.id,c.studentId);save();toast('Statusänderung wurde in der Fallhistorie gespeichert.')}
 function isInstructionDay(date){const iso=date.toISOString().slice(0,10),weekday=date.getDay(),extra=new Set(data.settings.additionalNonSchoolDays||[]);return weekday!==0&&weekday!==6&&!NDS_WEEKDAY_HOLIDAYS_2026_27.has(iso)&&!extra.has(iso)&&!NDS_FREE_RANGES_2026_27.some(([a,b])=>iso>=a&&iso<=b)}
 function addSchoolDays(start,count){const d=new Date(start+'T12:00');let remaining=Math.max(0,Number(count)||0);while(remaining){d.setDate(d.getDate()+1);if(isInstructionDay(d))remaining--}return d.toISOString().slice(0,10)}
@@ -871,7 +947,7 @@ function appDialog(o){return new Promise(res=>{
  const wrap=document.createElement('div');wrap.className='modal open';wrap.style.zIndex='60';
  const esc=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
  const abbrechen=o.modus==='alert'?'':'<button class="btn" data-r="0">Abbrechen</button>';
- wrap.innerHTML='<div class="dialog" style="width:min(520px,100%)"><div class="dialoghead"><h2>'+esc(o.titel)+'</h2></div><div class="dialogbody"><p style="white-space:pre-wrap;margin:0;line-height:1.55">'+esc(o.text)+'</p></div><div class="dialogfoot">'+abbrechen+'<button class="btn primary" data-r="1">'+(o.modus==='alert'?'Verstanden':'Ja, weiter')+'</button></div></div>';
+ wrap.innerHTML='<div class="dialog" style="width:min('+(o.html?860:520)+'px,100%)"><div class="dialoghead"><h2>'+esc(o.titel)+'</h2></div><div class="dialogbody">'+(o.html?o.html:'<p style="white-space:pre-wrap;margin:0;line-height:1.55">'+esc(o.text)+'</p>')+'</div><div class="dialogfoot">'+abbrechen+'<button class="btn primary" data-r="1">'+(o.jaText?esc(o.jaText):(o.modus==='alert'?'Verstanden':'Ja, weiter'))+'</button></div></div>';
  document.body.appendChild(wrap);
  const fertig=v=>{document.removeEventListener('keydown',k);wrap.remove();res(v)};
  const k=e=>{if(e.key==='Escape')fertig(false);if(e.key==='Enter')fertig(true)};
@@ -884,7 +960,7 @@ function appAlert(text){return appDialog({titel:'Hinweis',text:text,modus:'alert
 function appConfirm(text){return appDialog({titel:'Bitte bestätigen',text:text,modus:'confirm'})}
 window.alert=function(t){appAlert(t)};
 function dokuWaehlen(){
- const wege=[['Eine Schülerin oder ein Schüler','Gespräch, Beobachtung oder Maßnahme zu einer einzelnen Person','quickModal'],
+ const wege=[['Eine Schülerin oder ein Schüler','Ereignis, Maßnahme, Ergebnis und nächster Schritt in einer Maske','verlaufModal'],
   ['Eine ganze Klasse','Projekt, Präventionsstunde oder Maßnahme in einer Klasse','classActivityModal'],
   ['Mehrere Schüler:innen','Konfliktklärung oder Gruppengespräch mit mehreren Personen','groupTalkModal'],
   ['Trainingsraumbesuch','Schulischer Vorgang im sozialen Trainingsraum','trainingRoomModal']];
@@ -1188,9 +1264,9 @@ function renderGrueneListe(){
   gezeigt+=namen.length;
   if(!namen.length)return '';
   return `<h4 style="margin:14px 0 6px">${titel} <span class="tag ${farbe}">Stufe ${st}</span> <span class="subtle">${namen.length}</span></h4>`
-   +`<div class="signal-legend">${namen.map(n=>`<span class="tag ${LUDGERUS_ANGEBOTE.includes(n)?'':'gray'}" title="${LUDGERUS_ANGEBOTE.includes(n)?'Steht bereits in deiner Projektauswahl':''}">${n}${LUDGERUS_ANGEBOTE.includes(n)?' ●':''}</span>`).join('')}</div>`}).join('');
+   +`<div class="signal-legend">${namen.map(n=>`<button type="button" class="tag tagbutton ${LUDGERUS_ANGEBOTE.includes(n)?'':'gray'}" title="Programm im Detail ansehen" onclick="programmDetail('${n.replace(/'/g,"\\'")}')">${n}${LUDGERUS_ANGEBOTE.includes(n)?' ●':''}</button>`).join('')}</div>`}).join('');
  box.innerHTML=(teile||'<div class="empty">Kein Programm gefunden.</div>')
-  +`<p class="hint" style="margin-top:14px">${gezeigt} von ${gesamt} Programmen angezeigt. Mit ● markierte Programme stehen bereits in deiner Projektauswahl.</p>`}
+  +`<p class="hint" style="margin-top:14px">${gezeigt} von ${gesamt} Programmen angezeigt. Mit ● markierte Programme stehen bereits in deiner Projektauswahl. <strong>Klicke ein Programm an, um Details zu sehen.</strong></p><div class="actions"><button class="btn" onclick="grueneListeQuelleKopieren()">Adresse der Programmdatenbank kopieren</button><button class="btn" onclick="programmAdresseKopieren()">Adresse des zuletzt geöffneten Programms kopieren</button></div>`}
 /* ---------- Dreistufige Ampel ---------- */
 function signalAmpel(r){
  const a=signalAssessment(r),notices=a.notices;
@@ -1260,14 +1336,17 @@ function renderStartKacheln(){
    [...(data.schoolSignals||[])].sort((a,b)=>String(b.importedAt||'').localeCompare(String(a.importedAt||'')))
     .forEach(r=>{if(!neueste.has(r.studentId))neueste.set(r.studentId,r)});
    return [...neueste.values()].filter(r=>signalAmpel(r).stufe==='rot').length})();
+ const zuletzt=letzteEintraege(1)[0];
  el.innerHTML=
-  startKachel('✎','Etwas dokumentieren',null,'Gespräch, Maßnahme oder Beobachtung festhalten','dokuWaehlen()',true)
+  startKachel('✎','Fallverlauf erfassen',null,'Ereignis, Maßnahme, Ergebnis, nächster Schritt','verlaufOeffnen()',true)
+ +startKachel('☷','Anderes dokumentieren',null,'Klasse, Gruppe oder Trainingsraum','dokuWaehlen()')
  +startKachel('🔎','Schüler:in suchen',data.students.filter(s=>s.active!==false).length,'Name, Klasse oder Klassenleitung',"document.getElementById('globalSearch').focus()")
  +startKachel('✓','Offene Aufgaben',offen.length,'Alles, was noch zu tun ist',"go('tasks')")
- +startKachel('⏰','Fällige Wiedervorlagen',faellig.length,faellig.length?'Heute oder überfällig':'Nichts überfällig',"go('tasks')")
+ +startKachel('⏰','Wiedervorlagen',faellig.length,faellig.length?'Heute oder überfällig':'Nichts überfällig',"go('tasks')")
  +startKachel('◇','Aktuelle Fälle',aktiveFaelle,'Laufende Fallakten',"go('cases')")
- +startKachel('△','Fehlzeiten',rot,rot?'mit roter Ampel':'keine rote Ampel',"go('signals')")
- +startKachel('▥','Auswertung',null,'Statistik und Jahresbericht',"go('statistics')")}
+ +startKachel('☰','Letzte Einträge',null,zuletzt?'zuletzt '+fmt(zuletzt.datum)+' · '+zuletzt.art:'noch nichts dokumentiert','letzteEintraegeZeigen()')
+ +startKachel('⭳','Fehlzeiten importieren',null,'WebUntis-CSV einlesen und prüfen','fehlzeitenImportStarten()')
+}
 /* ===== Beispielfall O. B. ===== */
 function beispielfallVorhanden(){return data.students.some(s=>s.id===BEISPIEL_ID)}
 function beispielKontakt(nr,o){return Object.assign({id:'BEISPIEL-K'+nr,caseId:BEISPIEL_FALL_ID,studentId:BEISPIEL_ID,responsible:'Edmund',level:'Einzelfall',visibility:'SSA-Team',beispiel:true,createdAt:'2026-09-14T07:0'+nr+':00.000Z'},o)}
@@ -1626,6 +1705,677 @@ function renderPraeventionsplan(){
  if(hinweis)hinweis.textContent='Neun feste Angebote, jeweils eine Einheit von '+PRAEVENTION_DAUER+' Minuten. Der Plan läuft seit dem Schuljahr '+PRAEVENTION_SEIT+' jährlich im zweiten Schulhalbjahr. Für das Schuljahr '+(data.settings?.currentSchoolYear||'')+' sind die Angebote unten bereits als Projekte angelegt.';
 }
 
+/* ===== Drucken ohne Pop-up-Fenster ===== */
+let letzterAusdruck=null;
+function druckRahmen(){
+ let frame=document.getElementById('ssaPrintFrame');
+ if(!frame){frame=document.createElement('iframe');frame.id='ssaPrintFrame';frame.title='Druckvorschau';
+  frame.style.cssText='position:fixed;right:0;bottom:0;width:1px;height:1px;opacity:0;border:0;pointer-events:none';
+  document.body.appendChild(frame)}
+ return frame;
+}
+function druckSeite(title,body){return `<!doctype html><html lang="de"><head><meta charset="utf-8"><title>${title}</title><style>body{font:14px/1.5 Arial,sans-serif;color:#172f40;max-width:820px;margin:32px auto;padding:0 24px}h1{font-size:24px}h2{font-size:18px;margin-top:24px}table{width:100%;border-collapse:collapse}th,td{padding:8px;border:1px solid #cfd8dc;text-align:left;vertical-align:top}.box{border:1px solid #9aa9b2;border-radius:8px;padding:12px;min-height:55px;margin:7px 0 16px}.sign{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:54px}.line{border-top:1px solid #333;padding-top:5px}.muted{color:#607080;font-size:12px}@media print{body{margin:0}}</style></head><body>${body}</body></html>`}
+function printDocument(title,body){
+ const html=druckSeite(title,body);
+ letzterAusdruck={title,html};
+ try{
+  const frame=druckRahmen(),doc=frame.contentWindow.document;
+  doc.open();doc.write(html);doc.close();
+  setTimeout(()=>{try{frame.contentWindow.focus();frame.contentWindow.print();toast('Der Druckdialog wurde geöffnet. Über „Als PDF speichern“ entsteht eine Datei.')}
+   catch(err){druckDateiAnbieten()}},350);
+ }catch(err){druckDateiAnbieten()}
+}
+function druckDateiAnbieten(){
+ if(!letzterAusdruck)return;
+ const name=letzterAusdruck.title.replace(/[^\wäöüÄÖÜß -]/g,'').trim().replace(/\s+/g,'-')+'-'+today()+'.html';
+ download(name,letzterAusdruck.html,'text/html;charset=utf-8');
+ appAlert('Der Druckdialog ließ sich nicht öffnen.\n\nDas Dokument wurde stattdessen als Datei '+name+' gespeichert. Öffne sie per Doppelklick und drucke sie aus dem Browser.');
+}
+function druckDateiSpeichern(){
+ if(!letzterAusdruck){toast('Es wurde noch kein Dokument für den Druck erzeugt.');return}
+ const name=letzterAusdruck.title.replace(/[^\wäöüÄÖÜß -]/g,'').trim().replace(/\s+/g,'-')+'-'+today()+'.html';
+ download(name,letzterAusdruck.html,'text/html;charset=utf-8');
+ toast('Das Dokument wurde als Datei '+name+' gespeichert.');
+}
+
+/* ===== Diagramm-Grundbaustein ===== */
+function ssaBalken(titel,punkte,opt){
+ opt=opt||{};
+ punkte=(punkte||[]).filter(p=>p&&p.label!==undefined);
+ if(!punkte.length)return `<figure class="ssachart"><figcaption>${titel}</figcaption><p class="subtle">Noch keine Daten für diese Auswertung.</p></figure>`;
+ const W=Math.max(320,Math.min(760,punkte.length*74+70)),H=opt.hoehe||180,L=40,R=12,T=18,B=38;
+ const iw=W-L-R,ih=H-T-B;
+ const max=Math.max(1,...punkte.map(p=>Number(p.wert)||0));
+ const bw=Math.max(10,Math.min(52,iw/punkte.length-10));
+ const x=i=>L+(iw/punkte.length)*(i+0.5)-bw/2;
+ const y=v=>T+ih-(v/max)*ih;
+ const balken=punkte.map((p,i)=>{
+  const v=Number(p.wert)||0,hh=Math.max(2,(v/max)*ih),farbe=p.farbe||'var(--teal)';
+  const kurz=String(p.label).length>11?String(p.label).slice(0,10)+'…':String(p.label);
+  return `<g><rect x="${x(i).toFixed(1)}" y="${y(v).toFixed(1)}" width="${bw.toFixed(1)}" height="${hh.toFixed(1)}" rx="4" fill="${farbe}"><title>${p.titel||p.label+': '+v}</title></rect>`
+   +`<text x="${(x(i)+bw/2).toFixed(1)}" y="${(y(v)-5).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">${v}</text>`
+   +`<text x="${(x(i)+bw/2).toFixed(1)}" y="${H-22}" text-anchor="middle" font-size="10" fill="var(--muted)">${kurz}</text></g>`}).join('');
+ const achse=`<line x1="${L}" y1="${T+ih}" x2="${W-R}" y2="${T+ih}" stroke="var(--line)" stroke-width="1"/>`;
+ return `<figure class="ssachart"><figcaption>${titel}</figcaption>
+  <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="${titel}">${achse}${balken}
+   <text x="${L}" y="${H-6}" font-size="10" fill="var(--muted)">${opt.achse||''}</text></svg>
+  ${opt.hinweis?`<p class="hint">${opt.hinweis}</p>`:''}</figure>`;
+}
+function zaehleNach(liste,schluessel){const o={};for(const x of liste){const k=(typeof schluessel==='function'?schluessel(x):x[schluessel])||'ohne Angabe';o[k]=(o[k]||0)+1}return o}
+function alsPunkte(obj,opt){opt=opt||{};let e=Object.entries(obj);if(opt.sortiert!==false)e.sort((a,b)=>b[1]-a[1]);if(opt.max)e=e.slice(0,opt.max);return e.map(([label,wert])=>({label,wert,farbe:opt.farbe?opt.farbe(label,wert):undefined,titel:label+': '+wert+(opt.einheit?' '+opt.einheit:'')}))}
+
+/* ===== Trainingsraum-Auswertung ===== */
+const TR_MONATE=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+function trainingsraumAuswertung(){
+ const box=document.getElementById('trainingCharts');if(!box)return;
+ const jahr=data.settings.currentSchoolYear;
+ const alle=data.trainingRoom.filter(t=>!t.schoolYear||t.schoolYear===jahr);
+ if(alle.length<1){box.innerHTML='<div class="card empty">Sobald der erste Trainingsraumvorgang dokumentiert ist, erscheinen hier die Auswertungen.</div>';return}
+ const monate={};
+ for(const t of alle){const d=String(t.date||'');if(d.length<7)continue;const k=TR_MONATE[Number(d.slice(5,7))-1]+' '+d.slice(2,4);monate[k]=(monate[k]||0)+1}
+ const monatsPunkte=Object.entries(monate).sort((a,b)=>a[0].localeCompare(b[0])).map(([label,wert])=>({label,wert,titel:label+': '+wert+' Vorgänge'}));
+ const nachStunde=alsPunkte(zaehleNach(alle,'lesson'),{sortiert:false});
+ const nachAnlass=alsPunkte(zaehleNach(alle,'reason'),{max:6});
+ const nachKlasse=alsPunkte(zaehleNach(alle,t=>t.className||data.students.find(s=>s.id===t.studentId)?.className||'ohne Klasse'),{max:8});
+ const nachErgebnis=alsPunkte(zaehleNach(alle,'result'),{farbe:l=>/Abgebrochen/i.test(l)?'var(--red)':/Nachgespräch/i.test(l)?'var(--amber)':'var(--teal)'});
+ const nachLehrkraft=alsPunkte(zaehleNach(alle,'referringTeacher'),{max:8});
+ const proKind=zaehleNach(alle,'studentId');
+ const schwelle=Number(data.settings.trainingThreshold||3);
+ const wdh={'1 Besuch':0,'2 Besuche':0,[schwelle+' und mehr']:0};
+ for(const n of Object.values(proKind)){if(n>=schwelle)wdh[schwelle+' und mehr']++;else if(n===2)wdh['2 Besuche']++;else wdh['1 Besuch']++}
+ const wdhPunkte=Object.entries(wdh).map(([label,wert])=>({label,wert,
+  farbe:label==='1 Besuch'?'var(--teal)':label==='2 Besuche'?'var(--amber)':'var(--red)',
+  titel:label+': '+wert+' Schüler:innen'}));
+ const plan=alle.filter(t=>t.planAccepted).length;
+ const eltern=alsPunkte(zaehleNach(alle,'parentInfo'),{max:5});
+ box.innerHTML=`<div class="card"><div class="cardhead"><h3>Auswertung des Trainingsraums</h3><span class="tag gray">${alle.length} Vorgänge im Schuljahr ${jahr}</span></div>
+  <p class="subtle">Die Diagramme zeigen ausschließlich dokumentierte Vorgänge. Sie sind eine Arbeitsgrundlage für das Kollegium und keine Bewertung einzelner Kinder oder Lehrkräfte.</p>
+  <div class="chartgrid">
+   ${ssaBalken('Vorgänge je Monat',monatsPunkte,{achse:'Anzahl der Vorgänge',hinweis:'Zeigt, wann im Schuljahr die Belastung steigt. Nützlich für die Planung von Klassenangeboten.'})}
+   ${ssaBalken('Vorgänge je Unterrichtsstunde',nachStunde,{achse:'Anzahl der Vorgänge',hinweis:'Häufungen in einzelnen Stunden sind ein Hinweis auf Fach, Tageszeit oder Übergangssituationen, nicht auf einzelne Personen.'})}
+   ${ssaBalken('Häufigste Anlässe',nachAnlass,{achse:'Anzahl der Vorgänge',hinweis:'Die sechs häufigsten Anlässe. Ein wiederkehrender Anlass spricht für ein Klassen- oder Schulthema.'})}
+   ${ssaBalken('Vorgänge je Klasse',nachKlasse,{achse:'Anzahl der Vorgänge',hinweis:'Klassen mit auffälliger Häufung eignen sich für eine CTC-Bedarfsbeobachtung.'})}
+   ${ssaBalken('Ergebnis der Vorgänge',nachErgebnis,{achse:'Anzahl der Vorgänge',hinweis:'▲ Rot: abgebrochen. ◆ Gelb: Nachgespräch erforderlich. ● Grün: regulär beendet.'})}
+   ${ssaBalken('Wiederholte Besuche je Schüler:in',wdhPunkte,{achse:'Anzahl der Schüler:innen',hinweis:'● Grün: einmalig. ◆ Gelb: zweimal. ▲ Rot: '+schwelle+' und mehr Besuche, hier ist eine fachliche Prüfung vorgesehen.'})}
+   ${ssaBalken('Verweisende Lehrkräfte',nachLehrkraft,{achse:'Anzahl der Vorgänge',hinweis:'Dient der Abstimmung im Kollegium über eine einheitliche Handhabung, nicht der Bewertung einzelner Lehrkräfte.'})}
+   ${ssaBalken('Information der Erziehungsberechtigten',eltern,{achse:'Anzahl der Vorgänge',hinweis:'Zeigt, wie verlässlich die Rückmeldung nach Hause dokumentiert ist.'})}
+  </div>
+  <div class="detailgrid" style="margin-top:14px">
+   <div class="detailitem"><span>Rückkehrpläne akzeptiert</span><strong>${plan} von ${alle.length}${alle.length?' · '+Math.round(plan/alle.length*100)+' Prozent':''}</strong></div>
+   <div class="detailitem"><span>Betroffene Schüler:innen</span><strong>${Object.keys(proKind).length}</strong></div>
+   <div class="detailitem"><span>Vorgänge je Kind im Schnitt</span><strong>${Object.keys(proKind).length?(alle.length/Object.keys(proKind).length).toFixed(1):'0'}</strong></div>
+   <div class="detailitem"><span>Dokumentierte Begleitzeit</span><strong>${Math.floor(alle.reduce((a,t)=>a+Number(t.duration||0),0)/60)} Stunden</strong></div>
+  </div>
+  <div class="actions" style="margin-top:14px"><button class="btn" onclick="trainingsraumBerichtDrucken()">Auswertung als Bericht drucken</button></div></div>`;
+}
+function trainingsraumBerichtDrucken(){
+ const jahr=data.settings.currentSchoolYear,alle=data.trainingRoom.filter(t=>!t.schoolYear||t.schoolYear===jahr);
+ const tab=(titel,obj)=>`<h2>${titel}</h2><table><thead><tr><th>Merkmal</th><th>Anzahl</th></tr></thead><tbody>${Object.entries(obj).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td></tr>`).join('')||'<tr><td colspan="2">keine Angaben</td></tr>'}</tbody></table>`;
+ printDocument('Trainingsraum-Auswertung '+jahr,
+  `<h1>Ludgerusschule Rhede (Ems)</h1><h1>Trainingsraum-Auswertung ${jahr}</h1>
+   <p>${alle.length} dokumentierte Vorgänge, ${new Set(alle.map(t=>t.studentId)).size} betroffene Schüler:innen. Ohne Namen.</p>
+   ${tab('Anlässe',zaehleNach(alle,'reason'))}
+   ${tab('Unterrichtsstunden',zaehleNach(alle,'lesson'))}
+   ${tab('Klassen',zaehleNach(alle,t=>t.className||'ohne Klasse'))}
+   ${tab('Ergebnisse',zaehleNach(alle,'result'))}
+   <p class="muted">Anonymisierte Arbeitsgrundlage für die Schulentwicklung. Keine Bewertung einzelner Kinder oder Lehrkräfte.</p>`);
+}
+
+/* ===== Zuletzt dokumentiert ===== */
+function letzteEintraege(anzahl){
+ const liste=[];
+ for(const c of data.contacts){const s=data.students.find(x=>data.cases.some(y=>y.id===c.caseId&&y.studentId===x.id));liste.push({datum:c.date,art:'Fallverlauf',wer:s?s.last+', '+s.first:'',was:c.type||'Eintrag',ziel:s?`showStudent('${s.id}')`:''})}
+ for(const t of data.trainingRoom){const s=data.students.find(x=>x.id===t.studentId);liste.push({datum:t.date,art:'Trainingsraum',wer:s?s.last+', '+s.first:'',was:t.reason||'Vorgang',ziel:s?`showStudent('${s.id}')`:''})}
+ for(const a of data.classActivities)liste.push({datum:a.date,art:'Klassenmaßnahme',wer:'Klasse '+a.className,was:(a.type||'')+': '+(a.title||''),ziel:`showClass('${a.className}')`});
+ for(const g of data.groupTalks)liste.push({datum:g.date,art:'Gruppengespräch',wer:g.participantIds.length+' Beteiligte',was:g.type||'Gespräch',ziel:''});
+ return liste.filter(x=>x.datum).sort((a,b)=>String(b.datum).localeCompare(String(a.datum))).slice(0,anzahl||12);
+}
+function letzteEintraegeZeigen(){
+ const rows=letzteEintraege(12);
+ const html=rows.length
+  ? '<div class="list">'+rows.map(r=>`<div class="row ${r.ziel?'clickrow':''}" ${r.ziel?`onclick="document.querySelectorAll('.modal.open').forEach(m=>m.remove());${r.ziel}"`:''}><div class="grow"><strong>${r.was}</strong><span class="subtle">${fmt(r.datum)} · ${r.art}${r.wer?' · '+r.wer:''}</span></div>${r.ziel?'<span class="tag gray">öffnen</span>':''}</div>`).join('')+'</div>'
+  : '<p class="subtle">Es ist noch nichts dokumentiert. Beginne über „Etwas dokumentieren“ auf der Startseite.</p>';
+ appDialog({titel:'Zuletzt dokumentiert',html:html,modus:'alert'});
+}
+
+/* ===== Hilfe an jedem Bereich ===== */
+const HILFE={
+ dashboard:['Startseite','Die Kacheln sind die häufigsten nächsten Arbeitsschritte. Klicke auf „Etwas dokumentieren“, um einen Eintrag zu erfassen. Die Fallakte entsteht dabei von selbst.\n\nGrundablauf im Cockpit:\nSchüler:in suchen, Eintrag erfassen, Fallakte entsteht, Maßnahme festlegen, Wiedervorlage anlegen, Verlauf fortschreiben.'],
+ requests:['Schüler-Anfragen','Hier landen Anfragen, die Schüler:innen selbst gestellt haben. Sie sind bewusst vom Fallbestand getrennt. Erst fachlich prüfen, dann einer Person zuordnen oder verwerfen.'],
+ cases:['Fallarbeit','Eine Fallakte bündelt alles zu einer Person: Gespräche, Maßnahmen, Ziele, Aufgaben und Fehlzeiten. Sie entsteht automatisch, sobald du zu einer Person etwas dokumentierst.\n\nUnterschied Kontakt und Maßnahme: Ein Kontakt ist das Gespräch oder die Begegnung selbst. Eine Maßnahme ist das, was daraus konkret vereinbart oder getan wird.'],
+ kanban:['Fallarbeit als Board','Dasselbe wie die Fallliste, nur nach Arbeitsstand sortiert. Jede Karte ist direkt mit der Fallakte verbunden.\n\nEine Karte verschiebst du entweder mit der Maus oder über die Schaltfläche „⇄ Verschieben“ auf der Karte. Der Fallstatus ändert sich dadurch mit.\n\nSpalten: Neu ist angelegt, aber noch nicht bearbeitet. In Bearbeitung ist laufende Beratung. Rückmeldung ausstehend heißt, du wartest auf eine Antwort. Wiedervorlage ruht bis zum Termin. Erledigt ist abgeschlossen.'],
+ students:['Schüler:innen','Der Stammdatenbestand aus der Schülerliste. Klicke eine Person an, um die Schülerakte mit Übersicht, Fallverlauf, Kontakten, Zielen, Fehlzeiten und Dokumenten zu öffnen.'],
+ classes:['Klassen','Klassenbezogene Maßnahmen und Projekte. Eine hier dokumentierte Maßnahme lässt die Klasse farbig aufleuchten. Ohne Namen und ohne Einzelbewertung.'],
+ trainingroom:['Trainingsraum','Schulische Vorgänge im sozialen Trainingsraum. Der Trainingsraum ist schulische Dokumentation und keine Beratung. Die Diagramme unten zeigen, wann und warum der Raum genutzt wird.'],
+ signals:['Frühindikatoren','Fehlzeiten aus WebUntis. Die Ampel ist ausschließlich ein Arbeitshinweis auf vorher eingestellte Schwellenwerte. Sie ist keine Diagnose und löst nichts automatisch aus.\n\nWebUntis importieren: Datei in WebUntis als CSV exportieren, hier auswählen, Vorschau prüfen, bestätigen.\n\nFachlich prüfen bedeutet: Du siehst dir die Zahlen an, ordnest sie ein und hältst fest, was daraus folgt.'],
+ workflows:['Fachverfahren','Schrittweise Ablaufhilfen für wiederkehrende Verfahren, zum Beispiel Schulverweigerung oder Verdacht auf Kindeswohlgefährdung. Sie ersetzen weder Schutzkonzept noch Leitungslinie.'],
+ teachers:['Lehrkräfte','Lehrkräfte und Mitarbeitende. Über „Lehrkräfte-/Mitarbeiterliste importieren“ liest du eine CSV-Datei ein. Die Namen stehen danach überall zur Auswahl, wo eine Person auszuwählen ist.'],
+ projects:['Projekte und Gruppen','Angebote für Gruppen und Klassen. Der Präventionsplan der Schule steht oben, darunter die einzelnen Projekte mit Ziel, Dosis, Umsetzungstreue und Auswertung.'],
+ ctc:['Bedarf auf Gruppenebene','Für Beobachtungen auf Klassen-, Jahrgangs- oder Schulebene, wenn es nicht um ein einzelnes Kind geht. Der Bereich steht nicht mehr in der Navigation, die Daten bleiben erhalten. Die geprüften Präventionsprogramme der Grünen Liste findest du jetzt unter Projekte.'],
+ network:['Gruppen und Netzwerk','Gruppengespräche und das Verzeichnis der Netzwerkpartner, getrennt nach schulintern, Kooperationspartner, Sozialraum, Krise und Notfall sowie Übergang Schule und Beruf.\n\nMit „Weitervermittlung dokumentieren“ auf einer Kontaktkarte entsteht direkt ein Eintrag im Fallverlauf. Es wird dabei kein neuer Fall angelegt.\n\nHäufige Kontakte kannst du mit dem Stern nach oben holen. In jeder Schülerakte schlägt das Cockpit unter „Beteiligte und Weitervermittlungen“ passende Stellen vor.'],
+ tasks:['Aufgaben','Alles, was noch zu tun ist. Eine Aufgabe legst du an, sobald ein nächster Schritt vereinbart ist und ein Datum hat. Ohne Datum keine Wiedervorlage.'],
+ statistics:['Auswertung','Anonymisierte Arbeitsübersicht für Statistik und Jahresbericht. Keine Namen, keine Einzelbewertung.'],
+ settings:['Daten und Einstellungen','Verschlüsselter lokaler Datentresor, Sicherung, Kennwort, Schwellenwerte und Diktat. Eine Sicherung vor größeren Änderungen ist immer sinnvoll.']
+};
+function hilfeZeigen(seite){
+ const h=HILFE[seite];if(!h)return;
+ appDialog({titel:'Hilfe: '+h[0],text:h[1],modus:'alert'});
+}
+function hilfeSchaltflaechenSetzen(){
+ document.querySelectorAll('.page').forEach(seite=>{
+  if(!HILFE[seite.id])return;
+  const kopf=seite.querySelector('.sectionhead');if(!kopf||kopf.dataset.hilfe)return;
+  kopf.dataset.hilfe='1';
+  let ziel=kopf.querySelector('.actions');
+  if(!ziel){ziel=document.createElement('div');ziel.className='actions';kopf.appendChild(ziel)}
+  const b=document.createElement('button');b.type='button';b.className='btn hilfeknopf';b.textContent='? Hilfe';
+  b.title='Kurze Erklärung zu diesem Bereich';b.onclick=()=>hilfeZeigen(seite.id);
+  ziel.insertBefore(b,ziel.firstChild);
+ });
+}
+
+/* ===== Diktat ===== */
+async function diktatDienstErreichbar(){
+ try{const url=new URL(localSpeechEndpoint());url.pathname=url.pathname.replace(/\/transcribe\/?$/,'/health');
+  const r=await fetch(url,{method:'GET'});return r.ok}catch{return false}
+}
+function diktatHinweisText(){
+ return 'Für das Diktat im Cockpit wird ein kleiner Transkriptionsdienst auf diesem Computer gebraucht. Er läuft gerade nicht.\n\n'
+ +'Sofort nutzbare Alternative, ohne jede Einrichtung:\n'
+ +'1. Klicke in das Textfeld, in das du sprechen möchtest.\n'
+ +'2. Drücke die Windows-Taste zusammen mit H.\n'
+ +'3. Sprich. Der Text erscheint direkt im Feld.\n'
+ +'4. Zum Beenden erneut Windows-Taste und H drücken.\n\n'
+ +'Dauerhafte Lösung im Cockpit:\n'
+ +'Unter Daten und Einstellungen findest du bei „Lokale Spracherkennung“ die Schaltfläche „Startdatei für den Diktatdienst speichern“. Damit richtest du den lokalen Dienst einmalig ein. Danach funktioniert die Schaltfläche Diktat in jedem Textfeld.';
+}
+function diktatStartdateiSpeichern(){
+ const py=[
+  '# Lokaler Diktatdienst fuer das SSA-Cockpit',
+  '# Einmalige Einrichtung in der Eingabeaufforderung:',
+  '#   pip install faster-whisper flask flask-cors',
+  '# Danach diese Datei per Doppelklick starten und laufen lassen.',
+  '# Es verlaesst nichts diesen Computer.',
+  '',
+  'from flask import Flask, request, jsonify',
+  'from flask_cors import CORS',
+  'from faster_whisper import WhisperModel',
+  'import tempfile, os',
+  '',
+  'app = Flask(__name__)',
+  'CORS(app)',
+  'model = WhisperModel("small", device="cpu", compute_type="int8")',
+  '',
+  '@app.get("/health")',
+  'def health():',
+  '    return jsonify(status="ok")',
+  '',
+  '@app.post("/transcribe")',
+  'def transcribe():',
+  '    f = request.files.get("audio")',
+  '    if not f:',
+  '        return jsonify(error="keine Audiodatei"), 400',
+  '    path = os.path.join(tempfile.gettempdir(), "ssa-diktat.webm")',
+  '    f.save(path)',
+  '    segments, _ = model.transcribe(path, language="de")',
+  '    text = " ".join(s.text.strip() for s in segments).strip()',
+  '    try:',
+  '        os.remove(path)',
+  '    except OSError:',
+  '        pass',
+  '    return jsonify(text=text)',
+  '',
+  'if __name__ == "__main__":',
+  '    print("Diktatdienst laeuft auf http://127.0.0.1:8173 . Fenster offen lassen.")',
+  '    app.run(host="127.0.0.1", port=8173)',
+  ''].join('\n');
+ download('ssa-diktatdienst.py',py,'text/plain;charset=utf-8');
+ appAlert('Die Datei ssa-diktatdienst.py wurde gespeichert.\n\nSo richtest du den Dienst ein:\n1. Python von python.org installieren, falls noch nicht vorhanden. Beim Setup den Haken bei „Add Python to PATH“ setzen.\n2. Eingabeaufforderung öffnen und eingeben:\n   pip install faster-whisper flask flask-cors\n3. Die gespeicherte Datei per Doppelklick starten. Das schwarze Fenster muss offen bleiben.\n4. Im Cockpit unter Daten und Einstellungen auf „Verbindung prüfen“ klicken.\n\nBis dahin funktioniert die Windows-Diktierfunktion mit der Tastenkombination Windows und H in jedem Textfeld.');
+}
+
+/* ===== Programm im Detail ansehen ===== */
+const PROGRAMM_QUELLE='https://www.gruene-liste-praevention.de';
+function programmDetail(name){
+ const stufe=[1,2,3].find(st=>GRUENE_LISTE[st].includes(name))||0;
+ const eigen=LUDGERUS_ANGEBOTE.includes(name);
+ const katalog=PREVENTION_CATALOG.find(p=>p.name===name);
+ const projekt=data.projects.find(p=>p.name===name||String(p.name).startsWith(name));
+ const suche=PROGRAMM_QUELLE+'/suche?q='+encodeURIComponent(name);
+ const zeile=(a,b)=>b?`<div class="detailitem"><span>${a}</span><strong>${b}</strong></div>`:'';
+ const html=`<div class="detailgrid">
+   ${zeile('Programm',name)}
+   ${zeile('Wirksamkeitsstufe',stufe?GRUENE_STUFEN[stufe][0]+' (Stufe '+stufe+')':'nicht in der Grünen Liste geführt')}
+   ${zeile('An der Ludgerusschule',eigen?'bereits in deiner Auswahl hinterlegt':'bisher nicht hinterlegt')}
+   ${zeile('Zielgruppe',katalog?katalog.group:'')}
+   ${zeile('Schwerpunkt',katalog?katalog.focus:'')}
+   ${zeile('Einordnung vor Ort',katalog?katalog.fit:'')}
+   ${zeile('Als Projekt angelegt',projekt?projekt.group+' · '+projekt.status:'nein')}
+  </div>
+  <p class="subtle" style="margin-top:12px">Die vollständige Programmbeschreibung mit Zielgruppe, Ablauf, Dauer, Kosten, Anbieter und Evaluationslage steht in der Datenbank des Landespräventionsrats Niedersachsen. Die Adresse steht unten, kopiere sie in deinen Browser.</p>
+  <div class="notice" style="word-break:break-all">${suche}</div>
+  <p class="hint">Die Wirksamkeitsstufe allein entscheidet nicht. Zielgruppe, Bedarf, Umsetzbarkeit, Akzeptanz, Dosis und sichere Einbettung müssen zur Schule passen.</p>`;
+ appDialog({titel:'Programm im Detail',html:html,modus:'alert'});
+ letzteProgrammAdresse=suche;
+}
+let letzteProgrammAdresse='';
+function programmAdresseKopieren(){
+ if(!letzteProgrammAdresse)letzteProgrammAdresse=PROGRAMM_QUELLE;
+ navigator.clipboard?.writeText(letzteProgrammAdresse).then(()=>toast('Die Adresse wurde kopiert. Im Browser einfügen.'),()=>toast('Kopieren war nicht möglich. Bitte die Adresse abschreiben.'));
+}
+function grueneListeQuelleKopieren(){
+ navigator.clipboard?.writeText(PROGRAMM_QUELLE).then(()=>toast('gruene-liste-praevention.de wurde kopiert. Im Browser einfügen.'),()=>toast('Kopieren war nicht möglich.'));
+}
+
+/* ===== Geführter WebUntis-Import ===== */
+let offenerFehlzeitenImport=null;
+function fehlzeitenImportStarten(){
+ const feld=document.querySelector('#signals input[type="file"][onchange*="importSchoolSignals"]');
+ if(feld)feld.click();else{go('signals');toast('Bitte oben auf „WebUntis-Fehlzeiten importieren“ klicken.')}
+}
+function fehlzeitenVorschauZeigen(){
+ const v=offenerFehlzeitenImport;if(!v)return;
+ const nicht=v.unresolvedNames||[];
+ const html=`<ol class="importschritte">
+   <li><strong>Datei gewählt</strong><br><span class="subtle">${v.fileName} · ${Math.round(v.fileSize/1024)} KB · ${v.rawRows} Einzelzeilen</span></li>
+   <li><strong>Zeitraum erkannt</strong><br><span class="subtle">${v.period||'nicht erkannt'}</span></li>
+   <li><strong>Schüler:innen erkannt</strong><br><span class="subtle">${v.records.length} Personen mit gewerteten Fehlzeiten${v.classChanges?', '+v.classChanges+' Klassenangaben werden aktualisiert':''}</span></li>
+   <li><strong>Nicht zuordenbar</strong><br><span class="subtle">${nicht.length?nicht.length+' Name'+(nicht.length===1?'':'n')+': '+nicht.slice(0,12).join(', ')+(nicht.length>12?' und weitere':''):'keine, alle Personen wurden eindeutig zugeordnet'}</span></li>
+   <li><strong>Danach</strong><br><span class="subtle">Diagramme und Ampeln werden aktualisiert. Die fachliche Prüfung bleibt dein Schritt, es entsteht keine Fallakte und keine Bewertung.</span></li>
+  </ol>
+  ${v.beispiel.length?`<div class="tablewrap" style="margin-top:12px"><table><thead><tr><th>Schüler:in</th><th>Klasse</th><th>Fehlstunden</th><th>davon unentschuldigt</th><th>Verspätungen</th></tr></thead><tbody>${v.beispiel.map(r=>`<tr><td class="namecell">${r.name}</td><td>${r.className}</td><td>${r.absences}</td><td>${r.unexcused}</td><td>${r.late}</td></tr>`).join('')}</tbody></table></div><p class="hint">Stichprobe der ersten Zeilen zur Sichtprüfung.</p>`:''}`;
+ appDialog({titel:'Fehlzeiten importieren: Vorschau',html:html,jaText:'Import bestätigen'}).then(ok=>{if(ok)fehlzeitenImportBestaetigen();else{offenerFehlzeitenImport=null;toast('Der Import wurde abgebrochen. Es wurde nichts gespeichert.')}});
+}
+function fehlzeitenImportBestaetigen(){
+ const v=offenerFehlzeitenImport;if(!v)return;
+ for(const record of v.records)upsertSchoolSignal(record);
+ data.settings.signalImportNote=`<strong>Letzter WebUntis-Import:</strong> ${v.records.length} Schüler:innen, Zeitraum ${v.period}, ${v.rawRows} Einzelzeilen aus ${v.fileName}.${v.unresolvedNames.length?` ${v.unresolvedNames.length} Personen konnten nicht eindeutig zugeordnet werden.`:' Alle Personen wurden eindeutig zugeordnet.'}${v.classChanges?` ${v.classChanges} Klassenangaben wurden entsprechend WebUntis aktualisiert.`:''}`;
+ offenerFehlzeitenImport=null;
+ save();go('signals');
+ appAlert('Import abgeschlossen.\n\n'+v.records.length+' Datensätze für '+v.period+' wurden als überprüfbare Tatsachen gespeichert. Diagramme und Ampeln sind aktualisiert.\n\nEs wurde keine Diagnose und keine Fallakte erzeugt. Der nächste Schritt ist deine fachliche Prüfung in der Spalte „Fachliche Prüfung“.');
+ setTimeout(()=>signalFallaktenVorschlag(),600);
+}
+
+/* ===== Kanban nach Arbeitsstand ===== */
+const KANBAN_SPALTEN=[
+ ['Neu',['Erste Kontaktaufnahme'],'Fallakte besteht, die Klärung hat noch nicht begonnen.'],
+ ['In Bearbeitung',['Klärungsphase','Beratung','Aktive Begleitung','Wiederaufgenommen'],'Laufende Beratung oder Begleitung.'],
+ ['Rückmeldung ausstehend',['Rückmeldung ausstehend','Weitervermittlung'],'Es wurde etwas angestoßen, eine Antwort steht aus.'],
+ ['Wiedervorlage',['Beobachtung','Vorläufig beendet'],'Ruht bis zum vereinbarten Termin.'],
+ ['Erledigt',['Abgeschlossen'],'Fallarbeit abgeschlossen.']
+];
+function naechsteAufgabe(caseId){
+ return data.tasks.filter(t=>t.caseId===caseId&&!t.done).sort((a,b)=>String(a.due).localeCompare(String(b.due)))[0]||null;
+}
+function renderKanban(){
+ const board=document.getElementById('kanbanBoard');if(!board)return;
+ const q=(document.getElementById('kanbanSearch')?.value||'').toLocaleLowerCase('de-DE');
+ const classFilter=document.getElementById('kanbanClassFilter');
+ const classes=[...new Set(data.cases.map(c=>classOf(c)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+ if(classFilter){const selected=classFilter.value;classFilter.innerHTML='<option value="all">Alle Klassen</option>'+classes.map(x=>'<option>'+x+'</option>').join('');classFilter.value=classes.includes(selected)?selected:'all'}
+ const filterClass=classFilter?.value||'all';
+ board.innerHTML=KANBAN_SPALTEN.map(([titel,statuses,erklaerung])=>{
+  const cases=data.cases.filter(c=>statuses.includes(c.status)&&(filterClass==='all'||classOf(c)===filterClass)&&[cname(c.id),classOf(c),c.reason,c.goal].join(' ').toLocaleLowerCase('de-DE').includes(q)).sort((a,b)=>String(b.last).localeCompare(String(a.last)));
+  const drop=titel==='Erledigt'?'':`ondragover="event.preventDefault()" ondrop="dropCaseOnKanban(event,'${statuses[0]}')"`;
+  return `<section class="kanban-column" ${drop}><div class="kanban-head"><span title="${erklaerung}">${titel}</span><span class="tag gray">${cases.length}</span></div><p class="kanban-hinweis">${erklaerung}</p><div class="kanban-list">${cases.map(c=>{
+   const a=naechsteAufgabe(c.id),ueberfaellig=a&&a.due&&a.due<today();
+   return `<article class="kanban-card" draggable="${titel==='Erledigt'?'false':'true'}" ondragstart="event.dataTransfer.setData('text/plain','${c.id}')" onclick="showCase('${c.id}')">
+    <h4>${cname(c.id)}${c.id===BEISPIEL_FALL_ID?' <span class="tag amber">Beispiel</span>':''}</h4>
+    <p class="kanban-meta">${classOf(c)} · ${c.status}</p>
+    <p class="kanban-auftrag"><strong>Aufgabe:</strong> ${a?a.title:(c.reason||'Anlass noch zu klären')}</p>
+    <p class="kanban-meta"><strong>Frist:</strong> ${a&&a.due?fmt(a.due):'keine Frist gesetzt'} · <strong>Zuständig:</strong> ${a?(a.assignedTo||'nicht zugeordnet'):'Edmund oder Sabine'}</p>
+    <div class="eventmeta"><span class="tag ${ueberfaellig?'red':a?'':'gray'}">${ueberfaellig?'überfällig':a?(a.priority||'Normal'):'keine offene Aufgabe'}</span><span class="tag gray">letzter Eintrag ${c.last?fmt(c.last):'–'}</span></div>
+    <div class="kanban-aktionen"><button class="btn kleiner" onclick="event.stopPropagation();kanbanVerschieben('${c.id}')">⇄ Verschieben</button><button class="btn kleiner" onclick="event.stopPropagation();verlaufOeffnen('${c.studentId}')">✎ Eintrag</button><button class="btn kleiner" onclick="event.stopPropagation();closeModal('detailModal');showStudent('${c.studentId}')">Fallakte</button></div></article>`}).join('')
+   ||`<div class="empty">${erklaerung}</div>`}</div></section>`}).join('')
+}
+
+function importSchoolSignals(event){
+ const file=event.target.files[0];event.target.value='';if(!file)return;
+ if(/\.xls[x]?$/i.test(file.name)){alert('Diese Excel-Datei bitte zunächst in Excel öffnen und als „CSV UTF-8 (durch Trennzeichen getrennt)“ speichern. Danach kann das SSA-Cockpit die WebUntis-Einzelzeilen automatisch zusammenfassen.');return}
+ if(file.size>10*1024*1024){alert('Die Datei ist größer als 10 MB und wird nicht geöffnet.');return}
+ const reader=new FileReader();
+ reader.onload=()=>{try{
+  const rows=parseDelimited(reader.result);
+  if(rows.length<2)throw Error('Keine Datenzeilen gefunden.');
+  if(rows.length>20001)throw Error('Mehr als 20.000 Datenzeilen. Bitte Datei prüfen.');
+  const headers=rows[0].map(headerKey),webUntis=aggregateWebUntisRows(rows,headers,file);
+  let records=[],unresolvedNames=[],period='',classChanges=0,rawRows=rows.length-1;
+  if(webUntis){records=webUntis.records;unresolvedNames=webUntis.unresolvedNames||[];period=webUntis.period;classChanges=webUntis.classChanges||0;rawRows=webUntis.rawRows}
+  else{
+   const col=(...names)=>headers.findIndex(h=>names.includes(h)),ix={id:col('SCHULERID','SCHULERINID','ID'),name:col('NAMEOFFIZIELLERVORNAME','NAMEVORNAME','SCHULERIN','SCHULER'),className:col('KLASSE'),period:col('ZEITRAUM','MONAT','HALBJAHR','STICHTAG'),absences:col('FEHLSTUNDEN','FEHLZEITEN','VERSAUMTESTUNDEN'),absenceMinutes:col('FEHLMINUTEN'),absenceDays:col('FEHLTAGE'),unexcused:col('UNENTSCHULDIGT','UNENTSCHULDIGTEFEHLSTUNDEN'),unexcusedMinutes:col('UNENTSCHULDIGTEMINUTEN'),late:col('VERSPATUNGEN','VERSPATET'),openAbsences:col('OFFENEFEHLSTUNDEN'),openMinutes:col('OFFENEFEHLMINUTEN'),reasonSummary:col('GRUNDE'),gradePrevious:col('NOTENSCHNITTVORHER','VORHERIGERNOTENDURCHSCHNITT'),gradeCurrent:col('NOTENSCHNITTAKTUELL','NOTENDURCHSCHNITT','AKTUELLERNOTENDURCHSCHNITT')};
+   if(ix.id<0&&ix.name<0)throw Error('Die Spalten für Schüler-ID oder Name wurden nicht erkannt.');
+   const count=(row,i)=>i>=0?Math.max(0,Math.min(100000,numberGerman(row[i]))):0,grade=(row,i)=>{const value=i>=0?numberGerman(row[i]):0;return value>=1&&value<=6?value:0};
+   for(const row of rows.slice(1)){
+    const givenId=ix.id>=0?String(row[ix.id]||'').trim():'',name=ix.name>=0?String(row[ix.name]||'').trim():'',className=ix.className>=0?String(row[ix.className]||'').trim():'',student=matchSignalStudent(givenId,name,className);
+    if(!student){unresolvedNames.push(name||givenId||'ohne Namen');continue}
+    period=ix.period>=0?clean(String(row[ix.period]||'').trim()).slice(0,100):today();
+    records.push({id:id('sig'),studentId:student.id,className:student.className,period,absences:count(row,ix.absences),absenceMinutes:count(row,ix.absenceMinutes),absenceDays:count(row,ix.absenceDays),unexcused:count(row,ix.unexcused),unexcusedMinutes:count(row,ix.unexcusedMinutes),late:count(row,ix.late),openAbsences:count(row,ix.openAbsences),openMinutes:count(row,ix.openMinutes),reasonSummary:ix.reasonSummary>=0?clean(String(row[ix.reasonSummary]||'')).slice(0,500):'',gradePrevious:grade(row,ix.gradePrevious),gradeCurrent:grade(row,ix.gradeCurrent),sourceFile:clean(file.name).slice(0,120),importedAt:new Date().toISOString(),reviewStatus:'Noch nicht geprüft',reviewedAt:'',reviewedBy:'',reviewNote:''})}
+  }
+  if(!records.length)throw Error('Es konnte keine einzige Person zugeordnet werden. Bitte prüfe, ob Namen und Klassen in der Datei zur Schülerliste passen.');
+  const beispiel=records.slice(0,5).map(r=>{const s=data.students.find(x=>x.id===r.studentId);return {name:s?s.last+', '+s.first:r.studentId,className:r.className||'–',absences:r.absences,unexcused:r.unexcused,late:r.late}});
+  offenerFehlzeitenImport={records,unresolvedNames:[...new Set(unresolvedNames)],period:period||'nicht erkannt',classChanges,rawRows,fileName:clean(file.name).slice(0,120),fileSize:file.size,beispiel};
+  fehlzeitenVorschauZeigen();
+ }catch(err){alert('Import nicht möglich: '+err.message)}};
+ reader.readAsText(file,'utf-8')
+}
+
+
+/* ===== Effiziente Fallverlaufserfassung ===== */
+const VERLAUF_VORLAGEN={
+ 'Schülergespräch':{type:'Einzelgespräch mit Schüler:in',phase:'Beratung und Beziehungsarbeit',reason:'Emotionales Wohlbefinden',measure:'Einzelgespräch durchgeführt',intervention:'Klärendes Gespräch',dauer:30,
+  f:['Worum ging es und wer hat das Gespräch angestoßen?','Was habt ihr besprochen oder vereinbart?','Wie ging das Gespräch aus?'],schritt:'Vereinbarung nachhalten'},
+ 'Elterngespräch':{type:'Elterngespräch',phase:'Einbeziehung der Familie',reason:'Familie und Erziehung',measure:'Elterngespräch durchgeführt',intervention:'Beratung und Orientierung',dauer:45,
+  f:['Wer war beteiligt und worum ging es?','Was wurde besprochen oder vereinbart?','Wie ging das Gespräch aus?'],schritt:'Vereinbarung mit den Erziehungsberechtigten prüfen'},
+ 'Lehrkräfterückmeldung':{type:'Lehrkraftgespräch',phase:'Abstimmung und Arbeitsteilung',reason:'Verhalten im Unterricht',measure:'Lehrkraftgespräch durchgeführt',intervention:'Beratung und Orientierung',dauer:15,
+  f:['Welche Lehrkraft hat was zurückgemeldet?','Was wurde daraufhin abgestimmt?','Was ist der aktuelle Stand?'],schritt:'Erneute Rückmeldung einholen'},
+ 'Übergangsschwierigkeit':{type:'Begleitung im Schulalltag',phase:'Konkrete Maßnahme oder Handlung',reason:'Emotionales Wohlbefinden',measure:'Unterstützung im Schulalltag umgesetzt',intervention:'Begleitung und praktische Unterstützung',dauer:15,
+  f:['Was war am Morgen oder beim Wechsel zu beobachten?','Wie wurde begleitet?','Ab wann war die Teilnahme am Unterricht möglich?'],schritt:'Rückmeldung der Klassenleitung einholen'},
+ 'Konflikt':{type:'Konkrete Unterstützungsmaßnahme',phase:'Konkrete Maßnahme oder Handlung',reason:'Konflikt',measure:'Palaverzelt angeboten oder durchgeführt',intervention:'Konfliktmoderation',dauer:45,
+  f:['Wer war beteiligt und was ist vorgefallen?','Wie wurde der Konflikt bearbeitet?','Worauf haben sich die Beteiligten geeinigt?'],schritt:'Einhaltung der Vereinbarung prüfen'},
+ 'Fehlzeiten':{type:'Sonstiger Vorgang',phase:'Informationsgrundlage erweitern',reason:'Schulbesuch und Fehlzeiten',measure:'Keine konkrete Maßnahme erfolgt',intervention:'Beobachtung',dauer:15,
+  f:['Welche Fehlzeiten liegen vor und aus welcher Quelle?','Was wurde unternommen?','Was ist dabei herausgekommen?'],schritt:'Fehlzeiten im nächsten Zeitraum erneut prüfen'},
+ 'Maßnahme':{type:'Konkrete Unterstützungsmaßnahme',phase:'Konkrete Maßnahme oder Handlung',reason:'Sonstiges',measure:'Unterstützung im Schulalltag umgesetzt',intervention:'Begleitung und praktische Unterstützung',dauer:30,
+  f:['Was war der Anlass für die Maßnahme?','Wie wurde sie konkret umgesetzt?','Wie hat sie gewirkt?'],schritt:'Wirkung der Maßnahme prüfen'},
+ 'Weitervermittlung':{type:'Vermittlung an externe Stelle',phase:'Abstimmung und Arbeitsteilung',reason:'Sonstiges',measure:'An externe Fachstelle vermittelt',intervention:'Vermittlung',dauer:20,
+  f:['An welche Stelle wurde vermittelt und warum?','Was wurde konkret veranlasst und wer nimmt Kontakt auf?','Welche Rückmeldung liegt bisher vor?'],schritt:'Nachfragen, ob der Erstkontakt zustande gekommen ist'},
+ 'Fallbesprechung':{type:'Fallbesprechung',phase:'Abstimmung und Arbeitsteilung',reason:'Sonstiges',measure:'Gemeinsame Fallbesprechung durchgeführt',intervention:'Lösungs- und Zielklärung',dauer:45,
+  f:['Wer war beteiligt und worum ging es?','Was wurde abgestimmt und wer übernimmt was?','Was ist das Ergebnis der Besprechung?'],schritt:'Verabredete Arbeitsteilung nachhalten'},
+ 'Vereinbarung':{type:'Konkrete Unterstützungsmaßnahme',phase:'Konkrete Maßnahme oder Handlung',reason:'Sonstiges',measure:'Konkrete Vereinbarung mit Schüler:in getroffen',intervention:'Lösungs- und Zielklärung',dauer:20,
+  f:['Worauf bezieht sich die Vereinbarung?','Was genau wurde vereinbart und mit wem?','Wie wurde die Vereinbarung aufgenommen?'],schritt:'Einhaltung der Vereinbarung prüfen'},
+ 'Rückmeldung':{type:'Kurzkontakt mit Schüler:in',phase:'Auswertung und Zielüberprüfung',reason:'Sonstiges',measure:'Keine konkrete Maßnahme erfolgt',intervention:'Beobachtung',dauer:10,
+  f:['Worauf bezieht sich die Rückmeldung und von wem kommt sie?','Was wurde daraufhin getan oder angepasst?','Wie ist der Stand jetzt?'],schritt:'Weiter beobachten'},
+ 'Abschluss':{type:'Auswertung oder Abschlussgespräch',phase:'Abschluss oder Übergang',reason:'Sonstiges',measure:'Einzelgespräch durchgeführt',intervention:'Lösungs- und Zielklärung',dauer:30,
+  f:['Wie ist der Fall insgesamt verlaufen?','Was wurde zum Abschluss getan oder vereinbart?','Was ist erreicht und was bleibt offen?'],schritt:'Nachkontrolle nach vier bis sechs Wochen'}
+};
+let verlaufBezugEintrag=null;
+function verlaufOeffnen(studentId,vorlage,bezug){
+ const form=document.getElementById('verlaufForm');form.reset();
+ verlaufBezugEintrag=bezug||null;
+ const sel=document.getElementById('verlaufVorlage');
+ sel.innerHTML=Object.keys(VERLAUF_VORLAGEN).map(k=>`<option>${k}</option>`).join('');
+ sel.value=vorlage&&VERLAUF_VORLAGEN[vorlage]?vorlage:'Schülergespräch';
+ const stud=document.getElementById('verlaufStudent');
+ const aktive=data.students.filter(s=>s.active!==false).sort((a,b)=>a.className.localeCompare(b.className,undefined,{numeric:true})||a.last.localeCompare(b.last));
+ stud.innerHTML=aktive.map(s=>`<option value="${s.id}">${s.last}, ${s.first} · ${s.className}</option>`).join('')||'<option value="">Noch keine Schülerliste eingelesen</option>';
+ if(studentId)stud.value=studentId;
+ document.getElementById('verlaufSuche').value='';
+ document.getElementById('verlaufTreffer').textContent=studentId?'Ausgewählt: '+(data.students.find(s=>s.id===studentId)?.last||'')+', '+(data.students.find(s=>s.id===studentId)?.first||''):'Nach zwei Buchstaben wird der erste passende Name ausgewählt.';
+ form.elements.date.value=today();
+ document.getElementById('verlaufDetail').hidden=true;
+ document.getElementById('verlaufMehr').textContent='Fachlich ergänzen';
+ const partnerSel=document.getElementById('verlaufPartner');
+ if(partnerSel)partnerSel.innerHTML='<option value="">Keine Weitervermittlung in diesem Eintrag</option>'+[...data.partners].sort((a,b)=>String(a.organization).localeCompare(String(b.organization))).map(p=>`<option value="${p.id}">${p.organization}</option>`).join('');
+ document.getElementById('verlaufBezug').innerHTML=bezug
+  ? `<div class="notice"><strong>Folgeeintrag zu:</strong> ${fmt(bezug.date)} · ${bezug.vorlage||bezug.type}<br><span class="subtle">${(bezug.content||'').slice(0,220)}</span></div>`
+  : '';
+ if(bezug){
+  document.getElementById('verlaufEreignis').value='Rückmeldung zum Eintrag vom '+fmt(bezug.date)+': ';
+ }
+ verlaufVorlageWechseln(!!bezug);
+ openModal('verlaufModal');
+ setTimeout(()=>document.getElementById(studentId?'verlaufEreignis':'verlaufSuche').focus(),120);
+}
+function verlaufVorlageWechseln(behalten){
+ const v=VERLAUF_VORLAGEN[document.getElementById('verlaufVorlage').value];if(!v)return;
+ document.getElementById('verlaufEreignis').placeholder=v.f[0];
+ document.getElementById('verlaufMassnahme').placeholder=v.f[1];
+ document.getElementById('verlaufErgebnis').placeholder=v.f[2];
+ const next=document.getElementById('verlaufNext');
+ if(!behalten||!next.value)next.value=v.schritt;
+ const dauer=document.getElementById('verlaufDauer');if(dauer&&!dauer.value)dauer.value=v.dauer;
+ const due=document.getElementById('verlaufDue');
+ if(!due.value)due.value=addSchoolDays(today(),2);
+}
+function verlaufVertiefen(){
+ const box=document.getElementById('verlaufDetail'),b=document.getElementById('verlaufMehr');
+ box.hidden=!box.hidden;b.textContent=box.hidden?'Fachlich ergänzen':'Fachliche Felder ausblenden';
+}
+async function verlaufSpeichern(mitWiedervorlage){
+ const form=document.getElementById('verlaufForm');
+ if(!form.reportValidity())return;
+ const f=cleanObject(Object.fromEntries(new FormData(form)));
+ const studentId=f.studentId;
+ if(!studentId){appAlert('Bitte zuerst eine Schülerin oder einen Schüler auswählen. Falls die Liste leer ist, lies zuerst die Schülerliste ein.');return}
+ const v=VERLAUF_VORLAGEN[f.vorlage]||VERLAUF_VORLAGEN['Schülergespräch'];
+ const fall=ensureCaseForStudent(studentId,f.vorlage,f.date,f.responsible||'Edmund');
+ if(!fall){appAlert('Zu dieser Person konnte keine Fallakte angelegt werden.');return}
+ const eintragId=id('c');
+ const eintrag={id:eintragId,caseId:fall.id,date:f.date||today(),responsible:f.responsible||'Edmund',
+  vorlage:f.vorlage,type:v.type,phase:v.phase,reason:f.reason||v.reason,
+  intervention:v.intervention,measure:v.measure,
+  duration:Number(f.duration||v.dauer||0),level:'Einzelfall',visibility:'SSA-Team',
+  content:f.content||'',measureDetail:f.measureDetail||'',resultDetail:f.resultDetail||'',
+  trend:f.trend||'Nicht bewertet',safetyStatus:f.safetyStatus||'Kein akuter Sicherheitshinweis in diesem Vorgang',
+  participantsOther:f.participantsOther||'',goal:f.goal||'',
+  nextStep:f.nextStep||'',result:f.resultDetail?'Maßnahme umgesetzt':'Ergebnis derzeit nicht einschätzbar',
+  closureStatus:f.vorlage==='Abschluss'?'Fallabschluss gemeinsam vereinbart':'Fallarbeit wird fortgesetzt',
+  bezugId:verlaufBezugEintrag?verlaufBezugEintrag.id:'',
+  createdAt:new Date().toISOString()};
+ if(f.partnerId){
+  const p=data.partners.find(x=>x.id===f.partnerId);
+  if(p){eintrag.measure='An externe Fachstelle vermittelt';
+   eintrag.measureDetail=(eintrag.measureDetail?eintrag.measureDetail+' ':'')+'Weitervermittlung an '+p.organization+(p.phone?', Telefon '+p.phone:'')+'.';
+   eintrag.partnerId=p.id;eintrag.partnerName=p.organization}
+ }
+ data.contacts.push(eintrag);
+ fall.last=eintrag.date;fall.contacts=data.contacts.filter(c=>c.caseId===fall.id).length;
+ let aufgabe=null;
+ if(mitWiedervorlage&&f.nextStep){
+  aufgabe={id:id('t'),caseId:fall.id,title:f.nextStep,due:f.due||addSchoolDays(today(),2),
+   priority:'Normal',taskType:f.vorlage==='Weitervermittlung'?'Weitervermittlung nachhalten':'Rückmeldung ausstehend',
+   assignedTo:f.responsible||'Edmund',expectedResult:'Rückmeldung zum Eintrag vom '+fmt(eintrag.date)+' ('+f.vorlage+')',
+   done:false,createdAt:new Date().toISOString(),completedAt:'',result:'',
+   sourceContactId:eintragId,sourceStudentId:studentId};
+  data.tasks.push(aufgabe);
+  if(fall.status==='Erste Kontaktaufnahme'||fall.status==='Klärungsphase'){
+   const alt=fall.status;fall.status='Rückmeldung ausstehend';
+   data.statusHistory.push({id:id('sh'),caseId:fall.id,studentId,date:eintrag.date,fromStatus:alt,status:'Rückmeldung ausstehend',responsible:f.responsible||'Edmund',reason:'Rückmeldung steht aus: '+f.nextStep});
+  }
+ }
+ if(verlaufBezugEintrag){
+  const offen=data.tasks.find(t=>t.sourceContactId===verlaufBezugEintrag.id&&!t.done);
+  if(offen){offen.done=true;offen.completedAt=today();offen.completedBy=f.responsible||'Edmund';offen.result=f.resultDetail||f.content||'Rückmeldung dokumentiert.'}
+ }
+ logChange('Fallverlauf erfasst ('+f.vorlage+')',eintragId,studentId,f.responsible);
+ verlaufBezugEintrag=null;
+ save();closeModal('verlaufModal');
+ selectedStudentId=studentId;
+ const s=data.students.find(x=>x.id===studentId);
+ appDialog({titel:'Gespeichert',modus:'alert',html:
+  `<div class="list">
+   <div class="row"><div class="grow"><strong>✓ Fallverlaufseintrag angelegt</strong><span class="subtle">${fmt(eintrag.date)} · ${f.vorlage} · ${s?s.last+', '+s.first:''}</span></div></div>
+   <div class="row"><div class="grow"><strong>✓ Fallakte ${fall.contacts===1?'neu erstellt':'fortgeschrieben'}</strong><span class="subtle">Status: ${fall.status}</span></div></div>
+   ${aufgabe?`<div class="row"><div class="grow"><strong>✓ Aufgabe angelegt</strong><span class="subtle">${aufgabe.title} · fällig ${fmt(aufgabe.due)} · ${aufgabe.assignedTo}</span></div></div>
+   <div class="row"><div class="grow"><strong>✓ Karte im Fallboard</strong><span class="subtle">Spalte „Rückmeldung ausstehend“</span></div></div>`:'<div class="row"><div class="grow"><strong>Keine Wiedervorlage angelegt</strong><span class="subtle">Der Eintrag steht trotzdem vollständig in der Fallakte.</span></div></div>'}
+  </div>
+  <div class="actions" style="margin-top:14px"><button class="btn" onclick="document.querySelectorAll('.modal.open').forEach(m=>m.remove());showStudent('${studentId}')">Fallakte öffnen</button><button class="btn" onclick="document.querySelectorAll('.modal.open').forEach(m=>m.remove());go('kanban')">Fallboard öffnen</button></div>`});
+}
+function rueckmeldungDokumentieren(taskId){
+ const t=data.tasks.find(x=>x.id===taskId);if(!t)return;
+ const bezug=data.contacts.find(c=>c.id===t.sourceContactId);
+ const studentId=t.sourceStudentId||data.cases.find(c=>c.id===t.caseId)?.studentId;
+ if(!studentId){appAlert('Zu dieser Aufgabe ist keine Person hinterlegt.');return}
+ document.querySelectorAll('.modal.open').forEach(m=>{if(m.id)closeModal(m.id);else m.remove()});
+ verlaufOeffnen(studentId,'Rückmeldung',bezug||null);
+}
+
+/* ===== Fallboard: Verschieben ohne Ziehen ===== */
+async function kanbanVerschieben(caseId){
+ const c=data.cases.find(x=>x.id===caseId);if(!c)return;
+ const s=studentOfCase(c);
+ const html='<p class="subtle">Aktueller Stand: <strong>'+c.status+'</strong></p><div class="list">'
+  +KANBAN_SPALTEN.map(([titel,statuses,erkl])=>{
+    const ziel=statuses[0],aktiv=statuses.includes(c.status);
+    return `<div class="row ${aktiv?'':'clickrow'}" ${aktiv?'':`onclick="kanbanZielSetzen('${caseId}','${ziel}')"`}><div class="grow"><strong>${titel}</strong><span class="subtle">${erkl}</span></div>${aktiv?'<span class="tag">aktuell</span>':'<span class="tag gray">hierhin</span>'}</div>`}).join('')
+  +'</div>';
+ appDialog({titel:'Fall verschieben: '+(s?s.last+', '+s.first:''),html:html,modus:'alert'});
+}
+async function kanbanZielSetzen(caseId,neuerStatus){
+ document.querySelectorAll('.modal.open').forEach(m=>{if(!m.id)m.remove()});
+ const c=data.cases.find(x=>x.id===caseId);if(!c||c.status===neuerStatus)return;
+ if(neuerStatus==='Abgeschlossen'){toast('Abschlüsse bitte in der vollständigen Fallakte dokumentieren.');return}
+ const alt=c.status;c.status=neuerStatus;c.last=today();
+ data.statusHistory.push({id:id('sh'),caseId:c.id,studentId:c.studentId,date:today(),fromStatus:alt,status:neuerStatus,responsible:'Edmund oder Sabine',reason:'Statusänderung über das Fallboard'});
+ logChange('Fallstatus geändert',c.id,c.studentId);
+ save();toast('Der Fall steht jetzt in der Spalte für „'+neuerStatus+'“.');
+}
+
+/* ===== Netzwerkpartner ===== */
+const NETZWERK_BEREICHE=['Schulintern','Kooperationspartner','Sozialraum','Krise und Notfall','Übergang Schule und Beruf'];
+function netzwerkBereich(p){
+ const k=String(p.category||'')+' '+String(p.area||'')+' '+String(p.organization||'');
+ if(p.area&&NETZWERK_BEREICHE.includes(p.area))return p.area;
+ if(/schulintern|vertrauenslehr|medienbudd|palaverzelt|schulleitung|beratungslehr/i.test(k))return 'Schulintern';
+ if(/notfall|krise|notruf|feuerwehr|rettung|telefonseelsorge|kinder- und jugendtelefon|klinik/i.test(k))return 'Krise und Notfall';
+ if(/agentur für arbeit|berufs|ausbildung|übergang|jobcenter|kammer|bildungsträger/i.test(k))return 'Übergang Schule und Beruf';
+ if(/verein|sport|musik|jugendzentrum|jugendarbeit|freizeit|kirche|tafel/i.test(k))return 'Sozialraum';
+ return 'Kooperationspartner';
+}
+function netzwerkPrioTag(p){
+ const s=String(p.priority||'').toLocaleLowerCase('de-DE');
+ if(s.includes('sehr hoch'))return '<span class="tag red">sehr hoch</span>';
+ if(s.includes('hoch'))return '<span class="tag amber">hoch</span>';
+ if(s.includes('mittel'))return '<span class="tag gray">mittel</span>';
+ return '';
+}
+function netzwerkFavorit(partnerId){
+ const p=data.partners.find(x=>x.id===partnerId);if(!p)return;
+ p.favorite=!p.favorite;save();toast(p.favorite?'Als häufiger Kontakt markiert.':'Markierung entfernt.');
+}
+function netzwerkKarte(p){
+ const bereich=netzwerkBereich(p);
+ return `<article class="card netzkarte ${bereich==='Schulintern'?'intern':''}">
+  <div class="cardhead"><h4>${p.organization}</h4>${netzwerkPrioTag(p)}</div>
+  <p class="subtle">${bereich}${p.category&&p.category!==bereich?' · '+p.category:''}${p.region?' · '+p.region:''}</p>
+  ${p.contact?`<p class="netzzeile"><strong>Zuständig:</strong> ${p.contact}</p>`:''}
+  ${p.note?`<p class="netzzeile">${p.note}</p>`:''}
+  ${p.address?`<p class="netzzeile">${p.address}</p>`:''}
+  <div class="eventmeta">
+   ${p.phone?`<button class="btn kleiner" onclick="netzwerkKopieren('${String(p.phone).replace(/'/g,"")}','Telefonnummer')">☎ ${p.phone}</button>`:''}
+   ${p.email?`<button class="btn kleiner" onclick="netzwerkKopieren('${String(p.email).replace(/'/g,"")}','E-Mail-Adresse')">✉ ${p.email}</button>`:''}
+   ${p.website?`<button class="btn kleiner" onclick="netzwerkKopieren('${String(p.website).replace(/'/g,"")}','Internetadresse')">🌐 Website kopieren</button>`:''}
+  </div>
+  <div class="actions" style="margin-top:9px">
+   <button class="btn primary kleiner" onclick="netzwerkWeitervermittlung('${p.id}')">Weitervermittlung dokumentieren</button>
+   <button class="btn kleiner" onclick="netzwerkFavorit('${p.id}')">${p.favorite?'★ häufiger Kontakt':'☆ merken'}</button>
+  </div>
+  ${p.checkedAt?`<p class="hint">zuletzt geprüft: ${fmt(p.checkedAt)}</p>`:''}
+ </article>`;
+}
+function netzwerkKopieren(wert,was){
+ navigator.clipboard?.writeText(wert).then(()=>toast(was+' kopiert: '+wert),()=>toast('Kopieren war nicht möglich: '+wert));
+}
+function netzwerkWeitervermittlung(partnerId){
+ const p=data.partners.find(x=>x.id===partnerId);if(!p)return;
+ const sid=selectedStudentId||'';
+ document.querySelectorAll('.modal.open').forEach(m=>{if(m.id)closeModal(m.id);else m.remove()});
+ verlaufOeffnen(sid,'Weitervermittlung',null);
+ setTimeout(()=>{
+  const sel=document.getElementById('verlaufPartner');if(sel)sel.value=p.id;
+  const box=document.getElementById('verlaufDetail');if(box&&box.hidden)verlaufVertiefen();
+  const e=document.getElementById('verlaufEreignis');
+  if(e&&!e.value)e.value='Weitervermittlung an '+p.organization+'. Anlass: ';
+  const m=document.getElementById('verlaufMassnahme');
+  if(m&&!m.value)m.value='Kontaktdaten an die Erziehungsberechtigten weitergegeben. Erstkontakt erfolgt durch die Familie.';
+ },160);
+}
+function netzwerkVorschlag(studentId){
+ const c=data.cases.find(x=>x.studentId===studentId);
+ const events=studentEvents(studentId);
+ const text=[c?.reason,c?.goal,...events.slice(0,8).map(e=>[e.title,e.content,e.measureDetail].filter(Boolean).join(' '))].join(' ');
+ const treffer=suggestedPartners(text);
+ const favoriten=data.partners.filter(p=>p.favorite);
+ const liste=[...treffer,...favoriten.filter(f=>!treffer.some(t=>t.id===f.id))].slice(0,6);
+ if(!liste.length){
+  const wichtig=data.partners.filter(p=>p.active!==false&&(netzwerkBereich(p)==='Schulintern'||String(p.priority||'').includes('sehr hoch'))).slice(0,5);
+  if(!wichtig.length)return '<p class="subtle">Noch keine Netzwerkpartner hinterlegt. Unter Gruppen und Netzwerk kannst du die Liste importieren.</p>';
+  return `<p class="subtle">Zu diesem Fall ist noch keine Stelle automatisch zugeordnet. Häufig gebrauchte Anlaufstellen:</p><div class="list">${wichtig.map(p=>`<div class="row"><div class="grow"><strong>${p.organization}</strong><span class="subtle">${netzwerkBereich(p)}${p.phone?' · '+p.phone:''}</span></div><button class="btn kleiner" onclick="netzwerkWeitervermittlung('${p.id}')">Weitervermittlung</button></div>`).join('')}</div>`;
+ }
+ return `<div class="list">${liste.map(p=>`<div class="row"><div class="grow"><strong>${p.organization}</strong><span class="subtle">${netzwerkBereich(p)}${p.phone?' · '+p.phone:''}</span></div><button class="btn kleiner" onclick="netzwerkWeitervermittlung('${p.id}')">Weitervermittlung</button></div>`).join('')}</div>`;
+}
+function renderNetzwerkBereiche(){
+ const box=document.getElementById('netzwerkBereiche');if(!box)return;
+ const q=(document.getElementById('netzSuche')?.value||'').toLocaleLowerCase('de-DE');
+ const region=document.getElementById('netzRegion')?.value||'all';
+ const bereich=document.getElementById('netzBereich')?.value||'all';
+ const prio=document.getElementById('netzPrio')?.value||'all';
+ const regionen=[...new Set(data.partners.map(p=>p.region).filter(Boolean))].sort();
+ const rsel=document.getElementById('netzRegion');
+ if(rsel&&rsel.options.length!==regionen.length+1){const alt=rsel.value;rsel.innerHTML='<option value="all">Alle Regionen</option>'+regionen.map(r=>`<option>${r}</option>`).join('');rsel.value=regionen.includes(alt)?alt:'all'}
+ const gefiltert=data.partners.filter(p=>{
+  if(p.active===false)return false;
+  const b=netzwerkBereich(p);
+  const hay=[p.organization,p.contact,p.category,p.note,p.address,p.phone,p.email,p.region,b].join(' ').toLocaleLowerCase('de-DE');
+  return (region==='all'||p.region===region)&&(bereich==='all'||b===bereich)
+   &&(prio==='all'||String(p.priority||'').toLocaleLowerCase('de-DE').includes(prio))&&hay.includes(q)});
+ const fav=gefiltert.filter(p=>p.favorite);
+ box.innerHTML=(fav.length?`<h3 style="margin-top:0">★ Häufige Kontakte</h3><div class="grid three">${fav.map(netzwerkKarte).join('')}</div>`:'')
+  +NETZWERK_BEREICHE.map(b=>{const teil=gefiltert.filter(p=>netzwerkBereich(p)===b&&!p.favorite);
+   if(!teil.length)return '';
+   return `<h3 style="margin-top:17px">${b} <span class="tag gray">${teil.length}</span></h3><div class="grid three">${teil.map(netzwerkKarte).join('')}</div>`}).join('')
+  ||'<div class="card empty">Keine passenden Kontakte. Über „Netzwerkliste importieren“ liest du die CSV-Datei mit den Einrichtungen aus Emsland und Ostfriesland ein.</div>';
+ const zaehler=document.getElementById('netzZaehler');
+ if(zaehler)zaehler.textContent=gefiltert.length+' von '+data.partners.filter(p=>p.active!==false).length+' Kontakten';
+}
+let offenerNetzImport=null;
+function netzwerkSchluessel(p){return [p.organization,p.address,p.phone,p.website].map(x=>String(x||'').toLocaleLowerCase('de-DE').replace(/[^a-z0-9äöüß]/g,'')).join('|')}
+function netzwerkImport(event){
+ const file=event.target.files[0];event.target.value='';if(!file)return;
+ if(file.size>5*1024*1024){alert('Die Datei ist größer als 5 MB.');return}
+ const reader=new FileReader();
+ reader.onload=()=>{try{
+  const rows=parseDelimited(reader.result);
+  if(rows.length<2)throw Error('Keine Datenzeilen gefunden.');
+  const headers=rows[0].map(headerKey),col=(...n)=>headers.findIndex(h=>n.includes(h));
+  const ix={region:col('REGION'),category:col('KATEGORIE'),organization:col('EINRICHTUNG'),
+   contact:col('ANGEBOTZUSTANDIGKEIT','ANGEBOT','ZUSTANDIGKEIT'),address:col('ORTADRESSE','ORT','ADRESSE'),
+   phone:col('TELEFON'),email:col('EMAIL'),website:col('WEBSITE'),priority:col('PRIORITAT'),
+   note:col('COCKPITVERWENDUNG','VERWENDUNG','HINWEIS')};
+  if(ix.organization<0)throw Error('Die Spalte EINRICHTUNG wurde nicht gefunden.');
+  const vorhanden=new Map(data.partners.map(p=>[netzwerkSchluessel(p),p]));
+  const neu=[],dubletten=[],luecken=[];
+  const g=(row,i)=>i>=0?clean(String(row[i]||'').trim()).slice(0,400):'';
+  for(const row of rows.slice(1)){
+   const organization=g(row,ix.organization);if(!organization)continue;
+   const p={id:id('nw'),organization,region:g(row,ix.region),category:g(row,ix.category)||'Sonstiges',
+    contact:g(row,ix.contact),address:g(row,ix.address),phone:g(row,ix.phone),email:g(row,ix.email),
+    website:safeWebUrl(g(row,ix.website))||g(row,ix.website),priority:g(row,ix.priority),
+    note:g(row,ix.note),active:true,favorite:false,checkedAt:today(),source:clean(file.name).slice(0,120)};
+   const key=netzwerkSchluessel(p);
+   if(vorhanden.has(key)){dubletten.push(organization);continue}
+   if(!p.phone&&!p.email&&!p.website)luecken.push(organization);
+   vorhanden.set(key,p);neu.push(p);
+  }
+  if(!neu.length&&!dubletten.length)throw Error('Es konnte keine Einrichtung gelesen werden.');
+  offenerNetzImport={neu,dubletten,luecken,fileName:clean(file.name).slice(0,120),zeilen:rows.length-1};
+  const v=offenerNetzImport;
+  appDialog({titel:'Netzwerkliste importieren: Vorschau',jaText:'Import bestätigen',html:
+   `<ol class="importschritte">
+     <li><strong>Datei</strong><br><span class="subtle">${v.fileName} · ${v.zeilen} Zeilen</span></li>
+     <li><strong>Neue Kontakte</strong><br><span class="subtle">${v.neu.length}</span></li>
+     <li><strong>Bereits vorhanden</strong><br><span class="subtle">${v.dubletten.length?v.dubletten.length+': '+v.dubletten.slice(0,8).join(', ')+(v.dubletten.length>8?' und weitere':''):'keine Dubletten erkannt'}</span></li>
+     <li><strong>Ohne Telefon, E-Mail und Website</strong><br><span class="subtle">${v.luecken.length?v.luecken.length+': '+v.luecken.slice(0,8).join(', '):'keine'}</span></li>
+     <li><strong>Bestehende Kontakte</strong><br><span class="subtle">werden nicht überschrieben</span></li>
+    </ol>
+    ${v.neu.length?`<div class="tablewrap" style="margin-top:12px"><table><thead><tr><th>Einrichtung</th><th>Region</th><th>Kategorie</th><th>Priorität</th></tr></thead><tbody>${v.neu.slice(0,8).map(p=>`<tr><td>${p.organization}</td><td>${p.region||'–'}</td><td>${p.category}</td><td>${p.priority||'–'}</td></tr>`).join('')}</tbody></table></div><p class="hint">Stichprobe der ersten Zeilen.</p>`:''}`
+  }).then(ok=>{
+   if(!ok){offenerNetzImport=null;toast('Der Import wurde abgebrochen.');return}
+   data.partners.push(...v.neu);
+   logChange('Netzwerkliste importiert: '+v.neu.length+' Kontakte','netzwerk');
+   offenerNetzImport=null;save();go('network');
+   appAlert('Import abgeschlossen.\n\n'+v.neu.length+' neue Kontakte wurden übernommen.\n'+(v.dubletten.length?v.dubletten.length+' Kontakte waren bereits vorhanden und blieben unverändert.\n':'')+(v.luecken.length?v.luecken.length+' Kontakte haben weder Telefon noch E-Mail noch Website.\n':'')+'\nBestehende Fallakten und Einstellungen sind unverändert.');
+  });
+ }catch(err){alert('Import nicht möglich: '+err.message)}};
+ reader.readAsText(file,'utf-8');
+}
+function netzwerkVorlageSpeichern(){
+ const kopf='REGION;KATEGORIE;EINRICHTUNG;ANGEBOT / ZUSTÄNDIGKEIT;ORT / ADRESSE;TELEFON;E-MAIL;WEBSITE;PRIORITÄT;COCKPIT-VERWENDUNG';
+ const zeilen=[kopf,
+  'Emsland;Jugendhilfe und Kinderschutz;Jugendamt Landkreis Emsland, Außenstelle Aschendorf;Hilfen zur Erziehung, Kinderschutz;Große Straße 32, 26871 Papenburg;04962 5010;;https://www.emsland.de;sehr hoch;Erste Anlaufstelle bei Kindeswohlfragen',
+  'Emsland;Suchtberatung;Diakonisches Werk Papenburg;Sucht- und Drogenberatung, Prävention;Landsbergstraße 9, 26871 Papenburg;04961 98880;dw-papenburg@diakonie-emsland.de;https://www.suchtberatungsstelle.de;hoch;Prävention Jg. 5, 7, 8, 9 und Einzelberatung'];
+ download('SSA-Cockpit-Netzwerkpartner-Vorlage.csv','﻿'+zeilen.join('\r\n'),'text/csv;charset=utf-8');
+ toast('Die Vorlage wurde gespeichert. Semikolon als Trennzeichen, UTF-8 mit BOM.');
+}
+
 function setupQuickForm(){const grid=document.querySelector('#quickForm .formgrid');if(!grid||grid.dataset.zweistufig)return;
  grid.dataset.zweistufig='1';
  [...grid.children].forEach(k=>{if(!k.querySelector('[required]'))k.classList.add('qf-detail')});
@@ -1666,14 +2416,7 @@ function aggregateWebUntisRows(rows,headers,file){
  const groups=new Map(),unresolved=new Set(),dates=[],classChanges=new Set();
  for(const row of rows.slice(1)){const externalId=ix.externalId>=0?String(row[ix.externalId]||'').trim():'',name=String(row[ix.name]||'').trim(),sourceClassName=ix.className>=0?String(row[ix.className]||'').trim():'',student=matchSignalStudent(externalId,name,sourceClassName);if(!student){unresolved.add(externalId||name);continue}if(applyWebUntisClass(student,sourceClassName))classChanges.add(student.id);const date=parseSignalDate(row[ix.date]);if(date)dates.push(date);const counted=['TRUE','WAHR','1','JA'].includes(String(row[ix.counted]||'').trim().toUpperCase());if(!counted)continue;const item=groups.get(student.id)||{student,externalId,sourceClassName,absences:0,absenceMinutes:0,unexcused:0,unexcusedMinutes:0,openAbsences:0,openMinutes:0,late:0,absenceDates:new Set(),reasons:{}};const hours=Math.max(0,numberGerman(row[ix.hours])),minutes=ix.minutes>=0?Math.max(0,numberGerman(row[ix.minutes])):Math.round(hours*45),reason=String(row[ix.reason]||'').trim(),status=ix.status>=0?headerKey(row[ix.status]):'';item.absences+=hours;item.absenceMinutes+=minutes;item.reasons[reason]=(item.reasons[reason]||0)+1;if(headerKey(reason).includes('VERSPAT'))item.late++;else if(date)item.absenceDates.add(date);if(status.includes('NICHTENTSCH')){item.unexcused+=hours;item.unexcusedMinutes+=minutes}if(status==='OFFEN'){item.openAbsences+=hours;item.openMinutes+=minutes}groups.set(student.id,item)}
  if(!dates.length)throw Error('In der WebUntis-Datei wurden keine gültigen Datumsangaben gefunden.');const start=[...dates].sort()[0],end=[...dates].sort().at(-1),period=`${fmt(start)} bis ${fmt(end)}`;
- const records=[...groups.values()].map(item=>({id:id('sig'),sourceKey:`webuntis:${start}:${end}:${item.student.id}`,studentId:item.student.id,externalStudentId:item.externalId,className:item.student.className,sourceClassName:item.sourceClassName,startDate:start,endDate:end,period,absences:Number(item.absences.toFixed(2)),absenceMinutes:Math.round(item.absenceMinutes),absenceDays:item.absenceDates.size,unexcused:Number(item.unexcused.toFixed(2)),unexcusedMinutes:Math.round(item.unexcusedMinutes),openAbsences:Number(item.openAbsences.toFixed(2)),openMinutes:Math.round(item.openMinutes),late:item.late,reasonSummary:Object.entries(item.reasons).sort((a,b)=>b[1]-a[1]).map(([reason,count])=>`${reason}: ${count}`).join(', '),gradePrevious:0,gradeCurrent:0,sourceFile:clean(file.name).slice(0,120),sourceType:'WebUntis Fehlzeiten pro Schüler/in',importedAt:new Date().toISOString(),reviewStatus:'Noch nicht geprüft',reviewedAt:'',reviewedBy:'',reviewNote:''}));return {records,skipped:unresolved.size,period,rawRows:rows.length-1,classChanges:classChanges.size}
-}
-function importSchoolSignals(event){
- const file=event.target.files[0];event.target.value='';if(!file)return;if(/\.xls[x]?$/i.test(file.name)){alert('Diese Excel-Datei bitte zunächst in Excel öffnen und als „CSV UTF-8 (durch Trennzeichen getrennt)“ speichern. Danach kann das SSA-Cockpit die WebUntis-Einzelzeilen automatisch zusammenfassen.');return}if(file.size>10*1024*1024){alert('Die Datei ist größer als 10 MB und wird nicht geöffnet.');return}
- const reader=new FileReader();reader.onload=()=>{try{const rows=parseDelimited(reader.result);if(rows.length<2)throw Error('Keine Datenzeilen gefunden.');if(rows.length>20001)throw Error('Mehr als 20.000 Datenzeilen. Bitte Datei prüfen.');const headers=rows[0].map(headerKey),webUntis=aggregateWebUntisRows(rows,headers,file);let imported=0,skipped=0,period='';
- if(webUntis){for(const record of webUntis.records)upsertSchoolSignal(record);imported=webUntis.records.length;skipped=webUntis.skipped;period=webUntis.period;data.settings.signalImportNote=`<strong>Letzter WebUntis-Import:</strong> ${imported} Schüler:innen, Zeitraum ${period}, ${webUntis.rawRows} Einzelzeilen.${skipped?` ${skipped} Personen konnten nicht eindeutig zugeordnet werden.`:' Alle Personen wurden eindeutig zugeordnet.'}${webUntis.classChanges?` ${webUntis.classChanges} Klassenangaben wurden entsprechend WebUntis aktualisiert.`:''}`}
- else{const col=(...names)=>headers.findIndex(h=>names.includes(h)),ix={id:col('SCHULERID','SCHULERINID','ID'),name:col('NAMEOFFIZIELLERVORNAME','NAMEVORNAME','SCHULERIN','SCHULER'),className:col('KLASSE'),period:col('ZEITRAUM','MONAT','HALBJAHR','STICHTAG'),absences:col('FEHLSTUNDEN','FEHLZEITEN','VERSAUMTESTUNDEN'),absenceMinutes:col('FEHLMINUTEN'),absenceDays:col('FEHLTAGE'),unexcused:col('UNENTSCHULDIGT','UNENTSCHULDIGTEFEHLSTUNDEN'),unexcusedMinutes:col('UNENTSCHULDIGTEMINUTEN'),late:col('VERSPATUNGEN','VERSPATET'),openAbsences:col('OFFENEFEHLSTUNDEN'),openMinutes:col('OFFENEFEHLMINUTEN'),reasonSummary:col('GRUNDE'),gradePrevious:col('NOTENSCHNITTVORHER','VORHERIGERNOTENDURCHSCHNITT'),gradeCurrent:col('NOTENSCHNITTAKTUELL','NOTENDURCHSCHNITT','AKTUELLERNOTENDURCHSCHNITT')};if(ix.id<0&&ix.name<0)throw Error('Schüler-ID oder Name fehlt.');const count=(row,i)=>i>=0?Math.max(0,Math.min(100000,numberGerman(row[i]))):0,grade=(row,i)=>{const value=i>=0?numberGerman(row[i]):0;return value>=1&&value<=6?value:0};for(const row of rows.slice(1)){const givenId=ix.id>=0?String(row[ix.id]||'').trim():'',name=ix.name>=0?String(row[ix.name]||'').trim():'',className=ix.className>=0?String(row[ix.className]||'').trim():'',student=matchSignalStudent(givenId,name,className);if(!student){skipped++;continue}period=ix.period>=0?clean(String(row[ix.period]||'').trim()).slice(0,100):today();const record={id:id('sig'),studentId:student.id,className:student.className,period,absences:count(row,ix.absences),absenceMinutes:count(row,ix.absenceMinutes),absenceDays:count(row,ix.absenceDays),unexcused:count(row,ix.unexcused),unexcusedMinutes:count(row,ix.unexcusedMinutes),late:count(row,ix.late),openAbsences:count(row,ix.openAbsences),openMinutes:count(row,ix.openMinutes),reasonSummary:ix.reasonSummary>=0?clean(String(row[ix.reasonSummary]||'')).slice(0,500):'',gradePrevious:grade(row,ix.gradePrevious),gradeCurrent:grade(row,ix.gradeCurrent),sourceFile:clean(file.name).slice(0,120),importedAt:new Date().toISOString(),reviewStatus:'Noch nicht geprüft',reviewedAt:'',reviewedBy:'',reviewNote:''};upsertSchoolSignal(record);imported++}data.settings.signalImportNote=`<strong>Letzter Import:</strong> ${imported} Datensätze aus ${clean(file.name)}.${skipped?` ${skipped} Zeilen konnten nicht eindeutig zugeordnet werden.`:''}`}
- save();go('signals');setTimeout(()=>signalFallaktenVorschlag(),900);alert(`${imported} Schüler:innen-Datensätze wurden für ${period||'den angegebenen Zeitraum'} als überprüfbare Tatsachen eingelesen.${skipped?`\n${skipped} Personen oder Zeilen konnten nicht eindeutig zugeordnet werden.`:''}\n\nEs wurde keine Diagnose oder fachliche Bewertung erzeugt. Eine Fallakte entsteht erst bei einer personenbezogenen fachlichen Bearbeitung.`)}catch(err){alert('Import nicht möglich: '+err.message)}};reader.readAsText(file,'utf-8')
+ const records=[...groups.values()].map(item=>({id:id('sig'),sourceKey:`webuntis:${start}:${end}:${item.student.id}`,studentId:item.student.id,externalStudentId:item.externalId,className:item.student.className,sourceClassName:item.sourceClassName,startDate:start,endDate:end,period,absences:Number(item.absences.toFixed(2)),absenceMinutes:Math.round(item.absenceMinutes),absenceDays:item.absenceDates.size,unexcused:Number(item.unexcused.toFixed(2)),unexcusedMinutes:Math.round(item.unexcusedMinutes),openAbsences:Number(item.openAbsences.toFixed(2)),openMinutes:Math.round(item.openMinutes),late:item.late,reasonSummary:Object.entries(item.reasons).sort((a,b)=>b[1]-a[1]).map(([reason,count])=>`${reason}: ${count}`).join(', '),gradePrevious:0,gradeCurrent:0,sourceFile:clean(file.name).slice(0,120),sourceType:'WebUntis Fehlzeiten pro Schüler/in',importedAt:new Date().toISOString(),reviewStatus:'Noch nicht geprüft',reviewedAt:'',reviewedBy:'',reviewNote:''}));return {records,skipped:unresolved.size,unresolvedNames:[...unresolved],period,rawRows:rows.length-1,classChanges:classChanges.size}
 }
 function parseDelimited(text){text=text.replace(/^\ufeff/,'');const first=text.split(/\r?\n/,1)[0],delimiter=(first.match(/;/g)||[]).length>=(first.match(/,/g)||[]).length?';':',';const rows=[];let row=[],cell='',quoted=false;for(let i=0;i<text.length;i++){const ch=text[i];if(ch==='"'){if(quoted&&text[i+1]==='"'){cell+='"';i++}else quoted=!quoted}else if(ch===delimiter&&!quoted){row.push(cell);cell=''}else if((ch==='\n'||ch==='\r')&&!quoted){if(ch==='\r'&&text[i+1]==='\n')i++;row.push(cell);if(row.some(v=>v.trim()))rows.push(row);row=[];cell=''}else cell+=ch}row.push(cell);if(row.some(v=>v.trim()))rows.push(row);return rows}
 function headerKey(v){return String(v||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ß/g,'SS').replace(/[^A-Z0-9]/g,'')}
