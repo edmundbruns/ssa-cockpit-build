@@ -10,7 +10,11 @@
     :root{--navy:#123047;--teal:#0f766e;--cyan:#0891b2;--cream:#f7f5ef;--paper:#fff;--ink:#183042;--muted:#64748b;--line:#dce4e8;--amber:#f59e0b;--red:#dc2626;--green:#16a34a;--shadow:0 12px 34px rgba(15,45,61,.10);--radius:18px}
     *{box-sizing:border-box} body{margin:0;background:var(--cream);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif} button,input,select,textarea{font:inherit} button{cursor:pointer}
     .app{min-height:100vh;display:grid;grid-template-columns:250px 1fr}.sidebar{background:linear-gradient(175deg,#102f46 0%,#164e63 62%,#0f766e 100%);color:white;padding:26px 18px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}.brand{display:flex;gap:12px;align-items:center;margin:0 8px 26px}.brandmark{width:44px;height:44px;border-radius:14px;background:#fff;color:var(--teal);display:grid;place-items:center;font-weight:900;font-size:19px}.brand strong{display:block;font-size:17px}.brand small{opacity:.72}.nav{display:grid;gap:5px}.nav button{border:0;background:transparent;color:#d9edf1;text-align:left;padding:11px 13px;border-radius:12px;display:flex;gap:11px;align-items:center}.nav button:hover,.nav button.active{background:rgba(255,255,255,.14);color:#fff}.nav .icon{width:22px;text-align:center}.sidefoot{margin-top:auto;padding:14px 10px;color:#d5e7ea;font-size:12px}.statusdot{display:inline-block;width:8px;height:8px;background:#6ee7b7;border-radius:50%;margin-right:6px}
-    main{min-width:0}.testbar{background:#fff7d6;border-bottom:1px solid #f4d777;padding:8px 28px;color:#6b4c00;font-size:13px;text-align:center}.topbar{padding:23px 30px 8px;display:flex;justify-content:space-between;align-items:center;gap:20px}.topbar h1{font-size:26px;margin:0;letter-spacing:-.4px}.topbar p{margin:2px 0 0;color:var(--muted)}.actions{display:flex;gap:9px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 13px;border-radius:11px;font-weight:650}.btn:hover{box-shadow:0 4px 14px #18304216}.btn.primary{background:var(--teal);border-color:var(--teal);color:white}.btn.reviewed{background:#e6f4f2;border-color:#8bc9c2;color:#0f6b65}.btn.danger{color:var(--red)}.content{padding:18px 30px 42px}.page{display:none}.page.active{display:block}.grid{display:grid;gap:17px}.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:17px}.card{background:var(--paper);border:1px solid #e5e9eb;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}.kpi{position:relative;overflow:hidden}.kpi:after{content:"";position:absolute;width:90px;height:90px;border-radius:50%;background:#0f766e0d;right:-30px;top:-32px}.kpi .label{color:var(--muted);font-size:13px}.kpi .value{font-size:31px;font-weight:800;margin:5px 0 2px}.kpi .trend{font-size:12px;color:var(--teal)}.two{grid-template-columns:1.35fr 1fr}.three{grid-template-columns:repeat(3,1fr)}.cardhead{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:14px}.cardhead h2,.cardhead h3{margin:0;font-size:17px}.subtle{color:var(--muted);font-size:13px}.list{display:grid;gap:10px}.row{display:flex;align-items:center;gap:12px;padding:11px;border-radius:13px;background:#f8fafb}.row:hover{background:#f0f7f7}.avatar{width:38px;height:38px;border-radius:12px;background:#d9eef0;color:#075b63;display:grid;place-items:center;font-weight:800;flex:none}.grow{flex:1;min-width:0}.grow strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tag{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:#e6f4f2;color:#0f6b65;font-size:12px;font-weight:700}.tag.amber{background:#fff2d5;color:#936000}.tag.red{background:#fee8e8;color:#a91d1d}.tag.gray{background:#edf1f3;color:#536570}.tag.red{background:#fee2e2;color:#991b1b}.datebox{width:48px;text-align:center;color:var(--muted);font-size:12px}.datebox b{display:block;color:var(--ink);font-size:17px}.empty{padding:28px;text-align:center;color:var(--muted)}
+    main{min-width:0}.testbar{background:#fff7d6;border-bottom:1px solid #f4d777;padding:8px 28px;color:#6b4c00;font-size:13px;text-align:center}.topbar{padding:23px 30px 8px;display:flex;justify-content:space-between;align-items:center;gap:20px}.topbar h1{font-size:26px;margin:0;letter-spacing:-.4px}.topbar p{margin:2px 0 0;color:var(--muted)}.actions{display:flex;gap:9px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 13px;border-radius:11px;font-weight:650}.btn:hover{box-shadow:0 4px 14px #18304216}.btn.primary{background:var(--teal);border-color:var(--teal);color:white}.btn.reviewed{background:#e6f4f2;border-color:#8bc9c2;color:#0f6b65}.btn.danger{color:var(--red)}.content{padding:18px 30px 42px}.page{display:none}.page.active{display:block}.rollenbox{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:7px 14px;max-height:200px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:11px;background:var(--cream)}
+.rollenbox label{display:flex;gap:7px;align-items:flex-start;font-size:13px;font-weight:500;cursor:pointer;line-height:1.3}
+.rollenbox input{margin-top:2px;flex:none}
+.rollentags{display:flex;flex-wrap:wrap;gap:4px}
+.grid{display:grid;gap:17px}.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:17px}.card{background:var(--paper);border:1px solid #e5e9eb;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}.kpi{position:relative;overflow:hidden}.kpi:after{content:"";position:absolute;width:90px;height:90px;border-radius:50%;background:#0f766e0d;right:-30px;top:-32px}.kpi .label{color:var(--muted);font-size:13px}.kpi .value{font-size:31px;font-weight:800;margin:5px 0 2px}.kpi .trend{font-size:12px;color:var(--teal)}.two{grid-template-columns:1.35fr 1fr}.three{grid-template-columns:repeat(3,1fr)}.cardhead{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:14px}.cardhead h2,.cardhead h3{margin:0;font-size:17px}.subtle{color:var(--muted);font-size:13px}.list{display:grid;gap:10px}.row{display:flex;align-items:center;gap:12px;padding:11px;border-radius:13px;background:#f8fafb}.row:hover{background:#f0f7f7}.avatar{width:38px;height:38px;border-radius:12px;background:#d9eef0;color:#075b63;display:grid;place-items:center;font-weight:800;flex:none}.grow{flex:1;min-width:0}.grow strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tag{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:#e6f4f2;color:#0f6b65;font-size:12px;font-weight:700}.tag.amber{background:#fff2d5;color:#936000}.tag.red{background:#fee8e8;color:#a91d1d}.tag.gray{background:#edf1f3;color:#536570}.tag.red{background:#fee2e2;color:#991b1b}.datebox{width:48px;text-align:center;color:var(--muted);font-size:12px}.datebox b{display:block;color:var(--ink);font-size:17px}.empty{padding:28px;text-align:center;color:var(--muted)}
     .barrow{display:grid;grid-template-columns:120px 1fr 30px;gap:10px;align-items:center;margin:13px 0;font-size:13px}.bartrack{height:10px;background:#edf2f3;border-radius:99px;overflow:hidden}.barfill{height:100%;background:linear-gradient(90deg,var(--teal),var(--cyan));border-radius:99px}.sectionhead{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:15px}.sectionhead h2{font-size:22px;margin:0}.filters{display:flex;gap:8px;flex-wrap:wrap}.field{border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px 11px;color:var(--ink)}.search{min-width:230px}.tablewrap{overflow:auto;border-radius:var(--radius)}table{width:100%;border-collapse:collapse;background:#fff}th,td{text-align:left;padding:13px 15px;border-bottom:1px solid #e8edef;vertical-align:middle}th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:#f7fafb}tbody tr:hover{background:#f7fbfb}.namecell{font-weight:750}.clickrow{cursor:pointer}.linkbutton{appearance:none;border:0;background:none;color:var(--ink);font:inherit;font-weight:750;padding:0;text-align:left;text-decoration:underline;text-decoration-color:#9bc9c5;text-underline-offset:3px}.linkbutton:hover{color:var(--teal)}.progress{height:7px;background:#e5edef;border-radius:99px;overflow:hidden;margin-top:7px}.progress span{display:block;height:100%;background:var(--teal)}
     .project{display:flex;flex-direction:column;min-height:235px}.project .projecticon{font-size:27px}.project h3{margin:12px 0 5px}.project .meta{color:var(--muted);font-size:13px}.project .projectfoot{margin-top:auto}.workflow-card{display:flex;flex-direction:column;min-height:265px}.workflow-card h3{margin:10px 0 5px}.workflow-card p{color:var(--muted)}.workflow-card .actions{margin-top:auto}.step-list{counter-reset:workflow;display:grid;gap:10px;margin:12px 0}.step-list div{counter-increment:workflow;padding:11px 12px 11px 48px;background:#f7fafb;border-radius:12px;position:relative}.step-list div:before{content:counter(workflow);position:absolute;left:12px;top:10px;width:25px;height:25px;border-radius:8px;background:#d9eef0;color:#075b63;display:grid;place-items:center;font-weight:800}.stage-row{display:grid;grid-template-columns:120px 1fr 1.5fr;gap:12px;padding:11px;border-bottom:1px solid var(--line);align-items:start}.stage-row:last-child{border-bottom:0}.check{width:19px;height:19px;accent-color:var(--teal)}.taskdone strong{text-decoration:line-through;color:var(--muted)}.dropzone{border:2px dashed #b9d3d5;border-radius:15px;padding:22px;text-align:center;background:#f7fbfb}.dropzone strong{display:block;margin-bottom:4px}.source{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:7px}.source.iserv{background:#4f46e5}.source.google{background:#f59e0b}.source.intern{background:#0f766e}.yearflow{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}.yearbox{padding:15px;border:1px solid var(--line);border-radius:13px;background:#fff;text-align:center}.yeararrow{font-size:24px;color:var(--teal)}.checkgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.checkgrid label{font-weight:500;background:#f7fafb;border:1px solid var(--line);padding:9px;border-radius:10px}.multiselect{min-height:155px}.reviewsummary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}.reviewsummary div{padding:12px;border-radius:12px;background:#f7fafb;text-align:center}.reviewsummary b{display:block;font-size:24px}.eventmeta{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}.timeline .eventbody{white-space:pre-wrap}.warning{background:#fff7d6;color:#6b4c00}.success{background:#eaf8ee;color:#166534}
     .modal{position:fixed;inset:0;background:#102f467a;backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.modal.open{display:flex}.dialog{width:min(720px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:22px;box-shadow:0 28px 80px #071e2b55}.dialog.wide{width:min(980px,100%)}.dialoghead{padding:20px 23px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.dialoghead h2{margin:0;font-size:20px}.close{border:0;background:#edf2f3;border-radius:10px;width:35px;height:35px}.dialogbody{padding:22px}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.formgroup{display:grid;gap:6px}.formgroup.full{grid-column:1/-1}.formgroup label{font-weight:700;font-size:13px}.formgroup textarea{min-height:90px;resize:vertical}.hint{font-size:12px;color:var(--muted)}.dialogfoot{padding:16px 22px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap}.notice{padding:13px 15px;border-radius:12px;background:#eff8f7;color:#0d625c;margin-bottom:17px}.detailgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.detailitem{padding:12px;background:#f7fafb;border-radius:12px}.detailitem span{display:block;color:var(--muted);font-size:12px}.timeline{border-left:2px solid #cfe3e2;margin-left:8px;padding-left:19px;display:grid;gap:16px}.timeline article{position:relative}.timeline article:before{content:"";position:absolute;width:10px;height:10px;border-radius:50%;background:var(--teal);left:-25px;top:6px}.timeline h4{margin:0}.timeline p{margin:4px 0;color:var(--muted)}.chronicle-tools{display:flex;gap:8px;align-items:center;margin:12px 0}.chronicle-tools .field{flex:1}.trendline{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.alertlist{display:grid;gap:8px;margin-bottom:16px}.alertitem{padding:12px 14px;border-radius:12px;background:#fff7d6;color:#6b4c00;border:1px solid #f4d777}.signal-summary{grid-template-columns:repeat(3,minmax(0,1fr));margin:0 0 17px}.signal-period-card{border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0;background:#fbfdfd}.signal-period-card h4{margin:0}.signal-metric{display:grid;grid-template-columns:145px 1fr 62px;gap:10px;align-items:center;margin:8px 0;font-size:13px}.signal-metric .bartrack{height:12px}.signal-metric .barfill.unexcused,.signal-metric .barfill.red{background:#dc2626}.signal-metric .barfill.open,.signal-metric .barfill.amber{background:#f59e0b}.signal-reasons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.signal-reason{padding:11px;border-radius:12px;background:#f7fafb}.email-preview{min-height:260px;white-space:pre-wrap}.privacy-screen{position:fixed;inset:0;background:#102f46;z-index:100;display:none;place-items:center;color:white;text-align:center;padding:24px}.privacy-screen.open{display:grid}.privacy-screen .lockcard{max-width:460px}.privacy-screen h2{font-size:28px;margin:0 0 8px}.privacy-screen p{color:#d5e7ea}.attachment{align-items:flex-start}.attachment .subtle{display:block}.report-note{min-height:120px;width:100%}.speechrow{display:flex;gap:8px;align-items:flex-start}.speechrow textarea{flex:1}.signal-legend{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}body.privacy-mode .namecell,body.privacy-mode [data-person]{filter:blur(7px);user-select:none}.toast{position:fixed;right:24px;bottom:24px;background:#123047;color:#fff;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);transform:translateY(100px);opacity:0;transition:.25s;z-index:40}.toast.show{transform:none;opacity:1}
@@ -143,7 +147,7 @@
         <button class="navhead" type="button"><span class="chev">▾</span><span class="label">Weitere Bereiche</span></button>
         <div class="navitems">
           <button data-page="classes"><span class="icon">▤</span><span class="label">Klassen</span></button>
-          <button data-page="teachers"><span class="icon">♧</span><span class="label">Lehrkräfte</span></button>
+          <button data-page="teachers"><span class="icon">♧</span><span class="label">Personen</span></button>
           <button data-page="trainingroom"><span class="icon">↺</span><span class="label">Trainingsraum</span></button>
           <button data-page="projects"><span class="icon">◫</span><span class="label">Projekte</span></button>
           <button data-page="network"><span class="icon">◎</span><span class="label">Gruppen & Netzwerk</span></button>
@@ -152,7 +156,7 @@
         </div>
       </div>
     </nav>
-    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.8</span></div>
+    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.9</span></div>
   </aside>
   <main>
     <header class="topbar"><div><h1 id="pageTitle">Guten Morgen, Dr. Bruns</h1><p id="pageSubtitle">Freitag, 11. September 2026 · Schuljahr 2026/27</p></div><div class="kopfsuche"><input class="field" id="globalSearch" type="search" autocomplete="off" placeholder="Schüler:in suchen: Name, Vorname, Klasse oder Klassenleitung" oninput="globalSearchTippen()" onfocus="globalSearchTippen()"><div id="globalSearchResults"></div></div><div class="actions"><button class="btn" onclick="lockPrivacyScreen()">🔒 Sperren</button><button class="btn" onclick="openModal('taskModal')">＋ Aufgabe</button><button class="btn primary" onclick="verlaufOeffnen()">＋ Fallverlauf</button><button class="btn" onclick="dokuWaehlen()">＋ Anderes</button></div></header>
@@ -225,8 +229,16 @@
         <div class="grid three" id="workflowGrid"></div>
       </section>
       <section class="page" id="teachers">
-        <div class="sectionhead"><div><h2>Lehrkräfte</h2><div class="subtle">Klassenleitungen aus der Schülerliste. Weitere Lehrkräfte und Kontaktdaten können ergänzt werden.</div></div><div class="actions"><button class="btn" onclick="staffProtokollZeigen()">Importprotokoll</button><button class="btn" onclick="staffImportRueckgaengig()">Letzten Import rückgängig machen</button><button class="btn primary" onclick="staffImportOeffnen()">Lehrkräfte-/Mitarbeiterliste importieren</button><button class="btn" onclick="openModal('teacherModal')">＋ Einzelne Person</button></div></div>
-        <div class="card tablewrap"><table><thead><tr><th>Name</th><th>Funktion</th><th>Status</th><th>Klassenleitung</th><th>Fächer</th><th>Dienstliche E-Mail</th><th>Telefon</th></tr></thead><tbody id="teacherTable"></tbody></table></div>
+        <div class="sectionhead"><div><h2>Personen und Zuständigkeiten</h2><div class="subtle">Alle Personen, mit denen du zusammenarbeitest: Kollegium, Klassenleitungen, schulinterne Funktionen und feste Ansprechpersonen außerhalb der Schule. Die hier gepflegten Rollen werden in den Fachverfahren, in der Fallverlaufs-Erfassung und in allen Auswahlfeldern verwendet.</div></div><div class="actions"><button class="btn" onclick="staffProtokollZeigen()">Importprotokoll</button><button class="btn" onclick="staffImportRueckgaengig()">Letzten Import zurücknehmen</button><button class="btn" onclick="staffImportOeffnen()">Liste importieren</button><button class="btn primary" onclick="personModalOeffnen()">＋ Person hinzufügen</button></div></div>
+        <div class="card" style="margin-bottom:15px"><div class="filters">
+         <input class="field search" id="personSuche" placeholder="Name, Rolle, Klasse, Organisation oder Sozialraum">
+         <select class="field" id="personBereichFilter"><option value="all">Alle Bereiche</option><option>Schulintern</option><option>Extern</option></select>
+         <select class="field" id="personRolleFilter"><option value="all">Alle Rollen</option></select>
+         <select class="field" id="personStatusFilter"><option value="aktiv" selected>Nur aktive Personen</option><option value="inaktiv">Nur inaktive Personen</option><option value="all">Alle anzeigen</option></select>
+         <select class="field" id="personSortierung"><option value="name">Sortierung: Name</option><option value="rolle">Sortierung: Rolle</option><option value="bereich">Sortierung: Bereich</option><option value="klasse">Sortierung: Klassenleitung</option></select>
+        </div><div class="grid kpis" id="personKennzahlen" style="margin-top:13px"></div></div>
+        <div class="card tablewrap"><table><thead><tr><th>Name</th><th>Funktion und Rollen</th><th>Bereich und Organisation</th><th>Klassenleitung und Fächer</th><th>Erreichbarkeit</th><th>Status</th><th>Aktion</th></tr></thead><tbody id="teacherTable"></tbody></table></div>
+        <p class="hint">Personen werden nicht gelöscht, sondern auf „inaktiv“ gesetzt. So bleiben alte Fallverläufe und Dokumentationen vollständig lesbar. Änderungen an einer Person wirken nur für neue Einträge. Bereits geschriebene Dokumentation zeigt weiterhin den damaligen Namen und die damalige Zuständigkeit.</p>
       </section>
       
       <section class="page" id="projects">
@@ -298,6 +310,7 @@
  <div class="formgroup full"><label>Wie ging es aus?</label><select class="field bausteinwahl" id="bsErgebnis" onchange="verlaufBaustein(this,'verlaufErgebnis')"></select><textarea class="field" name="resultDetail" id="verlaufErgebnis" rows="2" placeholder="Wie hat sich die Situation entwickelt? Was war das Ergebnis?"></textarea></div>
  <div class="formgroup"><label>Nächster Schritt</label><select class="field bausteinwahl" id="bsSchritt" onchange="verlaufBaustein(this,'verlaufNext')"></select><input class="field" name="nextStep" id="verlaufNext" placeholder="Was soll als Nächstes passieren? Leer lassen, wenn nichts geplant ist." oninput="verlaufKnopfPruefen()"></div>
  <div class="formgroup"><label>Wiedervorlage</label><input class="field" type="date" name="due" id="verlaufDue" oninput="verlaufKnopfPruefen()"><span class="hint">Leer lassen, wenn nichts nachzuhalten ist.</span></div>
+ <div class="formgroup full"><label>Wer ist für den nächsten Schritt zuständig?</label><select class="field" name="assignedTo" id="verlaufZustaendig"><option value="">Ich selbst</option></select><span class="hint">Auswahl aus „Personen und Zuständigkeiten“. Die Wiedervorlage wird dieser Person zugeordnet.</span></div>
 </div>
 <div class="actions" style="margin:14px 0"><button type="button" class="btn" id="verlaufMehr" onclick="verlaufVertiefen()">Fachlich ergänzen</button><span class="hint"><strong>Nur bei Bedarf ausfüllen:</strong> Anlass, Ziel, Einschätzung, Sicherheitsprüfung, Dauer, Beteiligte und Weitervermittlung.</span></div>
 <div class="formgrid" id="verlaufDetail" hidden>
@@ -307,7 +320,7 @@
  <div class="formgroup"><label>Anlass <span class="subtle">optional</span></label><select class="field" name="reason"><option value="">Aus der Vorlage übernehmen</option><option>Konflikt</option><option>Emotionales Wohlbefinden</option><option>Schulbesuch und Fehlzeiten</option><option>Verhalten im Unterricht</option><option>Familie und Erziehung</option><option>Freundschaft und soziale Beziehungen</option><option>Mobbing oder Cybermobbing</option><option>Psychische Belastung, Angst oder Rückzug</option><option>Suchtmittel, Mediennutzung oder Glücksspiel</option><option>Gewalt, Bedrohung oder Waffen</option><option>Trauer, Trauma oder schweres Lebensereignis</option><option>Inklusion und Teilhabe</option><option>Armut, Grundversorgung oder Bildungsteilhabe</option><option>Berufsorientierung oder Übergang</option><option>Gesundheit</option><option>Kinderschutz</option><option>Soziales Lernen und Klassenklima</option><option>Sonstiges</option></select></div>
  <div class="formgroup"><label>Sicherheitsprüfung</label><select class="field" name="safetyStatus"><option>Kein akuter Sicherheitshinweis in diesem Vorgang</option><option>Akute Selbstgefährdung fachlich zu klären</option><option>Akute Fremdgefährdung fachlich zu klären</option><option>Kindeswohlverfahren fachlich zu prüfen</option><option>Medizinischer Notfall oder unmittelbare Gefahr</option><option>Sicherheitsprüfung derzeit nicht abschließend möglich</option></select></div>
  <div class="formgroup full"><label>Ziel dieser Fallarbeit <span class="subtle">optional, bei kurzen Gesprächen nicht nötig</span></label><input class="field" name="goal" placeholder="Beobachtbar formuliert, zum Beispiel: geht ohne Begleitung in den Klassenraum"></div>
- <div class="formgroup full"><label>Weitere Beteiligte</label><input class="field" name="participantsOther" placeholder="Klassenleitung, Erziehungsberechtigte, externe Stelle"></div>
+ <div class="formgroup full"><label>Weitere Beteiligte</label><input class="field" name="participantsOther" list="personOptions" placeholder="Namen eintippen, Vorschläge kommen aus „Personen und Zuständigkeiten“"></div>
  <div class="formgroup full"><label>Weitervermittlung an</label><select class="field" name="partnerId" id="verlaufPartner"></select><span class="hint">Erzeugt keinen neuen Fall. Die Weitervermittlung wird als Maßnahme in diesem Fall dokumentiert.</span></div>
  <div class="formgroup full"><label>Dokumentiert von</label><select class="field" name="responsible" id="verlaufVon"><option>Edmund</option><option>Sabine</option><option>Edmund und Sabine</option></select><span class="hint">Voreingestellt ist die Person, die unter Daten und Einstellungen als aktiv hinterlegt ist.</span></div>
 </div>
@@ -359,8 +372,24 @@
 <div class="modal" id="projectModal"><div class="dialog wide"><div class="dialoghead"><h2>Präventionsprojekt planen</h2><button class="close" onclick="closeModal('projectModal')">×</button></div><form id="projectForm"><div class="dialogbody"><div class="notice">Die Planung folgt den Beccaria-Schritten: Bedarf, Ursachen, Ziele, Zielgruppe, Maßnahme, Umsetzung und Evaluation.</div><div class="formgrid"><div class="formgroup full"><label>Projekt oder Programm. Schnellauswahl</label><select class="field" onchange="applyPreset(this,'projectName')"><option value="">Bitte auswählen</option><option>Sozialtraining durch die SSA</option><option>Medienbuddys</option><option>Palaverzelt</option><option>Klasse2000</option><option>EIGENSTÄNDIG WERDEN</option><option>Gemeinsam Klasse sein</option><option>HEYLiFE</option><option>IGEL</option><option>MaiStep</option><option>BASS</option><option value="">Eigenes Angebot</option></select><input class="field" id="projectName" name="name" required placeholder="Name des Vorhabens"></div><div class="formgroup"><label>Zielgruppe</label><input class="field" name="group" required placeholder="z. B. Klasse 5a"></div><div class="formgroup"><label>Teilnehmende</label><input class="field" type="number" name="participants" min="1" value="12"></div><div class="formgroup"><label>Evidenz- und Verbindlichkeitsstatus</label><select class="field" name="evidence"><option>E Lokale Praxisoption</option><option>D1 Theoretisch gut begründet</option><option>D2 Wirksamkeit wahrscheinlich</option><option>D3 Wirksamkeit nachgewiesen</option><option>C Professioneller Standard</option><option>B Offizieller Fachrahmen</option><option>A Verbindliche Vorgabe</option><option>Noch zu prüfen</option></select></div><div class="formgroup"><label>Geplante Einheiten</label><input class="field" type="number" name="total" min="1" value="6"></div><div class="formgroup full"><label>Bedarf und Ausgangslage</label><textarea class="field" name="need" required placeholder="Welcher klassen- oder gruppenbezogene Bedarf soll bearbeitet werden? Keine personenbezogenen Einzelfalldaten."></textarea></div><div class="formgroup full"><label>Ursachenannahmen und Schutzfaktoren</label><textarea class="field" name="factors" placeholder="Welche beeinflussbaren Risiko- und Schutzfaktoren sind fachlich begründet?"></textarea></div><div class="formgroup full"><label>Zielsetzung. Schnellauswahl</label><select class="field" onchange="applyPreset(this,'projectGoal')"><option value="">Bitte auswählen</option><option>Die soziale Kompetenz, Kooperation und gegenseitige Unterstützung der Teilnehmenden werden gestärkt.</option><option>Die Teilnehmenden entwickeln konstruktive Strategien zur Konfliktklärung und Deeskalation.</option><option>Selbstwirksamkeit, Beteiligung und Verantwortungsübernahme der Teilnehmenden werden gefördert.</option><option>Die Klassengemeinschaft beziehungsweise Gruppengemeinschaft wird nachhaltig gestärkt.</option><option>Die Teilnehmenden werden für respektvolle Kommunikation, Vielfalt und persönliche Grenzen sensibilisiert.</option><option>Medienkompetenz und ein verantwortungsvoller Umgang mit digitalen Angeboten werden gefördert.</option><option>Belastungen werden frühzeitig erkannt und niedrigschwellige Unterstützungswege bekannt gemacht.</option><option>Schulische Übergänge werden vorbereitet und die Orientierung der Teilnehmenden wird gestärkt.</option><option>Das Projekt schafft verlässliche Begegnungsräume und fördert die Einbindung in Schule und Sozialraum.</option><option value="">Eigene Zielsetzung formulieren</option></select><textarea class="field" id="projectGoal" name="goal" required placeholder="Beobachtbar, realistisch und mit Prüfzeitpunkt formulieren"></textarea></div><div class="formgroup"><label>Umsetzungstreue prüfen durch</label><select class="field" name="fidelity"><option>Einheiten und Dauer dokumentieren</option><option>Manual- oder Ablaufcheck nach jeder Einheit</option><option>Regelmäßige Teamreflexion</option><option>Teilnehmenden-Rückmeldung</option><option>Kombination mehrerer Verfahren</option><option>Noch festzulegen</option></select></div><div class="formgroup"><label>Ergebnisprüfung</label><select class="field" name="evaluation"><option>Qualitative Abschlussrunde</option><option>Anonyme Vorher-Nachher-Kurzbefragung</option><option>Klassenklima-Kurzmaß</option><option>Zielerreichung durch SSA und Lehrkraft getrennt einschätzen</option><option>Follow-up nach vier bis acht Wochen</option><option>Kombination mehrerer Verfahren</option><option>Noch festzulegen</option></select></div><div class="formgroup"><label>Status</label><select class="field" name="status"><option>Geplant</option><option>In Vorbereitung</option><option>Laufend</option><option>Auswertung</option><option>Abgeschlossen</option><option>Angepasst</option><option>Beendet</option></select></div><div class="formgroup"><label>Nächster Review</label><input class="field" type="date" name="reviewDate"></div></div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('projectModal')">Abbrechen</button><button class="btn primary">Projekt speichern</button></div></form></div></div>
 
 <div class="modal" id="classEmailModal"><div class="dialog wide"><div class="dialoghead"><h2>Sammel-E-Mail an die Klassenleitung</h2><button class="close" onclick="closeModal('classEmailModal')">×</button></div><div class="dialogbody"><div class="notice warning">Der Entwurf wird nur lokal erstellt. Er wird weder versendet noch als Kontakt dokumentiert. Prüfe den Text und beschränke ihn auf das Erforderliche.</div><div class="formgrid"><div class="formgroup"><label>Klasse</label><select class="field" id="classEmailClass" onchange="classEmailErzeugen()"></select></div><div class="formgroup"><label>Auswertungszeitraum der Daten</label><select class="field" id="classEmailPeriod" onchange="classEmailErzeugen()"></select></div><div class="formgroup"><label>Zeitraum von</label><input class="field" type="date" id="classEmailFrom" onchange="classEmailErzeugen()"></div><div class="formgroup"><label>Zeitraum bis</label><input class="field" type="date" id="classEmailTo" onchange="classEmailErzeugen()"></div><div class="formgroup"><label>Klassenleitung</label><input class="field" id="classEmailTeacher" readonly></div><div class="formgroup"><label>Dienstliche E-Mail</label><input class="field" type="email" id="classEmailAddress" placeholder="Falls bekannt, dienstliche Adresse"></div><div class="formgroup full"><label><input type="checkbox" id="classEmailOnlyFlagged" checked onchange="classEmailErzeugen()"> Nur Schüler:innen aufnehmen, die einen eingestellten Schwellenwert erreichen</label><span class="hint" id="classEmailCount"></span></div><div class="formgroup full"><label>Betreff</label><input class="field" id="classEmailSubject"></div><div class="formgroup full"><label>E-Mail-Text</label><textarea class="field email-preview" id="classEmailBody"></textarea><span class="hint">Du kannst den Entwurf frei verändern. Beratungsinhalte, Diagnosen und Vermutungen werden nicht eingefügt.</span></div></div></div><div class="dialogfoot"><button class="btn" onclick="closeModal('classEmailModal')">Schließen</button><button class="btn" onclick="classEmailErzeugen()">Entwurf neu erzeugen</button><button class="btn primary" onclick="classEmailKopieren()">Betreff und Text kopieren</button></div></div></div>
-<div class="modal" id="staffImportModal"><div class="dialog wide"><div class="dialoghead"><h2>Lehrkräfte- und Mitarbeiterliste importieren</h2><button class="close" onclick="closeModal('staffImportModal')">×</button></div><div class="dialogbody"><div class="helpbox"><strong>So geht es in vier Schritten:</strong><br>1. CSV-Datei auswählen &nbsp;·&nbsp; 2. Vorschau prüfen &nbsp;·&nbsp; 3. Import bestätigen &nbsp;·&nbsp; 4. Bericht kontrollieren<br>Erkannt werden die Spalten NAME, OFFIZIELLER VORNAME, ANZEIGENAME, FUNKTION, KLASSENLEITUNG FÜR, STATUS, HINWEIS und QUELLE. Pflicht ist nur NAME. Zusätzliche Spalten stören nicht. Semikolon und Komma werden automatisch erkannt.</div><div class="actions" style="margin-bottom:15px"><label class="btn primary">Schritt 1: CSV-Datei auswählen<input type="file" accept=".csv,text/csv" hidden onchange="staffImportVorschau(event)"></label><button class="btn" onclick="downloadStaffTemplate()">CSV-Vorlage herunterladen</button><button class="btn" onclick="staffBeispielZeigen()">Beispiel anzeigen</button></div><div id="staffPreview"><div class="empty">Noch keine Datei gewählt. Beginne mit Schritt 1.</div></div></div><div class="dialogfoot"><button class="btn" onclick="closeModal('staffImportModal')">Abbrechen</button><button class="btn primary" id="staffConfirmBtn" disabled onclick="staffImportBestaetigen()">Schritt 3: Import bestätigen</button></div></div></div>
-<div class="modal" id="teacherModal"><div class="dialog"><div class="dialoghead"><h2>Lehrkraft anlegen</h2><button class="close" onclick="closeModal('teacherModal')">×</button></div><form id="teacherForm"><div class="dialogbody"><div class="formgrid"><div class="formgroup"><label>Vorname</label><input class="field" name="first" required></div><div class="formgroup"><label>Nachname</label><input class="field" name="last" required></div><div class="formgroup"><label>Funktion</label><select class="field" name="role"><option>Lehrkraft</option><option>Schulleitung</option><option>Didaktische Leitung</option><option>Förderschullehrkraft</option></select></div><div class="formgroup"><label>Klassenleitung</label><input class="field" name="classLead" placeholder="z. B. 6a oder leer"></div><div class="formgroup"><label>Fächer</label><input class="field" name="subjects" placeholder="z. B. Deutsch, Geschichte"></div><div class="formgroup"><label>Dienstliche E-Mail</label><input class="field" type="email" name="email"></div><div class="formgroup full"><label>Dienstliches Telefon</label><input class="field" name="phone"></div></div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('teacherModal')">Abbrechen</button><button class="btn primary">Lehrkraft speichern</button></div></form></div></div>
+<div class="modal" id="staffImportModal"><div class="dialog wide"><div class="dialoghead"><h2>Lehrkräfte- und Mitarbeiterliste importieren</h2><button class="close" onclick="closeModal('staffImportModal')">×</button></div><div class="dialogbody"><div class="helpbox"><strong>So geht es in vier Schritten:</strong><br>1. CSV-Datei auswählen &nbsp;·&nbsp; 2. Vorschau prüfen &nbsp;·&nbsp; 3. Import bestätigen &nbsp;·&nbsp; 4. Bericht kontrollieren<br>Erkannt werden die Spalten NAME, OFFIZIELLER VORNAME, ANZEIGENAME, FUNKTION, ROLLEN, ORGANISATION, KLASSENLEITUNG FÜR, E-MAIL, TELEFON, STATUS, HINWEIS und QUELLE. Pflicht ist nur NAME. Zusätzliche Spalten stören nicht. Semikolon und Komma werden automatisch erkannt.</div><div class="actions" style="margin-bottom:15px"><label class="btn primary">Schritt 1: CSV-Datei auswählen<input type="file" accept=".csv,text/csv" hidden onchange="staffImportVorschau(event)"></label><button class="btn" onclick="downloadStaffTemplate()">CSV-Vorlage herunterladen</button><button class="btn" onclick="staffBeispielZeigen()">Beispiel anzeigen</button></div><div id="staffPreview"><div class="empty">Noch keine Datei gewählt. Beginne mit Schritt 1.</div></div></div><div class="dialogfoot"><button class="btn" onclick="closeModal('staffImportModal')">Abbrechen</button><button class="btn primary" id="staffConfirmBtn" disabled onclick="staffImportBestaetigen()">Schritt 3: Import bestätigen</button></div></div></div>
+<div class="modal" id="teacherModal"><div class="dialog wide"><div class="dialoghead"><h2 id="personModalTitle">Person hinzufügen</h2><button class="close" onclick="closeModal('teacherModal')">×</button></div><form id="teacherForm"><div class="dialogbody"><div class="helpbox" id="personModalHinweis">Pflicht ist nur der Nachname. Alles Weitere kannst du später ergänzen. Die Rollen entscheiden darüber, wo diese Person in den Fachverfahren und in der Fallverlaufs-Erfassung als zuständig vorgeschlagen wird.</div><div class="formgrid">
+<div class="formgroup"><label>Nachname</label><input class="field" name="last" required></div>
+<div class="formgroup"><label>Vorname</label><input class="field" name="first"></div>
+<div class="formgroup"><label>Anzeigename in Auswahllisten</label><input class="field" name="displayName" placeholder="leer lassen für „Nachname, Vorname“"></div>
+<div class="formgroup"><label>Bereich</label><select class="field" name="bereich"><option>Schulintern</option><option>Extern</option></select></div>
+<div class="formgroup"><label>Funktion</label><input class="field" name="role" list="personFunktionen" placeholder="z. B. Lehrkraft"></div>
+<div class="formgroup"><label>Organisation oder Einrichtung</label><input class="field" name="org" placeholder="z. B. Ludgerusschule Rhede oder Jugendamt Aschendorf"></div>
+<div class="formgroup full"><label>Rollen und Zuständigkeiten</label><div class="rollenbox" id="personRollenBox"></div><span class="hint">Mehrfachauswahl möglich. Nur Personen mit Rolle werden in den Fachverfahren vorgeschlagen.</span></div>
+<div class="formgroup"><label>Klassenleitung für</label><input class="field" name="classLead" placeholder="z. B. 6a oder 6a, 9b"></div>
+<div class="formgroup"><label>Fächer</label><input class="field" name="subjects" placeholder="z. B. Deutsch, Geschichte"></div>
+<div class="formgroup"><label>Dienstliche E-Mail</label><input class="field" type="email" name="email"></div>
+<div class="formgroup"><label>Dienstliches Telefon</label><input class="field" name="phone"></div>
+<div class="formgroup"><label>Zuständigkeitsbereich</label><input class="field" name="area" placeholder="z. B. Jahrgang 5 und 6 oder Bezirk Rhede"></div>
+<div class="formgroup"><label>Sozialraum</label><input class="field" name="sozialraum" placeholder="z. B. Rhede, Papenburg, Landkreis Emsland"></div>
+<div class="formgroup"><label>Status</label><select class="field" name="status"><option>aktiv</option><option>inaktiv</option><option>Elternzeit</option><option>langfristig abwesend</option></select></div>
+<div class="formgroup full"><label>Hinweise zur Erreichbarkeit und Zusammenarbeit</label><textarea class="field" name="note" rows="2" placeholder="z. B. dienstags nicht im Haus, Anfragen bitte über IServ"></textarea></div>
+</div><div class="notice" id="personDoppelHinweis" style="display:none"></div><p class="hint">Hier gehören ausschließlich dienstliche Angaben zur Person hinein. Keine Angaben zu Kindern, Familien, Gesundheit oder Fallinhalten.</p></div><div class="dialogfoot"><button type="button" class="btn" id="personStatusBtn" style="display:none;margin-right:auto" onclick="personStatusUmschalten()">Auf inaktiv setzen</button><button type="button" class="btn" onclick="closeModal('teacherModal')">Abbrechen</button><button class="btn primary" id="personSpeichernBtn">Person speichern</button></div></form></div></div>
 
 
 
@@ -388,6 +417,8 @@
 <div class="formgroup full"><label>Folgemaßnahme. Schnellauswahl</label><select class="field" onchange="applyPreset(this,'trainingFollowUp')"><option value="">Bitte auswählen</option><option>Keine weitere Maßnahme erforderlich.</option><option>Rückmeldung an die Klassenleitung.</option><option>Erziehungsberechtigte informieren.</option><option>Nachgespräch mit der Schulsozialarbeit.</option><option>Schulleitung einbeziehen.</option><option>Externen Kooperationspartner einbeziehen.</option><option value="">Eigener Eintrag</option></select><textarea class="field" id="trainingFollowUp" name="followUp" placeholder="Auswahl kann frei verändert oder ergänzt werden"></textarea></div>
 </div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('trainingRoomModal')">Abbrechen</button><button class="btn primary">Vorgang speichern</button></div></form></div></div>
 <datalist id="teacherOptions"></datalist>
+<datalist id="personOptions"></datalist>
+<datalist id="personFunktionen"></datalist>
 
 <div class="modal" id="partnerModal"><div class="dialog"><div class="dialoghead"><h2>Kooperationspartner anlegen</h2><button class="close" onclick="closeModal('partnerModal')">×</button></div><form id="partnerForm"><div class="dialogbody"><div class="formgrid"><div class="formgroup full"><label>Einrichtung</label><input class="field" name="organization" required></div><div class="formgroup"><label>Ansprechperson</label><input class="field" name="contact"></div><div class="formgroup"><label>Bereich</label><select class="field" name="category"><option>Jugendhilfe und Kinderschutz</option><option>Beratung</option><option>Schulpsychologie</option><option>Gesundheit</option><option>Polizei</option><option>Polizeiliche Prävention</option><option>Jugendarbeit</option><option>Suchtberatung</option><option>Krisenhilfe</option><option>Notfall</option><option>Verein</option><option>Sonstiges</option></select></div><div class="formgroup"><label>Telefon</label><input class="field" name="phone"></div><div class="formgroup"><label>E-Mail</label><input class="field" type="email" name="email"></div><div class="formgroup full"><label>Anschrift</label><input class="field" name="address"></div><div class="formgroup full"><label>Internetseite</label><input class="field" type="url" name="website" placeholder="https://…"></div><div class="formgroup full"><label>Aufgaben und Hinweise</label><textarea class="field" name="note"></textarea></div></div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('partnerModal')">Abbrechen</button><button class="btn primary">Partner speichern</button></div></form></div></div>
 
@@ -659,6 +690,35 @@ function ensureNetzwerkpartner(state){
  for(const p of NETZWERK_GRUNDBESTAND)if(!state.partners.some(x=>x.id===p.id))state.partners.push(Object.assign({},p));
  return state;
 }
+const PERSON_ROLLEN=['Schulleitung','Stellvertretende Schulleitung','Didaktische Leitung','Sekretariat','Klassenleitung','Beratungslehrkraft','Vertrauenslehrkraft','Förderschullehrkraft','Schulsozialarbeit','Schulsozialpädagogik','Inklusion und Teilhabe','Schulbegleitung','Ansprechperson Mobbing und Cybermobbing','Ansprechperson Schulabsentismus','Ansprechperson Trainingsraum','Ansprechperson Ganztag und VGS','Ansprechperson Medien','Ansprechperson Berufsorientierung','Ersthelferin oder Ersthelfer','Sicherheitsbeauftragung','Jugendamt und ASD','Insoweit erfahrene Fachkraft','Erziehungsberatung','Schulpsychologie','Polizei und Prävention','Therapie und Klinik','Jobcenter und Berufsberatung','Weitere Zuständigkeit'];
+const PERSON_FUNKTIONEN=['Lehrkraft','Lehrkraft und Klassenleitung','Schulleitung','Stellvertretende Schulleitung','Didaktische Leitung','Förderschullehrkraft','Pädagogische Mitarbeiterin oder Mitarbeiter','Schulsozialarbeit','Schulsozialpädagogik','Sekretariat','Hausmeisterei','Schulbegleitung','Fachkraft einer externen Stelle','Weitere Funktion'];
+function personRollenAusFunktion(t){const r=[],f=String(t.role||'');
+ if(/Stellvertretend/i.test(f))r.push('Stellvertretende Schulleitung'); else if(/Schulleitung/i.test(f))r.push('Schulleitung');
+ if(/Didaktisch/i.test(f))r.push('Didaktische Leitung');
+ if(/Förderschul/i.test(f))r.push('Förderschullehrkraft');
+ if(/Sekretariat/i.test(f))r.push('Sekretariat');
+ if(/Sozialpädagog/i.test(f))r.push('Schulsozialpädagogik');
+ if(/Sozialarbeit/i.test(f))r.push('Schulsozialarbeit');
+ if(/Beratungslehr/i.test(f))r.push('Beratungslehrkraft');
+ if(/Schulbegleit/i.test(f))r.push('Schulbegleitung');
+ if(String(t.classLead||'').trim())r.push('Klassenleitung');
+ return [...new Set(r)]}
+function ensurePersonen(state){
+ if(!Array.isArray(state.teachers))state.teachers=[];
+ state.teachers.forEach(t=>{
+  if(!Array.isArray(t.roles))t.roles=[];
+  if(!t.roles.length)t.roles=personRollenAusFunktion(t);
+  if(String(t.classLead||'').trim()&&!t.roles.includes('Klassenleitung'))t.roles.push('Klassenleitung');
+  if(!Array.isArray(t.aliases))t.aliases=[];
+  if(!t.bereich)t.bereich=/extern|Jugendamt|Polizei|Beratungsstelle|Klinik|Jobcenter|Fachstelle/i.test(String(t.role||'')+' '+String(t.org||''))?'Extern':'Schulintern';
+  if(!t.status)t.status='aktiv';
+  if(!t.org&&t.bereich==='Schulintern')t.org='Ludgerusschule Rhede';
+ });
+ const ssa=String(state.settings&&state.settings.activeUser||'Edmund').trim();
+ const vergleich=ssa.toLocaleLowerCase('de-DE');
+ if(ssa&&!state.teachers.some(t=>String(t.displayName||t.last||'').toLocaleLowerCase('de-DE').includes(vergleich)||String(t.first||'').toLocaleLowerCase('de-DE').includes(vergleich)))
+  state.teachers.push({id:'PERS-SSA',last:ssa,first:'',displayName:ssa,role:'Schulsozialarbeit',roles:['Schulsozialarbeit'],bereich:'Schulintern',org:'Ludgerusschule Rhede',area:'Schulsozialarbeit an der Ludgerusschule',status:'aktiv',aliases:[],subjects:'',email:'',phone:''});
+}
 function normalize(x){
  const fresh=structuredClone(seed);
  if(!x||typeof x!=='object')x={};
@@ -714,6 +774,7 @@ function normalize(x){
  ensurePraeventionsplan(x);
  ensureNetzwerkpartner(x);
  ensureNetzwerkbasis(x);
+ ensurePersonen(x);
  return x
 }
 function load(){return normalize(structuredClone(seed))}
@@ -724,7 +785,7 @@ async function persistState(){if(!vaultReady)return;await invoke('save_state',{s
 function save(){void persistState().catch(showVaultError);renderAll();sicherungNachSpeichern()}
 const fmt=d=>new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(d+'T12:00:00'));
 const initials=c=>(c?.first?.[0]||'?')+(c?.last?.[0]||''); const studentOfCase=c=>data.students.find(s=>s.id===c?.studentId);const cname=id=>{const c=data.cases.find(x=>x.id===id),s=studentOfCase(c);return s?s.first+' '+s.last:c?c.first+' '+c.last:'Anonymer Kontakt'};const classOf=c=>studentOfCase(c)?.className||c.className||'';
-function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===(id==='kanban'?'cases':id)));const names={dashboard:'Übersicht',requests:'Schüler-Anfragen',cases:'Fallarbeit',kanban:'Fallarbeit als Board',students:'Schüler:innen',classes:'Klassen und Klassenlisten',trainingroom:'Sozialer Trainingsraum',signals:'Frühindikatoren',workflows:'Fachverfahren',teachers:'Lehrkräfte',projects:'Projekte',ctc:'CTC-Bedarfsplanung',network:'Gruppengespräche und Netzwerk',tasks:'Aufgaben und Wiedervorlagen',statistics:'Interne Statistik',settings:'Daten und Sicherung'};document.getElementById('pageTitle').textContent=id==='dashboard'?'Guten Morgen, Dr. Bruns':names[id];document.getElementById('pageSubtitle').textContent=id==='dashboard'?`${new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).format(new Date())} · Schuljahr ${data.settings.currentSchoolYear}`:'SSA-Cockpit Ludgerusschule · verschlüsselte Desktopversion';scrollTo(0,0)}
+function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===(id==='kanban'?'cases':id)));const names={dashboard:'Übersicht',requests:'Schüler-Anfragen',cases:'Fallarbeit',kanban:'Fallarbeit als Board',students:'Schüler:innen',classes:'Klassen und Klassenlisten',trainingroom:'Sozialer Trainingsraum',signals:'Frühindikatoren',workflows:'Fachverfahren',teachers:'Personen und Zuständigkeiten',projects:'Projekte',ctc:'CTC-Bedarfsplanung',network:'Gruppengespräche und Netzwerk',tasks:'Aufgaben und Wiedervorlagen',statistics:'Interne Statistik',settings:'Daten und Sicherung'};document.getElementById('pageTitle').textContent=id==='dashboard'?'Guten Morgen, Dr. Bruns':names[id];document.getElementById('pageSubtitle').textContent=id==='dashboard'?`${new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).format(new Date())} · Schuljahr ${data.settings.currentSchoolYear}`:'SSA-Cockpit Ludgerusschule · verschlüsselte Desktopversion';scrollTo(0,0)}
 document.querySelectorAll('.nav button[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));
 document.querySelectorAll('.nav .navgroup').forEach(g=>{const head=g.querySelector('.navhead');if(head)head.onclick=()=>g.classList.toggle('collapsed')});
 function kpi(label,value,trend){return `<div class="card kpi"><div class="label">${label}</div><div class="value">${value}</div><div class="trend">${trend}</div></div>`}
@@ -928,10 +989,143 @@ async function copySignalEmail(){const address=document.getElementById('signalEm
 function saveSignalSettings(){data.settings.absenceThreshold=Math.max(1,Number(document.getElementById('absenceThreshold').value)||10);data.settings.unexcusedThreshold=Math.max(1,Number(document.getElementById('unexcusedThreshold').value)||3);data.settings.lateThreshold=Math.max(1,Number(document.getElementById('lateThreshold').value)||3);data.settings.gradeDropThreshold=Math.max(.1,Number(document.getElementById('gradeDropThreshold').value)||1);data.settings.grade1StartDate=document.getElementById('grade1StartDate').value||'2026-08-17';const raw=document.getElementById('additionalNonSchoolDays').value.split(',').map(x=>x.trim()).filter(Boolean),invalid=raw.filter(x=>!/^20\d{2}-\d{2}-\d{2}$/.test(x));if(invalid.length){alert('Bitte zusätzliche freie Tage im Format JJJJ-MM-TT eingeben.');return}data.settings.additionalNonSchoolDays=[...new Set(raw)].sort();void persistState().catch(showVaultError);renderAll();toast('Schwellenwerte und Schulkalender wurden gespeichert.')}
 document.getElementById('signalSearch').oninput=renderSignals;document.getElementById('signalClassFilter').onchange=renderSignals;document.getElementById('signalStatus').onchange=renderSignals;
 function renderWorkflows(){const q=(document.getElementById('workflowSearch').value||'').toLocaleLowerCase('de-DE'),category=document.getElementById('workflowFilter').value,list=WORKFLOWS.filter(w=>(category==='all'||w.category===category)&&[w.title,w.category,w.status,w.start,w.fields,w.quality,w.protection,...w.steps].join(' ').toLocaleLowerCase('de-DE').includes(q));document.getElementById('workflowKpis').innerHTML=kpi('Fachverfahren',WORKFLOWS.length,'zentrale Aufgabenfelder')+kpi('Schutzverfahren',WORKFLOWS.filter(w=>w.critical).length,'mit unmittelbarer Sicherheitsprüfung')+kpi('Absentismus-Stufen',ABSENCE_STAGES.length,'fachlich einzuordnen')+kpi('Interne Hilfen',4,'Vertrauenslehrkraft, Medienbuddys, Palaverzelt, SSA');document.getElementById('absenceStages').innerHTML=ABSENCE_STAGES.map(s=>`<div class="stage-row"><strong>${s.stage}</strong><span><b>Auslöser:</b> ${s.trigger}</span><span>${s.action}<br><span class="subtle">Review: ${s.review}</span></span></div>`).join('');document.getElementById('workflowGrid').innerHTML=list.map(w=>`<article class="card workflow-card"><div><span class="tag ${w.critical?'red':'gray'}">${w.status}</span></div><h3>${w.title}</h3><div class="subtle">${w.category}</div><p><strong>Start:</strong> ${w.start}</p><div class="actions"><button class="btn primary" onclick="openWorkflow('${w.id}')">Verfahren öffnen</button></div></article>`).join('')||'<div class="card empty">Kein passendes Fachverfahren gefunden.</div>'}
-function openWorkflow(id){const w=WORKFLOWS.find(x=>x.id===id);if(!w)return;document.getElementById('workflowTitle').textContent=w.title;document.getElementById('workflowBody').innerHTML=`<div class="notice ${w.critical?'warning':''}"><strong>${w.status}</strong> · ${w.category}<br>Startkriterium: ${w.start}</div>${w.critical?'<div class="notice warning"><strong>Sicherheitsregel:</strong> Bei unmittelbarer Gefahr zuerst Schutz und gegebenenfalls 112 oder 110 sicherstellen. Die Dokumentation darf die Hilfe nicht verzögern.</div>':''}<h3>Standardablauf</h3><div class="step-list">${w.steps.map(step=>`<div>${step}</div>`).join('')}</div><div class="detailgrid"><div class="detailitem"><span>Empfohlene Dokumentationsfelder</span><strong>${w.fields}</strong></div><div class="detailitem"><span>Qualitätsindikatoren</span><strong>${w.quality}</strong></div><div class="detailitem" style="grid-column:1/-1"><span>Schutzregel und Grenze</span><strong>${w.protection}</strong></div></div><p class="hint" style="margin-top:16px">Grundlage: SSA-Cockpit Fachkonzept 2026. Vor produktiver Anwendung müssen lokale Vereinbarungen, Zuständigkeiten und aktuelle Rechtsstände geprüft und freigegeben werden.</p>`;openModal('workflowModal')}
+function openWorkflow(id){const w=WORKFLOWS.find(x=>x.id===id);if(!w)return;document.getElementById('workflowTitle').textContent=w.title;document.getElementById('workflowBody').innerHTML=`<div class="notice ${w.critical?'warning':''}"><strong>${w.status}</strong> · ${w.category}<br>Startkriterium: ${w.start}</div>${w.critical?'<div class="notice warning"><strong>Sicherheitsregel:</strong> Bei unmittelbarer Gefahr zuerst Schutz und gegebenenfalls 112 oder 110 sicherstellen. Die Dokumentation darf die Hilfe nicht verzögern.</div>':''}<h3>Standardablauf</h3><div class="step-list">${w.steps.map(step=>`<div>${step}</div>`).join('')}</div><div class="detailgrid"><div class="detailitem"><span>Empfohlene Dokumentationsfelder</span><strong>${w.fields}</strong></div><div class="detailitem"><span>Qualitätsindikatoren</span><strong>${w.quality}</strong></div><div class="detailitem" style="grid-column:1/-1"><span>Schutzregel und Grenze</span><strong>${w.protection}</strong></div></div>${verfahrenZustaendigeHtml(w)}<p class="hint" style="margin-top:16px">Grundlage: SSA-Cockpit Fachkonzept 2026. Vor produktiver Anwendung müssen lokale Vereinbarungen, Zuständigkeiten und aktuelle Rechtsstände geprüft und freigegeben werden.</p>`;openModal('workflowModal')}
 document.getElementById('workflowSearch').oninput=renderWorkflows;document.getElementById('workflowFilter').onchange=renderWorkflows;
 function teacherName(t){return t.displayName||(t.first?`${t.last}, ${t.first}`:t.last)}
-function renderTeachers(){document.getElementById('teacherTable').innerHTML=data.teachers.sort((a,b)=>teacherName(a).localeCompare(teacherName(b))).map(t=>`<tr><td class="namecell">${teacherName(t)}</td><td>${t.role}</td><td>${staffStatusTag(t.status)}</td><td>${t.classLead||'–'}</td><td>${t.subjects||'–'}</td><td>${t.email?`<a href="mailto:${t.email}">${t.email}</a>`:'–'}</td><td>${t.phone||'–'}</td></tr>`).join('')||'<tr><td colspan="7" class="empty">Noch keine Lehrkräfte eingetragen. Sie werden für die Klassenleitung und für E-Mail-Entwürfe an die Klassenleitung gebraucht.</td></tr>'}
+/* ===== Personen- und Zuständigkeitsdatenbank ===== */
+let personEditId=null;
+function personLabel(t){return teacherName(t||{})||''}
+function personRollen(t){return Array.isArray(t&&t.roles)?t.roles.filter(Boolean):[]}
+function personAktiv(t){const st=staffNorm(t&&t.status);return !['inaktiv','ausgeschieden','ehemalig'].includes(st)}
+function personKlassen(t){return String(t&&t.classLead||'').split(/[,;]/).map(x=>x.trim()).filter(Boolean)}
+function personById(pid){return data.teachers.find(t=>t.id===pid)||null}
+function personGruppe(t){
+ const r=personRollen(t);
+ if(r.includes('Schulsozialarbeit')||r.includes('Schulsozialpädagogik'))return 'Schulsozialarbeit';
+ if(String(t&&t.bereich||'Schulintern')==='Extern')return 'Externe Ansprechpersonen';
+ if(r.includes('Klassenleitung'))return 'Klassenleitungen';
+ return 'Weitere schulinterne Personen';
+}
+function personInfoText(t){
+ return [t.role,personKlassen(t).length?'Klassenleitung '+personKlassen(t).join(', '):'',String(t.bereich||'')==='Extern'?(t.org||'extern'):'',t.area||''].filter(Boolean).join(' · ');
+}
+function personSuchtext(t){
+ return [personLabel(t),t.role,t.org,t.classLead,t.subjects,t.email,t.phone,t.area,t.sozialraum,t.note,t.bereich,t.status,...personRollen(t),...(Array.isArray(t.aliases)?t.aliases:[])].join(' ').toLocaleLowerCase('de-DE');
+}
+function personDuplikat(last,first,ignoreId){
+ const key=staffLose(last,first);
+ return data.teachers.find(t=>t.id!==ignoreId&&staffLose(t.last,t.first)===key)||null;
+}
+function personenMitRolle(rolle){return data.teachers.filter(t=>personAktiv(t)&&personRollen(t).includes(rolle))}
+function personRollenFeldFuellen(gewaehlt){
+ const box=document.getElementById('personRollenBox');if(!box)return;
+ const set=new Set(gewaehlt||[]);
+ const alle=[...new Set([...PERSON_ROLLEN,...set])];
+ box.innerHTML=alle.map(r=>`<label><input type="checkbox" value="${r}"${set.has(r)?' checked':''}><span>${r}</span></label>`).join('');
+}
+function personModalOeffnen(pid){
+ const form=document.getElementById('teacherForm');if(!form)return;
+ form.reset();delete form.dataset.doppelGeprueft;
+ personEditId=pid||null;
+ const t=pid?personById(pid):null;
+ document.getElementById('personModalTitle').textContent=t?'Person bearbeiten: '+personLabel(t):'Person hinzufügen';
+ document.getElementById('personSpeichernBtn').textContent=t?'Änderungen speichern':'Person speichern';
+ const statusBtn=document.getElementById('personStatusBtn');
+ statusBtn.style.display=t?'':'none';
+ if(t)statusBtn.textContent=personAktiv(t)?'Auf inaktiv setzen':'Wieder aktiv setzen';
+ ['last','first','displayName','role','org','classLead','subjects','email','phone','area','sozialraum','note'].forEach(k=>{if(form.elements[k])form.elements[k].value=t?(t[k]||''):''});
+ if(form.elements.bereich)form.elements.bereich.value=(t&&t.bereich)||'Schulintern';
+ if(form.elements.status){
+  const st=(t&&t.status)||'aktiv';
+  if(![...form.elements.status.options].some(o=>o.value===st))form.elements.status.insertAdjacentHTML('afterbegin',`<option>${st}</option>`);
+  form.elements.status.value=st;
+ }
+ personRollenFeldFuellen(personRollen(t||{}));
+ const hinweis=document.getElementById('personDoppelHinweis');hinweis.style.display='none';hinweis.innerHTML='';
+ document.getElementById('personModalHinweis').innerHTML=t
+  ?'Änderungen wirken nur für neue Einträge. Bereits geschriebene Dokumentation behält den damaligen Namen und die damalige Zuständigkeit. Wenn du den Namen änderst, bleibt der alte Name in den Auswahllisten auffindbar.'
+  :'Pflicht ist nur der Nachname. Alles Weitere kannst du später ergänzen. Die Rollen entscheiden darüber, wo diese Person in den Fachverfahren und in der Fallverlaufs-Erfassung als zuständig vorgeschlagen wird.';
+ openModal('teacherModal');
+ setTimeout(()=>{const el=document.getElementById('teacherForm').elements.last;if(el)el.focus()},120);
+}
+function personBearbeiten(pid){personModalOeffnen(pid)}
+function personNeuMitRolle(rolle){
+ personModalOeffnen();
+ if(rolle)personRollenFeldFuellen([rolle]);
+}
+async function personStatusUmschalten(){
+ const t=personById(personEditId);if(!t)return;
+ const aktiv=personAktiv(t);
+ if(aktiv&&!await appConfirm('„'+personLabel(t)+'“ auf inaktiv setzen?\n\nDie Person erscheint dann nicht mehr in den Auswahllisten für neue Einträge. Alle bisherigen Fallverläufe, Aufgaben und Dokumentationen bleiben unverändert erhalten und weiterhin lesbar. Gelöscht wird nichts.'))return;
+ t.status=aktiv?'inaktiv':'aktiv';
+ t.updatedAt=new Date().toISOString();
+ logChange(aktiv?'Person auf inaktiv gesetzt':'Person wieder aktiv gesetzt',t.id,'',aktivePerson());
+ personEditId=null;save();closeModal('teacherModal');
+ toast(aktiv?'Person ist jetzt inaktiv. Alle alten Einträge bleiben vollständig erhalten.':'Person steht wieder zur Auswahl.');
+}
+function personRolleFilterFuellen(){
+ const sel=document.getElementById('personRolleFilter');if(!sel)return;
+ const vorhanden=[...new Set(data.teachers.flatMap(personRollen))].sort((a,b)=>a.localeCompare(b,'de'));
+ const marke=vorhanden.join('|');
+ if(sel.dataset.marke===marke)return;
+ sel.dataset.marke=marke;
+ const wert=sel.value;
+ sel.innerHTML='<option value="all">Alle Rollen</option>'+vorhanden.map(r=>`<option>${r}</option>`).join('')+'<option value="ohne">Ohne Rolle</option>';
+ if(wert&&[...sel.options].some(o=>o.value===wert))sel.value=wert;
+}
+function renderTeachers(){
+ const tbody=document.getElementById('teacherTable');if(!tbody)return;
+ personRolleFilterFuellen();
+ const feld=x=>document.getElementById(x),
+  q=((feld('personSuche')||{}).value||'').toLocaleLowerCase('de-DE'),
+  bereich=(feld('personBereichFilter')||{}).value||'all',
+  rolle=(feld('personRolleFilter')||{}).value||'all',
+  status=(feld('personStatusFilter')||{}).value||'aktiv',
+  sortierung=(feld('personSortierung')||{}).value||'name';
+ let list=data.teachers.filter(t=>{
+  if(q&&!personSuchtext(t).includes(q))return false;
+  if(bereich!=='all'&&String(t.bereich||'Schulintern')!==bereich)return false;
+  if(rolle==='ohne'&&personRollen(t).length)return false;
+  if(rolle!=='all'&&rolle!=='ohne'&&!personRollen(t).includes(rolle))return false;
+  if(status==='aktiv'&&!personAktiv(t))return false;
+  if(status==='inaktiv'&&personAktiv(t))return false;
+  return true;
+ });
+ const nameSort=(a,b)=>personLabel(a).localeCompare(personLabel(b),'de');
+ const sorter={name:nameSort,
+  rolle:(a,b)=>(personRollen(a)[0]||'ZZZ').localeCompare(personRollen(b)[0]||'ZZZ','de')||nameSort(a,b),
+  bereich:(a,b)=>String(a.bereich||'').localeCompare(String(b.bereich||''),'de')||nameSort(a,b),
+  klasse:(a,b)=>(personKlassen(a)[0]||'ZZZ').localeCompare(personKlassen(b)[0]||'ZZZ','de')||nameSort(a,b)};
+ list=[...list].sort(sorter[sortierung]||nameSort);
+ const kz=document.getElementById('personKennzahlen');
+ if(kz){
+  const aktive=data.teachers.filter(personAktiv),
+   intern=aktive.filter(t=>String(t.bereich||'Schulintern')==='Schulintern').length,
+   extern=aktive.length-intern,
+   ohneRolle=aktive.filter(t=>!personRollen(t).length).length;
+  kz.innerHTML=kpi('Angezeigt',list.length,'nach aktuellem Filter')
+   +kpi('Schulintern aktiv',intern,'Kollegium und schulische Funktionen')
+   +kpi('Extern aktiv',extern,'feste Ansprechpersonen außerhalb der Schule')
+   +kpi('Ohne Rolle',ohneRolle,ohneRolle?'werden in Fachverfahren nicht vorgeschlagen':'alle aktiven Personen haben eine Rolle');
+ }
+ tbody.innerHTML=list.map(t=>{
+  const rollen=personRollen(t),klassen=personKlassen(t),
+   kontakt=[t.email?`<a href="mailto:${t.email}">${t.email}</a>`:'',t.phone||''].filter(Boolean).join('<br>')||'<span class="subtle">keine Angabe</span>';
+  return `<tr${personAktiv(t)?'':' style="opacity:.62"'}>`
+   +`<td class="namecell">${personLabel(t)}${t.area?`<br><span class="subtle" style="font-weight:400;color:var(--muted)">${t.area}</span>`:''}</td>`
+   +`<td>${t.role||'<span class="subtle">ohne Funktionsangabe</span>'}${rollen.length?`<div class="rollentags" style="margin-top:5px">${rollen.map(r=>`<span class="tag">${r}</span>`).join('')}</div>`:'<div class="subtle" style="margin-top:4px">noch keine Rolle hinterlegt</div>'}</td>`
+   +`<td>${String(t.bereich||'Schulintern')==='Extern'?'<span class="tag amber">Extern</span>':'<span class="tag">Schulintern</span>'}${t.org?`<br>${t.org}`:''}${t.sozialraum?`<br><span class="subtle">${t.sozialraum}</span>`:''}</td>`
+   +`<td>${klassen.join(', ')||'–'}${t.subjects?`<br><span class="subtle">${t.subjects}</span>`:''}</td>`
+   +`<td>${kontakt}</td>`
+   +`<td>${personAktiv(t)?staffStatusTag(t.status):'<span class="tag gray">inaktiv</span>'}</td>`
+   +`<td><button class="btn kleiner" onclick="personBearbeiten('${t.id}')">✎ Bearbeiten</button></td></tr>`;
+ }).join('')||'<tr><td colspan="7" class="empty">Zu diesem Filter passt keine Person. Setze den Statusfilter auf „Alle anzeigen“ oder lege über „＋ Person hinzufügen“ eine neue Person an.</td></tr>';
+}
+['personSuche','personBereichFilter','personRolleFilter','personStatusFilter','personSortierung'].forEach(k=>{
+ const el=document.getElementById(k);
+ if(!el)return;
+ if(el.tagName==='INPUT')el.oninput=renderTeachers; else el.onchange=renderTeachers;
+});
 function renderProjects(){document.getElementById('preventionCatalog').innerHTML=PREVENTION_CATALOG.map(p=>`<tr><td><strong>${p.name}</strong></td><td>${p.group}</td><td>${p.focus}</td><td><span class="tag ${p.evidence.startsWith('D3')?'':p.evidence.startsWith('E')?'gray':'amber'}">${p.evidence}</span></td><td>${p.fit}</td></tr>`).join('');document.getElementById('projectGrid').innerHTML=data.projects.map(p=>`<article class="card project"><div class="projecticon">${p.icon||'◉'}</div><h3>${p.name}</h3><div class="meta">${p.group} · ${p.participants?p.participants+' Teilnehmende':'Teilnehmendenzahl noch eintragen'}</div>${p.partner?`<div class="meta">Durchführung: ${p.partner}</div>`:''}<div class="eventmeta"><span class="tag gray">${p.evidence||'Noch zu prüfen'}</span>${p.unitMinutes?`<span class="tag">${p.unitMinutes} Min. je Einheit</span>`:''}${p.rhythm?`<span class="tag">${p.rhythm}</span>`:''}${p.since?`<span class="tag gray">seit ${p.since}</span>`:''}${p.reviewDate?`<span class="tag amber">Review ${fmt(p.reviewDate)}</span>`:''}</div><p>${p.goal}</p>${p.need?`<p class="subtle"><strong>Bedarf:</strong> ${p.need}</p>`:''}<div class="projectfoot"><div class="cardhead"><span class="tag">${p.status}</span><span class="subtle">${p.sessions} von ${p.total} Einheiten</span></div><div class="progress"><span style="width:${Math.min(100,p.sessions/Math.max(1,p.total)*100)}%"></span></div><div class="subtle" style="margin-top:9px">Fidelity: ${p.fidelity||'offen'} · Evaluation: ${p.evaluation||'offen'}</div></div></article>`).join('')||'<div class="card empty">Noch kein konkretes Präventionsprojekt angelegt.</div>'}
 function ctcLevel(a){const risk=a.factorType==='Risikofaktor',rating=a.rating||'Mittel';if(risk&&rating==='Hoch'||!risk&&rating==='Niedrig')return {color:'red',label:'Rot'};if(rating==='Mittel')return {color:'amber',label:'Gelb'};return {color:'green',label:'Grün'}}
 function ctcRecommendation(a){const d=a.domain||'';if(d.includes('Konflikte'))return 'Bei geeigneten, freiwillig klärbaren Konflikten Palaverzelt prüfen. Bei klassenweiten Mustern Sozialtraining durch die SSA planen. Bei Mobbing, Gewalt, Schutzfragen oder Machtungleichgewicht das passende Fachverfahren nutzen.';if(d.includes('Medien'))return 'Medienbuddys als niedrigschwellige Peer-Unterstützung und ein begleitetes Medienpräventionsangebot prüfen. Schutz- und Mobbinghinweise bleiben bei verantwortlichen Erwachsenen.';if(d.includes('Klassenklima'))return 'Sozialtraining durch die SSA mit konkretem Ziel, ausreichender Dauer und einem Reviewtermin planen; Klassenleitung beteiligen.';if(d.includes('Schulbindung'))return 'Beteiligungsmöglichkeiten, verlässliche Bezugspersonen und niedrigschwellige Angebote stärken; Wirkung nach einem festgelegten Zeitraum erneut prüfen.';if(d.includes('Substanz'))return 'Qualifizierte Suchtprävention und bei Bedarf eine Fachstelle einbeziehen. Keine individuelle Zuschreibung aus Gruppendaten ableiten.';if(d.includes('Familie'))return 'Niedrigschwellige Familienunterstützung und passende Netzwerkangebote sichtbar machen; Zugänge und soziale Barrieren prüfen.';if(d.includes('Übergänge'))return 'Übergangsplanung, Berufsorientierung, Patenschaften und verlässliche Anschlusswege gemeinsam mit den zuständigen schulischen Stellen stärken.';return 'Niedrigschwellige Gesprächs- und Unterstützungswege bekannt machen, Schutzfaktoren stärken und bei konkreten Einzelfallhinweisen getrennt fachlich prüfen.'}
@@ -1019,7 +1213,45 @@ document.getElementById('outcomeForm').onsubmit=e=>{e.preventDefault();const c=c
 document.getElementById('relatedPersonForm').onsubmit=e=>{e.preventDefault();const f=cleanObject(Object.fromEntries(new FormData(e.target))),entry={...f,id:id('rp'),studentId:selectedStudentId,createdAt:new Date().toISOString()};ensureCaseForStudent(selectedStudentId,'Bezugsperson oder Netzwerk dokumentiert',today());data.relatedPersons.push(entry);logChange('Bezugsperson oder Netzwerkpartner gespeichert',entry.id,selectedStudentId);save();closeModal('relatedPersonModal');showStudent(selectedStudentId);toast('Bezugsperson mit Kontakt- und Informationsstatus wurde gespeichert.')};
 document.getElementById('projectForm').onsubmit=e=>{e.preventDefault();const f=cleanObject(Object.fromEntries(new FormData(e.target)));data.projects.push({...f,id:id('p'),icon:'◉',participants:Number(f.participants),sessions:0,total:Number(f.total||6),status:f.status||'Geplant'});save();e.target.reset();closeModal('projectModal');toast('Das Präventionsprojekt wurde mit Evidenz-, Umsetzungs- und Evaluationsangaben angelegt.')};
 document.getElementById('ctcForm').onsubmit=e=>{e.preventDefault();const f=cleanObject(Object.fromEntries(new FormData(e.target))),participants=Number(f.participants||0);if(participants<5){alert('CTC-Bedarfsbeobachtungen dürfen erst ab fünf einbezogenen Personen gespeichert werden.');return}data.ctcAssessments.push({...f,id:id('ctc'),participants,createdAt:new Date().toISOString()});save();e.target.reset();closeModal('ctcModal');toast('Die aggregierte Bedarfsbeobachtung wurde mit Ampel und Handlungsempfehlung gespeichert.')};
-document.getElementById('teacherForm').onsubmit=e=>{e.preventDefault();const f=cleanObject(Object.fromEntries(new FormData(e.target)));if(!f.email)f.email=defaultTeacherEmail(f);data.teachers.push({...f,id:id('l')});save();e.target.reset();closeModal('teacherModal');toast('Lehrkraft wurde mit dienstlicher IServ-Adresse gespeichert.')};
+document.getElementById('teacherForm').onsubmit=e=>{
+ e.preventDefault();
+ const form=e.target,f=cleanObject(Object.fromEntries(new FormData(form)));
+ f.last=String(f.last||'').trim();
+ if(!f.last){toast('Bitte mindestens den Nachnamen eintragen.');return}
+ f.roles=[...document.querySelectorAll('#personRollenBox input:checked')].map(x=>x.value);
+ if(String(f.classLead||'').trim()&&!f.roles.includes('Klassenleitung'))f.roles.push('Klassenleitung');
+ if(!f.bereich)f.bereich='Schulintern';
+ if(!f.status)f.status='aktiv';
+ if(!f.email&&f.bereich==='Schulintern')f.email=defaultTeacherEmail(f);
+ const doppel=personDuplikat(f.last,f.first,personEditId),hinweis=document.getElementById('personDoppelHinweis');
+ if(doppel&&form.dataset.doppelGeprueft!==doppel.id){
+  form.dataset.doppelGeprueft=doppel.id;
+  hinweis.style.display='';
+  hinweis.innerHTML=`<strong>Möglicher Doppeleintrag:</strong> „${personLabel(doppel)}“ ist bereits angelegt (${doppel.role||'ohne Funktionsangabe'}${doppel.classLead?', Klassenleitung '+doppel.classLead:''}). <button type="button" class="btn kleiner" onclick="personBearbeiten('${doppel.id}')">Vorhandene Person bearbeiten</button> Sind es wirklich zwei verschiedene Personen, klicke einfach noch einmal auf Speichern.`;
+  return;
+ }
+ delete form.dataset.doppelGeprueft;
+ if(personEditId){
+  const t=personById(personEditId);
+  if(t){
+   const alterName=personLabel(t),alteAliase=Array.isArray(t.aliases)?t.aliases:[];
+   Object.assign(t,f);
+   t.aliases=alteAliase;
+   const neuerName=personLabel(t);
+   if(alterName&&alterName!==neuerName&&!t.aliases.includes(alterName))t.aliases.push(alterName);
+   t.updatedAt=new Date().toISOString();
+   logChange('Person bearbeitet',t.id,'',aktivePerson());
+  }
+ }else{
+  data.teachers.push({...f,id:id('pers'),aliases:[],createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});
+  logChange('Person angelegt','','',aktivePerson());
+ }
+ const rollenText=f.roles.length?' Sie wird jetzt bei der Rolle '+f.roles.slice(0,2).join(' und ')+' vorgeschlagen.':' Ergänze noch eine Rolle, damit die Person in den Fachverfahren vorgeschlagen wird.';
+ const bearbeitet=!!personEditId;
+ personEditId=null;
+ save();form.reset();closeModal('teacherModal');
+ toast((bearbeitet?'Änderungen gespeichert.':'Person gespeichert.')+rollenText);
+};
 
 document.getElementById('classActivityForm').onsubmit=e=>{e.preventDefault();const f=cleanObject(Object.fromEntries(new FormData(e.target))),participantIds=data.students.filter(s=>s.active&&s.className===f.className).map(s=>s.id),external=f.externalFacilitator?.trim()||'',facilitator=f.facilitator==='Andere Person oder Institution'?external:f.facilitator+(external?' · '+external:'');if(!facilitator){alert('Bitte die durchführende Person oder Institution eintragen.');return}data.classActivities.push({...f,id:id('ka'),facilitator,duration:Number(f.duration),weeklySessions:Number(f.weeklySessions||0),weeklyDuration:Number(f.weeklyDuration||0),totalWeeks:Number(f.totalWeeks||0),schoolYear:data.settings.currentSchoolYear,participantIds});save();selectedClass=f.className;e.target.reset();closeModal('classActivityModal');showClass(selectedClass);toast(`Maßnahme mit ${f.duration} Minuten je Aktion und ${f.weeklyDuration} Minuten pro Woche wurde gespeichert.`)};
 document.getElementById('groupTalkForm').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target),f=cleanObject(Object.fromEntries(fd));const participantIds=fd.getAll('participantIds').map(clean);if(participantIds.length<2){alert('Bitte mindestens zwei Schüler:innen auswählen.');return}participantIds.forEach(studentId=>ensureCaseForStudent(studentId,'Teilnahme an einem dokumentierten Gruppengespräch',f.date||today(),f.responsible||'Edmund oder Sabine'));data.groupTalks.push({...f,id:id('g'),participantIds,duration:Number(f.duration)});if(f.due)data.tasks.push({id:id('t'),title:`Wiedervorlage: ${f.type}`,due:f.due,priority:'Normal',caseId:'',done:false});save();e.target.reset();closeModal('groupTalkModal');toast(`Gruppengespräch wurde ${participantIds.length} Chroniken zugeordnet.`)};
@@ -1122,13 +1354,13 @@ function staffImportOeffnen(){staffPending=null;
  openModal('staffImportModal')}
 
 function downloadStaffTemplate(){
- const kopf=['NAME','OFFIZIELLER VORNAME','ANZEIGENAME','FUNKTION','KLASSENLEITUNG FÜR','STATUS','HINWEIS','QUELLE'];
- const bsp=[['Mustermann','Anna','Mustermann, Anna','Lehrkraft / Klassenleitung','7b','aktiv','','Mitarbeiterliste'],
-            ['Beispiel','Jan','Beispiel, Jan','Schulsozialpädagoge','','aktiv','','Mitarbeiterliste']];
+ const kopf=['NAME','OFFIZIELLER VORNAME','ANZEIGENAME','FUNKTION','ROLLEN','ORGANISATION','KLASSENLEITUNG FÜR','E-MAIL','TELEFON','STATUS','HINWEIS','QUELLE'];
+ const bsp=[['Mustermann','Anna','Mustermann, Anna','Lehrkraft und Klassenleitung','Klassenleitung','Ludgerusschule Rhede','7b','','','aktiv','','Mitarbeiterliste'],
+            ['Beispiel','Jan','Beispiel, Jan','Schulsozialpädagogik','Schulsozialpädagogik, Ansprechperson Trainingsraum','Ludgerusschule Rhede','','','','aktiv','','Mitarbeiterliste']];
  const csv='﻿'+[kopf,...bsp].map(r=>r.map(csvCell).join(';')).join('\n');
  download('Mitarbeiterimport_Vorlage.csv',csv,'text/csv;charset=utf-8')}
 
-function staffBeispielZeigen(){appAlert('So muss die Datei aufgebaut sein.\n\nErste Zeile mit den Spaltennamen, danach je eine Zeile pro Person:\n\nNAME;OFFIZIELLER VORNAME;ANZEIGENAME;FUNKTION;KLASSENLEITUNG FÜR;STATUS;HINWEIS;QUELLE\nMustermann;Anna;Mustermann, Anna;Lehrkraft / Klassenleitung;7b;aktiv;;Mitarbeiterliste\n\nPflicht ist nur NAME. Alles Übrige darf leer bleiben.\nHINWEIS und QUELLE sind freiwillig, zusätzliche Spalten stören nicht.\nTrennzeichen Semikolon oder Komma, beides wird erkannt.')}
+function staffBeispielZeigen(){appAlert('So muss die Datei aufgebaut sein.\n\nErste Zeile mit den Spaltennamen, danach je eine Zeile pro Person:\n\nNAME;OFFIZIELLER VORNAME;ANZEIGENAME;FUNKTION;ROLLEN;ORGANISATION;KLASSENLEITUNG FÜR;E-MAIL;TELEFON;STATUS;HINWEIS;QUELLE\nMustermann;Anna;Mustermann, Anna;Lehrkraft und Klassenleitung;Klassenleitung;Ludgerusschule Rhede;7b;;;aktiv;;Mitarbeiterliste\n\nMehrere Rollen werden mit Komma getrennt.\nPflicht ist nur NAME. Alles Übrige darf leer bleiben.\nHINWEIS und QUELLE sind freiwillig, zusätzliche Spalten stören nicht.\nTrennzeichen Semikolon oder Komma, beides wird erkannt.')}
 
 function staffImportVorschau(event){const file=event.target.files[0];if(!file)return;
  const reader=new FileReader();
@@ -1138,14 +1370,18 @@ function staffImportVorschau(event){const file=event.target.files[0];if(!file)re
   const h=rows[0].map(headerKey),col=(...n)=>h.findIndex(x=>n.some(y=>x===y));
   const iLast=col('NAME','NACHNAME'),iFirst=col('OFFIZIELLERVORNAME','VORNAME'),iDisp=col('ANZEIGENAME'),
         iRole=col('FUNKTION','ROLLE'),iLead=col('KLASSENLEITUNGFUR','KLASSENLEITUNG','KLASSENLEITUNGFUER'),
-        iStat=col('STATUS'),iNote=col('HINWEIS','BEMERKUNG'),iSrc=col('QUELLE');
+        iStat=col('STATUS'),iNote=col('HINWEIS','BEMERKUNG'),iSrc=col('QUELLE'),
+        iRoles=col('ROLLEN','ZUSTANDIGKEITEN','ZUSTANDIGKEIT'),iOrg=col('ORGANISATION','EINRICHTUNG'),
+        iMail=col('EMAIL','DIENSTLICHEEMAIL','MAIL'),iPhone=col('TELEFON','DIENSTLICHESTELEFON');
   if(iLast<0)throw Error('Die Spalte NAME wurde nicht gefunden. Bitte prüfe die Kopfzeile der Datei.');
   const zell=(r,i)=>i>=0?String(r[i]||'').trim():'';
   const gelesen=[],fehlerhaft=[],dublettenInDatei=[];
   const gesehen=new Set();
   for(const r of rows.slice(1)){
    const p={last:zell(r,iLast),first:zell(r,iFirst),displayName:zell(r,iDisp),role:zell(r,iRole),
-            classLead:zell(r,iLead),status:zell(r,iStat),note:zell(r,iNote),source:zell(r,iSrc)};
+            classLead:zell(r,iLead),status:zell(r,iStat),note:zell(r,iNote),source:zell(r,iSrc),
+            org:zell(r,iOrg),email:zell(r,iMail),phone:zell(r,iPhone),
+            roles:zell(r,iRoles).split(/[,;|]/).map(x=>x.trim()).filter(Boolean)};
    if(!p.last){fehlerhaft.push(p);continue}
    const k=staffKey(p.last,p.first,p.role);
    if(gesehen.has(k)){dublettenInDatei.push(p);continue}
@@ -1188,9 +1424,13 @@ function staffImportBestaetigen(){if(!staffPending)return;
  const vorhanden=new Map(data.teachers.map(t=>[staffKey(t.last,t.first,t.role),t]));
  let neu=0,akt=0;
  p.gelesen.forEach(q=>{const t=vorhanden.get(staffKey(q.last,q.first,q.role));
-  if(t){['first','displayName','role','classLead','status','note','source'].forEach(f=>{if(q[f])t[f]=q[f]});akt++}
+  if(t){['first','displayName','role','classLead','status','note','source','org','email','phone'].forEach(f=>{if(q[f])t[f]=q[f]});
+       if(Array.isArray(q.roles)&&q.roles.length)t.roles=[...new Set([...(Array.isArray(t.roles)?t.roles:[]),...q.roles])];
+       akt++}
   else{data.teachers.push({id:id('l'),last:q.last,first:q.first,displayName:q.displayName,role:q.role||'Mitarbeiter',
-        classLead:q.classLead,status:q.status||'aktiv',note:q.note,source:q.source,subjects:'',email:'',phone:''});neu++}});
+        classLead:q.classLead,status:q.status||'aktiv',note:q.note,source:q.source,subjects:'',
+        org:q.org||'',email:q.email||'',phone:q.phone||'',roles:Array.isArray(q.roles)?q.roles:[],aliases:[]});neu++}});
+ ensurePersonen(data);
  if(!Array.isArray(data.staffImports))data.staffImports=[];
  data.staffImports.unshift({zeit:new Date().toISOString(),dateiname:p.dateiname,gelesen:p.gelesen.length,neu:neu,
    aktualisiert:akt,uebersprungen:p.fehlerhaft.length+p.dublettenInDatei.length,
@@ -1944,7 +2184,7 @@ const HILFE={
  trainingroom:['Trainingsraum','Schulische Vorgänge im sozialen Trainingsraum. Der Trainingsraum ist schulische Dokumentation und keine Beratung. Die Diagramme unten zeigen, wann und warum der Raum genutzt wird.'],
  signals:['Frühindikatoren','Fehlzeiten aus WebUntis. Die Ampel ist ausschließlich ein Arbeitshinweis auf vorher eingestellte Schwellenwerte. Sie ist keine Diagnose und löst nichts automatisch aus.\n\nWebUntis importieren: Datei in WebUntis als CSV exportieren, hier auswählen, Vorschau prüfen, bestätigen.\n\nFachlich prüfen bedeutet: Du siehst dir die Zahlen an, ordnest sie ein und hältst fest, was daraus folgt.'],
  workflows:['Fachverfahren','Schrittweise Ablaufhilfen für wiederkehrende Verfahren, zum Beispiel Schulverweigerung oder Verdacht auf Kindeswohlgefährdung. Sie ersetzen weder Schutzkonzept noch Leitungslinie.'],
- teachers:['Lehrkräfte','Lehrkräfte und Mitarbeitende. Über „Lehrkräfte-/Mitarbeiterliste importieren“ liest du eine CSV-Datei ein. Die Namen stehen danach überall zur Auswahl, wo eine Person auszuwählen ist.'],
+ teachers:['Personen und Zuständigkeiten','Hier pflegst du alle Personen, mit denen du arbeitest: Kollegium, Klassenleitungen, schulinterne Funktionen und feste Ansprechpersonen außerhalb der Schule. Über „Liste importieren“ liest du eine CSV-Datei ein, über „＋ Person hinzufügen“ ergänzt du einzelne Personen, über „✎ Bearbeiten“ änderst du eine vorhandene. Die <strong>Funktion</strong> sagt, was die Person beruflich ist. Die <strong>Rollen</strong> sagen, wofür sie im Einzelfall zuständig ist. Nur Personen mit Rolle werden in den Fachverfahren als zuständig vorgeschlagen. Personen werden nicht gelöscht, sondern auf „inaktiv“ gesetzt, damit alte Fallverläufe vollständig lesbar bleiben.'],
  projects:['Projekte und Gruppen','Angebote für Gruppen und Klassen. Der Präventionsplan der Schule steht oben, darunter die einzelnen Projekte mit Ziel, Dosis, Umsetzungstreue und Auswertung.'],
  ctc:['Bedarf auf Gruppenebene','Für Beobachtungen auf Klassen-, Jahrgangs- oder Schulebene, wenn es nicht um ein einzelnes Kind geht. Der Bereich steht nicht mehr in der Navigation, die Daten bleiben erhalten. Die geprüften Präventionsprogramme der Grünen Liste findest du jetzt unter Projekte.'],
  network:['Gruppen und Netzwerk','Gruppengespräche und das Verzeichnis der Netzwerkpartner, getrennt nach schulintern, Kooperationspartner, Sozialraum, Krise und Notfall sowie Übergang Schule und Beruf.\n\nMit „Weitervermittlung dokumentieren“ auf einer Kontaktkarte entsteht direkt ein Eintrag im Fallverlauf. Es wird dabei kein neuer Fall angelegt.\n\nHäufige Kontakte kannst du mit dem Stern nach oben holen. In jeder Schülerakte schlägt das Cockpit unter „Beteiligte und Weitervermittlungen“ passende Stellen vor.'],
@@ -2272,7 +2512,7 @@ async function verlaufSpeichern(mitWiedervorlage){
  if(mitWiedervorlage&&f.nextStep){
   aufgabe={id:id('t'),caseId:fall.id,title:f.nextStep,due:f.due||addSchoolDays(today(),2),
    priority:'Normal',taskType:f.vorlage==='Weitervermittlung'?'Weitervermittlung nachhalten':'Rückmeldung ausstehend',
-   assignedTo:f.responsible||aktivePerson(),expectedResult:'Rückmeldung zum Eintrag vom '+fmt(eintrag.date)+' ('+f.vorlage+')',
+   assignedTo:f.assignedTo||f.responsible||aktivePerson(),expectedResult:'Rückmeldung zum Eintrag vom '+fmt(eintrag.date)+' ('+f.vorlage+')',
    done:false,createdAt:new Date().toISOString(),completedAt:'',result:'',
    sourceContactId:eintragId,sourceStudentId:studentId};
   data.tasks.push(aufgabe);
@@ -2566,27 +2806,80 @@ function renderSicherungsKarte(){
 }
 
 
-/* ===== Mitarbeiterliste in allen Auswahlfeldern ===== */
+/* ===== Personen in allen Auswahlfeldern ===== */
+function personEintraege(){
+ return data.teachers.filter(personAktiv).map(t=>({name:personLabel(t),info:personInfoText(t),gruppe:personGruppe(t)})).filter(x=>x.name);
+}
 function ssaPersonen(){
- const aus=data.teachers.map(teacherName).filter(Boolean);
+ const aus=personEintraege().map(x=>x.name);
  const leitungen=Object.values(data.settings.classLeads||{}).filter(Boolean);
  return [...new Set([...aus,...leitungen])].sort((a,b)=>String(a).localeCompare(String(b),'de'));
 }
+const PERSON_GRUPPEN=['Schulsozialarbeit','Klassenleitungen','Weitere schulinterne Personen','Externe Ansprechpersonen'];
 function personenAuswahlFuellen(){
- const namen=ssaPersonen();
- const marke=String(namen.length);
- document.querySelectorAll('select[name="responsible"],select[name="assignedTo"],select[name="completedBy"],select[name="reviewedBy"],select[name="facilitator"]').forEach(sel=>{
+ const eintraege=personEintraege(),marke=eintraege.map(x=>x.name+'#'+x.gruppe).join('|');
+ const dl=document.getElementById('personOptions');
+ if(dl&&dl.dataset.marke!==marke){
+  dl.dataset.marke=marke;
+  dl.innerHTML=eintraege.map(x=>`<option value="${x.name}" label="${x.info||x.gruppe}"></option>`).join('');
+ }
+ const dlf=document.getElementById('personFunktionen');
+ if(dlf&&!dlf.dataset.fertig){dlf.dataset.fertig='1';dlf.innerHTML=PERSON_FUNKTIONEN.map(f=>`<option value="${f}"></option>`).join('')}
+ document.querySelectorAll('select[name="responsible"],select[name="assignedTo"],select[name="completedBy"],select[name="reviewedBy"],select[name="facilitator"],select[data-personenfeld]').forEach(sel=>{
   if(sel.dataset.personen===marke)return;
   sel.dataset.personen=marke;
   const wert=sel.value;
   sel.querySelectorAll('optgroup[data-personen]').forEach(g=>g.remove());
-  if(namen.length)sel.insertAdjacentHTML('beforeend','<optgroup data-personen="1" label="Aus der Mitarbeiterliste">'+namen.map(n=>'<option>'+n+'</option>').join('')+'</optgroup>');
-  if(wert)sel.value=wert;
+  PERSON_GRUPPEN.forEach(g=>{
+   const namen=[...new Set(eintraege.filter(x=>x.gruppe===g).map(x=>x.name))].sort((a,b)=>a.localeCompare(b,'de'));
+   if(!namen.length)return;
+   sel.insertAdjacentHTML('beforeend',`<optgroup data-personen="1" label="${g}">`+namen.map(n=>`<option>${n}</option>`).join('')+'</optgroup>');
+  });
+  if(wert){
+   if(![...sel.options].some(o=>o.value===wert))sel.insertAdjacentHTML('beforeend',`<optgroup data-personen="1" label="Aus einem früheren Eintrag"><option>${wert}</option></optgroup>`);
+   sel.value=wert;
+  }
  });
- document.querySelectorAll('input[name="participantsOther"],input[name="facilitator"],input[name="referringTeacher"],input[name="involved"],input[name="contact"]').forEach(f=>{
-  if(!f.getAttribute('list'))f.setAttribute('list','teacherOptions');
+ document.querySelectorAll('input[name="participantsOther"],input[name="facilitator"],input[name="referringTeacher"],input[name="involved"],input[name="contact"],input[data-personenfeld]').forEach(f=>{
+  if(!f.getAttribute('list'))f.setAttribute('list','personOptions');
  });
 }
+
+/* ===== Rollen in den Fachverfahren ===== */
+const VERFAHREN_ROLLEN={
+ beratung:['Schulsozialarbeit','Klassenleitung'],
+ case:['Schulsozialarbeit','Klassenleitung','Jugendamt und ASD'],
+ absence:['Schulsozialarbeit','Klassenleitung','Ansprechperson Schulabsentismus','Schulleitung'],
+ kinderschutz:['Schulsozialarbeit','Insoweit erfahrene Fachkraft','Schulleitung','Jugendamt und ASD'],
+ selfharm:['Schulsozialarbeit','Schulleitung','Schulpsychologie','Therapie und Klinik'],
+ violence:['Schulleitung','Schulsozialarbeit','Polizei und Prävention'],
+ 'sexualisierte-gewalt':['Schulleitung','Insoweit erfahrene Fachkraft','Schulsozialarbeit'],
+ mobbing:['Schulsozialarbeit','Klassenleitung','Ansprechperson Mobbing und Cybermobbing','Schulleitung'],
+ psychisch:['Schulsozialarbeit','Schulpsychologie','Erziehungsberatung'],
+ sucht:['Schulsozialarbeit','Klassenleitung','Polizei und Prävention'],
+ konflikt:['Schulsozialarbeit','Klassenleitung','Ansprechperson Trainingsraum'],
+ sel:['Schulsozialarbeit','Klassenleitung'],
+ familie:['Schulsozialarbeit','Erziehungsberatung','Jugendamt und ASD'],
+ armut:['Schulsozialarbeit','Sekretariat','Jobcenter und Berufsberatung'],
+ inklusion:['Förderschullehrkraft','Inklusion und Teilhabe','Schulsozialarbeit','Schulbegleitung'],
+ diversitaet:['Schulsozialarbeit','Klassenleitung','Schulleitung'],
+ trauer:['Schulsozialarbeit','Klassenleitung','Schulleitung'],
+ uebergang:['Schulsozialarbeit','Ansprechperson Berufsorientierung','Jobcenter und Berufsberatung'],
+ partizipation:['Schulsozialarbeit','Vertrauenslehrkraft','Ansprechperson Ganztag und VGS'],
+ netzwerk:['Schulsozialarbeit','Schulleitung','Jugendamt und ASD']
+};
+function verfahrenRollen(vid){return VERFAHREN_ROLLEN[vid]||['Schulsozialarbeit','Klassenleitung','Schulleitung']}
+function verfahrenZustaendigeHtml(w){
+ const zeilen=verfahrenRollen(w.id).map(r=>{
+  const p=personenMitRolle(r);
+  const inhalt=p.length
+   ?p.slice(0,4).map(t=>`${personLabel(t)}${t.org&&String(t.bereich||'')==='Extern'?' ('+t.org+')':''}${t.email?`<br><a href="mailto:${t.email}">${t.email}</a>`:''}${t.phone?'<br>'+t.phone:''}`).join('<br><br>')+(p.length>4?`<br><span class="subtle">und ${p.length-4} weitere</span>`:'')
+   :`<span class="subtle">noch keine Person hinterlegt</span><br><button type="button" class="btn kleiner" onclick="verfahrenPersonAnlegen('${r}')">Person für diese Rolle anlegen</button>`;
+  return `<div class="detailitem"><span>${r}</span><strong style="font-weight:500;line-height:1.45">${inhalt}</strong></div>`;
+ }).join('');
+ return `<h3>Zuständige Personen zu diesem Verfahren</h3><div class="detailgrid">${zeilen}</div><p class="hint">Die Zuordnung stammt aus „Personen und Zuständigkeiten“. Das Cockpit nimmt von sich aus keinen Kontakt auf und markiert kein Verfahren automatisch als verbindlich oder abgeschlossen. Wer wann einbezogen wird, entscheidest du nach Leitungslinie und Schutzkonzept.</p>`;
+}
+function verfahrenPersonAnlegen(rolle){closeModal('workflowModal');go('teachers');personNeuMitRolle(rolle)}
 
 /* ===== Geführter Fallabschluss ===== */
 function fallAbschlussPruefen(studentId){
