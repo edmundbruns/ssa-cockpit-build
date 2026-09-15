@@ -93,6 +93,8 @@
 #globalSearchResults button{display:block;width:100%;text-align:left;border:0;background:none;padding:9px 13px;cursor:pointer;font:inherit}
 #globalSearchResults button:hover,#globalSearchResults button:focus{background:#eef6f6}
 #globalSearchResults .leer{padding:11px 13px;color:var(--muted);font-size:13px}
+.aktemehr{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding:11px 26px;border-top:1px solid var(--line);background:var(--cream)}
+.aktemehr .hint{margin-right:4px}
 .aktereiter{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin:0 0 17px}
 .aktereiter button{border:0;background:none;padding:9px 13px;border-radius:10px 10px 0 0;font-weight:700;font-size:13px;color:var(--muted);cursor:pointer}
 .aktereiter button.aktiv{background:#eef6f6;color:var(--teal);box-shadow:inset 0 -2px 0 var(--teal)}
@@ -175,7 +177,7 @@
         </div>
       </div>
     </nav>
-    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.13</span></div>
+    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.14</span></div>
   </aside>
   <main>
     <header class="topbar"><div><h1 id="pageTitle">Guten Morgen, Dr. Bruns</h1><p id="pageSubtitle">Freitag, 11. September 2026 · Schuljahr 2026/27</p></div><div class="kopfsuche"><input class="field" id="globalSearch" type="search" autocomplete="off" placeholder="Schüler:in suchen: Name, Vorname, Klasse oder Klassenleitung" oninput="globalSearchTippen()" onfocus="globalSearchTippen()"><div id="globalSearchResults"></div></div><div class="actions"><button class="btn" onclick="lockPrivacyScreen()">🔒 Sperren</button><button class="btn" onclick="openModal('taskModal')">＋ Aufgabe</button><button class="btn primary" onclick="verlaufOeffnen()">＋ Fallverlauf</button><button class="btn" onclick="dokuWaehlen()">＋ Anderes</button></div></header>
@@ -503,7 +505,8 @@
 
 <div class="modal" id="taskCompleteModal"><div class="dialog"><div class="dialoghead"><h2>Wiedervorlage abschließen</h2><button class="close" onclick="closeModal('taskCompleteModal')">×</button></div><form id="taskCompleteForm"><div class="dialogbody"><div class="formgrid"><div class="formgroup"><label>Erledigt am</label><input class="field" type="date" name="completedAt" required></div><div class="formgroup"><label>Erledigt von</label><select class="field" name="completedBy"><option>Edmund</option><option>Sabine</option><option>Edmund und Sabine</option></select></div><div class="formgroup full"><label>Ergebnis</label><textarea class="field" name="result" required placeholder="Was wurde erreicht, geklärt oder als neuer Schritt vereinbart?"></textarea></div></div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('taskCompleteModal')">Abbrechen</button><button class="btn primary">Als erledigt speichern</button></div></form></div></div>
 
-<div class="modal" id="studentModal"><div class="dialog wide"><div class="dialoghead"><h2 id="studentDetailTitle"></h2><button class="close" onclick="closeModal('studentModal')">×</button></div><div class="dialogbody" id="studentDetailBody"></div><div class="dialogfoot"><button class="btn" onclick="openGoalPlan()">Ziel und Maßnahme</button><button class="btn" onclick="openCaseStatus()">Fallstatus</button><button class="btn" onclick="openOutcomeAssessment()">Verlauf einschätzen</button><button class="btn" onclick="openRelatedPerson()">Bezugsperson</button><button class="btn" onclick="openFamilyModal()">Familie</button><button class="btn" onclick="openAttachments()">Dateien</button><button class="btn" onclick="openAiPrompt()">KI-Prompt</button><button class="btn" id="studentStatusButton" onclick="toggleStudentStatus()">Archivieren</button><button class="btn" onclick="printStudentOverview()">Drucken</button><button class="btn primary" onclick="closeModal('studentModal')">Schließen</button></div></div></div>
+<div class="modal" id="studentModal"><div class="dialog wide"><div class="dialoghead"><h2 id="studentDetailTitle"></h2><button class="close" onclick="closeModal('studentModal')">×</button></div><div class="dialogbody" id="studentDetailBody"></div><div class="aktemehr" id="akteMehrLeiste" hidden><span class="hint">Seltener gebraucht:</span><button class="btn kleiner" onclick="openOutcomeAssessment()">Verlauf einschätzen</button><button class="btn kleiner" onclick="openRelatedPerson()">Bezugsperson</button><button class="btn kleiner" onclick="openFamilyModal()">Familienkonstellation</button><button class="btn kleiner" onclick="openAttachments()">Dateien</button><button class="btn kleiner" onclick="openAiPrompt()">KI-Prompt</button><button class="btn kleiner" id="studentStatusButton" onclick="toggleStudentStatus()">Archivieren</button></div>
+<div class="dialogfoot"><button class="btn primary" onclick="akteFallverlauf()">＋ Fallverlauf erfassen</button><button class="btn" onclick="openCaseStatus()">Fallstatus</button><button class="btn" onclick="openGoalPlan()">Ziel und Maßnahme</button><button class="btn" onclick="akteMehr()" id="akteMehrKnopf">Weitere Aktionen ▾</button><button class="btn" onclick="printStudentOverview()">Drucken</button><button class="btn" onclick="closeModal('studentModal')">Schließen</button></div></div></div>
 
 <div class="modal" id="familyModal"><div class="dialog"><div class="dialoghead"><h2>Familien- und Bezugskonstellation</h2><button class="close" onclick="closeModal('familyModal')">×</button></div><form id="familyForm"><div class="dialogbody"><div class="notice">Nur erforderliche und fachlich relevante Angaben dokumentieren. Ungeklärte Angaben werden ausdrücklich als ungeklärt gekennzeichnet.</div><div class="formgrid"><div class="formgroup"><label>Sorgerechtsstand</label><select class="field" name="custodyStatus"><option value="">Nicht eingetragen</option><option>Gemeinsames Sorgerecht</option><option>Alleiniges Sorgerecht</option><option>Vormundschaft</option><option>Pflegschaft</option><option>Ungeklärt</option></select></div><div class="formgroup"><label>Lebens- und Aufenthaltsmodell</label><select class="field" name="livingArrangement"><option value="">Nicht eingetragen</option><option>Gemeinsamer Haushalt der Eltern</option><option>Überwiegend bei der Mutter</option><option>Überwiegend beim Vater</option><option>Wechselmodell</option><option>Pflegefamilie</option><option>Wohngruppe oder Einrichtung</option><option>Sonstige Konstellation</option><option>Ungeklärt</option></select></div><div class="formgroup"><label>Kontakt- und Auskunftslage</label><select class="field" name="contactPermission"><option value="">Nicht eingetragen</option><option>Kontakt und Auskunft möglich</option><option>Nur nach Rücksprache</option><option>Kontakt eingeschränkt</option><option>Kontakt untersagt</option><option>Ungeklärt</option></select></div><div class="formgroup"><label>Bevorzugter Kontaktweg</label><select class="field" name="preferredContact"><option value="">Nicht eingetragen</option><option>Telefon</option><option>E-Mail</option><option>IServ</option><option>Brief</option><option>Persönlich</option></select></div><div class="formgroup full"><label>Sorgeberechtigte Personen und Kontaktdaten</label><textarea class="field" name="custodians" placeholder="Name, Verhältnis und nur erforderliche Kontaktdaten"></textarea></div><div class="formgroup full"><label>Haushalte und Aufenthaltsregelung. Ergänzung</label><textarea class="field" name="households" placeholder="Weitere Anschriften, Wechselzeiten oder besondere Regelungen"></textarea></div><div class="formgroup full"><label>Weitere wichtige Bezugspersonen</label><textarea class="field" name="supportPersons" placeholder="Geschwister, Großeltern, Pflegepersonen, Familienhilfe"></textarea></div><div class="formgroup full"><label>Schutz-, Umgangs- oder Abholhinweise</label><textarea class="field" name="restrictions" placeholder="Nur verbindliche Hinweise mit Quelle und Gültigkeit"></textarea></div><div class="formgroup full"><label>Sprach- oder Unterstützungsbedarf</label><textarea class="field" name="supportNeeds"></textarea></div><div class="formgroup"><label>Quelle der Angaben</label><select class="field" name="informationSource"><option value="">Nicht eingetragen</option><option>Erziehungsberechtigte</option><option>Schüler:in</option><option>Schulunterlagen</option><option>Jugendamt oder Fachstelle</option><option>Gerichtliche oder behördliche Mitteilung</option><option>Mehrere Quellen</option></select></div><div class="formgroup"><label>Angaben geprüft am</label><input class="field" type="date" name="verifiedAt"></div></div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('familyModal')">Abbrechen</button><button class="btn primary">Angaben speichern</button></div></form></div></div>
 
@@ -751,7 +754,7 @@ function ensureNetzwerkpartner(state){
  for(const p of NETZWERK_GRUNDBESTAND)if(!state.partners.some(x=>x.id===p.id))state.partners.push(Object.assign({},p));
  return state;
 }
-const PERSON_ROLLEN=['Schulleitung','Stellvertretende Schulleitung','Didaktische Leitung','Sekretariat','Klassenleitung','Beratungslehrkraft','Vertrauenslehrkraft','Förderschullehrkraft','Schulsozialarbeit','Schulsozialpädagogik','Inklusion und Teilhabe','Schulbegleitung','Ansprechperson Mobbing und Cybermobbing','Ansprechperson Schulabsentismus','Ansprechperson Trainingsraum','Ansprechperson Ganztag und VGS','Ansprechperson Medien','Ansprechperson Berufsorientierung','Ersthelferin oder Ersthelfer','Sicherheitsbeauftragung','Jugendamt und ASD','Insoweit erfahrene Fachkraft','Erziehungsberatung','Schulpsychologie','Polizei und Prävention','Therapie und Klinik','Jobcenter und Berufsberatung','Weitere Zuständigkeit'];
+const PERSON_ROLLEN=['Schulleitung','Stellvertretende Schulleitung','Didaktische Leitung','Sekretariat','Klassenleitung','Beratungslehrkraft','Vertrauenslehrkraft','Förderschullehrkraft','Schulsozialarbeit','Schulsozialpädagogik','Inklusion und Teilhabe','Schulbegleitung','Ansprechperson Mobbing und Cybermobbing','Ansprechperson Schulabsentismus','Ansprechperson Trainingsraum','Ansprechperson VGS','Ansprechperson Ganztag GTS','Ansprechperson Medien','Ansprechperson Berufsorientierung','Ersthelferin oder Ersthelfer','Sicherheitsbeauftragung','Jugendamt und ASD','Insoweit erfahrene Fachkraft','Erziehungsberatung','Schulpsychologie','Polizei und Prävention','Therapie und Klinik','Jobcenter und Berufsberatung','Weitere Zuständigkeit'];
 const PERSON_FUNKTIONEN=['Lehrkraft','Lehrkraft und Klassenleitung','Schulleitung','Stellvertretende Schulleitung','Didaktische Leitung','Förderschullehrkraft','Pädagogische Mitarbeiterin oder Mitarbeiter','Schulsozialarbeit','Schulsozialpädagogik','Sekretariat','Hausmeisterei','Schulbegleitung','Fachkraft einer externen Stelle','Weitere Funktion'];
 function personRollenAusFunktion(t){const r=[],f=String(t.role||'');
  if(/Stellvertretend/i.test(f))r.push('Stellvertretende Schulleitung'); else if(/Schulleitung/i.test(f))r.push('Schulleitung');
@@ -770,6 +773,7 @@ function ensurePersonen(state){
   if(!Array.isArray(t.roles))t.roles=[];
   if(!t.roles.length)t.roles=personRollenAusFunktion(t);
   if(String(t.classLead||'').trim()&&!t.roles.includes('Klassenleitung'))t.roles.push('Klassenleitung');
+  if(t.roles.includes('Ansprechperson Ganztag und VGS')){t.roles=t.roles.filter(r=>r!=='Ansprechperson Ganztag und VGS');['Ansprechperson VGS','Ansprechperson Ganztag GTS'].forEach(r=>{if(!t.roles.includes(r))t.roles.push(r)})}
   if(!Array.isArray(t.aliases))t.aliases=[];
   if(!t.bereich)t.bereich=/extern|Jugendamt|Polizei|Beratungsstelle|Klinik|Jobcenter|Fachstelle/i.test(String(t.role||'')+' '+String(t.org||''))?'Extern':'Schulintern';
   if(!t.status)t.status='aktiv';
@@ -852,7 +856,7 @@ function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle
 document.querySelectorAll('.nav button[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));
 document.querySelectorAll('.nav .navgroup').forEach(g=>{const head=g.querySelector('.navhead');if(head)head.onclick=()=>g.classList.toggle('collapsed')});
 function kpi(label,value,trend){return `<div class="card kpi"><div class="label">${label}</div><div class="value">${value}</div><div class="trend">${trend}</div></div>`}
-function renderAll(){hilfeSchaltflaechenSetzen();personenAuswahlFuellen();renderSicherungsKarte();renderNetzwerkBereiche();renderSelects();renderDashboard();renderBeispielKarte();renderPraeventionsplan();renderRequests();renderCases();renderKanban();renderStudents();renderClasses();renderTrainingRoom();renderSignals();renderWorkflows();renderVerfahrenLaeufe();renderVerfahrenVorschlaege();renderTeachers();renderProjects();renderCTC();renderNetwork();renderTasks();renderStats()}
+function renderAll(){familienPflegen();hilfeSchaltflaechenSetzen();personenAuswahlFuellen();renderSicherungsKarte();renderNetzwerkBereiche();renderSelects();renderDashboard();renderBeispielKarte();renderPraeventionsplan();renderRequests();renderCases();renderKanban();renderStudents();renderClasses();renderTrainingRoom();renderSignals();renderWorkflows();renderVerfahrenLaeufe();renderVerfahrenVorschlaege();renderTeachers();renderProjects();renderCTC();renderNetwork();renderTasks();renderStats()}
 function renderSelects(){
  ['quickCase','taskCase'].forEach((id,i)=>{const el=document.getElementById(id);const first=i?' <option value="">Ohne Fallbezug</option>':'<option value="">Anonymer Kontakt</option>';const caseOpts=data.cases.filter(c=>c.status!=='Abgeschlossen').map(c=>`<option value="${c.id}">${cname(c.id)} · ${classOf(c)}</option>`).join('');let studentOpts='';if(!i){const openStudents=data.students.filter(s=>s.active&&!data.cases.some(c=>c.studentId===s.id&&c.status!=='Abgeschlossen')).sort((a,b)=>a.className.localeCompare(b.className)||a.last.localeCompare(b.last));if(openStudents.length)studentOpts='<optgroup label="Schüler:in ohne Fallakte – legt automatisch eine Fallakte an">'+openStudents.map(s=>`<option value="student:${s.id}">${s.last}, ${s.first} · ${s.className}</option>`).join('')+'</optgroup>';}el.innerHTML=first+(caseOpts?'<optgroup label="Bestehende Fallakten">'+caseOpts+'</optgroup>':'')+studentOpts});
  document.getElementById('caseStudent').innerHTML='<option value="">Bitte auswählen</option>'+data.students.filter(s=>s.active&&!data.cases.some(c=>c.studentId===s.id&&c.status!=='Abgeschlossen')).sort((a,b)=>a.className.localeCompare(b.className)||a.last.localeCompare(b.last)).map(s=>`<option value="${s.id}">${s.last}, ${s.first} · ${s.className}</option>`).join('');
@@ -957,6 +961,7 @@ function showStudent(studentId){
  document.getElementById('studentDetailTitle').innerHTML=`<span data-person>${s.first} ${s.last}</span> · ${s.className}${s.id===BEISPIEL_ID?' <span class="tag amber">Beispielfall</span>':''}`;
  document.getElementById('studentDetailBody').dataset.gegliedert='';document.getElementById('studentDetailBody').innerHTML=`<div class="notice">${studentId===BEISPIEL_ID?'<strong>◆ Beispielfall.</strong> Ein ausformulierter Übungsfall ohne echte Falldaten. Unter Daten und Sicherung lässt er sich vollständig entfernen.':'Personenbezogene Arbeitsansicht für Edmund und Sabine.'}</div><div class="detailgrid"><div class="detailitem"><span>Schüler-ID</span><strong>${s.id}</strong></div><div class="detailitem"><span>Schuljahr und Klasse</span><strong>${s.schoolYear} · ${s.className}</strong></div><div class="detailitem"><span>Anschrift</span><strong>${s.address||'–'}${s.district?' · '+s.district:''}</strong></div><div class="detailitem"><span>Telefon</span><strong>${s.phone||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 1</span><strong data-person>${s.guardian1||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 2</span><strong data-person>${s.guardian2||'–'}</strong></div><div class="detailitem"><span>Klassenleitung</span><strong>${data.settings.classLeads?.[s.className]||'–'}</strong></div><div class="detailitem"><span>Fallstatus</span><strong>${c?c.status:'keine Fallakte'}</strong></div></div><div class="actions" style="margin:12px 0"><button class="btn primary" onclick="verlaufOeffnen('${studentId}')">✎ Fallverlauf erfassen</button>${c&&c.status!=='Abgeschlossen'?`<button class="btn" onclick="fallAbschlussFuehren('${studentId}')">Fall abschließen</button>`:''}</div><h3>Beteiligte und Weitervermittlungen</h3>${netzwerkVorschlag(studentId)}<h3>Ziel- und Maßnahmenplan</h3>${planSummary(studentId)}<h3>Offene Aufgaben und Ergebnisse</h3>${taskSummary(studentId)}<h3>Entwicklung des Kindes</h3>${outcomeSummary(studentId)}<h3>Bezugspersonen und Netzwerk</h3>${relatedSummary(studentId)}<h3>Familienkonstellation</h3>${familySummary(s)}${geschwisterBlock(studentId)}${studentAbsencePanel(studentId)}<h3>Fachliche Entwicklung aus Kontakten</h3>${trendSummary(studentId)}<h3>Schuljahresverlauf</h3><div class="list">${(s.enrollments||[]).map(e=>`<div class="row"><div class="grow"><strong>${e.schoolYear}</strong><span class="subtle">Klasse ${e.className}</span></div></div>`).join('')}</div><h3>Fallverlauf</h3><p class="subtle">Gespräche, Elternkontakte, Rückmeldungen, Fehlzeitenereignisse, Vereinbarungen, Maßnahmen, Weitervermittlungen, Statusänderungen, Wirkungseinschätzungen, Aufgaben und Dokumente werden gemeinsam dargestellt.</p><div class="chronicle-tools"><input class="field" type="search" placeholder="Verlauf vollständig durchsuchen" oninput="filterTimeline(this,'studentTimeline')"></div><div class="timeline" id="studentTimeline">${timelineHtml(events)}</div>`;
  const statusButton=document.getElementById('studentStatusButton');statusButton.textContent=s.active?'Archivieren':'Reaktivieren';statusButton.classList.toggle('danger',s.active);
+ const mehr=document.getElementById('akteMehrLeiste');if(mehr){mehr.hidden=true;document.getElementById('akteMehrKnopf').textContent='Weitere Aktionen ▾'}
  openModal('studentModal')
 
  gliedereSchuelerakte();
@@ -1410,8 +1415,9 @@ function downloadAnnualReportDoc(){const body=annualReportHtml(),doc=`<!doctype 
 function saveAnnualNarrative(value){data.settings.annualNarrative=clean(value);void persistState().catch(showVaultError)}
 function savePracticeSettings(){data.settings.trainingThreshold=Math.max(2,Math.min(10,Number(document.getElementById('trainingThreshold').value)||3));data.settings.trainingWindowDays=Math.max(7,Math.min(180,Number(document.getElementById('trainingWindow').value)||28));data.settings.idleMinutes=Math.max(0,Math.min(120,Number(document.getElementById('idleMinutes').value)||0));void persistState().catch(showVaultError);renderTrainingRoom();resetIdleTimer();toast('Praxis-Einstellungen wurden gespeichert.')}
 let modalReturnFocus=null;
-function openModal(id){if(id==='quickModal')setupQuickForm();enhanceDictationFields();personenAuswahlFuellen();const modal=document.getElementById(id);if(id==='quickModal'){const form=document.getElementById('quickForm'),date=form.elements.date,time=form.elements.time;if(!date.value)date.value=today();if(!time.value)time.value=new Date().toTimeString().slice(0,5)}modalReturnFocus=document.activeElement;modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');const title=modal.querySelector('h2');if(title){if(!title.id)title.id=id+'Title';modal.setAttribute('aria-labelledby',title.id)}modal.classList.add('open');setTimeout(()=>{const focusable=modal.querySelector('button,input,select,textarea');focusable?.focus()},0)}
-function closeModal(id){const modal=document.getElementById(id);modal.classList.remove('open');if(modalReturnFocus?.focus)modalReturnFocus.focus();modalReturnFocus=null}
+let modalEbene=0;
+function openModal(id){if(id==='quickModal')setupQuickForm();enhanceDictationFields();personenAuswahlFuellen();const modal=document.getElementById(id);if(id==='quickModal'){const form=document.getElementById('quickForm'),date=form.elements.date,time=form.elements.time;if(!date.value)date.value=today();if(!time.value)time.value=new Date().toTimeString().slice(0,5)}document.getElementById(id).style.zIndex=20+(++modalEbene);modalReturnFocus=document.activeElement;modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');const title=modal.querySelector('h2');if(title){if(!title.id)title.id=id+'Title';modal.setAttribute('aria-labelledby',title.id)}modal.classList.add('open');setTimeout(()=>{const focusable=modal.querySelector('button,input,select,textarea');focusable?.focus()},0)}
+function closeModal(id){const modal=document.getElementById(id);modal.classList.remove('open');modal.style.zIndex='';if(!document.querySelector('.modal.open'))modalEbene=0;if(modalReturnFocus?.focus)modalReturnFocus.focus();modalReturnFocus=null}
 let idleTimer=null;
 function resetIdleTimer(){clearTimeout(idleTimer);const minutes=Math.max(1,Number(data.settings.idleMinutes||10));if(vaultReady)idleTimer=setTimeout(lockPrivacyScreen,minutes*60000)}
 async function lockPrivacyScreen(){if(!vaultReady)return;await persistState().catch(()=>{});await autoSicherung('sperren',true).catch(()=>{});await invoke('lock_vault').catch(()=>{});vaultReady=false;document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open'));document.getElementById('authGate').classList.remove('hidden');document.getElementById('setupVaultForm').hidden=true;document.getElementById('unlockVaultForm').hidden=false;document.getElementById('unlockPassword').value='';setTimeout(()=>document.getElementById('unlockPassword').focus(),0)}
@@ -1560,6 +1566,17 @@ document.addEventListener('click',e=>{const k=document.querySelector('.kopfsuche
 
 const AKTE_REITER=[['verlauf','Fallverlauf'],['uebersicht','Übersicht'],['kontakte','Kontakte'],['ziele','Ziele und Aufgaben'],['fehlzeiten','Fehlzeiten'],['dokumente','Dokumente und Notizen']];
 const AKTE_ZUORDNUNG={'Fallverlauf':'verlauf','Fachliche Entwicklung aus Kontakten':'kontakte','Ziel- und Maßnahmenplan':'ziele','Offene Aufgaben und Ergebnisse':'ziele','Fehlzeiten-Auswertung':'fehlzeiten'};
+function akteMehr(){
+ const l=document.getElementById('akteMehrLeiste'),k=document.getElementById('akteMehrKnopf');
+ if(!l)return;
+ l.hidden=!l.hidden;
+ k.textContent=l.hidden?'Weitere Aktionen ▾':'Weitere Aktionen ▴';
+}
+function akteFallverlauf(){
+ if(!selectedStudentId)return;
+ closeModal('studentModal');
+ verlaufOeffnen(selectedStudentId,'Schülergespräch');
+}
 function gliedereSchuelerakte(){const body=document.getElementById('studentDetailBody');if(!body||body.dataset.gegliedert==='1')return;
  const gruppen={};AKTE_REITER.forEach(([k])=>gruppen[k]=[]);
  let aktuell='uebersicht';
@@ -4261,15 +4278,50 @@ function geschwisterVon(studentId){
 }
 function geschwisterBlock(studentId){
  const g=geschwisterVon(studentId),f=(data.families||[]).find(x=>x.studentIds.includes(studentId));
- if(!g.length)return `<h4>Geschwister an der Schule</h4><p class="subtle">Keine Geschwister erkannt. Die Erkennung läuft über Nachname, Anschrift, Telefonnummer und Erziehungsberechtigte aus der Schülerliste. <button type="button" class="btn kleiner" onclick="familienOeffnen()">Familien prüfen</button></p>`;
+ if(!g.length){
+  const s=data.students.find(x=>x.id===studentId)||{};
+  const eigene=[famAdresse(s)?'':'Anschrift',famTelefon(s.phone)?'':'Telefonnummer',famPersonen(s).length?'':'Erziehungsberechtigte'].filter(Boolean);
+  return `<h4>Geschwister an der Schule</h4><p class="subtle">Keine Geschwister erkannt.${eigene.length?' Bei dieser Schülerin oder diesem Schüler fehlt in der Schülerliste: '+eigene.join(', ')+'. Ohne diese Angaben bleibt nur der Nachname, und der allein reicht für keine Zuordnung.':' Verglichen wurden Nachname, Anschrift, Telefonnummer und Erziehungsberechtigte.'} <button type="button" class="btn kleiner" onclick="closeModal('studentModal');familienOeffnen()">Familien prüfen</button></p>`;
+ }
  return `<h4>Geschwister an der Schule</h4><div class="notice"><strong>${f.name}</strong> · erkannt über ${f.merkmale.join(', ')||'deine Bestätigung'}<br>`
-  +g.map(s=>`<button type="button" class="btn kleiner" style="margin:5px 5px 0 0" onclick="closeModal('studentModal');showStudent('${s.id}')">${s.first} ${s.last} · Klasse ${s.className}</button>`).join('')
+  +g.map(s=>`<button type="button" class="btn kleiner" style="margin:5px 5px 0 0" onclick="showStudent('${s.id}')">${s.first} ${s.last} · Klasse ${s.className}</button>`).join('')
   +`</div><p class="hint">Automatisch erkannt, nicht amtlich. Prüfe die Zuordnung, bevor du sie in einem Gespräch verwendest. Änderungen nimmst du über „Familien prüfen“ vor.</p>`;
 }
 function familienNeuErkennen(){
  const r=familienErkennen();
  renderFamilien();
  toast(r.familien+' Familien mit '+r.kinder+' Kindern erkannt'+(r.pruefen?', '+r.pruefen+' Fall'+(r.pruefen===1?'':'e')+' zum Prüfen.':'.'));
+}
+function famDatenlage(){
+ const akt=data.students.filter(s=>s.active!==false);
+ return {
+  gesamt:akt.length,
+  adresse:akt.filter(s=>famAdresse(s)).length,
+  telefon:akt.filter(s=>famTelefon(s.phone)).length,
+  personen:akt.filter(s=>famPersonen(s).length).length
+ };
+}
+function famDatenlageText(){
+ const d=famDatenlage();
+ if(!d.gesamt)return 'Es sind noch keine Schüler:innen eingelesen. Lies zuerst unter „Schüler:innen“ eine Liste ein.';
+ const fehlt=[];
+ if(!d.adresse)fehlt.push('Anschrift');
+ if(!d.telefon)fehlt.push('Telefonnummer');
+ if(!d.personen)fehlt.push('Erziehungsberechtigte');
+ const basis='Geprüft wurden '+d.gesamt+' aktive Schüler:innen. Davon haben '+d.adresse+' eine Anschrift, '+d.telefon+' eine Telefonnummer und '+d.personen+' mindestens eine erziehungsberechtigte Person hinterlegt.';
+ if(fehlt.length===3)return basis+' Damit bleibt nur der Nachname als Merkmal, und ein einzelner Nachname reicht für keine Zuordnung. Lies die Schülerliste erneut ein, diesmal mit den Spalten STRAßE, ORTSTEIL, TELEFON, EZ NAME VORNAME und EZ2 NAME VORNAME.';
+ if(fehlt.length)return basis+' Es fehlt durchgehend: '+fehlt.join(', ')+'. Mit einer vollständigeren Schülerliste erkennt das Cockpit deutlich mehr.';
+ return basis;
+}
+function famStand(){
+ const akt=data.students.filter(s=>s.active!==false);
+ return akt.length+':'+akt.reduce((a,s)=>a+String(s.id).length+String(s.address||'').length+String(s.phone||'').length+String(s.guardian1||'').length+String(s.guardian2||'').length,0);
+}
+function familienPflegen(){
+ const stand=famStand();
+ if(data.settings.familienStand===stand)return;
+ familienErkennen(true);
+ data.settings.familienStand=stand;
 }
 function familienOeffnen(){
  familienErkennen(true);
@@ -4298,7 +4350,7 @@ function renderFamilien(){
     <p class="subtle">Erkannt über: ${f.merkmale.join(', ')||'deine Bestätigung'}</p>
     <div>${f.studentIds.map(id=>{const s=data.students.find(x=>x.id===id);return s?`<button type="button" class="btn kleiner" style="margin:4px 5px 0 0" onclick="closeModal('familienModal');showStudent('${s.id}')">${s.first} ${s.last} · ${s.className}</button>`:''}).join('')}</div>
     ${f.studentIds.length===2?`<div class="actions" style="margin-top:8px"><button class="btn kleiner" onclick="famBestaetigen('${f.studentIds[0]}','${f.studentIds[1]}',false)">Doch keine Geschwister</button></div>`:''}</div>`).join('')
-   :'<div class="card empty">Keine Familie erkannt. Das ist normal, solange keine Schülerliste mit Anschrift, Telefonnummer und Erziehungsberechtigten eingelesen wurde.</div>');
+   :'<div class="card empty"><strong>Keine Familie erkannt.</strong><br>'+famDatenlageText()+'</div>');
 }
 function famBestaetigen(a,b,ja){
  famEntscheiden(a,b,ja?'ja':'nein');
@@ -4401,7 +4453,7 @@ const VERFAHREN_ROLLEN={
  diversitaet:['Schulsozialarbeit','Klassenleitung','Schulleitung'],
  trauer:['Schulsozialarbeit','Klassenleitung','Schulleitung'],
  uebergang:['Schulsozialarbeit','Ansprechperson Berufsorientierung','Jobcenter und Berufsberatung'],
- partizipation:['Schulsozialarbeit','Vertrauenslehrkraft','Ansprechperson Ganztag und VGS'],
+ partizipation:['Schulsozialarbeit','Vertrauenslehrkraft','Ansprechperson Ganztag GTS','Ansprechperson VGS'],
  netzwerk:['Schulsozialarbeit','Schulleitung','Jugendamt und ASD']
 };
 function verfahrenRollen(vid){return VERFAHREN_ROLLEN[vid]||['Schulsozialarbeit','Klassenleitung','Schulleitung']}
