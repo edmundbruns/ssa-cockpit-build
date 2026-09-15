@@ -193,7 +193,7 @@
         </div>
       </div>
     </nav>
-    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.16</span></div>
+    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.17</span></div>
   </aside>
   <main>
     <header class="topbar"><div><h1 id="pageTitle">Guten Morgen, Dr. Bruns</h1><p id="pageSubtitle">Freitag, 11. September 2026 · Schuljahr 2026/27</p></div><div class="kopfsuche"><input class="field" id="globalSearch" type="search" autocomplete="off" placeholder="Schüler:in suchen: Name, Vorname, Klasse oder Klassenleitung" oninput="globalSearchTippen()" onfocus="globalSearchTippen()"><div id="globalSearchResults"></div></div><div class="actions"><button class="btn" onclick="lockPrivacyScreen()">🔒 Sperren</button><button class="btn" onclick="openModal('taskModal')">＋ Aufgabe</button><button class="btn primary" onclick="verlaufOeffnen()">＋ Fallverlauf</button><button class="btn" onclick="dokuWaehlen()">＋ Anderes</button></div></header>
@@ -447,6 +447,18 @@
 <div class="formgroup"><label>Ergebnis</label><select class="field" name="result"><option>Rückkehr vereinbart</option><option>Nachgespräch erforderlich</option><option>Abgebrochen</option><option>Andere Vereinbarung</option></select></div><div class="formgroup"><label>Rückkehrplan</label><label><input type="checkbox" name="planAccepted" value="ja"> von Schüler:in akzeptiert</label></div><div class="formgroup"><label>Information Erziehungsberechtigte</label><select class="field" name="parentInfo"><option>Nicht erforderlich</option><option>Informiert</option><option>Noch zu informieren</option><option>Nicht erreicht</option></select></div><div class="formgroup"><label>Wiedervorlage</label><input class="field" type="date" name="due"></div>
 <div class="formgroup full"><label>Folgemaßnahme. Schnellauswahl</label><select class="field" onchange="applyPreset(this,'trainingFollowUp')"><option value="">Bitte auswählen</option><option>Keine weitere Maßnahme erforderlich.</option><option>Rückmeldung an die Klassenleitung.</option><option>Erziehungsberechtigte informieren.</option><option>Nachgespräch mit der Schulsozialarbeit.</option><option>Schulleitung einbeziehen.</option><option>Externen Kooperationspartner einbeziehen.</option><option value="">Eigener Eintrag</option></select><textarea class="field" id="trainingFollowUp" name="followUp" placeholder="Auswahl kann frei verändert oder ergänzt werden"></textarea></div>
 </div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('trainingRoomModal')">Abbrechen</button><button class="btn primary">Vorgang speichern</button></div></form></div></div>
+<div class="modal" id="ampelRuheModal"><div class="dialog"><div class="dialoghead"><h2 id="ampelRuheTitel">Kein Handlungsbedarf</h2><button class="close" onclick="closeModal('ampelRuheModal')">×</button></div><div class="dialogbody">
+<div class="notice" id="ampelRuheLage"></div>
+<div class="formgrid">
+ <div class="formgroup full"><label>Wie lange soll der Eintrag ruhen?</label><select class="field" id="ampelRuheDauer">
+  <option value="7">7 Tage</option><option value="14">14 Tage</option><option value="30">30 Tage</option>
+  <option value="90">90 Tage</option><option value="schuljahr">Bis zum Ende dieses Schuljahres</option><option value="immer">Dauerhaft, bis ich es zurücknehme</option></select></div>
+ <div class="formgroup full"><label>Kurze Begründung <span class="subtle">freiwillig, aber hilfreich</span></label><textarea class="field" id="ampelRuheGrund" rows="2" placeholder="z. B. Krankheit ärztlich belegt, Klassenleitung kümmert sich, Familie hat sich gemeldet"></textarea></div>
+</div>
+<div class="notice warning" id="ampelRuheWirkung"></div>
+<p class="hint">Rücknehmen kannst du das jederzeit über „zurückgestellt“ oben auf der Startseite. Nichts wird gelöscht.</p>
+</div><div class="dialogfoot"><button class="btn" onclick="closeModal('ampelRuheModal')">Abbrechen</button><button class="btn primary" onclick="ampelRuheSpeichern()">Übernehmen</button></div></div></div>
+<div class="modal" id="ruheModal"><div class="dialog wide"><div class="dialoghead"><h2>Zurückgestellte Einträge</h2><button class="close" onclick="closeModal('ruheModal')">×</button></div><div class="dialogbody"><p class="subtle">Diese Kinder erscheinen derzeit nicht unter „Das ist heute dran“. Die Ampel steht bei ihnen auf Grün.</p><div id="ruheListe"></div></div><div class="dialogfoot"><button class="btn primary" onclick="closeModal('ruheModal')">Schließen</button></div></div></div>
 <div class="modal" id="familienModal"><div class="dialog wide"><div class="dialoghead"><h2>Familien und Geschwister</h2><button class="close" onclick="closeModal('familienModal')">×</button></div><div class="dialogbody"><div class="helpbox"><strong>Woher kommt das?</strong> Aus der eingelesenen Schülerliste. Verglichen werden Nachname, Anschrift mit Ortsteil, Telefonnummer und die Namen der Erziehungsberechtigten. <strong>Zwei übereinstimmende Merkmale</strong> gelten als Familie, <strong>ein einzelnes Merkmal</strong> landet in der Prüfliste. Deine Entscheidungen bleiben beim nächsten Import erhalten.</div><div class="filters" style="margin-bottom:13px"><input class="field search" id="familienSuche" placeholder="Name, Anschrift, Klasse oder Erziehungsberechtigte" oninput="renderFamilien()"><button class="btn" onclick="familienNeuErkennen()">Neu erkennen</button><button class="btn" onclick="familienExport()">Als CSV speichern</button></div><div id="familienBody"></div><p class="hint">Die Zuordnung ist eine Arbeitshilfe, keine amtliche Auskunft. Vor einem Gespräch immer selbst prüfen. Es werden keine Daten nach außen gegeben.</p></div><div class="dialogfoot"><button class="btn primary" onclick="closeModal('familienModal')">Schließen</button></div></div></div>
 <div class="modal" id="verfahrenModal"><div class="dialog wide"><div class="dialoghead"><h2 id="verfahrenTitel">Fachverfahren</h2><button class="close" onclick="closeModal('verfahrenModal')">×</button></div><div class="dialogbody" id="verfahrenBody"></div><div class="dialogfoot"><button class="btn primary" onclick="closeModal('verfahrenModal')">Schließen</button></div></div></div>
 <div class="modal" id="verfahrenStartModal"><div class="dialog"><div class="dialoghead"><h2 id="verfahrenStartTitel">Verfahren starten</h2><button class="close" onclick="closeModal('verfahrenStartModal')">×</button></div><div class="dialogbody"><div class="helpbox">Der Ablaufplan ist deine Arbeitsgrundlage. Er ist kein Beschluss und keine Verpflichtung. Besteht noch keine Fallakte, wird sie automatisch angelegt. Eine vorhandene Fallakte wird weiterverwendet.</div><div class="formgrid"><div class="formgroup full"><label>Schüler:in</label><input class="field" id="verfahrenStartSuche" placeholder="Name eintippen, dann wird unten ausgewählt" oninput="jumpToStudent(this.value,'verfahrenStudent','verfahrenStartTreffer')"><select class="field" id="verfahrenStudent" style="margin-top:7px"></select><span class="hint" id="verfahrenStartTreffer">Nach zwei Buchstaben wird der erste passende Name ausgewählt.</span></div></div></div><div class="dialogfoot"><button class="btn" onclick="closeModal('verfahrenStartModal')">Abbrechen</button><button class="btn primary" onclick="verfahrenStartBestaetigen()">Verfahren starten</button></div></div></div>
@@ -930,7 +942,7 @@ function showStudent(studentId){
  selectedStudentId=studentId;
  const s=data.students.find(x=>x.id===studentId),c=data.cases.find(x=>x.studentId===studentId),events=studentEvents(studentId);
  document.getElementById('studentDetailTitle').innerHTML=`<span data-person>${s.first} ${s.last}</span> · ${s.className}${s.id===BEISPIEL_ID?' <span class="tag amber">Beispielfall</span>':''}`;
- document.getElementById('studentDetailBody').dataset.gegliedert='';document.getElementById('studentDetailBody').innerHTML=`<div class="notice">${studentId===BEISPIEL_ID?'<strong>◆ Beispielfall.</strong> Ein ausformulierter Übungsfall ohne echte Falldaten. Unter Daten und Sicherung lässt er sich vollständig entfernen.':'Personenbezogene Arbeitsansicht für Edmund und Sabine.'}</div><div class="detailgrid"><div class="detailitem"><span>Schüler-ID</span><strong>${s.id}</strong></div><div class="detailitem"><span>Schuljahr und Klasse</span><strong>${s.schoolYear} · ${s.className}</strong></div><div class="detailitem"><span>Anschrift</span><strong>${s.address||'–'}${s.district?' · '+s.district:''}</strong></div><div class="detailitem"><span>Telefon</span><strong>${s.phone||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 1</span><strong data-person>${s.guardian1||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 2</span><strong data-person>${s.guardian2||'–'}</strong></div><div class="detailitem"><span>Klassenleitung</span><strong>${data.settings.classLeads?.[s.className]||'–'}</strong></div><div class="detailitem"><span>Fallstatus</span><strong>${c?c.status:'keine Fallakte'}</strong></div></div><div class="actions" style="margin:12px 0"><button class="btn primary" onclick="verlaufOeffnen('${studentId}')">✎ Fallverlauf erfassen</button>${c&&c.status!=='Abgeschlossen'?`<button class="btn" onclick="fallAbschlussFuehren('${studentId}')">Fall abschließen</button>`:''}</div><h3>Beteiligte und Weitervermittlungen</h3>${netzwerkVorschlag(studentId)}<h3>Ziel- und Maßnahmenplan</h3>${planSummary(studentId)}<h3>Offene Aufgaben und Ergebnisse</h3>${taskSummary(studentId)}<h3>Entwicklung des Kindes</h3>${outcomeSummary(studentId)}<h3>Bezugspersonen und Netzwerk</h3>${relatedSummary(studentId)}<h3>Familienkonstellation</h3>${familySummary(s)}${geschwisterBlock(studentId)}${studentAbsencePanel(studentId)}<h3>Fachliche Entwicklung aus Kontakten</h3>${trendSummary(studentId)}<h3>Schuljahresverlauf</h3><div class="list">${(s.enrollments||[]).map(e=>`<div class="row"><div class="grow"><strong>${e.schoolYear}</strong><span class="subtle">Klasse ${e.className}</span></div></div>`).join('')}</div>${ampelZeile(ampelKind(studentId))}${vorschlagKarte(studentId)}<h3>Fallverlauf</h3><p class="subtle">Gespräche, Elternkontakte, Rückmeldungen, Fehlzeitenereignisse, Vereinbarungen, Maßnahmen, Weitervermittlungen, Statusänderungen, Wirkungseinschätzungen, Aufgaben und Dokumente werden gemeinsam dargestellt.</p><div class="chronicle-tools"><input class="field" type="search" placeholder="Verlauf vollständig durchsuchen" oninput="filterTimeline(this,'studentTimeline')"></div><div class="timeline" id="studentTimeline">${timelineHtml(events)}</div>`;
+ document.getElementById('studentDetailBody').dataset.gegliedert='';document.getElementById('studentDetailBody').innerHTML=`<div class="notice">${studentId===BEISPIEL_ID?'<strong>◆ Beispielfall.</strong> Ein ausformulierter Übungsfall ohne echte Falldaten. Unter Daten und Sicherung lässt er sich vollständig entfernen.':'Personenbezogene Arbeitsansicht für Edmund und Sabine.'}</div><div class="detailgrid"><div class="detailitem"><span>Schüler-ID</span><strong>${s.id}</strong></div><div class="detailitem"><span>Schuljahr und Klasse</span><strong>${s.schoolYear} · ${s.className}</strong></div><div class="detailitem"><span>Anschrift</span><strong>${s.address||'–'}${s.district?' · '+s.district:''}</strong></div><div class="detailitem"><span>Telefon</span><strong>${s.phone||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 1</span><strong data-person>${s.guardian1||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 2</span><strong data-person>${s.guardian2||'–'}</strong></div><div class="detailitem"><span>Klassenleitung</span><strong>${data.settings.classLeads?.[s.className]||'–'}</strong></div><div class="detailitem"><span>Fallstatus</span><strong>${c?c.status:'keine Fallakte'}</strong></div></div><div class="actions" style="margin:12px 0"><button class="btn primary" onclick="verlaufOeffnen('${studentId}')">✎ Fallverlauf erfassen</button>${c&&c.status!=='Abgeschlossen'?`<button class="btn" onclick="fallAbschlussFuehren('${studentId}')">Fall abschließen</button>`:''}</div><h3>Beteiligte und Weitervermittlungen</h3>${netzwerkVorschlag(studentId)}<h3>Ziel- und Maßnahmenplan</h3>${planSummary(studentId)}<h3>Offene Aufgaben und Ergebnisse</h3>${taskSummary(studentId)}<h3>Entwicklung des Kindes</h3>${outcomeSummary(studentId)}<h3>Bezugspersonen und Netzwerk</h3>${relatedSummary(studentId)}<h3>Familienkonstellation</h3>${familySummary(s)}${geschwisterBlock(studentId)}${studentAbsencePanel(studentId)}<h3>Fachliche Entwicklung aus Kontakten</h3>${trendSummary(studentId)}<h3>Schuljahresverlauf</h3><div class="list">${(s.enrollments||[]).map(e=>`<div class="row"><div class="grow"><strong>${e.schoolYear}</strong><span class="subtle">Klasse ${e.className}</span></div></div>`).join('')}</div>${ampelZeile(ampelKind(studentId),studentId)}${vorschlagKarte(studentId)}<h3>Fallverlauf</h3><p class="subtle">Gespräche, Elternkontakte, Rückmeldungen, Fehlzeitenereignisse, Vereinbarungen, Maßnahmen, Weitervermittlungen, Statusänderungen, Wirkungseinschätzungen, Aufgaben und Dokumente werden gemeinsam dargestellt.</p><div class="chronicle-tools"><input class="field" type="search" placeholder="Verlauf vollständig durchsuchen" oninput="filterTimeline(this,'studentTimeline')"></div><div class="timeline" id="studentTimeline">${timelineHtml(events)}</div>`;
  const statusButton=document.getElementById('studentStatusButton');statusButton.textContent=s.active?'Archivieren':'Reaktivieren';statusButton.classList.toggle('danger',s.active);
  const mehr=document.getElementById('akteMehrLeiste');if(mehr){mehr.hidden=true;document.getElementById('akteMehrKnopf').textContent='Weitere Aktionen ▾'}
  openModal('studentModal')
@@ -4391,6 +4403,8 @@ function ampelAufgabe(t){
 function ampelKind(studentId){
  const s=data.students.find(x=>x.id===studentId);
  if(!s||s.active===false)return {stufe:'gruen',grund:'Archiviert.',gruende:[]};
+ const ruhe=ampelRuheFuer(studentId);
+ if(ruhe)return {stufe:'gruen',grund:ampelRuheText(ruhe),gruende:[],ruhe};
  const fall=data.cases.find(c=>c.studentId===studentId&&c.status!=='Abgeschlossen');
  const eintraege=fall?data.contacts.filter(c=>c.caseId===fall.id).sort((a,b)=>String(b.date).localeCompare(String(a.date))):[];
  const aufgaben=data.tasks.filter(t=>!t.done&&((fall&&t.caseId===fall.id)||t.sourceStudentId===studentId));
@@ -4419,8 +4433,10 @@ function ampelFall(c){return ampelKind(c&&c.studentId)}
 function ampelPunkt(a,mitText){
  return `<span class="ampel ${a.stufe}" title="${AMPEL_TEXT[a.stufe]}: ${String(a.grund).replace(/"/g,'')}">●</span>${mitText?'<span class="ampeltext">'+AMPEL_TEXT[a.stufe]+'</span>':''}`;
 }
-function ampelZeile(a){
- return `<div class="ampelzeile ${a.stufe}"><span class="ampel ${a.stufe}">●</span><div><strong>${AMPEL_TEXT[a.stufe]}</strong><div class="subtle">${a.grund}</div></div></div>`;
+function ampelZeile(a,studentId){
+ const knopf=a.ruhe&&studentId?`<button class="btn kleiner" style="margin-left:auto" onclick="ampelRuheAufheben('${studentId}')">Wieder anzeigen</button>`
+  :(studentId&&a.stufe!=='gruen'?`<span class="actions" style="margin-left:auto"><button class="btn kleiner" onclick="ampelErledigt('${studentId}',event)">✓ Kein Handlungsbedarf</button><button class="btn kleiner" onclick="ampelSpaeter('${studentId}',event)">Später</button></span>`:'');
+ return `<div class="ampelzeile ${a.stufe}"><span class="ampel ${a.stufe}">●</span><div><strong>${AMPEL_TEXT[a.stufe]}</strong><div class="subtle">${a.grund}</div></div>${knopf}</div>`;
 }
 function ampelListe(){
  const eintraege=[];
@@ -4432,6 +4448,81 @@ function ampelListe(){
  return eintraege.sort((x,y)=>rang[x.stufe]-rang[y.stufe]||y.gruende.length-x.gruende.length||x.name.localeCompare(y.name,'de'));
 }
 function ampelErklaerung(){appAlert('Die Ampel im SSA-Cockpit\n\nROT – Jetzt handeln.\nEs gibt einen offenen Sicherheitshinweis, eine seit über einer Woche überfällige Aufgabe oder ungeprüfte Fehlzeiten weit über der Schwelle.\n\nGELB – Bald ansehen.\nEine Aufgabe wird in den nächsten drei Tagen fällig, seit dreißig Tagen gab es keinen Eintrag, die Fehlzeitenschwelle ist erreicht oder ein Ablaufplan bewegt sich seit zwei Wochen nicht.\n\nGRÜN – Läuft.\nNichts davon trifft zu.\n\nDie Ampel ist eine Orientierungshilfe, kein Urteil. Sie ersetzt deine fachliche Einschätzung nicht.')}
+
+/* ===== Kein Handlungsbedarf und Zurückstellen ===== */
+function ampelRuheAlle(){const r=data.settings.ampelRuhe;return r&&typeof r==='object'?r:(data.settings.ampelRuhe={},data.settings.ampelRuhe)}
+function ampelRuheFuer(studentId){
+ const e=ampelRuheAlle()[studentId];
+ if(!e)return null;
+ if(e.bis&&e.bis<today()){delete ampelRuheAlle()[studentId];return null}
+ return e;
+}
+function ampelRuheText(e){
+ if(!e)return '';
+ return (e.art==='erledigt'?'Als „kein Handlungsbedarf“ abgehakt':'Zurückgestellt')
+  +' am '+fmt(String(e.am).slice(0,10))+' von '+(e.von||'unbekannt')
+  +(e.bis?', wieder sichtbar ab '+fmt(e.bis):'')
+  +(e.grund?' · '+e.grund:'');
+}
+let ampelRuheZiel=null,ampelRuheArt='erledigt';
+function ampelErledigt(studentId,event){if(event)event.stopPropagation();ampelRuheOeffnen(studentId,'erledigt')}
+function ampelSpaeter(studentId,event){if(event)event.stopPropagation();ampelRuheOeffnen(studentId,'spaeter')}
+function ampelRuheOeffnen(studentId,art){
+ const s=data.students.find(x=>x.id===studentId);if(!s)return;
+ ampelRuheZiel=studentId;ampelRuheArt=art;
+ const a=ampelKind(studentId);
+ const ungeprueft=data.schoolSignals.filter(r=>r.studentId===studentId&&(r.reviewStatus||'Noch nicht geprüft')==='Noch nicht geprüft');
+ document.getElementById('ampelRuheTitel').textContent=(art==='erledigt'?'Kein Handlungsbedarf: ':'Später ansehen: ')+s.first+' '+s.last;
+ document.getElementById('ampelRuheLage').innerHTML=
+  `<strong>${s.first} ${s.last} · Klasse ${s.className}</strong><br>${a.gruende.map(g=>'· '+g.text).join('<br>')||'· '+a.grund}`;
+ document.getElementById('ampelRuheWirkung').innerHTML=art==='erledigt'
+  ? `Der Eintrag verschwindet aus „Das ist heute dran“ und die Ampel wird grün.${ungeprueft.length?' <strong>'+ungeprueft.length+' Fehlzeiten-Datensatz'+(ungeprueft.length===1?'':'ätze')+'</strong> wird dabei als fachlich geprüft mit dem Ergebnis „Kein Handlungsbedarf“ festgehalten.':''} Es wird keine Fallakte angelegt und kein Fallverlaufseintrag geschrieben.`
+  : 'Der Eintrag verschwindet vorübergehend aus „Das ist heute dran“ und taucht danach von selbst wieder auf. Fachlich geprüft ist damit nichts.';
+ document.getElementById('ampelRuheGrund').value='';
+ document.getElementById('ampelRuheDauer').value=art==='erledigt'?'schuljahr':'14';
+ openModal('ampelRuheModal');
+}
+function ampelRuheSpeichern(){
+ const studentId=ampelRuheZiel;if(!studentId)return;
+ const grund=clean(String(document.getElementById('ampelRuheGrund').value||'').trim()).slice(0,300);
+ const dauer=document.getElementById('ampelRuheDauer').value;
+ let bis='';
+ if(dauer==='schuljahr')bis=schuljahrGrenzen(data.settings.currentSchoolYear).bis;
+ else if(dauer==='immer')bis='';
+ else bis=new Date(Date.now()+Number(dauer)*864e5).toISOString().slice(0,10);
+ if(ampelRuheArt==='erledigt'){
+  data.schoolSignals.filter(r=>r.studentId===studentId&&(r.reviewStatus||'Noch nicht geprüft')==='Noch nicht geprüft')
+   .forEach(r=>{r.reviewStatus='Kein Handlungsbedarf';r.reviewedAt=new Date().toISOString();r.reviewedBy=aktivePerson();
+     r.reviewNote=grund||'Ohne weitere Angabe als „kein Handlungsbedarf“ eingestuft.'});
+ }
+ ampelRuheAlle()[studentId]={art:ampelRuheArt,bis,grund,am:new Date().toISOString(),von:aktivePerson()};
+ logChange(ampelRuheArt==='erledigt'?'Kein Handlungsbedarf festgehalten':'Ampel zurückgestellt','',studentId,aktivePerson());
+ ampelRuheZiel=null;
+ save();closeModal('ampelRuheModal');
+ const s=data.students.find(x=>x.id===studentId);
+ toast(ampelRuheArt==='erledigt'
+  ?(s?s.first+' '+s.last:'Der Eintrag')+' ist abgehakt. Über „zurückgestellte Einträge“ kannst du das rückgängig machen.'
+  :(s?s.first+' '+s.last:'Der Eintrag')+' erscheint '+(bis?'ab '+fmt(bis):'vorerst nicht mehr')+' wieder.');
+}
+async function ampelRuheAufheben(studentId){
+ const s=data.students.find(x=>x.id===studentId);
+ if(!await appConfirm('Die Zurückstellung für '+(s?s.first+' '+s.last:'diese Person')+' aufheben?\n\nDer Eintrag erscheint danach wieder unter „Das ist heute dran“, sofern die Ampel weiterhin auf Rot oder Gelb steht. Die fachliche Einstufung der Fehlzeiten bleibt unverändert.'))return;
+ delete ampelRuheAlle()[studentId];
+ save();renderZurueckgestellt();
+ toast('Zurückstellung aufgehoben.');
+}
+function renderZurueckgestellt(){
+ const box=document.getElementById('ruheListe');if(!box)return;
+ const eintraege=Object.keys(ampelRuheAlle()).map(id=>({id,e:ampelRuheFuer(id),s:data.students.find(x=>x.id===id)}))
+  .filter(x=>x.e&&x.s).sort((a,b)=>String(b.e.am).localeCompare(String(a.e.am)));
+ box.innerHTML=eintraege.length?eintraege.map(x=>`<div class="heutezeile">
+  <span class="ampel gruen">●</span>
+  <div class="grow"><strong>${x.s.last}, ${x.s.first}</strong> <span class="subtle">· Klasse ${x.s.className}</span>
+   <div class="subtle">${ampelRuheText(x.e)}</div></div>
+  <button class="btn kleiner" onclick="ampelRuheAufheben('${x.id}')">Wieder anzeigen</button></div>`).join('')
+  :'<div class="empty">Nichts zurückgestellt.</div>';
+}
+function zurueckgestellteOeffnen(){renderZurueckgestellt();openModal('ruheModal')}
 
 /* ===== Vorschläge: was könnte jetzt dran sein ===== */
 function vorschlagKnopf(v,i){
@@ -4556,13 +4647,16 @@ function heuteListe(){
  const liste=ampelListe();
  const box=document.getElementById('heuteBox');if(!box)return;
  const rot=liste.filter(x=>x.stufe==='rot').length,gelb=liste.filter(x=>x.stufe==='gelb').length;
- box.innerHTML=`<div class="cardhead"><h3>Das ist heute dran</h3><button class="btn kleiner" onclick="ampelErklaerung()">Was bedeutet die Ampel?</button></div>`
+ const ruhend=Object.keys(ampelRuheAlle()).filter(id=>ampelRuheFuer(id)&&data.students.find(x=>x.id===id&&x.active!==false)).length;
+ box.innerHTML=`<div class="cardhead"><h3>Das ist heute dran</h3><div class="actions">${ruhend?`<button class="btn kleiner" onclick="zurueckgestellteOeffnen()">${ruhend} zurückgestellt</button>`:''}<button class="btn kleiner" onclick="ampelErklaerung()">Was bedeutet die Ampel?</button></div></div>`
   +(liste.length?`<p class="subtle">${rot} mal Rot, ${gelb} mal Gelb. Ganz oben steht, was am dringendsten ist.</p>`
-    +liste.slice(0,12).map(x=>`<div class="heutezeile clickrow" onclick="showStudent('${x.id}')">
+    +liste.slice(0,12).map(x=>`<div class="heutezeile">
       <span class="ampel ${x.stufe}">●</span>
-      <div class="grow"><strong>${x.name}</strong> <span class="subtle">· Klasse ${x.klasse}</span>
+      <div class="grow clickrow" onclick="showStudent('${x.id}')"><strong>${x.name}</strong> <span class="subtle">· Klasse ${x.klasse}</span>
       <div class="subtle">${x.grund}${x.gruende.length>1?' · und '+(x.gruende.length-1)+' weitere'+(x.gruende.length-1===1?'r Punkt':' Punkte'):''}</div></div>
-      <span class="tag ${x.stufe==='rot'?'red':'amber'}">${AMPEL_TEXT[x.stufe]}</span></div>`).join('')
+      <span class="tag ${x.stufe==='rot'?'red':'amber'}">${AMPEL_TEXT[x.stufe]}</span>
+      <button class="btn kleiner" title="Kein Handlungsbedarf" onclick="ampelErledigt('${x.id}',event)">✓ Erledigt</button>
+      <button class="btn kleiner" title="Später ansehen" onclick="ampelSpaeter('${x.id}',event)">Später</button></div>`).join('')
     +(liste.length>12?`<p class="hint">${liste.length-12} weitere stehen unter „Fallarbeit“.</p>`:'')
    :'<div class="empty">Alles grün. Es ist nichts überfällig, kein Sicherheitshinweis offen und keine Schwelle überschritten.</div>');
 }
