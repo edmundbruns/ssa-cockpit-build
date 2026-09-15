@@ -175,7 +175,7 @@
         </div>
       </div>
     </nav>
-    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.12</span></div>
+    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.13</span></div>
   </aside>
   <main>
     <header class="topbar"><div><h1 id="pageTitle">Guten Morgen, Dr. Bruns</h1><p id="pageSubtitle">Freitag, 11. September 2026 · Schuljahr 2026/27</p></div><div class="kopfsuche"><input class="field" id="globalSearch" type="search" autocomplete="off" placeholder="Schüler:in suchen: Name, Vorname, Klasse oder Klassenleitung" oninput="globalSearchTippen()" onfocus="globalSearchTippen()"><div id="globalSearchResults"></div></div><div class="actions"><button class="btn" onclick="lockPrivacyScreen()">🔒 Sperren</button><button class="btn" onclick="openModal('taskModal')">＋ Aufgabe</button><button class="btn primary" onclick="verlaufOeffnen()">＋ Fallverlauf</button><button class="btn" onclick="dokuWaehlen()">＋ Anderes</button></div></header>
@@ -211,7 +211,7 @@
         <div class="kanban-wrap"><div class="kanban-board" id="kanbanBoard"></div></div>
       </section>
       <section class="page" id="students">
-        <div class="sectionhead"><div><h2>Schüler:innen</h2><div class="subtle">Gesamte Schülerschaft und dauerhafte Schuljahreszuordnung</div></div><div class="filters"><input class="field search" id="studentSearch" placeholder="Name, ID oder Klasse suchen"><select class="field" id="studentFilter"><option value="active">Aktuelle Schüler:innen</option><option value="all">Alle einschließlich Abgänge</option></select></div></div>
+        <div class="sectionhead"><div><h2>Schüler:innen</h2><div class="subtle">Gesamte Schülerschaft und dauerhafte Schuljahreszuordnung</div></div><div class="filters"><button class="btn" onclick="familienOeffnen()">Familien und Geschwister</button><input class="field search" id="studentSearch" placeholder="Name, ID oder Klasse suchen"><select class="field" id="studentFilter"><option value="active">Aktuelle Schüler:innen</option><option value="all">Alle einschließlich Abgänge</option></select></div></div>
         <div class="grid two" style="margin-bottom:17px"><div class="card"><div class="cardhead"><h3>Excel-kompatibler Import</h3><span class="tag">CSV</span></div><p class="subtle">Deine vorhandene Liste wird erkannt. In Excel einmal als <strong>CSV UTF-8</strong> speichern und hier auswählen. Beim Import erzeugt beziehungsweise übernimmt das Cockpit eine dauerhafte Schüler-ID.</p><div class="dropzone"><strong>Schülerliste importieren</strong><span class="subtle">CSV aus Excel mit Semikolon oder Komma</span><div class="actions" style="justify-content:center;margin-top:13px"><button class="btn" onclick="downloadStudentTemplate()">Vorlage herunterladen</button><label class="btn primary">Datei auswählen<input type="file" accept=".csv,text/csv" hidden onchange="importStudents(event)"></label></div></div><p class="hint">Erkannt werden auch die Spalten deiner Liste: NAME, OFFIZIELLER VORNAME, KLASSE und KLASSENLEHRER.</p></div>
           <div class="card"><div class="cardhead"><h3>Kontrollierter Schuljahreswechsel</h3><span class="tag amber">erst prüfen, dann übernehmen</span></div><div class="yearflow"><div class="yearbox"><span class="subtle">aktuelles Schuljahr</span><strong id="currentYearLabel">2026/27</strong></div><div class="yeararrow">→</div><div class="yearbox"><span class="subtle">neue Liste</span><strong>Änderungen vergleichen</strong></div></div><p class="subtle">Die neue Liste wird zunächst nur ausgewertet. Erst nach deiner Bestätigung werden Klassen fortgeschrieben, Neuaufnahmen angelegt und fehlende Schüler:innen archiviert.</p><label><input type="checkbox" id="markLeavers" checked> Fehlende Schüler:innen als Abgang archivieren</label><div style="margin-top:14px"><label class="btn primary">Neue Liste prüfen<input type="file" accept=".csv,text/csv" hidden onchange="previewStudentImport(event)"></label></div></div></div>
         <div class="card tablewrap"><table><thead><tr><th>Schüler-ID</th><th>Name</th><th>Klasse</th><th>Telefon</th><th>Status</th><th>Fallakte</th></tr></thead><tbody id="studentTable"></tbody></table></div>
@@ -474,6 +474,7 @@
 <div class="formgroup"><label>Ergebnis</label><select class="field" name="result"><option>Rückkehr vereinbart</option><option>Nachgespräch erforderlich</option><option>Abgebrochen</option><option>Andere Vereinbarung</option></select></div><div class="formgroup"><label>Rückkehrplan</label><label><input type="checkbox" name="planAccepted" value="ja"> von Schüler:in akzeptiert</label></div><div class="formgroup"><label>Information Erziehungsberechtigte</label><select class="field" name="parentInfo"><option>Nicht erforderlich</option><option>Informiert</option><option>Noch zu informieren</option><option>Nicht erreicht</option></select></div><div class="formgroup"><label>Wiedervorlage</label><input class="field" type="date" name="due"></div>
 <div class="formgroup full"><label>Folgemaßnahme. Schnellauswahl</label><select class="field" onchange="applyPreset(this,'trainingFollowUp')"><option value="">Bitte auswählen</option><option>Keine weitere Maßnahme erforderlich.</option><option>Rückmeldung an die Klassenleitung.</option><option>Erziehungsberechtigte informieren.</option><option>Nachgespräch mit der Schulsozialarbeit.</option><option>Schulleitung einbeziehen.</option><option>Externen Kooperationspartner einbeziehen.</option><option value="">Eigener Eintrag</option></select><textarea class="field" id="trainingFollowUp" name="followUp" placeholder="Auswahl kann frei verändert oder ergänzt werden"></textarea></div>
 </div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('trainingRoomModal')">Abbrechen</button><button class="btn primary">Vorgang speichern</button></div></form></div></div>
+<div class="modal" id="familienModal"><div class="dialog wide"><div class="dialoghead"><h2>Familien und Geschwister</h2><button class="close" onclick="closeModal('familienModal')">×</button></div><div class="dialogbody"><div class="helpbox"><strong>Woher kommt das?</strong> Aus der eingelesenen Schülerliste. Verglichen werden Nachname, Anschrift mit Ortsteil, Telefonnummer und die Namen der Erziehungsberechtigten. <strong>Zwei übereinstimmende Merkmale</strong> gelten als Familie, <strong>ein einzelnes Merkmal</strong> landet in der Prüfliste. Deine Entscheidungen bleiben beim nächsten Import erhalten.</div><div class="filters" style="margin-bottom:13px"><input class="field search" id="familienSuche" placeholder="Name, Anschrift, Klasse oder Erziehungsberechtigte" oninput="renderFamilien()"><button class="btn" onclick="familienNeuErkennen()">Neu erkennen</button><button class="btn" onclick="familienExport()">Als CSV speichern</button></div><div id="familienBody"></div><p class="hint">Die Zuordnung ist eine Arbeitshilfe, keine amtliche Auskunft. Vor einem Gespräch immer selbst prüfen. Es werden keine Daten nach außen gegeben.</p></div><div class="dialogfoot"><button class="btn primary" onclick="closeModal('familienModal')">Schließen</button></div></div></div>
 <div class="modal" id="verfahrenModal"><div class="dialog wide"><div class="dialoghead"><h2 id="verfahrenTitel">Fachverfahren</h2><button class="close" onclick="closeModal('verfahrenModal')">×</button></div><div class="dialogbody" id="verfahrenBody"></div><div class="dialogfoot"><button class="btn primary" onclick="closeModal('verfahrenModal')">Schließen</button></div></div></div>
 <div class="modal" id="verfahrenStartModal"><div class="dialog"><div class="dialoghead"><h2 id="verfahrenStartTitel">Verfahren starten</h2><button class="close" onclick="closeModal('verfahrenStartModal')">×</button></div><div class="dialogbody"><div class="helpbox">Der Ablaufplan ist deine Arbeitsgrundlage. Er ist kein Beschluss und keine Verpflichtung. Besteht noch keine Fallakte, wird sie automatisch angelegt. Eine vorhandene Fallakte wird weiterverwendet.</div><div class="formgrid"><div class="formgroup full"><label>Schüler:in</label><input class="field" id="verfahrenStartSuche" placeholder="Name eintippen, dann wird unten ausgewählt" oninput="jumpToStudent(this.value,'verfahrenStudent','verfahrenStartTreffer')"><select class="field" id="verfahrenStudent" style="margin-top:7px"></select><span class="hint" id="verfahrenStartTreffer">Nach zwei Buchstaben wird der erste passende Name ausgewählt.</span></div></div></div><div class="dialogfoot"><button class="btn" onclick="closeModal('verfahrenStartModal')">Abbrechen</button><button class="btn primary" onclick="verfahrenStartBestaetigen()">Verfahren starten</button></div></div></div>
 <datalist id="teacherOptions"></datalist>
@@ -782,7 +783,7 @@ function ensurePersonen(state){
 function normalize(x){
  const fresh=structuredClone(seed);
  if(!x||typeof x!=='object')x={};
- const arrayKeys=['cases','contacts','tasks','projects','students','teachers','events','classActivities','groupTalks','trainingRoom','schoolSignals','timetableLessons','ctcAssessments','casePlans','statusHistory','outcomeAssessments','relatedPersons','documentEvents','auditLog','portalRequests','partners','verfahrenLaeufe'];
+ const arrayKeys=['cases','contacts','tasks','projects','students','teachers','events','classActivities','groupTalks','trainingRoom','schoolSignals','timetableLessons','ctcAssessments','casePlans','statusHistory','outcomeAssessments','relatedPersons','documentEvents','auditLog','portalRequests','partners','verfahrenLaeufe','families','familyReview'];
  for(const key of arrayKeys)if(!Array.isArray(x[key]))x[key]=[];
  const demoStudent=id=>String(id||'').startsWith('LUD-F-');
  const demoIds={
@@ -836,6 +837,7 @@ function normalize(x){
  ensureNetzwerkbasis(x);
  ensurePersonen(x);
  ensureVerfahrenLaeufe(x);
+ ensureFamilien(x);
  return x
 }
 function load(){return normalize(structuredClone(seed))}
@@ -953,7 +955,7 @@ function showStudent(studentId){
  selectedStudentId=studentId;
  const s=data.students.find(x=>x.id===studentId),c=data.cases.find(x=>x.studentId===studentId),events=studentEvents(studentId);
  document.getElementById('studentDetailTitle').innerHTML=`<span data-person>${s.first} ${s.last}</span> · ${s.className}${s.id===BEISPIEL_ID?' <span class="tag amber">Beispielfall</span>':''}`;
- document.getElementById('studentDetailBody').dataset.gegliedert='';document.getElementById('studentDetailBody').innerHTML=`<div class="notice">${studentId===BEISPIEL_ID?'<strong>◆ Beispielfall.</strong> Ein ausformulierter Übungsfall ohne echte Falldaten. Unter Daten und Sicherung lässt er sich vollständig entfernen.':'Personenbezogene Arbeitsansicht für Edmund und Sabine.'}</div><div class="detailgrid"><div class="detailitem"><span>Schüler-ID</span><strong>${s.id}</strong></div><div class="detailitem"><span>Schuljahr und Klasse</span><strong>${s.schoolYear} · ${s.className}</strong></div><div class="detailitem"><span>Anschrift</span><strong>${s.address||'–'}${s.district?' · '+s.district:''}</strong></div><div class="detailitem"><span>Telefon</span><strong>${s.phone||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 1</span><strong data-person>${s.guardian1||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 2</span><strong data-person>${s.guardian2||'–'}</strong></div><div class="detailitem"><span>Klassenleitung</span><strong>${data.settings.classLeads?.[s.className]||'–'}</strong></div><div class="detailitem"><span>Fallstatus</span><strong>${c?c.status:'keine Fallakte'}</strong></div></div><div class="actions" style="margin:12px 0"><button class="btn primary" onclick="verlaufOeffnen('${studentId}')">✎ Fallverlauf erfassen</button>${c&&c.status!=='Abgeschlossen'?`<button class="btn" onclick="fallAbschlussFuehren('${studentId}')">Fall abschließen</button>`:''}</div><h3>Beteiligte und Weitervermittlungen</h3>${netzwerkVorschlag(studentId)}<h3>Ziel- und Maßnahmenplan</h3>${planSummary(studentId)}<h3>Offene Aufgaben und Ergebnisse</h3>${taskSummary(studentId)}<h3>Entwicklung des Kindes</h3>${outcomeSummary(studentId)}<h3>Bezugspersonen und Netzwerk</h3>${relatedSummary(studentId)}<h3>Familienkonstellation</h3>${familySummary(s)}${studentAbsencePanel(studentId)}<h3>Fachliche Entwicklung aus Kontakten</h3>${trendSummary(studentId)}<h3>Schuljahresverlauf</h3><div class="list">${(s.enrollments||[]).map(e=>`<div class="row"><div class="grow"><strong>${e.schoolYear}</strong><span class="subtle">Klasse ${e.className}</span></div></div>`).join('')}</div><h3>Fallverlauf</h3><p class="subtle">Gespräche, Elternkontakte, Rückmeldungen, Fehlzeitenereignisse, Vereinbarungen, Maßnahmen, Weitervermittlungen, Statusänderungen, Wirkungseinschätzungen, Aufgaben und Dokumente werden gemeinsam dargestellt.</p><div class="chronicle-tools"><input class="field" type="search" placeholder="Verlauf vollständig durchsuchen" oninput="filterTimeline(this,'studentTimeline')"></div><div class="timeline" id="studentTimeline">${timelineHtml(events)}</div>`;
+ document.getElementById('studentDetailBody').dataset.gegliedert='';document.getElementById('studentDetailBody').innerHTML=`<div class="notice">${studentId===BEISPIEL_ID?'<strong>◆ Beispielfall.</strong> Ein ausformulierter Übungsfall ohne echte Falldaten. Unter Daten und Sicherung lässt er sich vollständig entfernen.':'Personenbezogene Arbeitsansicht für Edmund und Sabine.'}</div><div class="detailgrid"><div class="detailitem"><span>Schüler-ID</span><strong>${s.id}</strong></div><div class="detailitem"><span>Schuljahr und Klasse</span><strong>${s.schoolYear} · ${s.className}</strong></div><div class="detailitem"><span>Anschrift</span><strong>${s.address||'–'}${s.district?' · '+s.district:''}</strong></div><div class="detailitem"><span>Telefon</span><strong>${s.phone||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 1</span><strong data-person>${s.guardian1||'–'}</strong></div><div class="detailitem"><span>Erziehungsberechtigte Person 2</span><strong data-person>${s.guardian2||'–'}</strong></div><div class="detailitem"><span>Klassenleitung</span><strong>${data.settings.classLeads?.[s.className]||'–'}</strong></div><div class="detailitem"><span>Fallstatus</span><strong>${c?c.status:'keine Fallakte'}</strong></div></div><div class="actions" style="margin:12px 0"><button class="btn primary" onclick="verlaufOeffnen('${studentId}')">✎ Fallverlauf erfassen</button>${c&&c.status!=='Abgeschlossen'?`<button class="btn" onclick="fallAbschlussFuehren('${studentId}')">Fall abschließen</button>`:''}</div><h3>Beteiligte und Weitervermittlungen</h3>${netzwerkVorschlag(studentId)}<h3>Ziel- und Maßnahmenplan</h3>${planSummary(studentId)}<h3>Offene Aufgaben und Ergebnisse</h3>${taskSummary(studentId)}<h3>Entwicklung des Kindes</h3>${outcomeSummary(studentId)}<h3>Bezugspersonen und Netzwerk</h3>${relatedSummary(studentId)}<h3>Familienkonstellation</h3>${familySummary(s)}${geschwisterBlock(studentId)}${studentAbsencePanel(studentId)}<h3>Fachliche Entwicklung aus Kontakten</h3>${trendSummary(studentId)}<h3>Schuljahresverlauf</h3><div class="list">${(s.enrollments||[]).map(e=>`<div class="row"><div class="grow"><strong>${e.schoolYear}</strong><span class="subtle">Klasse ${e.className}</span></div></div>`).join('')}</div><h3>Fallverlauf</h3><p class="subtle">Gespräche, Elternkontakte, Rückmeldungen, Fehlzeitenereignisse, Vereinbarungen, Maßnahmen, Weitervermittlungen, Statusänderungen, Wirkungseinschätzungen, Aufgaben und Dokumente werden gemeinsam dargestellt.</p><div class="chronicle-tools"><input class="field" type="search" placeholder="Verlauf vollständig durchsuchen" oninput="filterTimeline(this,'studentTimeline')"></div><div class="timeline" id="studentTimeline">${timelineHtml(events)}</div>`;
  const statusButton=document.getElementById('studentStatusButton');statusButton.textContent=s.active?'Archivieren':'Reaktivieren';statusButton.classList.toggle('danger',s.active);
  openModal('studentModal')
 
@@ -4137,6 +4139,180 @@ function renderVerfahrenVorschlaege(){
    <div class="subtle">Warum dieser Vorschlag: ${t.gruende.join('. ')}.</div>
    <button class="btn kleiner" onclick="verfahrenStarten('${t.wid}','${v.student.id}')">Verfahren starten</button></div>`).join('')}
  </article>`).join(''):'<div class="card empty">Derzeit gibt es keinen Vorschlag. Vorschläge entstehen aus Anlass, Sicherheitsprüfung und Stichworten deiner Fallverlaufseinträge sowie aus den Fehlzeiten.</div>';
+}
+
+/* ===== Familien und Geschwister ===== */
+function famNorm(v){return String(v||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ß/g,'ss').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
+function famTelefon(v){const t=String(v||'').replace(/\D+/g,'').replace(/^0+/,'');return t.length>=6?t.slice(-9):''}
+function famAdresse(s){const a=famNorm(s.address).replace(/\b(str|strasse|weg|allee|platz)\b/g,'str');return a?a+'|'+famNorm(s.district):''}
+function famPersonen(s){
+ return [s.guardian1,s.guardian2].map(x=>famNorm(x)).filter(x=>x.length>4);
+}
+function famMerkmale(a,b){
+ const m=[];
+ if(famNorm(a.last)&&famNorm(a.last)===famNorm(b.last))m.push('gleicher Nachname');
+ const aa=famAdresse(a),ba=famAdresse(b);
+ if(aa&&aa===ba)m.push('gleiche Anschrift');
+ const at=famTelefon(a.phone),bt=famTelefon(b.phone);
+ if(at&&at===bt)m.push('gleiche Telefonnummer');
+ const ap=famPersonen(a),bp=famPersonen(b);
+ const gemeinsam=ap.filter(x=>bp.includes(x));
+ if(gemeinsam.length)m.push(gemeinsam.length>1?'zwei gleiche Erziehungsberechtigte':'gleiche erziehungsberechtigte Person');
+ return m;
+}
+function famPaarSchluessel(a,b){return [a,b].sort().join('~')}
+function famEntscheidung(a,b){
+ const e=(data.familyDecisions||{})[famPaarSchluessel(a,b)];
+ return e||'';
+}
+function famEntscheiden(a,b,wert){
+ if(!data.familyDecisions||typeof data.familyDecisions!=='object')data.familyDecisions={};
+ data.familyDecisions[famPaarSchluessel(a,b)]=wert;
+}
+function ensureFamilien(state){
+ if(!Array.isArray(state.families))state.families=[];
+ if(!Array.isArray(state.familyReview))state.familyReview=[];
+ if(!state.familyDecisions||typeof state.familyDecisions!=='object')state.familyDecisions={};
+}
+function famSchluessel(s){
+ return {id:s.id,last:famNorm(s.last),adresse:famAdresse(s),telefon:famTelefon(s.phone),personen:famPersonen(s),roh:s};
+}
+function famMerkmaleSchnell(a,b){
+ const m=[];
+ if(a.last&&a.last===b.last)m.push('gleicher Nachname');
+ if(a.adresse&&a.adresse===b.adresse)m.push('gleiche Anschrift');
+ if(a.telefon&&a.telefon===b.telefon)m.push('gleiche Telefonnummer');
+ const gemeinsam=a.personen.filter(x=>b.personen.includes(x));
+ if(gemeinsam.length)m.push(gemeinsam.length>1?'zwei gleiche Erziehungsberechtigte':'gleiche erziehungsberechtigte Person');
+ return m;
+}
+function familienErkennen(stumm){
+ const schueler=data.students.filter(s=>s.active!==false).map(famSchluessel);
+ const nachId=new Map(schueler.map(x=>[x.id,x]));
+ const index=new Map();
+ const merke=(k,x)=>{if(!k)return;if(!index.has(k))index.set(k,[]);index.get(k).push(x)};
+ schueler.forEach(x=>{merke('n:'+x.last,x);merke('a:'+x.adresse,x);merke('t:'+x.telefon,x);x.personen.forEach(p=>merke('p:'+p,x))});
+ const nachnameHaeufig={};
+ schueler.forEach(x=>{if(x.last)nachnameHaeufig[x.last]=(nachnameHaeufig[x.last]||0)+1});
+ const gesehen=new Set(),paare=[],pruefen=[];
+ index.forEach(gruppe=>{
+  if(gruppe.length<2||gruppe.length>40)return;
+  for(let i=0;i<gruppe.length;i++)for(let j=i+1;j<gruppe.length;j++){
+   const a=gruppe[i],b=gruppe[j],k=famPaarSchluessel(a.id,b.id);
+   if(gesehen.has(k))continue;gesehen.add(k);
+   const ent=famEntscheidung(a.id,b.id);
+   if(ent==='nein')continue;
+   const m=famMerkmaleSchnell(a,b);
+   if(ent==='ja'){paare.push({a:a.roh,b:b.roh,merkmale:m.length?m:['von dir bestätigt']});continue}
+   if(m.length>=2)paare.push({a:a.roh,b:b.roh,merkmale:m});
+   else if(m.length===1&&m[0]!=='gleicher Nachname')pruefen.push({a:a.roh,b:b.roh,merkmale:m});
+   else if(m.length===1&&a.last.length>3&&nachnameHaeufig[a.last]<=3)pruefen.push({a:a.roh,b:b.roh,merkmale:m});
+  }
+ });
+ Object.keys(data.familyDecisions||{}).forEach(k=>{
+  if(data.familyDecisions[k]!=='ja')return;
+  const [x,y]=k.split('~'),a=nachId.get(x),b=nachId.get(y);
+  if(a&&b&&!gesehen.has(k))paare.push({a:a.roh,b:b.roh,merkmale:['von dir bestätigt']});
+ });
+ /* Zusammenhangskomponenten bilden */
+ const eltern={},finde=x=>{while(eltern[x]&&eltern[x]!==x)x=eltern[x];return x};
+ schueler.forEach(s=>eltern[s.id]=s.id);
+ const gruende={};
+ paare.forEach(({a,b,merkmale})=>{
+  const ra=finde(a.id),rb=finde(b.id);
+  if(ra!==rb)eltern[ra]=rb;
+  gruende[famPaarSchluessel(a.id,b.id)]=merkmale;
+ });
+ const gruppen={};
+ schueler.forEach(s=>{const r=finde(s.id);(gruppen[r]=gruppen[r]||[]).push(s.roh)});
+ const familien=[];
+ Object.values(gruppen).forEach(mitglieder=>{
+  if(mitglieder.length<2)return;
+  mitglieder.sort((x,y)=>String(x.className).localeCompare(String(y.className),'de',{numeric:true})||x.first.localeCompare(y.first,'de'));
+  const erster=mitglieder[0];
+  const alleMerkmale=[...new Set(mitglieder.flatMap((m,i)=>mitglieder.slice(i+1).flatMap(n=>gruende[famPaarSchluessel(m.id,n.id)]||[])))];
+  familien.push({
+   id:'FAM-'+mitglieder.map(m=>m.id).join('-').slice(0,60),
+   name:famNachname(mitglieder),
+   address:erster.address||'',district:erster.district||'',phone:erster.phone||'',
+   guardians:[...new Set(mitglieder.flatMap(m=>[m.guardian1,m.guardian2]).filter(Boolean))],
+   studentIds:mitglieder.map(m=>m.id),
+   merkmale:alleMerkmale
+  });
+ });
+ familien.sort((a,b)=>a.name.localeCompare(b.name,'de'));
+ const offen=pruefen.filter(p=>finde(p.a.id)!==finde(p.b.id)&&!famEntscheidung(p.a.id,p.b.id));
+ data.families=familien;
+ data.familyReview=offen.map(p=>({id:famPaarSchluessel(p.a.id,p.b.id),studentIds:[p.a.id,p.b.id],merkmale:p.merkmale}));
+ data.students.forEach(s=>{const f=familien.find(x=>x.studentIds.includes(s.id));s.familyId=f?f.id:''});
+ if(!stumm)save();
+ return {familien:familien.length,kinder:familien.reduce((a,f)=>a+f.studentIds.length,0),pruefen:offen.length};
+}
+function famNachname(mitglieder){
+ const namen=mitglieder.map(m=>m.last).filter(Boolean);
+ const haeufig={};namen.forEach(n=>haeufig[n]=(haeufig[n]||0)+1);
+ const sortiert=Object.entries(haeufig).sort((a,b)=>b[1]-a[1]);
+ return sortiert.length>1&&sortiert[0][1]===sortiert[1][1]?[...new Set(namen)].join(' und '):(sortiert[0]?sortiert[0][0]:'ohne Namen');
+}
+function geschwisterVon(studentId){
+ const f=(data.families||[]).find(x=>x.studentIds.includes(studentId));
+ if(!f)return [];
+ return f.studentIds.filter(id=>id!==studentId).map(id=>data.students.find(s=>s.id===id)).filter(Boolean);
+}
+function geschwisterBlock(studentId){
+ const g=geschwisterVon(studentId),f=(data.families||[]).find(x=>x.studentIds.includes(studentId));
+ if(!g.length)return `<h4>Geschwister an der Schule</h4><p class="subtle">Keine Geschwister erkannt. Die Erkennung läuft über Nachname, Anschrift, Telefonnummer und Erziehungsberechtigte aus der Schülerliste. <button type="button" class="btn kleiner" onclick="familienOeffnen()">Familien prüfen</button></p>`;
+ return `<h4>Geschwister an der Schule</h4><div class="notice"><strong>${f.name}</strong> · erkannt über ${f.merkmale.join(', ')||'deine Bestätigung'}<br>`
+  +g.map(s=>`<button type="button" class="btn kleiner" style="margin:5px 5px 0 0" onclick="closeModal('studentModal');showStudent('${s.id}')">${s.first} ${s.last} · Klasse ${s.className}</button>`).join('')
+  +`</div><p class="hint">Automatisch erkannt, nicht amtlich. Prüfe die Zuordnung, bevor du sie in einem Gespräch verwendest. Änderungen nimmst du über „Familien prüfen“ vor.</p>`;
+}
+function familienNeuErkennen(){
+ const r=familienErkennen();
+ renderFamilien();
+ toast(r.familien+' Familien mit '+r.kinder+' Kindern erkannt'+(r.pruefen?', '+r.pruefen+' Fall'+(r.pruefen===1?'':'e')+' zum Prüfen.':'.'));
+}
+function familienOeffnen(){
+ familienErkennen(true);
+ renderFamilien();
+ openModal('familienModal');
+}
+function renderFamilien(){
+ const box=document.getElementById('familienBody');if(!box)return;
+ const fam=data.families||[],pruef=data.familyReview||[];
+ const q=(document.getElementById('familienSuche')||{}).value||'';
+ const treffer=q?fam.filter(f=>[f.name,f.address,f.district,f.phone,...(f.guardians||[]),...f.studentIds.map(id=>{const s=data.students.find(x=>x.id===id);return s?s.first+' '+s.last+' '+s.className:''})].join(' ').toLocaleLowerCase('de-DE').includes(q.toLocaleLowerCase('de-DE'))):fam;
+ const kinder=fam.reduce((a,f)=>a+f.studentIds.length,0);
+ box.innerHTML=
+  `<div class="grid kpis">${kpi('Familien',fam.length,'mit mindestens zwei Kindern an der Schule')}${kpi('Geschwisterkinder',kinder,'insgesamt betroffen')}${kpi('Offene Prüffälle',pruef.length,pruef.length?'nur ein übereinstimmendes Merkmal':'nichts zu klären')}</div>`
+  +(pruef.length?`<h3>Bitte prüfen</h3><p class="subtle">Hier stimmt nur ein Merkmal überein. Das reicht nicht für eine automatische Zuordnung.</p>`
+    +pruef.slice(0,40).map(p=>{
+     const a=data.students.find(x=>x.id===p.studentIds[0]),b=data.students.find(x=>x.id===p.studentIds[1]);
+     if(!a||!b)return '';
+     return `<div class="card" style="margin-bottom:9px"><strong>${a.first} ${a.last} (Klasse ${a.className})</strong> und <strong>${b.first} ${b.last} (Klasse ${b.className})</strong>
+      <div class="subtle">Übereinstimmung: ${p.merkmale.join(', ')}</div>
+      <div class="actions" style="margin-top:8px"><button class="btn kleiner primary" onclick="famBestaetigen('${a.id}','${b.id}',true)">Sind Geschwister</button><button class="btn kleiner" onclick="famBestaetigen('${a.id}','${b.id}',false)">Sind keine Geschwister</button></div></div>`;
+    }).join(''):'')
+  +`<h3>Erkannte Familien</h3>`
+  +(treffer.length?treffer.map(f=>`<div class="card" style="margin-bottom:9px"><div class="cardhead"><h3>${f.name}</h3><span class="tag gray">${f.studentIds.length} Kinder</span></div>
+    <p class="subtle">${[f.address,f.district].filter(Boolean).join(', ')||'ohne Anschrift'}${f.phone?' · '+f.phone:''}${f.guardians.length?'<br>Erziehungsberechtigte: '+f.guardians.join(', '):''}</p>
+    <p class="subtle">Erkannt über: ${f.merkmale.join(', ')||'deine Bestätigung'}</p>
+    <div>${f.studentIds.map(id=>{const s=data.students.find(x=>x.id===id);return s?`<button type="button" class="btn kleiner" style="margin:4px 5px 0 0" onclick="closeModal('familienModal');showStudent('${s.id}')">${s.first} ${s.last} · ${s.className}</button>`:''}).join('')}</div>
+    ${f.studentIds.length===2?`<div class="actions" style="margin-top:8px"><button class="btn kleiner" onclick="famBestaetigen('${f.studentIds[0]}','${f.studentIds[1]}',false)">Doch keine Geschwister</button></div>`:''}</div>`).join('')
+   :'<div class="card empty">Keine Familie erkannt. Das ist normal, solange keine Schülerliste mit Anschrift, Telefonnummer und Erziehungsberechtigten eingelesen wurde.</div>');
+}
+function famBestaetigen(a,b,ja){
+ famEntscheiden(a,b,ja?'ja':'nein');
+ familienErkennen(true);save();renderFamilien();
+ toast(ja?'Als Geschwister übernommen.':'Zuordnung verworfen. Das Paar wird nicht mehr vorgeschlagen.');
+}
+function familienExport(){
+ const zeilen=[['FAMILIE','ANSCHRIFT','ORTSTEIL','TELEFON','ERZIEHUNGSBERECHTIGTE','KIND','KLASSE','ERKANNT ÜBER']];
+ (data.families||[]).forEach(f=>f.studentIds.forEach(id=>{
+  const s=data.students.find(x=>x.id===id);if(!s)return;
+  zeilen.push([f.name,f.address,f.district,f.phone,(f.guardians||[]).join(' / '),s.last+', '+s.first,s.className,(f.merkmale||[]).join(' / ')]);
+ }));
+ if(zeilen.length<2){appAlert('Es ist noch keine Familie erkannt.');return}
+ download('Familien_und_Geschwister.csv','﻿'+zeilen.map(r=>r.map(csvCell).join(';')).join('\n'),'text/csv;charset=utf-8');
 }
 
 /* ===== Archivierte Schüler:innen konsequent ausblenden ===== */
