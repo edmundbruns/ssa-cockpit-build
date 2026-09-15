@@ -153,5 +153,6 @@ function timeline(state,sid,legacy=[]){
 function journalStats(state,year='',className='all'){
  return state.journal.filter(e=>!e.planned&&e.type!=='zusätzliche Information'&&(!year||e.schoolYear===year)&& (className==='all'||e.participantIds.some(sid=>{const cl=recordContext(state,e,sid).className;return className.startsWith('jg:')?cl.match(/^\d+/)?.[0]===className.slice(3):cl===className}))).map(e=>({...e,duration:e.duration*Math.max(1,(e.facilitators||[]).length)}));
 }
-root.Dossier={uid,iso,schoolYear,validYear,classValid,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats};
+function restore(raw,sanitize){const state=sanitize(raw);for(const [i,e]of (state.journal||[]).entries()){const original=raw.journal?.[i];if(!original)continue;for(const key of ['content','childView','otherView','observation','assessment','agreement','goal','result','source','people'])if(typeof original[key]==='string')e[key]=original[key];if(original.individualNotes&&typeof original.individualNotes==='object')for(const key of Object.keys(e.individualNotes||{}))if(typeof original.individualNotes[key]==='string')e.individualNotes[key]=original.individualNotes[key];}return state;}
+root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats};
 })(globalThis);
