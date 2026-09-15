@@ -10,7 +10,25 @@
     :root{--navy:#123047;--teal:#0f766e;--cyan:#0891b2;--cream:#f7f5ef;--paper:#fff;--ink:#183042;--muted:#64748b;--line:#dce4e8;--amber:#f59e0b;--red:#dc2626;--green:#16a34a;--shadow:0 12px 34px rgba(15,45,61,.10);--radius:18px}
     *{box-sizing:border-box} body{margin:0;background:var(--cream);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif} button,input,select,textarea{font:inherit} button{cursor:pointer}
     .app{min-height:100vh;display:grid;grid-template-columns:250px 1fr}.sidebar{background:linear-gradient(175deg,#102f46 0%,#164e63 62%,#0f766e 100%);color:white;padding:26px 18px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}.brand{display:flex;gap:12px;align-items:center;margin:0 8px 26px}.brandmark{width:44px;height:44px;border-radius:14px;background:#fff;color:var(--teal);display:grid;place-items:center;font-weight:900;font-size:19px}.brand strong{display:block;font-size:17px}.brand small{opacity:.72}.nav{display:grid;gap:5px}.nav button{border:0;background:transparent;color:#d9edf1;text-align:left;padding:11px 13px;border-radius:12px;display:flex;gap:11px;align-items:center}.nav button:hover,.nav button.active{background:rgba(255,255,255,.14);color:#fff}.nav .icon{width:22px;text-align:center}.sidefoot{margin-top:auto;padding:14px 10px;color:#d5e7ea;font-size:12px}.statusdot{display:inline-block;width:8px;height:8px;background:#6ee7b7;border-radius:50%;margin-right:6px}
-    main{min-width:0}.testbar{background:#fff7d6;border-bottom:1px solid #f4d777;padding:8px 28px;color:#6b4c00;font-size:13px;text-align:center}.topbar{padding:23px 30px 8px;display:flex;justify-content:space-between;align-items:center;gap:20px}.topbar h1{font-size:26px;margin:0;letter-spacing:-.4px}.topbar p{margin:2px 0 0;color:var(--muted)}.actions{display:flex;gap:9px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 13px;border-radius:11px;font-weight:650}.btn:hover{box-shadow:0 4px 14px #18304216}.btn.primary{background:var(--teal);border-color:var(--teal);color:white}.btn.reviewed{background:#e6f4f2;border-color:#8bc9c2;color:#0f6b65}.btn.danger{color:var(--red)}.content{padding:18px 30px 42px}.page{display:none}.page.active{display:block}.rollenbox{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:7px 14px;max-height:200px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:11px;background:var(--cream)}
+    main{min-width:0}.testbar{background:#fff7d6;border-bottom:1px solid #f4d777;padding:8px 28px;color:#6b4c00;font-size:13px;text-align:center}.topbar{padding:23px 30px 8px;display:flex;justify-content:space-between;align-items:center;gap:20px}.topbar h1{font-size:26px;margin:0;letter-spacing:-.4px}.topbar p{margin:2px 0 0;color:var(--muted)}.actions{display:flex;gap:9px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 13px;border-radius:11px;font-weight:650}.btn:hover{box-shadow:0 4px 14px #18304216}.btn.primary{background:var(--teal);border-color:var(--teal);color:white}.btn.reviewed{background:#e6f4f2;border-color:#8bc9c2;color:#0f6b65}.btn.danger{color:var(--red)}.content{padding:18px 30px 42px}.page{display:none}.page.active{display:block}.fortschritt{height:9px;border-radius:9px;background:var(--line);overflow:hidden;margin:9px 0}
+.fortschrittbalken{height:100%;background:var(--teal);border-radius:9px;transition:width .25s}
+.cleanlist{list-style:none;padding:0;margin:0}
+.cleanlist li{padding:6px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.cleanlist li:last-child{border-bottom:0}
+.verfahrenschritt{margin-bottom:9px;padding:0;overflow:hidden}
+.verfahrenschritt.erledigt{border-left:4px solid var(--green)}
+.verfahrenschritt.läuft{border-left:4px solid var(--amber)}
+.verfahrenschritt.offen{border-left:4px solid var(--line)}
+.verfahrenkopf{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;padding:13px 15px;cursor:pointer}
+.verfahrenkopf:hover{background:var(--cream)}
+.verfahrennr{width:30px;height:30px;border-radius:50%;background:var(--cream);color:var(--teal);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+.verfahrenbody{padding:0 15px 15px;border-top:1px solid var(--line)}
+.verfahrenbody h4{margin:15px 0 7px;font-size:14px}
+.checkliste{display:grid;gap:7px}
+.checkliste label{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;line-height:1.4;cursor:pointer}
+.checkliste input{margin-top:3px;flex:none}
+.vfdatum{display:inline-block;width:auto;padding:5px 9px}
+.rollenbox{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:7px 14px;max-height:200px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:11px;background:var(--cream)}
 .rollenbox label{display:flex;gap:7px;align-items:flex-start;font-size:13px;font-weight:500;cursor:pointer;line-height:1.3}
 .rollenbox input{margin-top:2px;flex:none}
 .rollentags{display:flex;flex-wrap:wrap;gap:4px}
@@ -156,7 +174,7 @@
         </div>
       </div>
     </nav>
-    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.9</span></div>
+    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.10</span></div>
   </aside>
   <main>
     <header class="topbar"><div><h1 id="pageTitle">Guten Morgen, Dr. Bruns</h1><p id="pageSubtitle">Freitag, 11. September 2026 · Schuljahr 2026/27</p></div><div class="kopfsuche"><input class="field" id="globalSearch" type="search" autocomplete="off" placeholder="Schüler:in suchen: Name, Vorname, Klasse oder Klassenleitung" oninput="globalSearchTippen()" onfocus="globalSearchTippen()"><div id="globalSearchResults"></div></div><div class="actions"><button class="btn" onclick="lockPrivacyScreen()">🔒 Sperren</button><button class="btn" onclick="openModal('taskModal')">＋ Aufgabe</button><button class="btn primary" onclick="verlaufOeffnen()">＋ Fallverlauf</button><button class="btn" onclick="dokuWaehlen()">＋ Anderes</button></div></header>
@@ -223,8 +241,13 @@
       <section class="page" id="workflows">
         <div class="sectionhead"><div><h2>Fachverfahren</h2><div class="subtle">Standardisierte Abläufe, Sicherheitswege und fachliche Orientierung</div></div><div class="filters"><input class="field search" id="workflowSearch" placeholder="Thema oder Handlung suchen"><select class="field" id="workflowFilter"><option value="all">Alle Verfahren</option><option value="Schutz und Krise">Schutz und Krise</option><option value="Einzelfallhilfe">Einzelfallhilfe</option><option value="Prävention">Prävention</option><option value="Übergang und Netzwerk">Übergang und Netzwerk</option></select></div></div>
         <div class="notice warning">Fachverfahren unterstützen die strukturierte Arbeit. Sie ersetzen keine fachliche Einschätzung, keine Notfallentscheidung und keine Prüfung der jeweils geltenden Rechts- und Verfahrenslage.</div>
-        <div class="helpbox"><strong>So gehst du vor:</strong> Wähle das passende Verfahren. Jede Karte zeigt die Schritte in der richtigen Reihenfolge, arbeite sie von oben nach unten ab. <strong>Zuordnung zu Schüler:in:</strong> Sobald du einen Schritt umgesetzt hast, halte ihn über „Schnellerfassung“ bei der betreffenden Schülerin oder dem Schüler fest. So ist nachvollziehbar, was schon getan wurde.</div>
+        <div class="helpbox"><strong>So gehst du vor:</strong> Neun Verfahren haben einen kleinschrittigen Ablaufplan. Öffne das passende Verfahren und starte es für eine Schülerin oder einen Schüler. Der Plan erscheint dann oben unter „Laufende Verfahren“. <strong>In jedem Schritt</strong> stehen Ziel, Zeitpunkt, zuständige Rolle, eine Handlungscheckliste, eine Formulierungshilfe, die Schutzregel und das Abschlusskriterium. Aus jedem Schritt kannst du direkt einen Fallverlaufseintrag, eine Aufgabe oder eine Wiedervorlage erzeugen. <strong>Wichtig:</strong> Das Cockpit markiert kein Verfahren von sich aus als verbindlich oder abgeschlossen und nimmt von sich aus keinen Kontakt zu einer Institution auf.</div>
         <div class="grid kpis" id="workflowKpis"></div>
+        <div class="sectionhead" style="margin-top:6px"><div><h3>Laufende Verfahren</h3><div class="subtle">Angefangene Ablaufpläne mit Fortschritt. Klicke eine Karte an, um weiterzuarbeiten.</div></div></div>
+        <div class="grid three" id="verfahrenLaufListe"></div>
+        <div class="sectionhead" style="margin-top:14px"><div><h3>Vorschläge aus der Fallarbeit</h3><div class="subtle">Aus Anlass, Sicherheitsprüfung, Stichworten und Fehlzeiten. Jeder Vorschlag nennt seine Begründung. Die Entscheidung triffst immer du.</div></div></div>
+        <div class="grid three" id="verfahrenVorschlagBox"></div>
+        <div class="sectionhead" style="margin-top:14px"><div><h3>Alle Fachverfahren</h3><div class="subtle">Fachlicher Rahmen. Neun Verfahren haben zusätzlich einen kleinschrittigen Ablaufplan.</div></div></div>
         <div class="card" style="margin-bottom:17px"><div class="cardhead"><h3>Ludgerusschul-Stufenmodell Schulabsentismus</h3><span class="tag amber">schulintern zu beschließen</span></div><div id="absenceStages"></div><p class="hint">Die formale Eskalation orientiert sich an unentschuldigten Vorkommnissen. Entschuldigte Fehlzeiten können dennoch einen Unterstützungsbedarf anzeigen. Die Einordnung erfolgt immer fachlich.</p></div>
         <div class="grid three" id="workflowGrid"></div>
       </section>
@@ -416,6 +439,8 @@
 <div class="formgroup"><label>Ergebnis</label><select class="field" name="result"><option>Rückkehr vereinbart</option><option>Nachgespräch erforderlich</option><option>Abgebrochen</option><option>Andere Vereinbarung</option></select></div><div class="formgroup"><label>Rückkehrplan</label><label><input type="checkbox" name="planAccepted" value="ja"> von Schüler:in akzeptiert</label></div><div class="formgroup"><label>Information Erziehungsberechtigte</label><select class="field" name="parentInfo"><option>Nicht erforderlich</option><option>Informiert</option><option>Noch zu informieren</option><option>Nicht erreicht</option></select></div><div class="formgroup"><label>Wiedervorlage</label><input class="field" type="date" name="due"></div>
 <div class="formgroup full"><label>Folgemaßnahme. Schnellauswahl</label><select class="field" onchange="applyPreset(this,'trainingFollowUp')"><option value="">Bitte auswählen</option><option>Keine weitere Maßnahme erforderlich.</option><option>Rückmeldung an die Klassenleitung.</option><option>Erziehungsberechtigte informieren.</option><option>Nachgespräch mit der Schulsozialarbeit.</option><option>Schulleitung einbeziehen.</option><option>Externen Kooperationspartner einbeziehen.</option><option value="">Eigener Eintrag</option></select><textarea class="field" id="trainingFollowUp" name="followUp" placeholder="Auswahl kann frei verändert oder ergänzt werden"></textarea></div>
 </div></div><div class="dialogfoot"><button type="button" class="btn" onclick="closeModal('trainingRoomModal')">Abbrechen</button><button class="btn primary">Vorgang speichern</button></div></form></div></div>
+<div class="modal" id="verfahrenModal"><div class="dialog wide"><div class="dialoghead"><h2 id="verfahrenTitel">Fachverfahren</h2><button class="close" onclick="closeModal('verfahrenModal')">×</button></div><div class="dialogbody" id="verfahrenBody"></div><div class="dialogfoot"><button class="btn primary" onclick="closeModal('verfahrenModal')">Schließen</button></div></div></div>
+<div class="modal" id="verfahrenStartModal"><div class="dialog"><div class="dialoghead"><h2 id="verfahrenStartTitel">Verfahren starten</h2><button class="close" onclick="closeModal('verfahrenStartModal')">×</button></div><div class="dialogbody"><div class="helpbox">Der Ablaufplan ist deine Arbeitsgrundlage. Er ist kein Beschluss und keine Verpflichtung. Besteht noch keine Fallakte, wird sie automatisch angelegt. Eine vorhandene Fallakte wird weiterverwendet.</div><div class="formgrid"><div class="formgroup full"><label>Schüler:in</label><input class="field" id="verfahrenStartSuche" placeholder="Name eintippen, dann wird unten ausgewählt" oninput="jumpToStudent(this.value,'verfahrenStudent','verfahrenStartTreffer')"><select class="field" id="verfahrenStudent" style="margin-top:7px"></select><span class="hint" id="verfahrenStartTreffer">Nach zwei Buchstaben wird der erste passende Name ausgewählt.</span></div></div></div><div class="dialogfoot"><button class="btn" onclick="closeModal('verfahrenStartModal')">Abbrechen</button><button class="btn primary" onclick="verfahrenStartBestaetigen()">Verfahren starten</button></div></div></div>
 <datalist id="teacherOptions"></datalist>
 <datalist id="personOptions"></datalist>
 <datalist id="personFunktionen"></datalist>
@@ -722,7 +747,7 @@ function ensurePersonen(state){
 function normalize(x){
  const fresh=structuredClone(seed);
  if(!x||typeof x!=='object')x={};
- const arrayKeys=['cases','contacts','tasks','projects','students','teachers','events','classActivities','groupTalks','trainingRoom','schoolSignals','timetableLessons','ctcAssessments','casePlans','statusHistory','outcomeAssessments','relatedPersons','documentEvents','auditLog','portalRequests','partners'];
+ const arrayKeys=['cases','contacts','tasks','projects','students','teachers','events','classActivities','groupTalks','trainingRoom','schoolSignals','timetableLessons','ctcAssessments','casePlans','statusHistory','outcomeAssessments','relatedPersons','documentEvents','auditLog','portalRequests','partners','verfahrenLaeufe'];
  for(const key of arrayKeys)if(!Array.isArray(x[key]))x[key]=[];
  const demoStudent=id=>String(id||'').startsWith('LUD-F-');
  const demoIds={
@@ -775,6 +800,7 @@ function normalize(x){
  ensureNetzwerkpartner(x);
  ensureNetzwerkbasis(x);
  ensurePersonen(x);
+ ensureVerfahrenLaeufe(x);
  return x
 }
 function load(){return normalize(structuredClone(seed))}
@@ -789,7 +815,7 @@ function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle
 document.querySelectorAll('.nav button[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));
 document.querySelectorAll('.nav .navgroup').forEach(g=>{const head=g.querySelector('.navhead');if(head)head.onclick=()=>g.classList.toggle('collapsed')});
 function kpi(label,value,trend){return `<div class="card kpi"><div class="label">${label}</div><div class="value">${value}</div><div class="trend">${trend}</div></div>`}
-function renderAll(){hilfeSchaltflaechenSetzen();personenAuswahlFuellen();renderSicherungsKarte();renderNetzwerkBereiche();renderSelects();renderDashboard();renderBeispielKarte();renderPraeventionsplan();renderRequests();renderCases();renderKanban();renderStudents();renderClasses();renderTrainingRoom();renderSignals();renderWorkflows();renderTeachers();renderProjects();renderCTC();renderNetwork();renderTasks();renderStats()}
+function renderAll(){hilfeSchaltflaechenSetzen();personenAuswahlFuellen();renderSicherungsKarte();renderNetzwerkBereiche();renderSelects();renderDashboard();renderBeispielKarte();renderPraeventionsplan();renderRequests();renderCases();renderKanban();renderStudents();renderClasses();renderTrainingRoom();renderSignals();renderWorkflows();renderVerfahrenLaeufe();renderVerfahrenVorschlaege();renderTeachers();renderProjects();renderCTC();renderNetwork();renderTasks();renderStats()}
 function renderSelects(){
  ['quickCase','taskCase'].forEach((id,i)=>{const el=document.getElementById(id);const first=i?' <option value="">Ohne Fallbezug</option>':'<option value="">Anonymer Kontakt</option>';const caseOpts=data.cases.filter(c=>c.status!=='Abgeschlossen').map(c=>`<option value="${c.id}">${cname(c.id)} · ${classOf(c)}</option>`).join('');let studentOpts='';if(!i){const openStudents=data.students.filter(s=>s.active&&!data.cases.some(c=>c.studentId===s.id&&c.status!=='Abgeschlossen')).sort((a,b)=>a.className.localeCompare(b.className)||a.last.localeCompare(b.last));if(openStudents.length)studentOpts='<optgroup label="Schüler:in ohne Fallakte – legt automatisch eine Fallakte an">'+openStudents.map(s=>`<option value="student:${s.id}">${s.last}, ${s.first} · ${s.className}</option>`).join('')+'</optgroup>';}el.innerHTML=first+(caseOpts?'<optgroup label="Bestehende Fallakten">'+caseOpts+'</optgroup>':'')+studentOpts});
  document.getElementById('caseStudent').innerHTML='<option value="">Bitte auswählen</option>'+data.students.filter(s=>s.active&&!data.cases.some(c=>c.studentId===s.id&&c.status!=='Abgeschlossen')).sort((a,b)=>a.className.localeCompare(b.className)||a.last.localeCompare(b.last)).map(s=>`<option value="${s.id}">${s.last}, ${s.first} · ${s.className}</option>`).join('');
@@ -988,8 +1014,8 @@ function refreshSignalEmail(){const r=data.schoolSignals.find(x=>x.id===selected
 async function copySignalEmail(){const address=document.getElementById('signalEmailAddress').value.trim(),subject=document.getElementById('signalEmailSubject').value.trim(),body=document.getElementById('signalEmailBody').value.trim(),text=`${address?'An: '+address+'\n':''}Betreff: ${subject}\n\n${body}`;try{await navigator.clipboard.writeText(text)}catch{const el=document.getElementById('signalEmailBody');el.select();document.execCommand('copy')}toast('Der geprüfte E-Mail-Entwurf wurde in die Zwischenablage kopiert. Es wurde nichts versendet.')}
 function saveSignalSettings(){data.settings.absenceThreshold=Math.max(1,Number(document.getElementById('absenceThreshold').value)||10);data.settings.unexcusedThreshold=Math.max(1,Number(document.getElementById('unexcusedThreshold').value)||3);data.settings.lateThreshold=Math.max(1,Number(document.getElementById('lateThreshold').value)||3);data.settings.gradeDropThreshold=Math.max(.1,Number(document.getElementById('gradeDropThreshold').value)||1);data.settings.grade1StartDate=document.getElementById('grade1StartDate').value||'2026-08-17';const raw=document.getElementById('additionalNonSchoolDays').value.split(',').map(x=>x.trim()).filter(Boolean),invalid=raw.filter(x=>!/^20\d{2}-\d{2}-\d{2}$/.test(x));if(invalid.length){alert('Bitte zusätzliche freie Tage im Format JJJJ-MM-TT eingeben.');return}data.settings.additionalNonSchoolDays=[...new Set(raw)].sort();void persistState().catch(showVaultError);renderAll();toast('Schwellenwerte und Schulkalender wurden gespeichert.')}
 document.getElementById('signalSearch').oninput=renderSignals;document.getElementById('signalClassFilter').onchange=renderSignals;document.getElementById('signalStatus').onchange=renderSignals;
-function renderWorkflows(){const q=(document.getElementById('workflowSearch').value||'').toLocaleLowerCase('de-DE'),category=document.getElementById('workflowFilter').value,list=WORKFLOWS.filter(w=>(category==='all'||w.category===category)&&[w.title,w.category,w.status,w.start,w.fields,w.quality,w.protection,...w.steps].join(' ').toLocaleLowerCase('de-DE').includes(q));document.getElementById('workflowKpis').innerHTML=kpi('Fachverfahren',WORKFLOWS.length,'zentrale Aufgabenfelder')+kpi('Schutzverfahren',WORKFLOWS.filter(w=>w.critical).length,'mit unmittelbarer Sicherheitsprüfung')+kpi('Absentismus-Stufen',ABSENCE_STAGES.length,'fachlich einzuordnen')+kpi('Interne Hilfen',4,'Vertrauenslehrkraft, Medienbuddys, Palaverzelt, SSA');document.getElementById('absenceStages').innerHTML=ABSENCE_STAGES.map(s=>`<div class="stage-row"><strong>${s.stage}</strong><span><b>Auslöser:</b> ${s.trigger}</span><span>${s.action}<br><span class="subtle">Review: ${s.review}</span></span></div>`).join('');document.getElementById('workflowGrid').innerHTML=list.map(w=>`<article class="card workflow-card"><div><span class="tag ${w.critical?'red':'gray'}">${w.status}</span></div><h3>${w.title}</h3><div class="subtle">${w.category}</div><p><strong>Start:</strong> ${w.start}</p><div class="actions"><button class="btn primary" onclick="openWorkflow('${w.id}')">Verfahren öffnen</button></div></article>`).join('')||'<div class="card empty">Kein passendes Fachverfahren gefunden.</div>'}
-function openWorkflow(id){const w=WORKFLOWS.find(x=>x.id===id);if(!w)return;document.getElementById('workflowTitle').textContent=w.title;document.getElementById('workflowBody').innerHTML=`<div class="notice ${w.critical?'warning':''}"><strong>${w.status}</strong> · ${w.category}<br>Startkriterium: ${w.start}</div>${w.critical?'<div class="notice warning"><strong>Sicherheitsregel:</strong> Bei unmittelbarer Gefahr zuerst Schutz und gegebenenfalls 112 oder 110 sicherstellen. Die Dokumentation darf die Hilfe nicht verzögern.</div>':''}<h3>Standardablauf</h3><div class="step-list">${w.steps.map(step=>`<div>${step}</div>`).join('')}</div><div class="detailgrid"><div class="detailitem"><span>Empfohlene Dokumentationsfelder</span><strong>${w.fields}</strong></div><div class="detailitem"><span>Qualitätsindikatoren</span><strong>${w.quality}</strong></div><div class="detailitem" style="grid-column:1/-1"><span>Schutzregel und Grenze</span><strong>${w.protection}</strong></div></div>${verfahrenZustaendigeHtml(w)}<p class="hint" style="margin-top:16px">Grundlage: SSA-Cockpit Fachkonzept 2026. Vor produktiver Anwendung müssen lokale Vereinbarungen, Zuständigkeiten und aktuelle Rechtsstände geprüft und freigegeben werden.</p>`;openModal('workflowModal')}
+function renderWorkflows(){const q=(document.getElementById('workflowSearch').value||'').toLocaleLowerCase('de-DE'),category=document.getElementById('workflowFilter').value,list=WORKFLOWS.filter(w=>(category==='all'||w.category===category)&&[w.title,w.category,w.status,w.start,w.fields,w.quality,w.protection,...w.steps].join(' ').toLocaleLowerCase('de-DE').includes(q));document.getElementById('workflowKpis').innerHTML=kpi('Fachverfahren',WORKFLOWS.length,'zentrale Aufgabenfelder')+kpi('Schutzverfahren',WORKFLOWS.filter(w=>w.critical).length,'mit unmittelbarer Sicherheitsprüfung')+kpi('Absentismus-Stufen',ABSENCE_STAGES.length,'fachlich einzuordnen')+kpi('Mit Ablaufplan',Object.keys(VERFAHREN_PLAENE).length,'kleinschrittig durchgeplant');document.getElementById('absenceStages').innerHTML=ABSENCE_STAGES.map(s=>`<div class="stage-row"><strong>${s.stage}</strong><span><b>Auslöser:</b> ${s.trigger}</span><span>${s.action}<br><span class="subtle">Review: ${s.review}</span></span></div>`).join('');document.getElementById('workflowGrid').innerHTML=list.map(w=>`<article class="card workflow-card"><div><span class="tag ${w.critical?'red':'gray'}">${w.status}</span></div><h3>${w.title}</h3><div class="subtle">${w.category}</div><p><strong>Start:</strong> ${w.start}</p><div class="actions"><button class="btn primary" onclick="openWorkflow('${w.id}')">Verfahren öffnen</button>${verfahrenPlan(w.id)?`<span class="tag green">${verfahrenPlan(w.id).length}-Schritte-Ablaufplan</span>`:''}</div></article>`).join('')||'<div class="card empty">Kein passendes Fachverfahren gefunden.</div>'}
+function openWorkflow(id){const w=WORKFLOWS.find(x=>x.id===id);if(!w)return;document.getElementById('workflowTitle').textContent=w.title;document.getElementById('workflowBody').innerHTML=`<div class="notice ${w.critical?'warning':''}"><strong>${w.status}</strong> · ${w.category}<br>Startkriterium: ${w.start}</div>${w.critical?'<div class="notice warning"><strong>Sicherheitsregel:</strong> Bei unmittelbarer Gefahr zuerst Schutz und gegebenenfalls 112 oder 110 sicherstellen. Die Dokumentation darf die Hilfe nicht verzögern.</div>':''}<h3>Standardablauf</h3><div class="step-list">${w.steps.map(step=>`<div>${step}</div>`).join('')}</div><div class="detailgrid"><div class="detailitem"><span>Empfohlene Dokumentationsfelder</span><strong>${w.fields}</strong></div><div class="detailitem"><span>Qualitätsindikatoren</span><strong>${w.quality}</strong></div><div class="detailitem" style="grid-column:1/-1"><span>Schutzregel und Grenze</span><strong>${w.protection}</strong></div></div>${verfahrenZustaendigeHtml(w)}<p class="hint" style="margin-top:16px">Grundlage: SSA-Cockpit Fachkonzept 2026. Vor produktiver Anwendung müssen lokale Vereinbarungen, Zuständigkeiten und aktuelle Rechtsstände geprüft und freigegeben werden.</p>${verfahrenPlan(w.id)?`<div class="actions" style="margin-top:16px"><button class="btn primary" onclick="verfahrenStartOeffnen('${w.id}')">Verfahren für eine Schülerin oder einen Schüler starten</button><span class="hint">Öffnet den kleinschrittigen Ablaufplan mit ${verfahrenPlan(w.id).length} Schritten.</span></div>`:'<p class="hint" style="margin-top:14px">Für dieses Verfahren ist noch kein kleinschrittiger Ablaufplan hinterlegt. Die Übersicht oben bleibt als fachliche Orientierung nutzbar.</p>'}`;openModal('workflowModal')}
 document.getElementById('workflowSearch').oninput=renderWorkflows;document.getElementById('workflowFilter').onchange=renderWorkflows;
 function teacherName(t){return t.displayName||(t.first?`${t.last}, ${t.first}`:t.last)}
 /* ===== Personen- und Zuständigkeitsdatenbank ===== */
@@ -2805,6 +2831,1094 @@ function renderSicherungsKarte(){
   <div class="notice warning" style="margin-top:14px"><strong>Wichtig:</strong> Diese Sicherungen liegen auf demselben Computer. Lege zusätzlich in regelmäßigen Abständen eine Kopie an einem zweiten, für dich zulässigen Ort ab. Kläre den Sicherungsort vorher mit Schulleitung und Datenschutz.</div></div>`;
 }
 
+
+/* ===== Fachverfahren als kleinschrittiger Ablaufplan ===== */
+const VERFAHREN_STATUS=['Noch nicht begonnen','In Vorbereitung','Laufend','Wartet auf Rückmeldung','Schulleitung eingebunden','Externe Stelle eingebunden','Unterbrochen','Abgeschlossen','Nicht weiterverfolgt'];
+const VERFAHREN_STATUS_FARBE={'Noch nicht begonnen':'gray','In Vorbereitung':'gray','Laufend':'','Wartet auf Rückmeldung':'amber','Schulleitung eingebunden':'amber','Externe Stelle eingebunden':'amber','Unterbrochen':'amber','Abgeschlossen':'green','Nicht weiterverfolgt':'gray'};
+const VERFAHREN_SCHUTZTHEMEN=['Mobbing oder Cybermobbing','Gewalt, Bedrohung oder Waffen','Kinderschutz','Psychische Belastung, Angst oder Rückzug'];
+const VERFAHREN_PLAENE={
+mobbing:[
+{titel:'Hinweis aufnehmen und Mobbing vom Einzelkonflikt unterscheiden',
+ ziel:'Klären, ob wiederholte, einseitige Übergriffe mit Machtungleichgewicht vorliegen oder ein einmaliger Konflikt.',
+ wann:'Am Tag des Hinweises, spätestens am nächsten Schultag.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'meldende Person, betroffene Schülerin oder Schüler',
+ handlungen:['Wer hat gemeldet und was genau wurde beobachtet oder berichtet?','Seit wann läuft das? Einmalig oder wiederholt?','Gibt es ein Machtungleichgewicht (Anzahl, Status, Körperkraft, Wissen, digitale Reichweite)?','Wo passiert es: Unterricht, Pause, Schulweg, Bus, Chat, Spielplattform?','Welche Kanäle sind betroffen, gibt es Screenshots?','Beobachtung, Vermutung und Hypothese getrennt notieren.'],
+ formulierung:'„Ich möchte verstehen, was passiert ist. Erzähl mir bitte von Anfang an, was du erlebt hast. Ich unterbreche dich nicht und bewerte nichts.“',
+ doku:'Erstmeldung mit Datum, meldender Person, geschilderten Vorfällen, Dauer und Häufigkeit.',
+ schutz:'Noch keine Konfrontation der beschuldigten Person. Keine gemeinsame Aussprache, solange ein Machtungleichgewicht möglich ist.',
+ fehler:'Die Situation vorschnell als „Streit unter Kindern“ einordnen und damit die Betroffenenperspektive übergehen.',
+ ergebnis:'Es steht fest, ob als Mobbing oder als Einzelkonflikt weitergearbeitet wird, und diese Einordnung ist begründet dokumentiert.',
+ naechster:'Bei Mobbing weiter mit Schritt 2. Bei Einzelkonflikt in das Verfahren Konfliktklärung wechseln.',
+ vorlage:'Konflikt'},
+{titel:'Sofortschutz herstellen und Beweise sichern',
+ ziel:'Die betroffene Schülerin oder den betroffenen Schüler im Schulalltag entlasten, bevor irgendetwas geklärt wird.',
+ wann:'Sofort im Anschluss an Schritt 1.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Klassenleitung, betroffene Schülerin oder Schüler, bei digitalen Inhalten Ansprechperson Medien',
+ handlungen:['Konkrete Schutzabsprache treffen: sichere Pausenorte, Sitzordnung, Wege, Ansprechperson im Notfall.','Der betroffenen Person ein klares Signal geben, dass sie nicht selbst schuld ist und dass etwas passiert.','Digitale Inhalte sichern lassen: Screenshots mit Datum, Uhrzeit und Profilnamen, nichts löschen.','Bei strafrechtlich relevanten Inhalten keine eigenen Kopien von Bildmaterial anfertigen, sondern Vorgehen mit der Schulleitung klären.','Klären, wer im Kollegium informiert sein muss, damit der Schutz im Alltag trägt.'],
+ formulierung:'„Du musst das nicht alleine aushalten. Wir legen jetzt zuerst fest, wo und bei wem du in den nächsten Tagen sicher bist.“',
+ doku:'Schutzabsprache mit Orten, Zeiten, Ansprechpersonen und Datum. Hinweis, welche Beweise wo gesichert sind.',
+ schutz:'Bei Hinweisen auf sexualisierte Inhalte, Gewaltdarstellungen oder Straftaten sofort Schulleitung einbeziehen und das Kinderschutzverfahren prüfen.',
+ fehler:'Mit der Klärung beginnen, bevor der Schutz steht. Die betroffene Person erlebt dann die Aufklärung selbst als Belastung.',
+ ergebnis:'Eine schriftliche Schutzabsprache liegt vor und die betroffene Person kann sie in eigenen Worten wiedergeben.',
+ naechster:'Falldarstellung und Zuständigkeiten im kleinen Kreis klären.',
+ vorlage:'Maßnahme'},
+{titel:'Fallteam bilden und Zuständigkeiten festlegen',
+ ziel:'Festlegen, wer was tut, damit nicht mehrere Personen unabgestimmt Gespräche führen.',
+ wann:'Innerhalb von zwei Schultagen.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Klassenleitung, Schulleitung, bei Bedarf Beratungslehrkraft',
+ handlungen:['Kurze Fallbesprechung ansetzen, maximal 30 Minuten.','Fallführung benennen: eine Person hält die Fäden zusammen.','Festlegen, wer mit der betroffenen Person spricht, wer mit den beschuldigten Personen, wer mit den Eltern.','Zeitplan für die nächsten zehn Schultage festlegen.','Festlegen, ab welchem Punkt die Schulleitung eine formale Maßnahme prüft.'],
+ formulierung:'„Wir stimmen kurz ab, wer welchen Teil übernimmt, damit die Kinder nicht von fünf Seiten befragt werden.“',
+ doku:'Protokollnotiz mit Datum, Teilnehmenden, Aufgabenverteilung und Fristen.',
+ schutz:'Informationen bleiben im Fallteam. Der Kollegiumskreis erhält nur, was für den Schutz im Alltag nötig ist.',
+ fehler:'Jede beteiligte Lehrkraft führt eigene Gespräche. Die Kinder gleichen ihre Aussagen an und die Klärung wird unmöglich.',
+ ergebnis:'Aufgaben, Fristen und Fallführung sind schriftlich festgehalten.',
+ naechster:'Getrennte Gespräche führen.',
+ vorlage:'Fallbesprechung'},
+{titel:'Getrennte Gespräche führen und das System verstehen',
+ ziel:'Die Sichtweisen einzeln erfassen und die Rollen im Klassengefüge erkennen.',
+ wann:'Innerhalb einer Woche nach Schritt 3.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'betroffene Person, beschuldigte Personen, Mitwissende, Klassenleitung',
+ handlungen:['Zuerst erneut mit der betroffenen Person sprechen: Was hat sich seit der Schutzabsprache verändert?','Danach einzeln mit den beschuldigten Personen sprechen, ohne Vorwurf, aber mit klarer Benennung des Verhaltens.','Mitwissende und Zuschauende einbeziehen, sie sind der Hebel für Veränderung.','Rollen benennen: wer handelt, wer stachelt an, wer schaut weg, wer hilft.','Bei jedem Gespräch festhalten: eigene Beobachtung, Aussage der Person, eigene Hypothese, klar getrennt.'],
+ formulierung:'„Ich bin nicht hier, um dich zu bestrafen. Ich bin hier, damit das aufhört. Was ist aus deiner Sicht passiert?“',
+ doku:'Je Gespräch ein Fallverlaufseintrag mit Datum, Dauer, Beteiligten und Ergebnis.',
+ schutz:'Keine Gegenüberstellung. Keine gemeinsame Mediation bei Machtungleichgewicht. Keine Aufforderung an die betroffene Person, sich zu entschuldigen oder Verständnis zu zeigen.',
+ fehler:'Die beschuldigte Person in Anwesenheit der betroffenen Person mit Vorwürfen konfrontieren.',
+ ergebnis:'Die Rollen im System sind beschrieben und es ist klar, welches Verhalten aufhören muss.',
+ naechster:'Eltern und Schulleitung abgestimmt einbeziehen.',
+ vorlage:'Schülergespräch'},
+{titel:'Eltern und Schulleitung abgestimmt einbeziehen',
+ ziel:'Die Erziehungsberechtigten beider Seiten sachlich informieren und die schulische Linie klarmachen.',
+ wann:'Nach Abschluss der Einzelgespräche, in der Regel innerhalb von zehn Schultagen.',
+ rolle:'Klassenleitung',
+ beteiligte:'Erziehungsberechtigte, Schulleitung, Schulsozialarbeit',
+ handlungen:['Eltern der betroffenen Person informieren: was passiert ist, was die Schule tut, was sie zu Hause tun können.','Eltern der beschuldigten Personen getrennt informieren, ohne Details über die betroffene Person preiszugeben.','Klare Erwartung formulieren: welches Verhalten sofort aufhört.','Prüfen lassen, ob eine Erziehungs- oder Ordnungsmaßnahme angezeigt ist. Diese Entscheidung trifft die Schulleitung.','Nächsten Überprüfungstermin mit allen Seiten vereinbaren.'],
+ formulierung:'„Wir schildern Ihnen, was uns bekannt ist, und sagen Ihnen, was die Schule tut. Wir möchten mit Ihnen besprechen, wie Sie zu Hause unterstützen können.“',
+ doku:'Gesprächsnotiz je Elternteil mit Datum, Anwesenden, getroffenen Vereinbarungen und nächstem Termin.',
+ schutz:'Keine Namen und keine Details über andere Kinder an Eltern weitergeben. Keine gemeinsamen Elterngespräche beider Seiten bei laufendem Machtungleichgewicht.',
+ fehler:'Beide Elternpaare an einen Tisch holen, in der Hoffnung auf eine schnelle Einigung.',
+ ergebnis:'Alle Erziehungsberechtigten sind informiert, die schulische Erwartung ist ausgesprochen und ein Überprüfungstermin steht.',
+ naechster:'Maßnahmen in der Klasse umsetzen.',
+ vorlage:'Elterngespräch'},
+{titel:'In der Klasse arbeiten, ohne die betroffene Person zu exponieren',
+ ziel:'Das Klassenklima verändern, damit Zuschauen nicht länger belohnt wird.',
+ wann:'Innerhalb von zwei bis vier Wochen nach Schritt 5.',
+ rolle:'Klassenleitung',
+ beteiligte:'Schulsozialarbeit, Klasse, bei Bedarf externe Präventionsanbieter',
+ handlungen:['Klassenbaustein ohne Namensnennung und ohne Fallbezug planen.','Zivilcourage und Handlungsmöglichkeiten der Zuschauenden zum Thema machen.','Klassenregeln gemeinsam konkretisieren: Was tun wir, wenn wir so etwas sehen?','Mit der betroffenen Person vorher absprechen, was in der Klasse thematisiert wird.','Vorhandene Präventionsangebote prüfen, etwa das Mobbingangebot der Polizei Papenburg.'],
+ formulierung:'„Wir sprechen heute nicht über einen bestimmten Fall. Wir sprechen darüber, was wir in dieser Klasse tun, wenn jemand ausgegrenzt wird.“',
+ doku:'Klassenmaßnahme mit Datum, Thema, Dauer und Durchführenden im Bereich Klassen und Projekte erfassen.',
+ schutz:'Die betroffene Person wird nicht im Klassenverband thematisiert, befragt oder als Beispiel benutzt. Ihre Zustimmung zum Thema ist vorher einzuholen.',
+ fehler:'Eine Klassenkonferenz oder Aussprache abhalten, in der die betroffene Person erklären soll, wie es ihr geht.',
+ ergebnis:'Der Klassenbaustein ist durchgeführt und dokumentiert, die Klasse hat konkrete Handlungsalternativen benannt.',
+ naechster:'Wirkung aus Betroffenensicht überprüfen.',
+ vorlage:'Maßnahme'},
+{titel:'Wirkung aus Betroffenensicht überprüfen und abschließen',
+ ziel:'Sicherstellen, dass die Übergriffe tatsächlich aufgehört haben, und den Fall bewusst abschließen oder fortführen.',
+ wann:'Nach zwei Wochen, nach sechs Wochen und vor den nächsten Ferien.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'betroffene Person, Klassenleitung, Erziehungsberechtigte',
+ handlungen:['Betroffene Person einzeln fragen: Wie oft ist seitdem etwas passiert? Wo? Durch wen?','Klassenleitung nach Beobachtungen im Unterricht und in den Pausen fragen.','Prüfen, ob sich das Verhalten nur verlagert hat, etwa in Chats oder auf den Schulweg.','Bei anhaltenden Übergriffen zurück zu Schritt 3 und Maßnahmen verschärfen.','Bei stabiler Lage Abschluss mit allen Beteiligten vereinbaren und eine Nachkontrolle festlegen.'],
+ formulierung:'„Ich möchte wissen, ob es für dich wirklich besser geworden ist, nicht ob es für uns besser aussieht.“',
+ doku:'Überprüfungseintrag je Termin mit Einschätzung und Entscheidung über Fortführung oder Abschluss.',
+ schutz:'Der Fall gilt erst als beendet, wenn die betroffene Person das bestätigt. Ein Abschluss allein nach Aktenlage ist nicht zulässig.',
+ fehler:'Den Fall schließen, weil keine neuen Meldungen mehr eingehen.',
+ ergebnis:'Es liegt eine dokumentierte Einschätzung vor, ob die Übergriffe beendet sind, und der nächste Schritt ist festgelegt.',
+ naechster:'Fallabschluss oder erneute Maßnahmenrunde.',
+ vorlage:'Abschluss'}
+],
+absence:[
+{titel:'Fehlzeiten prüfen und Muster erkennen',
+ ziel:'Aus Zahlen ein verstehbares Bild machen, bevor jemand angesprochen wird.',
+ wann:'Sobald eine Schwelle im Frühindikatorenbereich erreicht ist.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Klassenleitung, Sekretariat',
+ handlungen:['Fehlstunden, Fehltage, Verspätungen und offene Entschuldigungen gegenüberstellen.','Muster prüfen: einzelne Fächer, bestimmte Wochentage, erste oder letzte Stunden, nach Ferien.','Entschuldigt und unentschuldigt getrennt betrachten. Auch entschuldigte Fehlzeiten können Unterstützungsbedarf anzeigen.','Klassenleitung nach Beobachtungen fragen: Leistungsstand, soziale Einbindung, Auffälligkeiten.','Die fachliche Prüfung im Frühindikatorenbereich abschließen.'],
+ formulierung:'„Mir ist aufgefallen, dass sich die Fehlzeiten verändert haben. Bevor ich jemanden anspreche, möchte ich verstehen, worum es gehen könnte.“',
+ doku:'Fachliche Prüfung mit Zeitraum, Zahlen, erkanntem Muster und erster Hypothese.',
+ schutz:'Keine Diagnose und keine Schuldzuschreibung aus Zahlen ableiten. Zahlen sind ein Anlass zu fragen, kein Befund.',
+ fehler:'Direkt mit den Eltern über die Zahlen sprechen, ohne das Kind gehört zu haben.',
+ ergebnis:'Der Datensatz ist fachlich geprüft und eine begründete Hypothese liegt vor.',
+ naechster:'Gespräch mit der Schülerin oder dem Schüler.',
+ vorlage:'Fehlzeiten'},
+{titel:'Mit der Schülerin oder dem Schüler sprechen',
+ ziel:'Die Gründe aus erster Hand hören, bevor Maßnahmen geplant werden.',
+ wann:'Innerhalb von fünf Schultagen nach der Prüfung.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Schülerin oder Schüler',
+ handlungen:['Freiwilligkeit und Vertraulichkeit sowie ihre Grenzen erklären.','Offen fragen, ohne die Zahlen als Vorwurf zu benutzen.','Nach Angst, Überforderung, Konflikten, Schlaf, Medien, Aufgaben zu Hause und Gesundheit fragen.','Kurze Sicherheitsprüfung: Gibt es Hinweise auf Gefährdung?','Eine erste kleine Vereinbarung treffen, die morgen schon gelingen kann.'],
+ formulierung:'„Ich habe gesehen, dass du oft nicht da warst. Ich will dir keinen Ärger machen. Ich möchte wissen, wie es dir mit Schule gerade geht.“',
+ doku:'Fallverlaufseintrag mit Datum, Dauer, genannten Gründen, Vereinbarung und Sicherheitsprüfung.',
+ schutz:'Bei Hinweisen auf Gefährdung, Gewalt oder Selbstgefährdung sofort in das Kinderschutzverfahren wechseln.',
+ fehler:'Das Gespräch mit einer Ermahnung eröffnen. Danach kommt in der Regel nichts Belastbares mehr.',
+ ergebnis:'Die Gründe sind aus Sicht der Schülerin oder des Schülers dokumentiert und eine erste Vereinbarung steht.',
+ naechster:'Erziehungsberechtigte einbeziehen.',
+ vorlage:'Schülergespräch'},
+{titel:'Erziehungsberechtigte einbeziehen',
+ ziel:'Gemeinsam ein tragfähiges Vorgehen für den Schulbesuch finden.',
+ wann:'Innerhalb von zehn Schultagen.',
+ rolle:'Klassenleitung',
+ beteiligte:'Erziehungsberechtigte, Schulsozialarbeit',
+ handlungen:['Gespräch anbieten, nicht nur schriftlich mahnen.','Die eigene Beobachtung schildern, ohne Vorwurf, und um die Sicht der Familie bitten.','Klären, was zu Hause bereits versucht wurde und was nicht funktioniert hat.','Konkrete Absprachen treffen: Morgenablauf, Krankmeldung, Rückmeldeweg, Ansprechperson.','Nächsten Überprüfungstermin festlegen.'],
+ formulierung:'„Wir möchten gemeinsam mit Ihnen schauen, wie der Schulbesuch wieder gelingen kann. Was hilft Ihrem Kind morgens?“',
+ doku:'Elterngesprächsnotiz mit Vereinbarungen, Zuständigkeiten und Überprüfungstermin.',
+ schutz:'Keine Androhung von Maßnahmen, für die die Schulsozialarbeit nicht zuständig ist. Formale Schritte bleiben bei Schulleitung und Schulbehörde.',
+ fehler:'Nur das Stufenmodell abarbeiten und dabei den Kontakt zur Familie verlieren.',
+ ergebnis:'Eine schriftliche Vereinbarung mit der Familie liegt vor.',
+ naechster:'Unterstützung organisieren.',
+ vorlage:'Elterngespräch'},
+{titel:'Unterstützung organisieren und Stufenmodell einordnen',
+ ziel:'Passende Hilfen einsetzen und den formalen Stand sauber bestimmen.',
+ wann:'Parallel zu Schritt 3, spätestens zwei Wochen danach.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Klassenleitung, Schulleitung, bei Bedarf externe Stellen',
+ handlungen:['Stufe im Ludgerusschul-Stufenmodell bestimmen und begründen.','Schulische Entlastung prüfen: Nachteilsausgleich, Lernstoff, Sitzordnung, Ansprechperson, Wiedereinstieg in Etappen.','Externe Unterstützung prüfen: Erziehungsberatung, Jugendamt, gesundheitliche Abklärung über die Familie.','Zuständigkeiten und Fristen für jede Maßnahme festhalten.','Bei Verdacht auf Angststörung oder gesundheitliche Ursachen den Weg über die Erziehungsberechtigten gehen, nicht selbst einordnen.'],
+ formulierung:'„Wir schauen, welche Unterstützung jetzt wirklich trägt, und wer davon was übernimmt.“',
+ doku:'Maßnahmenplan mit Stufe, Begründung, Maßnahmen, Verantwortlichen und Fristen.',
+ schutz:'Keine gesundheitliche oder psychologische Einordnung durch die Schulsozialarbeit. Die Stufenzuordnung ist eine schulische Entscheidung, keine automatische Folge von Zahlen.',
+ fehler:'Die Stufe allein nach der Stundenzahl vergeben, ohne die Umstände zu bewerten.',
+ ergebnis:'Stufe, Maßnahmen und Zuständigkeiten sind dokumentiert.',
+ naechster:'Umsetzung nachhalten.',
+ vorlage:'Maßnahme'},
+{titel:'Umsetzung nachhalten',
+ ziel:'Prüfen, ob die Vereinbarungen tatsächlich greifen.',
+ wann:'Nach zwei und nach sechs Wochen.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Klassenleitung, Familie, Schülerin oder Schüler',
+ handlungen:['Anwesenheit im vereinbarten Zeitraum erneut auswerten.','Kurze Rückmeldung von Klassenleitung und Familie einholen.','Mit der Schülerin oder dem Schüler sprechen: Was hat geholfen, was nicht?','Bei ausbleibender Wirkung Maßnahmen anpassen statt wiederholen.','Bei Verschlechterung Schulleitung informieren und nächste Stufe prüfen.'],
+ formulierung:'„Wir haben vor zwei Wochen etwas vereinbart. Ich möchte ehrlich hören, was davon im Alltag funktioniert hat.“',
+ doku:'Überprüfungseintrag mit Zahlen, Rückmeldungen und Entscheidung.',
+ schutz:'Keine Sanktion als einzige Reaktion auf ausbleibende Wirkung. Zuerst prüfen, ob die Maßnahme zur Ursache passt.',
+ fehler:'Dieselbe Maßnahme mit mehr Nachdruck wiederholen.',
+ ergebnis:'Die Wirkung ist belegt und das weitere Vorgehen ist entschieden.',
+ naechster:'Abschluss oder Weitergabe.',
+ vorlage:'Fehlzeiten'},
+{titel:'Abschließen oder abgestimmt weitergeben',
+ ziel:'Den Vorgang bewusst beenden oder geordnet an die zuständige Stelle übergeben.',
+ wann:'Spätestens am Ende des Halbjahres.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Schulleitung, Erziehungsberechtigte, gegebenenfalls Jugendamt oder Schulbehörde',
+ handlungen:['Ausgangslage, Maßnahmen und Ergebnis in wenigen Sätzen zusammenfassen.','Bei stabiler Lage Abschluss mit Familie und Klassenleitung vereinbaren.','Bei anhaltender Schulverweigerung Übergabe an die zuständige Stelle vorbereiten und mit der Schulleitung abstimmen.','Erziehungsberechtigte über die Übergabe informieren, soweit rechtlich vorgesehen.','Nachkontrolle festlegen, auch nach einem Abschluss.'],
+ formulierung:'„Wir fassen zusammen, was wir gemeinsam erreicht haben, und legen fest, wie es weitergeht.“',
+ doku:'Abschluss- oder Übergabeeintrag mit Zusammenfassung, Beteiligten und Nachkontrolltermin.',
+ schutz:'Keine Weitergabe an externe Stellen ohne geklärte Rechtsgrundlage und ohne Abstimmung mit der Schulleitung.',
+ fehler:'Den Vorgang stillschweigend auslaufen lassen.',
+ ergebnis:'Abschluss oder Übergabe ist dokumentiert und allen Beteiligten bekannt.',
+ naechster:'Nachkontrolle nach dem vereinbarten Zeitraum.',
+ vorlage:'Abschluss'}
+],
+kinderschutz:[
+{titel:'Wahrnehmung festhalten und sofort Sicherheit prüfen',
+ ziel:'Klären, ob eine akute Gefahr besteht, und die Wahrnehmung sauber sichern.',
+ wann:'Sofort, am Tag der Wahrnehmung.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'wahrnehmende Person',
+ handlungen:['Besteht eine unmittelbare Gefahr für Leib oder Leben? Wenn ja, zuerst 112 oder 110 und Schulleitung.','Wörtlich notieren, was gesagt oder beobachtet wurde, mit Datum und Uhrzeit.','Beobachtung, Vermutung und Hypothese strikt trennen.','Keine eigene Ermittlung, keine Befragung des Kindes zu Details, keine Konfrontation der Familie.','Prüfen, ob das Kind heute sicher nach Hause gehen kann.'],
+ formulierung:'„Danke, dass du mir das erzählt hast. Ich muss dir ehrlich sagen, dass ich das nicht für mich behalten kann, wenn es um deine Sicherheit geht.“',
+ doku:'Wortgetreue Notiz der Wahrnehmung, Datum, Uhrzeit, anwesende Personen, Sicherheitsprüfung.',
+ schutz:'Keine Zusage absoluter Verschwiegenheit gegenüber dem Kind. Keine eigene Beweiserhebung. Keine Information der Familie, solange dadurch eine Gefährdung entstehen kann.',
+ fehler:'Das Kind ausführlich befragen und damit eine spätere fachliche Abklärung erschweren.',
+ ergebnis:'Die Wahrnehmung ist gesichert und die Frage der akuten Gefahr ist beantwortet.',
+ naechster:'Leitungslinie einhalten.',
+ vorlage:'Übergangsschwierigkeit'},
+{titel:'Leitungslinie einhalten und Schutzkonzept anwenden',
+ ziel:'Die schulinterne Meldekette gehen, wie sie im Schutzkonzept festgelegt ist.',
+ wann:'Am selben Tag.',
+ rolle:'Schulleitung',
+ beteiligte:'Schulsozialarbeit, Schulleitung',
+ handlungen:['Schulleitung informieren, auch wenn noch vieles unklar ist.','Im Schutzkonzept nachsehen, welcher Weg für diesen Fall vorgesehen ist.','Festlegen, wer ab jetzt mit wem spricht und wer die Fallführung hat.','Verabreden, wer die Dokumentation führt und wo sie abgelegt wird.','Prüfen, ob eine sofortige Schutzmaßnahme in der Schule nötig ist.'],
+ formulierung:'„Ich habe eine Wahrnehmung, die ich nach unserem Schutzkonzept an Sie weitergeben muss.“',
+ doku:'Meldenotiz mit Datum, Uhrzeit, informierten Personen und getroffenen Festlegungen.',
+ schutz:'Die Einschätzung, ob eine Kindeswohlgefährdung vorliegt, trifft nicht die Schulsozialarbeit allein.',
+ fehler:'Warten, bis mehr Klarheit besteht. Zeitverlust ist im Kinderschutz das größte Risiko.',
+ ergebnis:'Die Leitung ist informiert und die Zuständigkeit ist geklärt.',
+ naechster:'Fachberatung einholen.',
+ vorlage:'Fallbesprechung'},
+{titel:'Insoweit erfahrene Fachkraft einbeziehen',
+ ziel:'Die Gefährdungseinschätzung fachlich absichern.',
+ wann:'Innerhalb von ein bis zwei Arbeitstagen.',
+ rolle:'Insoweit erfahrene Fachkraft',
+ beteiligte:'Schulsozialarbeit, Schulleitung',
+ handlungen:['Fall anonymisiert darstellen: Alter, Lebenssituation, Wahrnehmung, Verlauf.','Gemeinsam gewichten: Anhaltspunkte, Schutzfaktoren, Risikofaktoren.','Gemeinsam festlegen, ob und wie die Erziehungsberechtigten einbezogen werden.','Festlegen, ob eine Meldung an das Jugendamt erfolgt und wer sie macht.','Vereinbarte Schritte mit Fristen festhalten.'],
+ formulierung:'„Ich schildere Ihnen den Fall anonymisiert und möchte mit Ihnen die Gefährdung einschätzen.“',
+ doku:'Beratungsnotiz mit Datum, beratender Stelle, Einschätzung und vereinbarten Schritten.',
+ schutz:'Die Beratung erfolgt anonymisiert, solange keine Meldung erfolgt. Die Verantwortung für die Entscheidung bleibt bei der Schule.',
+ fehler:'Die Beratung überspringen und direkt melden oder direkt beruhigen.',
+ ergebnis:'Eine gemeinsam getragene Einschätzung mit konkreten nächsten Schritten liegt vor.',
+ naechster:'Eltern einbeziehen oder melden.',
+ vorlage:'Fallbesprechung'},
+{titel:'Erziehungsberechtigte einbeziehen, soweit der Schutz es zulässt',
+ ziel:'Die Familie einbeziehen, ohne den Schutz des Kindes zu gefährden.',
+ wann:'Nach der Fachberatung, nur wenn diese es vorsieht.',
+ rolle:'Schulleitung',
+ beteiligte:'Erziehungsberechtigte, Schulsozialarbeit',
+ handlungen:['Vorher klären: Erhöht das Gespräch die Gefahr für das Kind? Wenn ja, findet es nicht statt.','Sachlich schildern, was aufgefallen ist, ohne Anschuldigung.','Hilfen anbieten und konkret benennen.','Klar sagen, welche Schritte die Schule unabhängig von der Zustimmung geht.','Ergebnis und Vereinbarungen schriftlich festhalten.'],
+ formulierung:'„Uns ist etwas aufgefallen, das wir mit Ihnen besprechen möchten. Wir wollen gemeinsam mit Ihnen eine Lösung finden.“',
+ doku:'Gesprächsnotiz mit Datum, Anwesenden, Inhalten und Vereinbarungen.',
+ schutz:'Kein Elterngespräch bei Verdacht auf Gewalt durch Erziehungsberechtigte, bevor die Fachberatung das freigegeben hat.',
+ fehler:'Die Familie aus Höflichkeit informieren, obwohl dadurch der Schutz des Kindes sinkt.',
+ ergebnis:'Entweder ist ein dokumentiertes Elterngespräch erfolgt oder die begründete Entscheidung dagegen ist festgehalten.',
+ naechster:'Meldung oder Hilfeplanung.',
+ vorlage:'Elterngespräch'},
+{titel:'Meldung oder Hilfeplanung umsetzen',
+ ziel:'Die entschiedenen Schritte tatsächlich und nachweisbar vollziehen.',
+ wann:'Ohne Verzögerung nach der Entscheidung.',
+ rolle:'Jugendamt und ASD',
+ beteiligte:'Schulleitung, Schulsozialarbeit, Jugendamt',
+ handlungen:['Meldung schriftlich und sachlich verfassen: Beobachtung, Verlauf, bisherige Schritte.','Beobachtung und Bewertung im Text klar trennen.','Ansprechperson im Jugendamt benennen und Rückmeldeweg klären.','Schulische Schutzmaßnahmen parallel weiterführen.','Termin für die Rückmeldung setzen und im Cockpit als Wiedervorlage anlegen.'],
+ formulierung:'„Wir melden Ihnen folgende Wahrnehmungen und bitten um Rückmeldung zum weiteren Vorgehen.“',
+ doku:'Kopie oder Zusammenfassung der Meldung, Datum, Empfänger, vereinbarter Rückmeldeweg.',
+ schutz:'Keine Weitergabe von Informationen, die über den Schutzzweck hinausgehen. Das Cockpit nimmt keinen Kontakt zu Behörden auf, das tut immer eine Person.',
+ fehler:'Mündlich melden und nichts schriftlich festhalten.',
+ ergebnis:'Die Meldung oder Hilfeplanung ist vollzogen und dokumentiert.',
+ naechster:'Begleitung und Überprüfung.',
+ vorlage:'Weitervermittlung'},
+{titel:'Kind weiter begleiten und Verlauf überprüfen',
+ ziel:'Das Kind in der Schule stabil halten und den Verlauf im Blick behalten.',
+ wann:'Fortlaufend, mit festen Überprüfungsterminen.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Kind, Klassenleitung, Jugendamt',
+ handlungen:['Verlässlichen Kontakt zum Kind halten, ohne es zum Thema zu machen.','Mit der Klassenleitung Beobachtungen abgleichen.','Rückmeldung der zuständigen Stelle nachhalten, wenn sie ausbleibt.','Schulische Entlastung anpassen, wenn sich die Lage verändert.','Bei neuer Zuspitzung zurück zu Schritt 1.'],
+ formulierung:'„Ich bin weiter für dich da. Du musst nicht darüber sprechen, wenn du nicht willst.“',
+ doku:'Kurzeinträge zu Kontakten, Beobachtungen und Rückmeldungen.',
+ schutz:'Keine wiederholte Befragung des Kindes zum Vorfall. Keine Zusagen über den Verfahrensausgang.',
+ fehler:'Nach der Meldung den Kontakt abbrechen, weil nun eine andere Stelle zuständig ist.',
+ ergebnis:'Der Verlauf ist dokumentiert und die schulische Begleitung ist gesichert.',
+ naechster:'Fortführung oder abgestimmter Abschluss.',
+ vorlage:'Rückmeldung'}
+],
+konflikt:[
+{titel:'Konflikt beschreiben und Freiwilligkeit klären',
+ ziel:'Verstehen, worum es geht, und prüfen, ob eine gemeinsame Klärung überhaupt geeignet ist.',
+ wann:'Am Tag der Meldung oder am Folgetag.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'beteiligte Schüler:innen, meldende Lehrkraft',
+ handlungen:['Beide Seiten einzeln kurz anhören, ohne Bewertung.','Prüfen, ob ein Machtungleichgewicht besteht. Wenn ja, kein gemeinsames Gespräch, sondern Wechsel ins Mobbingverfahren.','Freiwilligkeit klären: Wollen beide wirklich eine Klärung?','Klären, ob Erwachsene bereits eingegriffen haben und mit welchem Ergebnis.','Dringlichkeit einschätzen: Droht eine körperliche Auseinandersetzung?'],
+ formulierung:'„Ich höre mir zuerst beide Seiten einzeln an. Danach entscheiden wir gemeinsam, ob ein Gespräch zu zweit Sinn ergibt.“',
+ doku:'Kurznotiz mit Anlass, Beteiligten, Einschätzung zu Machtgefälle und Freiwilligkeit.',
+ schutz:'Bei Machtungleichgewicht, Mobbing, Gewalt oder Bedrohung keine gemeinsame Klärung und keine Mediation.',
+ fehler:'Beide sofort zusammensetzen, weil das schneller geht.',
+ ergebnis:'Es ist entschieden und begründet, ob eine gemeinsame Klärung stattfindet.',
+ naechster:'Gemeinsames Gespräch vorbereiten oder Verfahren wechseln.',
+ vorlage:'Konflikt'},
+{titel:'Gemeinsames Gespräch vorbereiten',
+ ziel:'Beide Seiten so vorbereiten, dass ein Gespräch gelingen kann.',
+ wann:'Innerhalb von drei Schultagen.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'beteiligte Schüler:innen',
+ handlungen:['Mit jeder Seite einzeln das eigene Anliegen in einem Satz formulieren.','Gesprächsregeln vorher gemeinsam festlegen.','Ort und Zeit so wählen, dass niemand zuschaut.','Klären, ob eine Vertrauensperson dabei sein soll.','Absprechen, was passiert, wenn das Gespräch abgebrochen werden muss.'],
+ formulierung:'„Überlege dir bis morgen einen Satz: Was ist für dich das Wichtigste, das die andere Seite verstehen soll?“',
+ doku:'Vorbereitungsnotiz mit Anliegen beider Seiten und vereinbarten Regeln.',
+ schutz:'Niemand wird zum Gespräch gedrängt. Ein Rückzug ist jederzeit möglich und wird nicht sanktioniert.',
+ fehler:'Die Regeln erst im Gespräch einführen, wenn es bereits eskaliert.',
+ ergebnis:'Beide Seiten kennen Ablauf und Regeln und stimmen zu.',
+ naechster:'Klärungsgespräch führen.',
+ vorlage:'Vereinbarung'},
+{titel:'Klärungsgespräch führen',
+ ziel:'Eine tragfähige Vereinbarung erarbeiten, die beide mittragen.',
+ wann:'Zum vereinbarten Termin.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'beteiligte Schüler:innen',
+ handlungen:['Reihum sprechen lassen, ohne Unterbrechung.','Beide Sichtweisen sichtbar machen, ohne eine Wahrheit festzulegen.','Von der Schuldfrage zur Zukunftsfrage wechseln: Was soll ab morgen anders sein?','Konkrete, überprüfbare Vereinbarungen formulieren, höchstens drei.','Vereinbarung schriftlich festhalten und beiden aushändigen.'],
+ formulierung:'„Wir suchen nicht, wer angefangen hat. Wir suchen, was ab morgen anders läuft.“',
+ doku:'Vereinbarung mit Datum, Beteiligten, drei Punkten und Überprüfungstermin.',
+ schutz:'Keine erzwungene Entschuldigung. Das Gespräch wird abgebrochen, wenn eine Seite unter Druck gerät.',
+ fehler:'Eine Entschuldigung als Gesprächsziel setzen.',
+ ergebnis:'Eine unterschriebene oder festgehaltene Vereinbarung liegt vor.',
+ naechster:'Umsetzung im Alltag begleiten.',
+ vorlage:'Vereinbarung'},
+{titel:'Umsetzung im Alltag begleiten',
+ ziel:'Die Vereinbarung im Schulalltag verankern.',
+ wann:'In den zwei Wochen nach dem Gespräch.',
+ rolle:'Klassenleitung',
+ beteiligte:'Schulsozialarbeit, Klassenleitung',
+ handlungen:['Klassenleitung über die Vereinbarung informieren, soweit nötig.','Gegebenenfalls Sitzordnung, Gruppeneinteilung oder Pausenorte anpassen.','Kurze Rückfragen bei beiden Seiten, getrennt und beiläufig.','Rückmeldungen aus dem Kollegium einholen.','Bei erneuten Vorfällen zurück zu Schritt 1 und Einordnung überprüfen.'],
+ formulierung:'„Kurz gefragt: Hat das mit der Sitzordnung so funktioniert, wie wir es besprochen haben?“',
+ doku:'Kurzeinträge zu Rückmeldungen und Anpassungen.',
+ schutz:'Keine öffentliche Thematisierung der Vereinbarung in der Klasse.',
+ fehler:'Die Vereinbarung treffen und danach nicht mehr nachfragen.',
+ ergebnis:'Es ist dokumentiert, ob die Vereinbarung im Alltag trägt.',
+ naechster:'Überprüfung.',
+ vorlage:'Rückmeldung'},
+{titel:'Wirkung überprüfen',
+ ziel:'Feststellen, ob der Konflikt beendet ist oder ob mehr nötig ist.',
+ wann:'Nach zwei und nach sechs Wochen.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'beteiligte Schüler:innen, Klassenleitung',
+ handlungen:['Beide Seiten einzeln fragen, ob sich etwas verändert hat.','Prüfen, ob sich der Konflikt nur verlagert hat, etwa in Chats.','Beobachtungen der Klassenleitung einholen.','Bei Wiederholung prüfen, ob es sich doch um Mobbing handelt.','Entscheidung über Abschluss oder Fortführung treffen.'],
+ formulierung:'„Ist es für dich wirklich ruhiger geworden oder tust du nur so, damit Ruhe ist?“',
+ doku:'Überprüfungseintrag mit Einschätzung und Entscheidung.',
+ schutz:'Kein Abschluss gegen die Einschätzung einer betroffenen Person.',
+ fehler:'Ruhe mit Lösung verwechseln.',
+ ergebnis:'Die Wirkung ist eingeschätzt und die Entscheidung ist dokumentiert.',
+ naechster:'Abschluss oder Wechsel ins Mobbingverfahren.',
+ vorlage:'Abschluss'},
+{titel:'Abschließen und Rückfallweg vereinbaren',
+ ziel:'Den Vorgang beenden und einen klaren Weg für den Wiederholungsfall festlegen.',
+ wann:'Nach der positiven Überprüfung.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'beteiligte Schüler:innen, Klassenleitung',
+ handlungen:['Erreichtes gemeinsam benennen.','Festlegen, an wen sich beide wenden, wenn es wieder losgeht.','Klassenleitung über den Abschluss informieren.','Bei Bedarf Eltern kurz informieren.','Nachkontrolle in sechs bis acht Wochen festlegen.'],
+ formulierung:'„Wenn es doch wieder anfängt, kommst du direkt zu mir. Du musst nicht warten, bis es schlimm ist.“',
+ doku:'Abschlusseintrag mit Ergebnis, Rückfallweg und Nachkontrolltermin.',
+ schutz:'Keine Zusage, dass der Konflikt endgültig gelöst ist.',
+ fehler:'Ohne Rückfallweg abschließen.',
+ ergebnis:'Der Abschluss und der Rückfallweg sind dokumentiert und beiden bekannt.',
+ naechster:'Nachkontrolle.',
+ vorlage:'Abschluss'}
+],
+selfharm:[
+{titel:'Sicherheit prüfen und nicht allein lassen',
+ ziel:'Die unmittelbare Sicherheit der Schülerin oder des Schülers herstellen.',
+ wann:'Sofort.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'betroffene Person, Schulleitung',
+ handlungen:['Besteht eine unmittelbare Gefahr? Wenn ja, 112 und Schulleitung, die Person nicht allein lassen.','Ruhig bleiben, zuhören, nicht bewerten, nicht abwiegeln.','Konkret und ruhig nach der aktuellen Sicherheit fragen.','Keine Versprechen absoluter Verschwiegenheit machen.','Für den Rest des Schultages eine verlässliche Begleitung sicherstellen.'],
+ formulierung:'„Ich nehme das ernst. Ich bleibe jetzt bei dir und wir überlegen gemeinsam, wer dir helfen kann.“',
+ doku:'Wortgetreue Notiz, Datum, Uhrzeit, Sicherheitsprüfung, getroffene Sofortmaßnahmen.',
+ schutz:'Keine Diagnose, keine Bewertung, keine Methodendetails aufnehmen oder weitergeben. Bei akuter Gefahr hat der Schutz Vorrang vor jeder Dokumentation.',
+ fehler:'Beruhigen wollen und dadurch das Thema kleinreden.',
+ ergebnis:'Die aktuelle Sicherheit ist eingeschätzt und die Begleitung ist geregelt.',
+ naechster:'Leitung und Fachberatung.',
+ vorlage:'Übergangsschwierigkeit'},
+{titel:'Schulleitung informieren und Fachberatung einholen',
+ ziel:'Die Verantwortung auf mehrere Schultern verteilen und fachlich absichern.',
+ wann:'Am selben Tag.',
+ rolle:'Schulleitung',
+ beteiligte:'Schulsozialarbeit, Schulleitung, Schulpsychologie',
+ handlungen:['Schulleitung informieren und gemeinsames Vorgehen festlegen.','Schulpsychologischen Dienst oder Fachberatung kontaktieren.','Klären, wer die Erziehungsberechtigten informiert und wann.','Festlegen, wer im Kollegium was wissen muss.','Rückmeldeweg und Zuständigkeiten schriftlich festhalten.'],
+ formulierung:'„Ich habe eine Situation, bei der ich fachliche Rückendeckung brauche.“',
+ doku:'Meldenotiz mit Datum, Uhrzeit, beteiligten Stellen und Festlegungen.',
+ schutz:'Informationen nur an Personen, die für den Schutz zuständig sind. Kein Thema im Lehrerzimmer.',
+ fehler:'Allein weiterarbeiten, um die Person nicht zu enttäuschen.',
+ ergebnis:'Leitung und Fachberatung sind eingebunden, die Zuständigkeiten sind geklärt.',
+ naechster:'Erziehungsberechtigte einbeziehen.',
+ vorlage:'Fallbesprechung'},
+{titel:'Erziehungsberechtigte einbeziehen',
+ ziel:'Die Familie in die Verantwortung für die weitere Abklärung bringen.',
+ wann:'In der Regel am selben Tag.',
+ rolle:'Schulleitung',
+ beteiligte:'Erziehungsberechtigte, Schulsozialarbeit',
+ handlungen:['Der betroffenen Person vorher sagen, dass und warum die Eltern informiert werden.','Sachlich schildern, was beobachtet oder berichtet wurde.','Konkrete nächste Schritte benennen: ärztliche oder therapeutische Abklärung.','Notfallnummern und Anlaufstellen schriftlich mitgeben.','Festhalten, was die Familie zugesagt hat.'],
+ formulierung:'„Wir möchten Sie über etwas informieren, das uns Sorgen macht, und mit Ihnen besprechen, wie es jetzt weitergeht.“',
+ doku:'Gesprächsnotiz mit Datum, Anwesenden, Inhalten und Zusagen.',
+ schutz:'Wenn die Information der Eltern die Gefahr erhöhen könnte, vorher mit Fachberatung und Schulleitung klären.',
+ fehler:'Die Eltern ohne Vorbereitung der betroffenen Person informieren.',
+ ergebnis:'Die Familie ist informiert und die nächsten Schritte sind verabredet.',
+ naechster:'Externe Hilfe anbahnen.',
+ vorlage:'Elterngespräch'},
+{titel:'Externe Hilfe anbahnen',
+ ziel:'Die Schülerin oder den Schüler an die zuständige fachliche Stelle anbinden.',
+ wann:'Innerhalb weniger Tage.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Familie, externe Fachstelle',
+ handlungen:['Passende Stelle aus dem Netzwerk heraussuchen und Kontaktdaten weitergeben.','Der Familie anbieten, den ersten Kontakt gemeinsam vorzubereiten.','Klären, was die Schule zur Entlastung beitragen kann.','Vereinbaren, wer die Schule über den Verlauf informiert und in welchem Umfang.','Wiedervorlage setzen, um den Kontakt nachzuhalten.'],
+ formulierung:'„Ich kann Ihnen die Stelle nennen und Sie beim ersten Anruf unterstützen. Anrufen müssen Sie selbst.“',
+ doku:'Weitervermittlungseintrag mit Stelle, Datum und Rückmeldeweg.',
+ schutz:'Die Schulsozialarbeit übernimmt keine Therapie und keine Krisenbehandlung. Das Cockpit nimmt keinen Kontakt zu einer Einrichtung auf.',
+ fehler:'Die Vermittlung zusagen und die Umsetzung nicht nachhalten.',
+ ergebnis:'Eine konkrete Stelle ist benannt und der erste Kontakt ist verabredet.',
+ naechster:'Schulische Begleitung.',
+ vorlage:'Weitervermittlung'},
+{titel:'Schulische Begleitung und Entlastung sichern',
+ ziel:'Den Schulalltag so gestalten, dass er entlastet statt zusätzlich zu belasten.',
+ wann:'Fortlaufend.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Klassenleitung, betroffene Person',
+ handlungen:['Feste, verlässliche Kontaktzeiten anbieten.','Mit der Klassenleitung Entlastungen abstimmen: Leistungsdruck, Präsentationen, Gruppenarbeit.','Eine Rückzugsmöglichkeit und eine Ansprechperson für akute Momente festlegen.','Regelmäßig, aber unaufdringlich nachfragen.','Beobachtete Veränderungen sachlich dokumentieren.'],
+ formulierung:'„Du hast jeden Dienstag in der zweiten großen Pause einen festen Platz bei mir. Du musst nichts erzählen.“',
+ doku:'Kurzeinträge zu Kontakten, Entlastungen und Beobachtungen.',
+ schutz:'Keine Kontrolle des Körpers, keine Nachschau, keine Bewertung von Verhalten als Symptom.',
+ fehler:'Dauerbeobachtung einrichten und damit Kontrolle statt Beziehung herstellen.',
+ ergebnis:'Feste Begleitung und Entlastungen sind verabredet und dokumentiert.',
+ naechster:'Verlauf überprüfen.',
+ vorlage:'Maßnahme'},
+{titel:'Verlauf überprüfen und Zuständigkeiten nachhalten',
+ ziel:'Sicherstellen, dass die externe Hilfe angelaufen ist und die Lage stabil bleibt.',
+ wann:'Nach zwei Wochen, danach in festen Abständen.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Familie, externe Stelle, Klassenleitung',
+ handlungen:['Nachfragen, ob der Kontakt zur Fachstelle zustande gekommen ist.','Rückmeldungen aus dem Kollegium einholen.','Bei erneuter Zuspitzung zurück zu Schritt 1.','Prüfen, ob die schulischen Entlastungen noch passen.','Verlauf und Entscheidungen dokumentieren.'],
+ formulierung:'„Ich frage nach, wie es mit dem Termin geklappt hat, damit nichts liegen bleibt.“',
+ doku:'Überprüfungseinträge mit Datum, Rückmeldung und Entscheidung.',
+ schutz:'Keine Einschätzung des therapeutischen Verlaufs durch die Schule.',
+ fehler:'Davon ausgehen, dass die Hilfe läuft, weil nichts mehr gemeldet wird.',
+ ergebnis:'Der Verlauf ist dokumentiert und die Zuständigkeiten sind geklärt.',
+ naechster:'Fortführung oder abgestimmter Abschluss.',
+ vorlage:'Rückmeldung'}
+],
+psychisch:[
+{titel:'Beobachtungen sammeln und einordnen',
+ ziel:'Aus verstreuten Eindrücken ein beschreibbares Bild machen, ohne zu deuten.',
+ wann:'Innerhalb einer Woche nach dem ersten Hinweis.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Klassenleitung, Fachlehrkräfte',
+ handlungen:['Konkrete Beobachtungen sammeln: Rückzug, Fehlzeiten, Leistungsabfall, Tagesmüdigkeit, Reizbarkeit.','Seit wann? In welchen Situationen? Wie oft?','Rückmeldungen aus dem Kollegium einholen, ohne das Kind zum Gesprächsthema zu machen.','Beobachtung, Vermutung und Hypothese getrennt aufschreiben.','Kurze Sicherheitsprüfung: Gibt es Hinweise auf Selbstgefährdung?'],
+ formulierung:'„Mir ist aufgefallen, dass sie sich in den letzten Wochen zurückzieht. Ist Ihnen im Unterricht etwas aufgefallen?“',
+ doku:'Beobachtungsnotiz mit Zeitraum, konkreten Beobachtungen und Sicherheitsprüfung.',
+ schutz:'Keine Diagnose, keine Verdachtsäußerung über Krankheitsbilder, auch nicht intern. Bei Hinweisen auf Selbstgefährdung sofort in das entsprechende Verfahren wechseln.',
+ fehler:'Eine Vermutung als Befund weitergeben, etwa „hat vermutlich eine Depression“.',
+ ergebnis:'Eine sachliche Beobachtungsgrundlage liegt vor.',
+ naechster:'Gespräch mit der Schülerin oder dem Schüler.',
+ vorlage:'Lehrkräfterückmeldung'},
+{titel:'Kontakt aufnehmen und Beziehung sichern',
+ ziel:'Einen tragfähigen Kontakt herstellen, ohne Druck aufzubauen.',
+ wann:'Innerhalb von fünf Schultagen.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Schülerin oder Schüler',
+ handlungen:['Niedrigschwellig ansprechen, nicht im Beisein der Klasse.','Freiwilligkeit betonen, kein Zwang zum Erzählen.','Nach Belastungen fragen, nicht nach Symptomen.','Ressourcen erfragen: Was tut gut? Wer hilft?','Ein zweites Gespräch anbieten und einen festen Zeitpunkt vereinbaren.'],
+ formulierung:'„Du musst mir nichts erzählen. Ich wollte dir nur sagen, dass mir aufgefallen ist, dass es dir gerade nicht leicht fällt.“',
+ doku:'Fallverlaufseintrag mit Datum, Dauer, Thema und Vereinbarung.',
+ schutz:'Keine Befragung zu Symptomen, keine Selbsttests, keine Einordnung in Krankheitsbilder.',
+ fehler:'Im ersten Gespräch bereits eine Weitervermittlung ansprechen.',
+ ergebnis:'Ein Kontakt besteht und ein Folgetermin ist vereinbart.',
+ naechster:'Erziehungsberechtigte einbeziehen.',
+ vorlage:'Schülergespräch'},
+{titel:'Erziehungsberechtigte einbeziehen',
+ ziel:'Die Familie beteiligen und den Weg zur fachlichen Abklärung öffnen.',
+ wann:'Nach dem zweiten Gespräch, in Absprache mit der Schülerin oder dem Schüler.',
+ rolle:'Klassenleitung',
+ beteiligte:'Erziehungsberechtigte, Schulsozialarbeit',
+ handlungen:['Vorher mit der Schülerin oder dem Schüler besprechen, was gesagt wird.','Beobachtungen schildern, keine Deutungen.','Fragen, ob der Familie Ähnliches auffällt.','Auf die Möglichkeit einer ärztlichen oder psychologischen Abklärung hinweisen.','Schulische Entlastung anbieten und konkret benennen.'],
+ formulierung:'„Wir beobachten Folgendes in der Schule. Wir bewerten das nicht, wir möchten aber gemeinsam mit Ihnen schauen, was helfen kann.“',
+ doku:'Gesprächsnotiz mit Beobachtungen, Reaktion der Familie und Vereinbarungen.',
+ schutz:'Keine Empfehlung einer bestimmten Diagnose oder Behandlung. Die Abklärung veranlasst die Familie.',
+ fehler:'Den Eltern sagen, das Kind brauche eine Therapie.',
+ ergebnis:'Die Familie ist informiert und der weitere Weg ist besprochen.',
+ naechster:'Entlastung in der Schule umsetzen.',
+ vorlage:'Elterngespräch'},
+{titel:'Schulische Entlastung umsetzen',
+ ziel:'Den Schulalltag an die aktuelle Belastbarkeit anpassen.',
+ wann:'Sofort nach dem Elterngespräch.',
+ rolle:'Klassenleitung',
+ beteiligte:'Fachlehrkräfte, Schulsozialarbeit',
+ handlungen:['Konkrete Entlastungen festlegen: Leistungssituationen, Referate, Gruppenarbeit, Zeitfenster.','Rückzugsort und Ansprechperson für akute Momente benennen.','Notwendige Informationen im Kollegium abgestimmt weitergeben, nicht mehr als nötig.','Prüfen, ob ein Nachteilsausgleich in Frage kommt, Entscheidung durch die Schule.','Vereinbarungen schriftlich festhalten und der Familie mitgeben.'],
+ formulierung:'„Wir passen an, was gerade zu viel ist, und behalten den Rest bewusst bei.“',
+ doku:'Maßnahmenplan mit Entlastungen, Verantwortlichen und Überprüfungstermin.',
+ schutz:'Keine Weitergabe gesundheitlicher Angaben an das Kollegium ohne Einverständnis der Familie.',
+ fehler:'Alle Anforderungen aussetzen und damit den Wiedereinstieg erschweren.',
+ ergebnis:'Die Entlastungen sind schriftlich festgelegt und im Kollegium bekannt.',
+ naechster:'Externe Anbindung prüfen.',
+ vorlage:'Maßnahme'},
+{titel:'Externe Anbindung prüfen und begleiten',
+ ziel:'Bei Bedarf eine fachliche Stelle einbinden.',
+ wann:'Wenn sich nach vier bis sechs Wochen nichts verbessert.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Familie, Erziehungsberatung oder Schulpsychologie',
+ handlungen:['Passende Stelle aus dem Netzwerk auswählen und der Familie vorstellen.','Unterstützung bei der Kontaktaufnahme anbieten, ohne sie zu übernehmen.','Klären, welche Informationen die Schule mit Einverständnis weitergeben darf.','Rückmeldeweg vereinbaren.','Wiedervorlage setzen.'],
+ formulierung:'„Es gibt eine Stelle, die genau dafür da ist. Ich kann Ihnen die Nummer geben und beim ersten Schritt helfen.“',
+ doku:'Weitervermittlungseintrag mit Stelle, Datum und Rückmeldeweg.',
+ schutz:'Keine Kontaktaufnahme durch die Schule ohne Einverständnis. Das Cockpit nimmt von sich aus keinen Kontakt auf.',
+ fehler:'Die Familie mit einer Liste von Adressen allein lassen.',
+ ergebnis:'Entweder ist eine Anbindung angebahnt oder die begründete Entscheidung dagegen ist dokumentiert.',
+ naechster:'Verlauf überprüfen.',
+ vorlage:'Weitervermittlung'},
+{titel:'Verlauf überprüfen',
+ ziel:'Feststellen, ob sich die Lage stabilisiert hat.',
+ wann:'Nach sechs Wochen und vor den nächsten Ferien.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Schülerin oder Schüler, Klassenleitung, Familie',
+ handlungen:['Beobachtungen aus Schritt 1 erneut abfragen und vergleichen.','Mit der Schülerin oder dem Schüler sprechen: Was hat geholfen?','Entlastungen anpassen oder schrittweise zurücknehmen.','Bei Verschlechterung Sicherheitsprüfung wiederholen.','Entscheidung über Fortführung oder Abschluss treffen.'],
+ formulierung:'„Wir schauen ehrlich: Was hat sich verändert und was noch nicht?“',
+ doku:'Überprüfungseintrag mit Vergleich, Einschätzung und Entscheidung.',
+ schutz:'Keine Bewertung eines Krankheitsverlaufs durch die Schule.',
+ fehler:'Entlastungen zu früh vollständig beenden.',
+ ergebnis:'Der Verlauf ist eingeschätzt und das weitere Vorgehen ist entschieden.',
+ naechster:'Fortführung oder Abschluss.',
+ vorlage:'Abschluss'}
+],
+familie:[
+{titel:'Anliegen der Familie verstehen',
+ ziel:'Klären, worum es geht und wer eigentlich den Auftrag stellt.',
+ wann:'Beim ersten Kontakt.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Erziehungsberechtigte, gegebenenfalls Schülerin oder Schüler',
+ handlungen:['Wer wendet sich an wen und mit welchem Anliegen?','Erwartung der Familie an die Schule klären.','Grenzen der Schulsozialarbeit früh und freundlich benennen.','Vertraulichkeit und ihre Grenzen erklären.','Dringlichkeit einschätzen: Grundversorgung, Wohnsituation, Sicherheit.'],
+ formulierung:'„Damit ich Ihnen wirklich helfen kann, sagen Sie mir bitte zuerst, was Sie sich von uns erhoffen.“',
+ doku:'Erstkontakt mit Datum, Anliegen, Erwartung und Einschätzung der Dringlichkeit.',
+ schutz:'Keine Rechtsberatung, keine Beratung in Sorgerechts- oder Unterhaltsfragen. Bei Hinweisen auf Gefährdung in das Kinderschutzverfahren wechseln.',
+ fehler:'Zusagen machen, die die Schulsozialarbeit nicht halten kann.',
+ ergebnis:'Anliegen und Auftrag sind geklärt und dokumentiert.',
+ naechster:'Situation gemeinsam sortieren.',
+ vorlage:'Elterngespräch'},
+{titel:'Situation gemeinsam sortieren',
+ ziel:'Aus einem diffusen Problemberg zwei oder drei bearbeitbare Punkte machen.',
+ wann:'Im ersten oder zweiten Gespräch.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Erziehungsberechtigte',
+ handlungen:['Belastungen und Ressourcen gemeinsam aufschreiben.','Danach fragen, was die Familie bereits versucht hat.','Gemeinsam priorisieren: Was muss zuerst besser werden?','Trennen, was schulisch lösbar ist und was nicht.','Zwei bis drei konkrete Ziele formulieren.'],
+ formulierung:'„Wir schreiben zusammen auf, was gerade alles auf Ihnen lastet, und suchen dann den einen Punkt, der zuerst leichter werden soll.“',
+ doku:'Zielvereinbarung mit zwei bis drei beobachtbaren Zielen.',
+ schutz:'Keine Bewertung der Erziehungskompetenz. Keine Einordnung familiärer Konflikte in Krankheitsbilder.',
+ fehler:'Alle Probleme gleichzeitig angehen.',
+ ergebnis:'Zwei bis drei priorisierte Ziele stehen fest.',
+ naechster:'Schulische Möglichkeiten ausschöpfen.',
+ vorlage:'Vereinbarung'},
+{titel:'Schulische Möglichkeiten ausschöpfen',
+ ziel:'Zuerst nutzen, was die Schule selbst anbieten kann.',
+ wann:'Innerhalb von zwei Wochen.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Klassenleitung, Sekretariat, Ganztag',
+ handlungen:['Prüfen: Ganztag, Hausaufgabenbetreuung, Förderangebote, Mittagessen, Bildungs- und Teilhabeleistungen.','Mit der Klassenleitung Entlastungen für das Kind abstimmen.','Anträge und Formulare gemeinsam mit der Familie sichten.','Konkrete Zuständigkeiten und Fristen festhalten.','Termine im Cockpit als Wiedervorlage anlegen.'],
+ formulierung:'„Bevor wir nach außen gehen, schauen wir, was wir hier im Haus für Sie tun können.“',
+ doku:'Maßnahmenliste mit Angeboten, Zuständigen und Fristen.',
+ schutz:'Keine Weitergabe finanzieller Angaben an Personen, die sie nicht benötigen.',
+ fehler:'Sofort nach außen vermitteln, obwohl schulische Angebote ungenutzt sind.',
+ ergebnis:'Die schulischen Möglichkeiten sind geprüft und die genutzten sind festgehalten.',
+ naechster:'Externe Hilfen anbahnen.',
+ vorlage:'Maßnahme'},
+{titel:'Externe Hilfen anbahnen',
+ ziel:'Passgenaue Unterstützung außerhalb der Schule vermitteln.',
+ wann:'Wenn schulische Angebote nicht ausreichen.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Familie, Erziehungsberatung, Jugendamt, weitere Stellen',
+ handlungen:['Passende Stellen aus dem Netzwerk auswählen und erklären, was dort passiert.','Unterschied zwischen Beratung und Hilfe zur Erziehung verständlich machen.','Unterstützung bei der Antragstellung oder beim Erstkontakt anbieten.','Mit Einverständnis klären, welche Informationen weitergegeben werden.','Rückmeldeweg und Wiedervorlage festlegen.'],
+ formulierung:'„Die Erziehungsberatung ist kostenlos und vertraulich. Sie entscheiden, was Sie dort erzählen.“',
+ doku:'Weitervermittlungseintrag mit Stelle, Datum, Einverständnis und Rückmeldeweg.',
+ schutz:'Keine Weitergabe ohne Einverständnis, außer bei Gefährdung. Das Cockpit nimmt selbst keinen Kontakt auf.',
+ fehler:'Die Familie an das Jugendamt verweisen, ohne die Sorge davor anzusprechen.',
+ ergebnis:'Eine konkrete Stelle ist benannt und der Kontakt ist verabredet.',
+ naechster:'Umsetzung begleiten.',
+ vorlage:'Weitervermittlung'},
+{titel:'Umsetzung begleiten',
+ ziel:'Dranbleiben, damit Verabredungen nicht im Alltag untergehen.',
+ wann:'In den vier Wochen nach Schritt 4.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Familie, beteiligte Stellen',
+ handlungen:['Nachfragen, ob Kontakte und Anträge zustande gekommen sind.','Hürden ansprechen: Sprache, Formulare, Termine, Fahrtwege.','Bei Bedarf gemeinsame Termine vorbereiten.','Rückmeldungen der beteiligten Stellen dokumentieren.','Ziele aus Schritt 2 auf Aktualität prüfen.'],
+ formulierung:'„Ich frage kurz nach, wie es mit dem Termin geklappt hat. Wenn es nicht geklappt hat, schauen wir woran es lag.“',
+ doku:'Kurzeinträge zu Rückmeldungen und Anpassungen.',
+ schutz:'Keine Kontrolle der Familie. Begleitung bleibt freiwillig.',
+ fehler:'Nach der Vermittlung nicht mehr nachfragen.',
+ ergebnis:'Der Umsetzungsstand ist dokumentiert.',
+ naechster:'Überprüfen und abschließen.',
+ vorlage:'Rückmeldung'},
+{titel:'Überprüfen und abschließen',
+ ziel:'Wirkung einschätzen und den Fall bewusst beenden.',
+ wann:'Nach acht bis zwölf Wochen.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Familie, Klassenleitung',
+ handlungen:['Ziele aus Schritt 2 durchgehen: erreicht, teilweise, nicht erreicht.','Situation des Kindes in der Schule einschätzen.','Familie fragen, was geholfen hat.','Bei laufender externer Hilfe schulische Rolle neu klären.','Abschluss oder Fortführung mit allen Beteiligten vereinbaren.'],
+ formulierung:'„Wir schauen auf die Ziele von damals: Was ist besser geworden, was nicht?“',
+ doku:'Abschluss- oder Verlaufseintrag mit Zielbilanz und Entscheidung.',
+ schutz:'Kein Abschluss, solange Hinweise auf eine Gefährdung offen sind.',
+ fehler:'Abschließen, weil die Familie sich nicht mehr meldet.',
+ ergebnis:'Die Zielbilanz ist dokumentiert und die Entscheidung ist getroffen.',
+ naechster:'Nachkontrolle oder Fallabschluss.',
+ vorlage:'Abschluss'}
+],
+uebergang:[
+{titel:'Ausgangslage klären',
+ ziel:'Feststellen, wo die Schülerin oder der Schüler im Übergang gerade steht.',
+ wann:'Zu Beginn des Schuljahres in Jahrgang 8, spätestens 9.',
+ rolle:'Ansprechperson Berufsorientierung',
+ beteiligte:'Schülerin oder Schüler, Klassenleitung, Schulsozialarbeit',
+ handlungen:['Schulabschluss, Notenlage und Fehlzeiten gemeinsam anschauen.','Wünsche, Stärken und bisherige Erfahrungen erfragen.','Bereits bestehende Kontakte klären: Berufsberatung, Praktikum, Familienbetrieb.','Hindernisse benennen: Mobilität, Sprache, Gesundheit, familiäre Aufgaben.','Realistische Bandbreite an Wegen benennen, ohne zu entmutigen.'],
+ formulierung:'„Wir schauen zuerst, wo du stehst, und danach, welche Wege von hier aus offen sind.“',
+ doku:'Ausgangsprofil mit Abschlussperspektive, Stärken, Wünschen und Hindernissen.',
+ schutz:'Keine Prognose über Eignung. Keine Empfehlung, die einen Abschluss ausschließt.',
+ fehler:'Den Wunschberuf als unrealistisch abtun, statt Zwischenschritte zu suchen.',
+ ergebnis:'Ein schriftliches Ausgangsprofil liegt vor.',
+ naechster:'Ziele und Zeitplan festlegen.',
+ vorlage:'Schülergespräch'},
+{titel:'Ziele und Zeitplan festlegen',
+ ziel:'Aus dem Profil einen Fahrplan mit Terminen machen.',
+ wann:'Innerhalb von vier Wochen nach Schritt 1.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Schülerin oder Schüler, Erziehungsberechtigte',
+ handlungen:['Zwei bis drei Ziele für das Schuljahr festlegen.','Bewerbungsfristen, Praktikumszeiträume und Anmeldetermine eintragen.','Erziehungsberechtigte einbeziehen und Zuständigkeiten klären.','Für jeden Termin eine Wiedervorlage anlegen.','Einen Plan B mit aufnehmen.'],
+ formulierung:'„Wir legen jetzt fest, was bis Weihnachten erledigt sein muss, damit im Frühjahr nichts eng wird.“',
+ doku:'Zielplan mit Terminen, Zuständigkeiten und Plan B.',
+ schutz:'Keine Entscheidung über den Kopf der Jugendlichen hinweg.',
+ fehler:'Nur den Wunschweg planen und keinen Alternativweg vorbereiten.',
+ ergebnis:'Ein Zeitplan mit Fristen ist hinterlegt.',
+ naechster:'Praktische Erfahrung ermöglichen.',
+ vorlage:'Vereinbarung'},
+{titel:'Praktische Erfahrung ermöglichen',
+ ziel:'Berufsorientierung erfahrbar machen statt nur zu besprechen.',
+ wann:'Im Praktikumszeitraum des Jahrgangs.',
+ rolle:'Ansprechperson Berufsorientierung',
+ beteiligte:'Betriebe, Erziehungsberechtigte, Klassenleitung',
+ handlungen:['Praktikumsplatz suchen, notfalls gemeinsam anrufen und vorbereiten.','Erwartungen an das Praktikum klären: Pünktlichkeit, Kleidung, Rückmeldung.','Während des Praktikums mindestens einmal Kontakt halten.','Nach dem Praktikum auswerten: Was hat gepasst, was nicht?','Ergebnisse in den Zielplan zurückspielen.'],
+ formulierung:'„Ruf du an, ich sitze daneben. Wir üben vorher, was du sagst.“',
+ doku:'Praktikumseintrag mit Betrieb, Zeitraum, Rückmeldung und Auswertung.',
+ schutz:'Keine Vermittlung in Betriebe ohne Kenntnis der Erziehungsberechtigten.',
+ fehler:'Den Platz für die Jugendlichen organisieren und ihnen die Erfahrung abnehmen.',
+ ergebnis:'Ein Praktikum ist absolviert und ausgewertet.',
+ naechster:'Bewerbungen und Anmeldungen.',
+ vorlage:'Maßnahme'},
+{titel:'Bewerbungen und Anmeldungen begleiten',
+ ziel:'Die formalen Schritte fristgerecht erledigen.',
+ wann:'Ab Herbst des Abschlussjahrgangs.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Schülerin oder Schüler, Erziehungsberechtigte, Berufsberatung',
+ handlungen:['Unterlagen zusammenstellen: Lebenslauf, Zeugnisse, Anschreiben.','Bewerbungsgespräche üben.','Online-Anmeldungen gemeinsam durchgehen.','Jede Bewerbung mit Datum und Stand festhalten.','Bei Absagen zeitnah den nächsten Schritt festlegen.'],
+ formulierung:'„Eine Absage heißt nicht, dass du falsch bist. Sie heißt, dass wir die nächste Bewerbung rausschicken.“',
+ doku:'Bewerbungsübersicht mit Stellen, Daten und Stand.',
+ schutz:'Keine Bewerbung im Namen der Jugendlichen versenden.',
+ fehler:'Nur eine einzige Bewerbung abwarten.',
+ ergebnis:'Die Bewerbungen und Anmeldungen sind fristgerecht raus und dokumentiert.',
+ naechster:'Anschluss sichern.',
+ vorlage:'Maßnahme'},
+{titel:'Anschluss sichern',
+ ziel:'Sicherstellen, dass nach dem Schuljahr ein konkreter Anschluss steht.',
+ wann:'Ab Frühjahr des Abschlussjahrgangs.',
+ rolle:'Jobcenter und Berufsberatung',
+ beteiligte:'Schulsozialarbeit, Berufsberatung, Familie',
+ handlungen:['Stand aller Bewerbungen prüfen.','Bei fehlendem Anschluss Alternativen anbahnen: Berufseinstiegsklasse, weiterführende Schule, Maßnahme.','Kontakt zur Berufsberatung herstellen und Termin sichern.','Erziehungsberechtigte über den Stand informieren.','Einen verbindlichen Anschluss bis zu einem festen Datum anstreben.'],
+ formulierung:'„Wir sorgen dafür, dass du im Sommer nicht ohne Plan dastehst.“',
+ doku:'Anschlusseintrag mit Stand, Alternativen und Terminen.',
+ schutz:'Keine Zusagen über Aufnahmeentscheidungen Dritter.',
+ fehler:'Bis zu den Zeugnissen warten.',
+ ergebnis:'Ein konkreter Anschluss oder ein verbindlicher Alternativweg steht fest.',
+ naechster:'Übergabe und Nachkontakt.',
+ vorlage:'Weitervermittlung'},
+{titel:'Übergabe und Nachkontakt',
+ ziel:'Den Übergang über das Schulende hinaus absichern.',
+ wann:'In den letzten Schulwochen und danach.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Jugendliche, aufnehmende Stelle, Berufsberatung',
+ handlungen:['Mit Einverständnis die wichtigsten Informationen an die aufnehmende Stelle übergeben.','Den Jugendlichen eine Kontaktmöglichkeit für die ersten Wochen nennen.','Nachkontakt nach sechs bis acht Wochen verabreden.','Bei Abbruch Ansprechpersonen benennen.','Verfahren dokumentiert abschließen.'],
+ formulierung:'„Wenn es in den ersten Wochen hakt, meldest du dich. Das ist kein Scheitern.“',
+ doku:'Übergabe- und Abschlusseintrag mit Nachkontakttermin.',
+ schutz:'Keine Weitergabe von Daten ohne Einverständnis der Jugendlichen und der Erziehungsberechtigten.',
+ fehler:'Mit dem letzten Schultag den Kontakt beenden.',
+ ergebnis:'Übergabe und Nachkontakt sind vereinbart und dokumentiert.',
+ naechster:'Nachkontakt durchführen.',
+ vorlage:'Abschluss'}
+],
+sucht:[
+{titel:'Beobachtung sichern und Anlass klären',
+ ziel:'Trennen, was beobachtet wurde, und was vermutet wird.',
+ wann:'Am Tag der Beobachtung.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'meldende Lehrkraft, Klassenleitung',
+ handlungen:['Konkrete Beobachtung notieren: was, wann, wo, durch wen.','Klären, ob es um Konsum, Besitz, Weitergabe oder Verdacht geht.','Prüfen, ob eine akute gesundheitliche Gefahr besteht.','Bei Besitz oder Weitergabe sofort die Schulleitung einbeziehen.','Prüfen, ob schulrechtliche oder strafrechtliche Aspekte berührt sind.'],
+ formulierung:'„Ich schreibe auf, was Sie beobachtet haben, ohne es zu bewerten.“',
+ doku:'Beobachtungsnotiz mit Datum, Uhrzeit, Ort, Beobachtung und Sicherheitsprüfung.',
+ schutz:'Keine Durchsuchung, keine Tests, keine Diagnose. Bei akuter gesundheitlicher Gefahr zuerst 112.',
+ fehler:'Auf Verdacht hin Taschen kontrollieren.',
+ ergebnis:'Die Beobachtung ist gesichert und der Anlass ist eingeordnet.',
+ naechster:'Gespräch mit der Schülerin oder dem Schüler.',
+ vorlage:'Übergangsschwierigkeit'},
+{titel:'Gespräch führen, ohne zu moralisieren',
+ ziel:'Einen Zugang herstellen, der ein zweites Gespräch möglich macht.',
+ wann:'Innerhalb von drei Schultagen.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Schülerin oder Schüler',
+ handlungen:['Beobachtung sachlich benennen, ohne Etikett.','Nach Funktion fragen: Was bringt es dir? Wann brauchst du es?','Nach Häufigkeit und Umfeld fragen, ohne zu drängen.','Risiken sachlich und altersgerecht ansprechen.','Eine kleine, überprüfbare Vereinbarung treffen.'],
+ formulierung:'„Ich will dir nichts verbieten, was ich gar nicht verbieten kann. Ich will verstehen, welche Rolle das für dich spielt.“',
+ doku:'Fallverlaufseintrag mit Datum, Inhalt, Vereinbarung und Einschätzung.',
+ schutz:'Keine Einordnung als Abhängigkeit. Keine Drohung mit Konsequenzen, für die die Schulsozialarbeit nicht zuständig ist.',
+ fehler:'Mit Abschreckung arbeiten. Das beendet den Kontakt.',
+ ergebnis:'Ein Kontakt besteht und eine erste Vereinbarung ist getroffen.',
+ naechster:'Erziehungsberechtigte und Schulleitung einbeziehen.',
+ vorlage:'Schülergespräch'},
+{titel:'Erziehungsberechtigte und Schulleitung einbeziehen',
+ ziel:'Die Verantwortlichen beteiligen und die schulische Linie klären.',
+ wann:'Abhängig vom Anlass, bei Besitz oder Weitergabe sofort.',
+ rolle:'Schulleitung',
+ beteiligte:'Erziehungsberechtigte, Schulsozialarbeit',
+ handlungen:['Mit der Schulleitung klären, welche schulrechtlichen Schritte nötig sind.','Erziehungsberechtigte sachlich informieren.','Hilfsangebote benennen statt nur Konsequenzen.','Klare Erwartung an den Schulalltag formulieren.','Überprüfungstermin vereinbaren.'],
+ formulierung:'„Wir informieren Sie über eine Beobachtung und möchten mit Ihnen besprechen, was jetzt hilfreich ist.“',
+ doku:'Gesprächsnotiz mit Beteiligten, Inhalten, Maßnahmen und Terminen.',
+ schutz:'Keine Angaben zu Mitschüler:innen. Keine Aussage über eine Abhängigkeit.',
+ fehler:'Ausschließlich sanktionieren und keine Hilfe anbieten.',
+ ergebnis:'Familie und Leitung sind eingebunden, die Linie ist klar.',
+ naechster:'Fachstelle einbinden.',
+ vorlage:'Elterngespräch'},
+{titel:'Fachstelle einbinden',
+ ziel:'Fachliche Suchtberatung anbahnen.',
+ wann:'Wenn Häufigkeit oder Umfang dafür sprechen.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Familie, Suchtberatung, Diakonie Papenburg',
+ handlungen:['Passende Beratungsstelle auswählen und erklären, was dort passiert.','Erstkontakt gemeinsam vorbereiten.','Anonyme Beratungsmöglichkeiten benennen.','Rückmeldeweg und Einverständnis klären.','Wiedervorlage setzen.'],
+ formulierung:'„Die Beratung ist vertraulich. Du entscheidest dort selbst, was du erzählst.“',
+ doku:'Weitervermittlungseintrag mit Stelle, Datum und Rückmeldeweg.',
+ schutz:'Keine Kontaktaufnahme durch die Schule ohne Einverständnis, sofern keine Gefährdung vorliegt.',
+ fehler:'Die Beratung als Strafmaßnahme darstellen.',
+ ergebnis:'Ein Beratungskontakt ist angebahnt oder die Entscheidung dagegen ist dokumentiert.',
+ naechster:'Prävention in der Klasse.',
+ vorlage:'Weitervermittlung'},
+{titel:'Prävention in der Klasse verankern',
+ ziel:'Den Jahrgang erreichen, ohne den Einzelfall sichtbar zu machen.',
+ wann:'Im laufenden oder folgenden Halbjahr.',
+ rolle:'Klassenleitung',
+ beteiligte:'Schulsozialarbeit, Polizei und Prävention, Diakonie Papenburg',
+ handlungen:['Passendes Angebot aus dem Präventionsjahresplan auswählen.','Termin mit dem Träger abstimmen.','Inhalte mit der Klassenleitung vorbereiten.','Durchführung dokumentieren.','Rückmeldung der Klasse einholen.'],
+ formulierung:'„Wir machen das als Jahrgangsthema, nicht als Reaktion auf einen Vorfall.“',
+ doku:'Klassenmaßnahme mit Thema, Träger, Datum und Dauer.',
+ schutz:'Kein Bezug auf den Einzelfall, auch nicht andeutungsweise.',
+ fehler:'Die Präventionsstunde unmittelbar nach dem Vorfall in genau dieser Klasse ansetzen.',
+ ergebnis:'Das Präventionsangebot ist durchgeführt und dokumentiert.',
+ naechster:'Verlauf überprüfen.',
+ vorlage:'Maßnahme'},
+{titel:'Verlauf überprüfen und abschließen',
+ ziel:'Einschätzen, ob sich die Lage verändert hat.',
+ wann:'Nach sechs bis acht Wochen.',
+ rolle:'Schulsozialarbeit',
+ beteiligte:'Schülerin oder Schüler, Klassenleitung, Familie',
+ handlungen:['Vereinbarung aus Schritt 2 überprüfen.','Beobachtungen aus dem Kollegium einholen.','Prüfen, ob der Beratungskontakt besteht.','Bei Verschlechterung Schulleitung und Fachstelle erneut einbeziehen.','Abschluss oder Fortführung entscheiden und dokumentieren.'],
+ formulierung:'„Wir schauen ehrlich, ob sich etwas verändert hat, und was du dafür gebraucht hast.“',
+ doku:'Überprüfungseintrag mit Einschätzung und Entscheidung.',
+ schutz:'Kein Abschluss allein aufgrund fehlender neuer Meldungen.',
+ fehler:'Den Vorgang als erledigt betrachten, weil nichts mehr aufgefallen ist.',
+ ergebnis:'Die Wirkung ist eingeschätzt und die Entscheidung ist dokumentiert.',
+ naechster:'Abschluss oder erneute Maßnahmenrunde.',
+ vorlage:'Abschluss'}
+]};
+
+/* ---- Laufende Verfahren ---- */
+function ensureVerfahrenLaeufe(state){if(!Array.isArray(state.verfahrenLaeufe))state.verfahrenLaeufe=[]}
+function verfahrenPlan(wid){return VERFAHREN_PLAENE[wid]||null}
+function verfahrenTitel(wid){const w=WORKFLOWS.find(x=>x.id===wid);return w?w.title:wid}
+function verfahrenLauf(lid){return data.verfahrenLaeufe.find(l=>l.id===lid)||null}
+function verfahrenLaeufeFuer(studentId){return data.verfahrenLaeufe.filter(l=>l.studentId===studentId)}
+function verfahrenOffen(l){return !['Abgeschlossen','Nicht weiterverfolgt'].includes(l.status)}
+function verfahrenFortschritt(l){
+ const plan=verfahrenPlan(l.workflowId)||[];
+ const erledigt=plan.filter((s,i)=>l.schritte&&l.schritte[i+1]&&l.schritte[i+1].done).length;
+ return {erledigt,gesamt:plan.length,prozent:plan.length?Math.round(erledigt/plan.length*100):0};
+}
+function verfahrenNaechsterSchritt(l){
+ const plan=verfahrenPlan(l.workflowId)||[];
+ for(let i=0;i<plan.length;i++){const st=l.schritte&&l.schritte[i+1];if(!st||!st.done)return i+1}
+ return 0;
+}
+async function verfahrenStarten(wid,studentId){
+ const s=data.students.find(x=>x.id===studentId);
+ if(!s){appAlert('Bitte zuerst eine Schülerin oder einen Schüler auswählen.');return null}
+ if(!verfahrenPlan(wid)){appAlert('Für dieses Fachverfahren ist noch kein kleinschrittiger Ablaufplan hinterlegt. Die Verfahrensübersicht kannst du weiterhin als fachliche Orientierung nutzen.');return null}
+ const vorhanden=data.verfahrenLaeufe.find(l=>l.studentId===studentId&&l.workflowId===wid&&verfahrenOffen(l));
+ if(vorhanden){toast('Für diese Person läuft dieses Verfahren bereits. Es wird geöffnet.');verfahrenOeffnen(vorhanden.id);return vorhanden}
+ const fall=ensureCaseForStudent(studentId,verfahrenTitel(wid),today(),aktivePerson());
+ const l={id:id('vf'),workflowId:wid,studentId,caseId:fall?fall.id:'',status:'In Vorbereitung',
+  responsible:aktivePerson(),startedAt:new Date().toISOString(),note:'',schritte:{}};
+ data.verfahrenLaeufe.push(l);
+ logChange('Fachverfahren gestartet: '+verfahrenTitel(wid),l.id,studentId,aktivePerson());
+ save();
+ toast('Verfahren gestartet. Es ist kein verbindlicher Beschluss, sondern deine Arbeitsgrundlage.');
+ verfahrenOeffnen(l.id);
+ return l;
+}
+async function verfahrenStatusSetzen(lid,status){
+ const l=verfahrenLauf(lid);if(!l)return;
+ if(status==='Abgeschlossen'){
+  const f=verfahrenFortschritt(l);
+  if(!await appConfirm('Verfahren „'+verfahrenTitel(l.workflowId)+'“ abschließen?\n\nErledigt sind '+f.erledigt+' von '+f.gesamt+' Schritten. Das Cockpit markiert kein Verfahren von sich aus als verbindlich oder abgeschlossen. Mit dem Abschluss hältst du deine eigene fachliche Entscheidung fest.\n\nDie Fallakte bleibt davon unberührt.'))return;
+ }
+ l.status=status;l.updatedAt=new Date().toISOString();
+ logChange('Verfahrensstatus: '+status,l.id,l.studentId,aktivePerson());
+ save();renderVerfahrenLauf(lid);
+}
+async function verfahrenEntfernen(lid){
+ const l=verfahrenLauf(lid);if(!l)return;
+ if(!await appConfirm('Das Verfahren aus der Liste nehmen?\n\nEs wird auf „Nicht weiterverfolgt“ gesetzt und bleibt im Verlauf sichtbar. Fallakte, Einträge und Aufgaben bleiben vollständig erhalten.'))return;
+ l.status='Nicht weiterverfolgt';l.updatedAt=new Date().toISOString();
+ save();closeModal('verfahrenModal');
+}
+
+/* ---- Vorschlagslogik mit sichtbarer Begründung ---- */
+const VERFAHREN_TREFFER={
+ mobbing:{anlaesse:['Mobbing oder Cybermobbing'],worte:['mobbing','ausgrenzung','gerücht','bloßgestellt','chatgruppe','gehänselt'],sicherheit:[]},
+ absence:{anlaesse:['Schulbesuch und Fehlzeiten'],worte:['fehlzeit','fehlstunde','verspätung','schulverweigerung','nicht erschienen'],sicherheit:[],signal:true},
+ kinderschutz:{anlaesse:['Kinderschutz'],worte:['kindeswohl','vernachlässig','misshandl'],sicherheit:['Kindeswohlverfahren fachlich zu prüfen']},
+ selfharm:{anlaesse:[],worte:[],sicherheit:['Akute Selbstgefährdung fachlich zu klären']},
+ psychisch:{anlaesse:['Psychische Belastung, Angst oder Rückzug','Emotionales Wohlbefinden'],worte:['rückzug','angst','antriebslos','weint','panik','überfordert'],sicherheit:[]},
+ konflikt:{anlaesse:['Konflikt','Freundschaft und soziale Beziehungen'],worte:['streit','konflikt','auseinandersetzung','zoff'],sicherheit:[]},
+ sucht:{anlaesse:['Suchtmittel, Mediennutzung oder Glücksspiel'],worte:['vape','rauchen','alkohol','cannabis','konsum','zocken'],sicherheit:[]},
+ familie:{anlaesse:['Familie und Erziehung','Armut, Grundversorgung oder Bildungsteilhabe'],worte:['trennung','familie','zuhause','geld','wohnung','umzug'],sicherheit:[]},
+ uebergang:{anlaesse:['Berufsorientierung oder Übergang'],worte:['praktikum','bewerbung','abschluss','ausbildung','anschluss'],sicherheit:[]}
+};
+function verfahrenPunkte(studentId){
+ const kontakte=data.contacts.filter(c=>{const f=data.cases.find(x=>x.id===c.caseId);return f&&f.studentId===studentId});
+ const letzte=kontakte.slice(-25);
+ const signale=data.schoolSignals.filter(r=>r.studentId===studentId);
+ const treffer=[];
+ Object.keys(VERFAHREN_TREFFER).forEach(wid=>{
+  if(!verfahrenPlan(wid))return;
+  const t=VERFAHREN_TREFFER[wid];let punkte=0;const gruende=[];
+  const nachAnlass=letzte.filter(c=>t.anlaesse.includes(c.reason));
+  if(nachAnlass.length){punkte+=nachAnlass.length*3;gruende.push((nachAnlass.length>1?nachAnlass.length+' Einträge':'1 Eintrag')+' mit dem Anlass „'+nachAnlass[nachAnlass.length-1].reason+'“')}
+  const nachSicherheit=letzte.filter(c=>t.sicherheit.includes(c.safetyStatus));
+  if(nachSicherheit.length){punkte+=nachSicherheit.length*8;gruende.push('Sicherheitsprüfung: '+nachSicherheit[nachSicherheit.length-1].safetyStatus)}
+  const text=letzte.map(c=>[c.content,c.measureDetail,c.resultDetail,c.nextStep].join(' ')).join(' ').toLocaleLowerCase('de-DE');
+  const worte=t.worte.filter(w=>text.includes(w));
+  if(worte.length){punkte+=worte.length;gruende.push('Stichworte in der Dokumentation: '+worte.join(', '))}
+  if(t.signal&&signale.some(r=>Number(r.absences||0)>=Number(data.settings.absenceThreshold||10))){
+   punkte+=4;gruende.push('Fehlzeiten über der eingestellten Schwelle');
+  }
+  if(punkte>0)treffer.push({wid,punkte,gruende});
+ });
+ return treffer.sort((a,b)=>b.punkte-a.punkte);
+}
+function verfahrenVorschlaege(){
+ const offen=data.cases.filter(c=>c.status!=='Abgeschlossen');
+ const liste=[];
+ offen.forEach(c=>{
+  const s=data.students.find(x=>x.id===c.studentId);if(!s)return;
+  const treffer=verfahrenPunkte(c.studentId).filter(t=>{
+   const lauf=data.verfahrenLaeufe.find(l=>l.studentId===c.studentId&&l.workflowId===t.wid&&verfahrenOffen(l));
+   return !lauf;
+  });
+  if(treffer.length)liste.push({student:s,treffer:treffer.slice(0,2)});
+ });
+ return liste.sort((a,b)=>b.treffer[0].punkte-a.treffer[0].punkte).slice(0,8);
+}
+
+/* ---- Ansprechpersonen in drei Kategorien ---- */
+const VERFAHREN_SCHUTZSPERRE=['mobbing','kinderschutz','selfharm','violence','sexualisierte-gewalt'];
+const VERFAHREN_GRUPPENANGEBOTE=/mediation|palaverzelt|streitschlichtung|gruppengespräch|sozialtraining|buddy|peer/i;
+function verfahrenSchutzsperre(wid,studentId){
+ if(VERFAHREN_SCHUTZSPERRE.includes(wid))return true;
+ const kontakte=data.contacts.filter(c=>{const f=data.cases.find(x=>x.id===c.caseId);return f&&f.studentId===studentId});
+ return kontakte.slice(-25).some(c=>['Mobbing oder Cybermobbing','Gewalt, Bedrohung oder Waffen','Kinderschutz'].includes(c.reason)
+  ||['Akute Selbstgefährdung fachlich zu klären','Akute Fremdgefährdung fachlich zu klären','Kindeswohlverfahren fachlich zu prüfen'].includes(c.safetyStatus));
+}
+function verfahrenPartnerVorschlag(wid){
+ const rollen=verfahrenRollen(wid),w=WORKFLOWS.find(x=>x.id===wid)||{};
+ const begriffe=[w.title,w.category,...rollen].join(' ').toLocaleLowerCase('de-DE');
+ const worte=begriffe.split(/[^a-zäöüß]+/).filter(x=>x.length>5);
+ return data.partners.filter(p=>{
+  if(netzwerkBereich(p)==='Schulintern')return false;
+  const t=[p.organization,p.category,p.contact,p.note].join(' ').toLocaleLowerCase('de-DE');
+  return worte.some(x=>t.includes(x.slice(0,7)));
+ }).slice(0,6);
+}
+function verfahrenPraeventionVorschlag(wid){
+ const w=WORKFLOWS.find(x=>x.id===wid)||{};
+ const t=(w.title+' '+w.category).toLocaleLowerCase('de-DE');
+ const aus=[];
+ PREVENTION_CATALOG.forEach(p=>{
+  const txt=(p.name+' '+p.focus+' '+p.group).toLocaleLowerCase('de-DE');
+  if(t.split(/[^a-zäöüß]+/).filter(x=>x.length>5).some(x=>txt.includes(x.slice(0,6))))aus.push({name:p.name,info:p.focus,quelle:'Präventionskatalog'});
+ });
+ PRAEVENTIONSPLAN.forEach(p=>{
+  if(t.includes(String(p.thema).toLocaleLowerCase('de-DE').slice(0,6)))aus.push({name:p.thema+' (Jahrgang '+p.jg+')',info:p.traeger,quelle:'Präventionsjahresplan'});
+ });
+ return aus.slice(0,5);
+}
+function verfahrenAnsprechpartnerHtml(wid,studentId){
+ const sperre=verfahrenSchutzsperre(wid,studentId);
+ const intern=[];
+ verfahrenRollen(wid).forEach(r=>personenMitRolle(r).forEach(t=>{if(!intern.some(x=>x.t.id===t.id))intern.push({r,t})}));
+ const extern=verfahrenPartnerVorschlag(wid);
+ let praev=verfahrenPraeventionVorschlag(wid);
+ let gesperrt=[];
+ if(sperre){
+  gesperrt=praev.filter(p=>VERFAHREN_GRUPPENANGEBOTE.test(p.name));
+  praev=praev.filter(p=>!VERFAHREN_GRUPPENANGEBOTE.test(p.name));
+ }
+ const block=(titel,inhalt,hinweis)=>`<div class="card" style="margin-bottom:11px"><div class="cardhead"><h3>${titel}</h3></div>${inhalt}${hinweis?`<p class="hint">${hinweis}</p>`:''}</div>`;
+ const internHtml=intern.length
+  ?'<ul class="cleanlist">'+intern.slice(0,8).map(x=>`<li><strong>${personLabel(x.t)}</strong> · ${x.r}${x.t.email?` · <a href="mailto:${x.t.email}">${x.t.email}</a>`:''}${x.t.phone?' · '+x.t.phone:''}</li>`).join('')+'</ul>'
+  :'<p class="subtle">Für die Rollen dieses Verfahrens ist noch keine Person hinterlegt. <button type="button" class="btn kleiner" onclick="verfahrenPersonAnlegen(\'\')">Person anlegen</button></p>';
+ const externHtml=extern.length
+  ?'<ul class="cleanlist">'+extern.map(p=>`<li><strong>${p.organization}</strong>${p.contact?' · '+p.contact:''}${p.phone?' · '+p.phone:''}</li>`).join('')+'</ul>'
+  :'<p class="subtle">Kein passender Netzwerkpartner gefunden. Suche im Bereich Netzwerk gezielt weiter.</p>';
+ const praevHtml=praev.length
+  ?'<ul class="cleanlist">'+praev.map(p=>`<li><strong>${p.name}</strong> · ${p.info} <span class="subtle">(${p.quelle})</span></li>`).join('')+'</ul>'
+  :'<p class="subtle">Für dieses Verfahren ist derzeit kein passendes präventives Angebot hinterlegt.</p>';
+ return (sperre?`<div class="notice warning"><strong>Schutzregel greift.</strong> Bei Hinweisen auf Machtungleichgewicht, Mobbing, Gewalt, sexualisierte Grenzverletzungen, Kindeswohlgefährdung oder akute Selbstgefährdung schlägt das Cockpit keine gemeinsamen Gruppen-, Mediations- oder Schlichtungsangebote vor.${gesperrt.length?' Zurückgehalten wurden: '+gesperrt.map(x=>x.name).join(', ')+'.':''}</div>`:'')
+  +block('1. Schulintern zuständig',internHtml,'Aus „Personen und Zuständigkeiten“, passend zu den Rollen dieses Verfahrens.')
+  +block('2. Externe Fachstellen',externHtml,'Vorschlag aus dem Netzwerk. Die Kontaktaufnahme erfolgt immer durch dich, nie durch das Cockpit, und nur mit der nötigen Zustimmung.')
+  +block('3. Präventive Angebote',praevHtml,'Angebote für Klasse oder Jahrgang, nicht als Ersatz für die Einzelfallarbeit.');
+}
+
+/* ---- Oberfläche der Fachverfahren ---- */
+let verfahrenStartId=null,verfahrenOffenerSchritt=0;
+function verfahrenStartOeffnen(wid){
+ if(!verfahrenPlan(wid)){appAlert('Für dieses Fachverfahren ist noch kein kleinschrittiger Ablaufplan hinterlegt.\n\nMit Ablaufplan arbeiten kannst du bei: '+Object.keys(VERFAHREN_PLAENE).map(verfahrenTitel).join(', ')+'.');return}
+ verfahrenStartId=wid;
+ document.getElementById('verfahrenStartTitel').textContent='Verfahren starten: '+verfahrenTitel(wid);
+ const pupils=data.students.filter(s=>s.active).sort((a,b)=>String(a.className).localeCompare(String(b.className),'de',{numeric:true})||a.last.localeCompare(b.last,'de'));
+ document.getElementById('verfahrenStudent').innerHTML='<option value="">Bitte auswählen</option>'+pupils.map(s=>`<option value="${s.id}">${s.className} · ${s.last}, ${s.first}</option>`).join('');
+ document.getElementById('verfahrenStartSuche').value='';
+ document.getElementById('verfahrenStartTreffer').textContent='Nach zwei Buchstaben wird der erste passende Name ausgewählt.';
+ closeModal('workflowModal');
+ openModal('verfahrenStartModal');
+}
+async function verfahrenStartBestaetigen(){
+ const sid=document.getElementById('verfahrenStudent').value;
+ if(!sid){appAlert('Bitte zuerst eine Schülerin oder einen Schüler auswählen.');return}
+ closeModal('verfahrenStartModal');
+ await verfahrenStarten(verfahrenStartId,sid);
+}
+function verfahrenOeffnen(lid){
+ verfahrenOffenerSchritt=0;
+ renderVerfahrenLauf(lid);
+ openModal('verfahrenModal');
+}
+function verfahrenSchrittUmschalten(lid,nr){
+ verfahrenOffenerSchritt=verfahrenOffenerSchritt===nr?0:nr;
+ renderVerfahrenLauf(lid);
+}
+function verfahrenSchrittZustand(l,nr){
+ const st=(l.schritte||{})[nr]||{};
+ return st.done?'erledigt':st.started?'läuft':'offen';
+}
+function verfahrenSchrittKarte(l,s,nr){
+ const zustand=verfahrenSchrittZustand(l,nr),st=(l.schritte||{})[nr]||{},offen=verfahrenOffenerSchritt===nr;
+ const marke=zustand==='erledigt'?'<span class="tag green">erledigt</span>':zustand==='läuft'?'<span class="tag amber">läuft</span>':'<span class="tag gray">offen</span>';
+ const kopf=`<div class="verfahrenkopf" onclick="verfahrenSchrittUmschalten('${l.id}',${nr})"><span class="verfahrennr">${nr}</span><div><strong>${s.titel}</strong><div class="subtle">${s.ziel}</div></div><div>${marke}</div></div>`;
+ if(!offen)return `<article class="card verfahrenschritt ${zustand}">${kopf}</article>`;
+ const feld=(t,v)=>v?`<div class="detailitem"><span>${t}</span><strong style="font-weight:500;line-height:1.45">${v}</strong></div>`:'';
+ const body=`<div class="verfahrenbody">
+  <div class="detailgrid">
+   ${feld('Wann',s.wann)}${feld('Zuständige Rolle',s.rolle)}${feld('Weitere Beteiligte',s.beteiligte)}
+  </div>
+  <h4>Konkrete Handlungsschritte</h4>
+  <div class="checkliste">${s.handlungen.map((h,i)=>`<label><input type="checkbox" ${((st.haken||[]).includes(i))?'checked':''} onchange="verfahrenHaken('${l.id}',${nr},${i},this.checked)"><span>${h}</span></label>`).join('')}</div>
+  <div class="notice" style="margin:12px 0"><strong>Formulierungshilfe:</strong> ${s.formulierung}</div>
+  <div class="detailgrid">
+   ${feld('Was dokumentiert wird',s.doku)}${feld('Woran du den Abschluss erkennst',s.ergebnis)}
+   ${feld('Typischer Fehler',s.fehler)}${feld('Danach',s.naechster)}
+  </div>
+  <div class="notice warning" style="margin:12px 0"><strong>Schutzregel und Grenze:</strong> ${s.schutz}</div>
+  <div class="formgroup"><label>Deine Notiz zu diesem Schritt</label><textarea class="field" rows="2" id="vfNotiz${nr}" placeholder="Was ist hier konkret passiert?" onchange="verfahrenNotiz('${l.id}',${nr},this.value)">${st.note||''}</textarea></div>
+  <div class="actions">
+   ${st.started||st.done?'':`<button class="btn" onclick="verfahrenSchrittStarten('${l.id}',${nr})">Schritt starten</button>`}
+   ${st.done?`<button class="btn" onclick="verfahrenSchrittOeffnenWieder('${l.id}',${nr})">Wieder öffnen</button>`:`<button class="btn primary" onclick="verfahrenSchrittErledigt('${l.id}',${nr})">Als erledigt markieren</button>`}
+   <button class="btn" onclick="verfahrenInVerlauf('${l.id}',${nr})">In Fallverlauf übernehmen</button>
+   <button class="btn" onclick="verfahrenAufgabe('${l.id}',${nr})">Aufgabe anlegen</button>
+  </div>
+  <div class="actions" style="margin-top:8px"><span class="hint">Wiedervorlage am <input type="date" class="field vfdatum" id="vfDue${nr}" value="${addSchoolDays(today(),7)}"> <button class="btn kleiner" onclick="verfahrenWiedervorlage('${l.id}',${nr})">festlegen</button></span></div>
+  ${st.done?`<p class="hint">Erledigt am ${fmt(String(st.doneAt||today()).slice(0,10))}${st.by?' durch '+st.by:''}.</p>`:''}
+ </div>`;
+ return `<article class="card verfahrenschritt ${zustand} offen">${kopf}${body}</article>`;
+}
+function renderVerfahrenLauf(lid){
+ const l=verfahrenLauf(lid);if(!l)return;
+ const s=data.students.find(x=>x.id===l.studentId),plan=verfahrenPlan(l.workflowId)||[],f=verfahrenFortschritt(l);
+ document.getElementById('verfahrenTitel').textContent=verfahrenTitel(l.workflowId);
+ const naechster=verfahrenNaechsterSchritt(l);
+ document.getElementById('verfahrenBody').innerHTML=
+  `<div class="notice"><strong>${s?s.last+', '+s.first+' · Klasse '+s.className:'Ohne Zuordnung'}</strong><br>Gestartet am ${fmt(String(l.startedAt).slice(0,10))} durch ${l.responsible||'unbekannt'}. Erledigt sind ${f.erledigt} von ${f.gesamt} Schritten.</div>`
+  +`<div class="fortschritt"><div class="fortschrittbalken" style="width:${f.prozent}%"></div></div>`
+  +`<div class="formgrid" style="margin:13px 0">
+     <div class="formgroup"><label>Status des Verfahrens</label><select class="field" onchange="verfahrenStatusSetzen('${l.id}',this.value)">${VERFAHREN_STATUS.map(x=>`<option${x===l.status?' selected':''}>${x}</option>`).join('')}</select></div>
+     <div class="formgroup"><label>Fallführung</label><select class="field" data-personenfeld="1" onchange="verfahrenFuehrung('${l.id}',this.value)"><option${l.responsible?'':' selected'} value="">Noch nicht festgelegt</option>${l.responsible?`<option selected>${l.responsible}</option>`:''}</select></div>
+    </div>`
+  +(naechster?`<p class="hint">Nächster offener Schritt: <strong>${naechster}. ${plan[naechster-1].titel}</strong></p>`:'<p class="hint">Alle Schritte sind als erledigt markiert. Das Cockpit schließt das Verfahren nicht von sich aus ab, diese Entscheidung triffst du über den Status.</p>')
+  +plan.map((x,i)=>verfahrenSchrittKarte(l,x,i+1)).join('')
+  +`<h3 style="margin-top:20px">Wen du einbeziehen kannst</h3>`
+  +verfahrenAnsprechpartnerHtml(l.workflowId,l.studentId)
+  +`<div class="actions" style="margin-top:14px"><button class="btn" onclick="openWorkflow('${l.workflowId}')">Fachlichen Rahmen anzeigen</button><button class="btn" onclick="verfahrenEntfernen('${l.id}')">Nicht weiterverfolgen</button></div>`
+  +`<p class="hint">Das Cockpit markiert ein Verfahren nie von sich aus als verbindlich oder abgeschlossen und nimmt von sich aus keinen Kontakt zu einer Institution auf.</p>`;
+ personenAuswahlFuellen();
+}
+function verfahrenFuehrung(lid,wert){const l=verfahrenLauf(lid);if(!l)return;l.responsible=wert;save();renderVerfahrenLauf(lid)}
+function verfahrenNotiz(lid,nr,wert){
+ const l=verfahrenLauf(lid);if(!l)return;
+ l.schritte=l.schritte||{};l.schritte[nr]=Object.assign({},l.schritte[nr],{note:String(wert||'').slice(0,2000)});
+ save();
+}
+function verfahrenHaken(lid,nr,i,an){
+ const l=verfahrenLauf(lid);if(!l)return;
+ l.schritte=l.schritte||{};const st=Object.assign({haken:[],started:true},l.schritte[nr]);
+ const set=new Set(st.haken||[]);an?set.add(i):set.delete(i);
+ st.haken=[...set];st.started=true;l.schritte[nr]=st;
+ if(l.status==='In Vorbereitung')l.status='Laufend';
+ save();
+}
+function verfahrenSchrittStarten(lid,nr){
+ const l=verfahrenLauf(lid);if(!l)return;
+ l.schritte=l.schritte||{};l.schritte[nr]=Object.assign({haken:[]},l.schritte[nr],{started:true,startedAt:new Date().toISOString()});
+ if(l.status==='In Vorbereitung')l.status='Laufend';
+ save();renderVerfahrenLauf(lid);
+ toast('Schritt gestartet. Die Checkliste kannst du nach und nach abhaken.');
+}
+async function verfahrenSchrittErledigt(lid,nr){
+ const l=verfahrenLauf(lid);if(!l)return;
+ const plan=verfahrenPlan(l.workflowId)||[],s=plan[nr-1];
+ const st=(l.schritte||{})[nr]||{},offeneHaken=s.handlungen.length-((st.haken||[]).length);
+ if(offeneHaken>0&&!await appConfirm('Schritt '+nr+' als erledigt markieren?\n\nEs sind noch '+offeneHaken+' von '+s.handlungen.length+' Handlungsschritten nicht abgehakt.\n\nAbschlusskriterium: '+s.ergebnis))return;
+ l.schritte=l.schritte||{};
+ l.schritte[nr]=Object.assign({haken:[]},l.schritte[nr],{started:true,done:true,doneAt:new Date().toISOString(),by:aktivePerson()});
+ if(l.status==='In Vorbereitung')l.status='Laufend';
+ logChange('Verfahrensschritt erledigt: '+s.titel,l.id,l.studentId,aktivePerson());
+ save();renderVerfahrenLauf(lid);
+ const f=verfahrenFortschritt(l);
+ toast(f.erledigt===f.gesamt?'Alle Schritte sind erledigt. Über den Status entscheidest du, ob das Verfahren abgeschlossen ist.':'Schritt erledigt. Als Nächstes: '+plan[verfahrenNaechsterSchritt(l)-1].titel);
+}
+function verfahrenSchrittOeffnenWieder(lid,nr){
+ const l=verfahrenLauf(lid);if(!l)return;
+ l.schritte[nr]=Object.assign({},l.schritte[nr],{done:false,doneAt:''});
+ save();renderVerfahrenLauf(lid);
+}
+function verfahrenInVerlauf(lid,nr){
+ const l=verfahrenLauf(lid);if(!l)return;
+ const s=(verfahrenPlan(l.workflowId)||[])[nr-1];if(!s)return;
+ const st=(l.schritte||{})[nr]||{};
+ closeModal('verfahrenModal');
+ verlaufOeffnen(l.studentId,s.vorlage||'Maßnahme');
+ setTimeout(()=>{
+  const form=document.getElementById('verlaufForm');if(!form)return;
+  const haken=(st.haken||[]).map(i=>s.handlungen[i]).filter(Boolean);
+  form.elements.content.value=verfahrenTitel(l.workflowId)+', Schritt '+nr+': '+s.titel+'. '+s.ziel;
+  form.elements.measureDetail.value=(haken.length?haken.join(' ')+' ':'')+(st.note||'');
+  if(form.elements.nextStep)form.elements.nextStep.value=s.naechster;
+  verlaufKnopfPruefen();
+ },160);
+}
+function verfahrenAufgabe(lid,nr){
+ const l=verfahrenLauf(lid);if(!l)return;
+ const s=(verfahrenPlan(l.workflowId)||[])[nr-1];if(!s)return;
+ const fall=data.cases.find(c=>c.id===l.caseId)||currentCaseForStudent(l.studentId);
+ const aufgabe={id:id('t'),caseId:fall?fall.id:'',title:verfahrenTitel(l.workflowId)+' · Schritt '+nr+': '+s.titel,
+  due:addSchoolDays(today(),3),priority:'Normal',taskType:'Fachverfahren',
+  assignedTo:l.responsible||aktivePerson(),expectedResult:s.ergebnis,
+  done:false,createdAt:new Date().toISOString(),completedAt:'',result:'',
+  sourceStudentId:l.studentId,verfahrenId:l.id,verfahrenSchritt:nr};
+ data.tasks.push(aufgabe);
+ l.schritte=l.schritte||{};l.schritte[nr]=Object.assign({haken:[]},l.schritte[nr],{started:true,taskId:aufgabe.id});
+ if(l.status==='In Vorbereitung')l.status='Laufend';
+ save();renderVerfahrenLauf(lid);
+ toast('Aufgabe angelegt, fällig am '+fmt(aufgabe.due)+'. Sie steht unter Aufgaben und Wiedervorlagen.');
+}
+async function verfahrenWiedervorlage(lid,nr){
+ const l=verfahrenLauf(lid);if(!l)return;
+ const s=(verfahrenPlan(l.workflowId)||[])[nr-1];if(!s)return;
+ const feld=document.getElementById('vfDue'+nr);
+ const datum=feld&&feld.value?feld.value:addSchoolDays(today(),7);
+ if(!await appConfirm('Wiedervorlage zu „'+s.titel+'“ am '+fmt(datum)+' anlegen?'))return;
+ const fall=data.cases.find(c=>c.id===l.caseId)||currentCaseForStudent(l.studentId);
+ const aufgabe={id:id('t'),caseId:fall?fall.id:'',title:'Wiedervorlage: '+verfahrenTitel(l.workflowId)+' · Schritt '+nr,
+  due:datum,priority:'Normal',taskType:'Rückmeldung ausstehend',
+  assignedTo:l.responsible||aktivePerson(),expectedResult:s.ergebnis,
+  done:false,createdAt:new Date().toISOString(),completedAt:'',result:'',
+  sourceStudentId:l.studentId,verfahrenId:l.id,verfahrenSchritt:nr};
+ data.tasks.push(aufgabe);
+ if(l.status==='Laufend'||l.status==='In Vorbereitung')l.status='Wartet auf Rückmeldung';
+ save();renderVerfahrenLauf(lid);
+ toast('Wiedervorlage zum '+fmt(datum)+' angelegt.');
+}
+function renderVerfahrenLaeufe(){
+ const box=document.getElementById('verfahrenLaufListe');if(!box)return;
+ const offen=data.verfahrenLaeufe.filter(verfahrenOffen);
+ box.innerHTML=offen.length?offen.map(l=>{
+  const s=data.students.find(x=>x.id===l.studentId),f=verfahrenFortschritt(l),n=verfahrenNaechsterSchritt(l),plan=verfahrenPlan(l.workflowId)||[];
+  return `<article class="card clickrow" onclick="verfahrenOeffnen('${l.id}')">
+   <div class="cardhead"><h3>${verfahrenTitel(l.workflowId)}</h3><span class="tag ${VERFAHREN_STATUS_FARBE[l.status]||''}">${l.status}</span></div>
+   <p class="subtle">${s?s.last+', '+s.first+' · Klasse '+s.className:'Ohne Zuordnung'}</p>
+   <div class="fortschritt"><div class="fortschrittbalken" style="width:${f.prozent}%"></div></div>
+   <p><strong>${f.erledigt} von ${f.gesamt} Schritten</strong>${n?'<br>Als Nächstes: '+n+'. '+plan[n-1].titel:'<br>Alle Schritte erledigt'}</p>
+   <p class="subtle">Fallführung: ${l.responsible||'noch nicht festgelegt'}</p></article>`;
+ }).join(''):'<div class="card empty">Es läuft derzeit kein Fachverfahren. Öffne unten ein Verfahren und starte es für eine Schülerin oder einen Schüler.</div>';
+}
+function renderVerfahrenVorschlaege(){
+ const box=document.getElementById('verfahrenVorschlagBox');if(!box)return;
+ const liste=verfahrenVorschlaege();
+ box.innerHTML=liste.length?liste.map(v=>`<article class="card">
+  <div class="cardhead"><h3>${v.student.last}, ${v.student.first}</h3><span class="tag gray">Klasse ${v.student.className}</span></div>
+  ${v.treffer.map(t=>`<div style="margin:9px 0"><strong>${verfahrenTitel(t.wid)}</strong>
+   <div class="subtle">Warum dieser Vorschlag: ${t.gruende.join('. ')}.</div>
+   <button class="btn kleiner" onclick="verfahrenStarten('${t.wid}','${v.student.id}')">Verfahren starten</button></div>`).join('')}
+ </article>`).join(''):'<div class="card empty">Derzeit gibt es keinen Vorschlag. Vorschläge entstehen aus Anlass, Sicherheitsprüfung und Stichworten deiner Fallverlaufseinträge sowie aus den Fehlzeiten.</div>';
+}
 
 /* ===== Personen in allen Auswahlfeldern ===== */
 function personEintraege(){
