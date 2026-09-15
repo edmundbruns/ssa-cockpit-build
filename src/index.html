@@ -175,7 +175,7 @@
         </div>
       </div>
     </nav>
-    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.11</span></div>
+    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.12</span></div>
   </aside>
   <main>
     <header class="topbar"><div><h1 id="pageTitle">Guten Morgen, Dr. Bruns</h1><p id="pageSubtitle">Freitag, 11. September 2026 · Schuljahr 2026/27</p></div><div class="kopfsuche"><input class="field" id="globalSearch" type="search" autocomplete="off" placeholder="Schüler:in suchen: Name, Vorname, Klasse oder Klassenleitung" oninput="globalSearchTippen()" onfocus="globalSearchTippen()"><div id="globalSearchResults"></div></div><div class="actions"><button class="btn" onclick="lockPrivacyScreen()">🔒 Sperren</button><button class="btn" onclick="openModal('taskModal')">＋ Aufgabe</button><button class="btn primary" onclick="verlaufOeffnen()">＋ Fallverlauf</button><button class="btn" onclick="dokuWaehlen()">＋ Anderes</button></div></header>
@@ -201,11 +201,13 @@
       </section>
       <section class="page" id="cases">
         <div class="sectionhead"><div><h2>Fallarbeit</h2><div class="subtle">Verlauf, Ziele, Maßnahmen, Wirkung und Wiedervorlagen</div><div class="actions" style="margin-top:9px"><button class="btn primary" disabled>Als Tabelle</button><button class="btn" onclick="go('kanban')">Als Board</button></div></div><div class="filters"><input class="field search" id="caseSearch" placeholder="Name, Anlass, Ziel oder Maßnahme"><select class="field" id="caseFilter"><option value="all">Alle Status</option><option>Erste Kontaktaufnahme</option><option>Klärungsphase</option><option>Beratung</option><option>Aktive Begleitung</option><option>Rückmeldung ausstehend</option><option>Weitervermittlung</option><option>Beobachtung</option><option>Vorläufig beendet</option><option>Abgeschlossen</option><option>Wiederaufgenommen</option></select><select class="field" id="caseClassFilter"><option value="all">Alle Klassen</option></select><button class="btn primary" onclick="openModal('caseModal')">＋ Fall anlegen</button></div></div>
+        <div id="caseArchivHinweis"></div>
         <div class="card tablewrap"><table><thead><tr><th>Schüler:in</th><th>Klasse</th><th>Anlass</th><th>Status</th><th>Letzter Kontakt</th><th>Kontakte</th></tr></thead><tbody id="caseTable"></tbody></table></div>
       </section>
       <section class="page" id="kanban">
         <div class="sectionhead"><div><h2>Fallarbeit als Board</h2><div class="subtle">Dieselben Fallakten wie in der Tabelle. Verschiebungen werden in der Historie dokumentiert.</div><div class="actions" style="margin-top:9px"><button class="btn" onclick="go('cases')">Als Tabelle</button><button class="btn primary" disabled>Als Board</button></div></div><div class="filters"><input class="field search" id="kanbanSearch" placeholder="Name, Klasse oder Anlass" oninput="renderKanban()"><select class="field" id="kanbanClassFilter" onchange="renderKanban()"><option value="all">Alle Klassen</option></select></div></div>
         <div class="notice">Das Fallboard ergänzt die tabellarische Fallarbeit. Es legt keine parallelen Daten an. Abschlüsse werden weiterhin in der vollständigen Fallakte dokumentiert.</div>
+        <div id="kanbanArchivHinweis"></div>
         <div class="kanban-wrap"><div class="kanban-board" id="kanbanBoard"></div></div>
       </section>
       <section class="page" id="students">
@@ -245,6 +247,7 @@
         <div class="helpbox"><strong>So gehst du vor:</strong> Neun Verfahren haben einen kleinschrittigen Ablaufplan. Öffne das passende Verfahren und starte es für eine Schülerin oder einen Schüler. Der Plan erscheint dann oben unter „Laufende Verfahren“. <strong>In jedem Schritt</strong> stehen Ziel, Zeitpunkt, zuständige Rolle, eine Handlungscheckliste, eine Formulierungshilfe, die Schutzregel und das Abschlusskriterium. Aus jedem Schritt kannst du direkt einen Fallverlaufseintrag, eine Aufgabe oder eine Wiedervorlage erzeugen. <strong>Wichtig:</strong> Das Cockpit markiert kein Verfahren von sich aus als verbindlich oder abgeschlossen und nimmt von sich aus keinen Kontakt zu einer Institution auf.</div>
         <div class="grid kpis" id="workflowKpis"></div>
         <div class="sectionhead" style="margin-top:6px"><div><h3>Laufende Verfahren</h3><div class="subtle">Angefangene Ablaufpläne mit Fortschritt. Klicke eine Karte an, um weiterzuarbeiten.</div></div></div>
+        <div id="verfahrenArchivHinweis"></div>
         <div class="grid three" id="verfahrenLaufListe"></div>
         <div class="sectionhead" style="margin-top:14px"><div><h3>Vorschläge aus der Fallarbeit</h3><div class="subtle">Aus Anlass, Sicherheitsprüfung, Stichworten und Fehlzeiten. Jeder Vorschlag nennt seine Begründung. Die Entscheidung triffst immer du.</div></div></div>
         <div class="grid three" id="verfahrenVorschlagBox"></div>
@@ -294,6 +297,7 @@
       </section>
       <section class="page" id="tasks">
         <div class="sectionhead"><div><h2>Aufgaben und Wiedervorlagen</h2><div class="subtle">Verbindliche nächste Schritte im Blick behalten</div></div><button class="btn primary" onclick="openModal('taskModal')">＋ Aufgabe</button></div>
+        <div id="taskArchivHinweis"></div>
         <div class="card"><div class="list" id="taskList"></div></div>
       </section>
       <section class="page" id="statistics">
@@ -884,9 +888,9 @@ function renderDashboardStart(){const el=document.getElementById('dashboardStart
  if(!beispielfallVorhanden()&&!data.students.length)el.innerHTML+=beispielfallKarte();
  el.innerHTML=sicherungWarnung()+beispielfallBanner()+el.innerHTML;
 }
-function renderDashboard(){renderDashboardStart();renderStartKacheln();const active=data.cases.filter(c=>c.status!=='Abgeschlossen').length,mins=data.contacts.reduce((a,c)=>a+Number(c.duration),0),open=data.tasks.filter(t=>!t.done).length;
- document.getElementById('kpis').innerHTML=kpi('Aktive Fälle',active,'davon '+data.cases.filter(c=>c.status==='Beobachtung').length+' in Beobachtung')+kpi('Kontakte',data.contacts.length,'im laufenden Schuljahr')+kpi('Beratungszeit',Math.round(mins/60)+' Std.','aus Kurz- und Fallkontakten')+kpi('Offene Aufgaben',open,'nächste 14 Tage');
- document.getElementById('recentCases').innerHTML=data.cases.filter(c=>c.status!=='Abgeschlossen').sort((a,b)=>b.last.localeCompare(a.last)).slice(0,4).map(c=>`<div class="row clickrow" onclick="showCase('${c.id}')"><div class="avatar">${initials(studentOfCase(c)||c)}</div><div class="grow"><strong>${cname(c.id)}</strong><span class="subtle">${classOf(c)} · ${c.reason}</span></div><span class="tag ${c.status==='Beobachtung'?'amber':''}">${c.status}</span></div>`).join('');
+function renderDashboard(){renderDashboardStart();renderStartKacheln();const active=data.cases.filter(c=>c.status!=='Abgeschlossen'&&!fallArchiviert(c)).length,mins=data.contacts.reduce((a,c)=>a+Number(c.duration),0),open=data.tasks.filter(t=>!t.done&&!aufgabeArchiviert(t)).length;
+ document.getElementById('kpis').innerHTML=kpi('Aktive Fälle',active,'davon '+data.cases.filter(c=>c.status==='Beobachtung'&&!fallArchiviert(c)).length+' in Beobachtung')+kpi('Kontakte',data.contacts.length,'im laufenden Schuljahr')+kpi('Beratungszeit',Math.round(mins/60)+' Std.','aus Kurz- und Fallkontakten')+kpi('Offene Aufgaben',open,'nächste 14 Tage');
+ document.getElementById('recentCases').innerHTML=data.cases.filter(c=>c.status!=='Abgeschlossen'&&!fallArchiviert(c)).sort((a,b)=>b.last.localeCompare(a.last)).slice(0,4).map(c=>`<div class="row clickrow" onclick="showCase('${c.id}')"><div class="avatar">${initials(studentOfCase(c)||c)}</div><div class="grow"><strong>${cname(c.id)}</strong><span class="subtle">${classOf(c)} · ${c.reason}</span></div><span class="tag ${c.status==='Beobachtung'?'amber':''}">${c.status}</span></div>`).join('');
  const tasks=data.tasks.filter(t=>!t.done).sort((a,b)=>a.due.localeCompare(b.due)).slice(0,4);document.getElementById('openTaskCount').textContent=tasks.length+' offen';document.getElementById('dashboardTasks').innerHTML=tasks.map(t=>`<div class="row"><div class="datebox"><b>${new Date(t.due+'T12:00').getDate()}</b>SEP</div><div class="grow"><strong>${t.title}</strong><span class="subtle">${t.caseId?cname(t.caseId):'Organisation'}</span></div>${t.priority==='Hoch'?'<span class="tag red">hoch</span>':''}</div>`).join('');
  const now=today(),inSeven=addSchoolDays(now,7),openTasks=data.tasks.filter(t=>!t.done),overdue=openTasks.filter(t=>t.due&&t.due<now),dueToday=openTasks.filter(t=>t.due===now),soon=openTasks.filter(t=>t.due>now&&t.due<=inSeven),stale=data.cases.filter(c=>c.status!=='Abgeschlossen'&&c.last&&Math.floor((new Date(now+'T12:00')-new Date(c.last+'T12:00'))/86400000)>=30),feedback=openTasks.filter(t=>/Rückmeldung|Rücksprache/i.test([t.title,t.taskType].join(' '))),consents=data.casePlans.filter(p=>/ausstehend|zu klären|ungeklärt/i.test(p.consentStatus||'')),absenceSteps=openTasks.filter(t=>/Fehlzeit|WebUntis|Eskalation/i.test([t.title,t.taskType].join(' ')));
  document.getElementById('caseControlAlerts').innerHTML=[['Überfällig',overdue.length,'red'],['Heute fällig',dueToday.length,'amber'],['Nächste 7 Schultage',soon.length,''],['Fälle ohne Kontakt seit 30 Tagen',stale.length,stale.length?'amber':''],['Offene Rückmeldungen',feedback.length,''],['Ausstehende Einwilligungen',consents.length,consents.length?'amber':''],['Offene Fehlzeiten-Schritte',absenceSteps.length,absenceSteps.length?'amber':'']].map(([label,value,color])=>`<div class="row"><div class="grow"><strong>${label}</strong></div><span class="tag ${color}">${value}</span></div>`).join('');
@@ -906,8 +910,10 @@ function renderCases(){
  const q=(document.getElementById('caseSearch').value||'').toLocaleLowerCase('de-DE'),status=document.getElementById('caseFilter').value,classFilter=document.getElementById('caseClassFilter').value;
  const cases=data.cases.filter(c=>{
   const s=studentOfCase(c),events=s?studentEvents(s.id):[],hay=[cname(c.id),c.reason,classOf(c),c.goal,...events.flatMap(e=>[e.title,e.note,...(e.details||[]),e.measure,e.result])].join(' ').toLocaleLowerCase('de-DE');
-  return (status==='all'||c.status===status)&&(classFilter==='all'||classOf(c)===classFilter)&&hay.includes(q)
+  return (status==='all'||c.status===status)&&(classFilter==='all'||classOf(c)===classFilter)&&hay.includes(q)&&!fallArchiviert(c)
  });
+ const versteckteFaelle=data.cases.filter(fallArchiviert).length;
+ archivZeigen('caseArchivHinweis',versteckteFaelle,'Fallakte'+(versteckteFaelle===1?'':'n'));
  document.getElementById('caseTable').innerHTML=cases.map(c=>`<tr class="clickrow" onclick="showCase('${c.id}')"><td class="namecell">${cname(c.id)}${c.id===BEISPIEL_FALL_ID?' <span class="tag amber">Beispiel</span>':''}</td><td>${classOf(c)}</td><td>${c.reason}</td><td><span class="tag ${c.status==='Beobachtung'?'amber':c.status==='Abgeschlossen'?'gray':''}">${c.status}</span></td><td>${fmt(c.last)}</td><td>${c.contacts}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">Keine passenden Fälle oder Verlaufseinträge gefunden. Eine Fallakte entsteht automatisch, sobald du zu einer Person etwas dokumentierst.</td></tr>'
 }
 document.getElementById('caseSearch').oninput=renderCases;document.getElementById('caseFilter').onchange=renderCases;document.getElementById('caseClassFilter').onchange=renderCases;
@@ -953,7 +959,19 @@ function showStudent(studentId){
 
  gliedereSchuelerakte();
 }
-async function toggleStudentStatus(){const s=data.students.find(x=>x.id===selectedStudentId);if(!s)return;const action=s.active?'archivieren':'reaktivieren';if(!await appConfirm(`${s.last}, ${s.first} wirklich ${action}?\n\nDie Schülerakte und alle Verläufe bleiben erhalten.`))return;s.active=!s.active;save();showStudent(s.id);toast(s.active?'Schüler:in wurde reaktiviert.':'Schüler:in wurde archiviert und aus aktuellen Listen entfernt.')
+async function toggleStudentStatus(){const s=data.students.find(x=>x.id===selectedStudentId);if(!s)return;
+ const action=s.active?'archivieren':'reaktivieren';
+ let zusatz='';
+ if(s.active){
+  const st=archivStandStudent(s.id),teile=[];
+  if(st.fall)teile.push('eine offene Fallakte');
+  if(st.aufgaben)teile.push(st.aufgaben+' offene Aufgabe'+(st.aufgaben===1?'':'n'));
+  if(st.verfahren)teile.push(st.verfahren+' laufende'+(st.verfahren===1?'s Fachverfahren':' Fachverfahren'));
+  if(teile.length)zusatz='\n\nEs besteht noch '+teile.join(' sowie ')+'. Alles bleibt gespeichert und lesbar, erscheint aber nicht mehr in Fallarbeit, Board, Aufgaben, Frühindikatoren, Trainingsraum und Fachverfahren.';
+ }
+ if(!await appConfirm(`${s.last}, ${s.first} wirklich ${action}?\n\nDie Schülerakte und alle Verläufe bleiben erhalten.`+zusatz))return;
+ s.active=!s.active;save();showStudent(s.id);
+ toast(s.active?'Schüler:in wurde reaktiviert und erscheint wieder in allen Listen.':'Schüler:in wurde archiviert und aus allen aktiven Listen entfernt.')
 }
 let selectedClass='';
 function currentClasses(){return [...new Set(data.students.filter(s=>s.active).map(s=>s.className))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}))}
@@ -974,7 +992,7 @@ function daysBetween(a,b){return Math.floor((new Date(b+'T12:00')-new Date(a+'T1
 function trainingSeries(studentId,reference=today()){const windowDays=Number(data.settings.trainingWindowDays||28);return data.trainingRoom.filter(t=>t.studentId===studentId&&daysBetween(t.date,reference)>=0&&daysBetween(t.date,reference)<windowDays)}
 function renderTrainingRoom(){
  const q=(document.getElementById('trainingSearch').value||'').toLocaleLowerCase('de-DE'),status=document.getElementById('trainingStatus').value,classFilter=document.getElementById('trainingClassFilter').value;
- const list=[...data.trainingRoom].filter(t=>{const s=data.students.find(x=>x.id===t.studentId),className=t.className||s?.className||'',hay=`${s?.first||''} ${s?.last||''} ${className} ${t.reason} ${t.referringTeacher} ${t.note||''} ${t.reflection||''}`.toLocaleLowerCase('de-DE');return (status==='all'||t.result===status)&&(classFilter==='all'||className===classFilter)&&hay.includes(q)}).sort((a,b)=>b.date.localeCompare(a.date));
+ const list=[...data.trainingRoom].filter(t=>!schuelerArchiviert(t.studentId)).filter(t=>{const s=data.students.find(x=>x.id===t.studentId),className=t.className||s?.className||'',hay=`${s?.first||''} ${s?.last||''} ${className} ${t.reason} ${t.referringTeacher} ${t.note||''} ${t.reflection||''}`.toLocaleLowerCase('de-DE');return (status==='all'||t.result===status)&&(classFilter==='all'||className===classFilter)&&hay.includes(q)}).sort((a,b)=>b.date.localeCompare(a.date));
  const current=data.trainingRoom.filter(t=>t.schoolYear===data.settings.currentSchoolYear),plans=current.filter(t=>t.planAccepted).length,follow=current.filter(t=>t.result==='Nachgespräch erforderlich').length,totalMins=current.reduce((a,t)=>a+Number(t.duration||0),0);
  document.getElementById('trainingKpis').innerHTML=kpi('Besuche',current.length,'im laufenden Schuljahr')+kpi('Rückkehrpläne',plans,current.length?Math.round(plans/current.length*100)+' % akzeptiert':'noch keine Einträge')+kpi('Nachgespräche',follow,'noch besonders im Blick')+kpi('Begleitzeit',Math.floor(totalMins/60)+' h '+totalMins%60+' min','dokumentierter Aufwand');
  const threshold=Number(data.settings.trainingThreshold||3),windowDays=Number(data.settings.trainingWindowDays||28),cutoff=new Date();cutoff.setDate(cutoff.getDate()-windowDays+1);const cutoffDate=cutoff.toISOString().slice(0,10),recent=current.filter(t=>t.date>=cutoffDate),byStudent=Object.entries(recent.reduce((o,t)=>(o[t.studentId]=(o[t.studentId]||0)+1,o),{})).filter(([,count])=>count>=threshold),byClass=Object.entries(recent.reduce((o,t)=>{const s=data.students.find(x=>x.id===t.studentId),c=t.className||s?.className||'ohne Klasse';o[c]=(o[c]||0)+1;return o},{})).filter(([,count])=>count>=threshold);
@@ -1003,7 +1021,7 @@ function signalSchlimmsterWert(r){
 function renderSignals(){renderGrueneListe();
  const q=(document.getElementById('signalSearch').value||'').toLocaleLowerCase('de-DE'),classFilter=document.getElementById('signalClassFilter').value,status=document.getElementById('signalStatus').value,records=[...data.schoolSignals].sort((a,b)=>String(b.importedAt||'').localeCompare(String(a.importedAt||''))),latest=new Map();
  for(const r of records)if(!latest.has(r.studentId))latest.set(r.studentId,r);
- const list=[...latest.values()].filter(r=>{const s=data.students.find(x=>x.id===r.studentId),has=signalAssessment(r).notices.length>0,hay=[s?.first,s?.last,s?.className,r.period,r.reviewStatus,r.reviewNote,r.reasonSummary].join(' ').toLocaleLowerCase('de-DE');const stufe=signalAmpel(r).stufe;const passt=status==='all'||status==='rot'&&stufe==='rot'||status==='gelb'&&stufe==='gelb'||status==='gelbrot'&&stufe!=='gruen'||status==='notice'&&has||status==='clear'&&!has;return (classFilter==='all'||s?.className===classFilter)&&passt&&hay.includes(q)}).sort((a,b)=>{const ra={rot:0,gelb:1,gruen:2}[signalAmpel(a).stufe],rb={rot:0,gelb:1,gruen:2}[signalAmpel(b).stufe];if(ra!==rb)return ra-rb;const da=signalDringlichkeit(b)-signalDringlichkeit(a);if(Math.abs(da)>0.001)return da;const sa=data.students.find(x=>x.id===a.studentId),sb=data.students.find(x=>x.id===b.studentId);return String(sa?.last||'').localeCompare(String(sb?.last||''),'de')}),withNotice=list.filter(r=>signalAssessment(r).notices.length),unreviewed=withNotice.filter(r=>!r.reviewStatus||r.reviewStatus==='Noch nicht geprüft');
+ const list=[...latest.values()].filter(r=>!schuelerArchiviert(r.studentId)).filter(r=>{const s=data.students.find(x=>x.id===r.studentId),has=signalAssessment(r).notices.length>0,hay=[s?.first,s?.last,s?.className,r.period,r.reviewStatus,r.reviewNote,r.reasonSummary].join(' ').toLocaleLowerCase('de-DE');const stufe=signalAmpel(r).stufe;const passt=status==='all'||status==='rot'&&stufe==='rot'||status==='gelb'&&stufe==='gelb'||status==='gelbrot'&&stufe!=='gruen'||status==='notice'&&has||status==='clear'&&!has;return (classFilter==='all'||s?.className===classFilter)&&passt&&hay.includes(q)}).sort((a,b)=>{const ra={rot:0,gelb:1,gruen:2}[signalAmpel(a).stufe],rb={rot:0,gelb:1,gruen:2}[signalAmpel(b).stufe];if(ra!==rb)return ra-rb;const da=signalDringlichkeit(b)-signalDringlichkeit(a);if(Math.abs(da)>0.001)return da;const sa=data.students.find(x=>x.id===a.studentId),sb=data.students.find(x=>x.id===b.studentId);return String(sa?.last||'').localeCompare(String(sb?.last||''),'de')}),withNotice=list.filter(r=>signalAssessment(r).notices.length),unreviewed=withNotice.filter(r=>!r.reviewStatus||r.reviewStatus==='Noch nicht geprüft');
  const alleNeueste=[...latest.values()],rot=alleNeueste.filter(r=>signalAmpel(r).stufe==='rot'),gelb=alleNeueste.filter(r=>signalAmpel(r).stufe==='gelb'),gruen=alleNeueste.filter(r=>signalAmpel(r).stufe==='gruen');
  const sichtbarRot=list.filter(r=>signalAmpel(r).stufe==='rot').length,sichtbarGelb=list.filter(r=>signalAmpel(r).stufe==='gelb').length;
  const ueberfaellig=list.filter(r=>{const gep=(r.reviewStatus||'Noch nicht geprüft')!=='Noch nicht geprüft';if(gep)return false;const ende=signalDateRange(r)[1];return ende&&daysBetween(ende,today())>14}).length;
@@ -1203,7 +1221,9 @@ function renderNetwork(){
 document.getElementById('networkSearch').oninput=renderNetwork;document.getElementById('networkCategory').onchange=renderNetwork;document.getElementById('networkNeed').onchange=renderNetwork;
 function openGroupTalk(){document.getElementById('groupTalkForm').reset();document.querySelector('#groupTalkForm [name="date"]').value=today();openModal('groupTalkModal')}
 function taskDueLabel(t){if(t.done)return 'Erledigt '+(t.completedAt?fmt(t.completedAt):'');if(!t.due)return 'ohne Termin';if(t.due<today())return 'überfällig seit '+fmt(t.due);if(t.due===today())return 'heute fällig';return 'fällig '+fmt(t.due)}
-function renderTasks(){const sorted=[...data.tasks].sort((a,b)=>Number(a.done)-Number(b.done)||String(a.due).localeCompare(String(b.due)));document.getElementById('taskList').innerHTML=sorted.map(t=>`<div class="row ${t.done?'taskdone':''}" style="align-items:flex-start"><button class="check" aria-label="${t.done?'Aufgabe wieder öffnen':'Aufgabe abschließen'}" onclick="${t.done?`reopenTask('${t.id}')`:`openTaskComplete('${t.id}')`}">${t.done?'✓':''}</button><div class="grow"><strong>${t.title}</strong><span class="subtle">${t.caseId?cname(t.caseId):t.recurrence==='WEBUNTIS_MONTHLY'?'Monatliche Organisation':'Organisation'} · ${taskDueLabel(t)} · zuständig ${t.assignedTo||'nicht festgelegt'}</span>${t.expectedResult?`<span class="subtle">Erwartetes Ergebnis: ${t.expectedResult}</span>`:''}${t.done&&t.result?`<span class="subtle"><strong>Ergebnis:</strong> ${t.result}${t.completedBy?' · '+t.completedBy:''}</span>`:''}${t.instructions?`<details style="margin-top:8px"><summary>Anleitung anzeigen</summary><p class="eventbody subtle" style="margin-top:8px">${t.instructions}</p></details>`:''}${!t.done&&t.sourceContactId?`<div class="actions" style="margin-top:9px"><button class="btn primary kleiner" onclick="rueckmeldungDokumentieren('${t.id}')">Rückmeldung dokumentieren</button></div>`:''}${!t.done&&!t.sourceContactId&&t.caseId?`<div class="actions" style="margin-top:9px"><button class="btn kleiner" onclick="verlaufOeffnen(data.cases.find(c=>c.id==='${t.caseId}')?.studentId||'')">Eintrag zu dieser Aufgabe erfassen</button></div>`:''}</div>${t.recurrence==='WEBUNTIS_MONTHLY'?'<span class="tag">monatlich</span>':''}<span class="tag ${!t.done&&t.due<today()?'red':t.priority==='Hoch'?'red':t.done?'gray':''}">${t.done?'erledigt':t.due<today()?'überfällig':t.priority}</span></div>`).join('')||'<div class="empty">Noch keine Wiedervorlagen. Hier stehen verbindliche nächste Schritte mit Datum, damit nichts untergeht.</div>'}
+function renderTasks(){const versteckteAufgaben=data.tasks.filter(t=>!t.done&&aufgabeArchiviert(t)).length;
+ archivZeigen('taskArchivHinweis',versteckteAufgaben,'offene Aufgabe'+(versteckteAufgaben===1?'':'n'));
+ const sorted=[...data.tasks].filter(t=>!aufgabeArchiviert(t)).sort((a,b)=>Number(a.done)-Number(b.done)||String(a.due).localeCompare(String(b.due)));document.getElementById('taskList').innerHTML=sorted.map(t=>`<div class="row ${t.done?'taskdone':''}" style="align-items:flex-start"><button class="check" aria-label="${t.done?'Aufgabe wieder öffnen':'Aufgabe abschließen'}" onclick="${t.done?`reopenTask('${t.id}')`:`openTaskComplete('${t.id}')`}">${t.done?'✓':''}</button><div class="grow"><strong>${t.title}</strong><span class="subtle">${t.caseId?cname(t.caseId):t.recurrence==='WEBUNTIS_MONTHLY'?'Monatliche Organisation':'Organisation'} · ${taskDueLabel(t)} · zuständig ${t.assignedTo||'nicht festgelegt'}</span>${t.expectedResult?`<span class="subtle">Erwartetes Ergebnis: ${t.expectedResult}</span>`:''}${t.done&&t.result?`<span class="subtle"><strong>Ergebnis:</strong> ${t.result}${t.completedBy?' · '+t.completedBy:''}</span>`:''}${t.instructions?`<details style="margin-top:8px"><summary>Anleitung anzeigen</summary><p class="eventbody subtle" style="margin-top:8px">${t.instructions}</p></details>`:''}${!t.done&&t.sourceContactId?`<div class="actions" style="margin-top:9px"><button class="btn primary kleiner" onclick="rueckmeldungDokumentieren('${t.id}')">Rückmeldung dokumentieren</button></div>`:''}${!t.done&&!t.sourceContactId&&t.caseId?`<div class="actions" style="margin-top:9px"><button class="btn kleiner" onclick="verlaufOeffnen(data.cases.find(c=>c.id==='${t.caseId}')?.studentId||'')">Eintrag zu dieser Aufgabe erfassen</button></div>`:''}</div>${t.recurrence==='WEBUNTIS_MONTHLY'?'<span class="tag">monatlich</span>':''}<span class="tag ${!t.done&&t.due<today()?'red':t.priority==='Hoch'?'red':t.done?'gray':''}">${t.done?'erledigt':t.due<today()?'überfällig':t.priority}</span></div>`).join('')||'<div class="empty">Noch keine Wiedervorlagen. Hier stehen verbindliche nächste Schritte mit Datum, damit nichts untergeht.</div>'}
 let selectedTaskId='';
 function openTaskComplete(id){const t=data.tasks.find(x=>x.id===id);if(!t)return;selectedTaskId=id;const form=document.getElementById('taskCompleteForm');form.reset();form.elements.completedAt.value=today();form.elements.completedBy.value=t.assignedTo==='Sabine'?'Sabine':t.assignedTo==='Edmund und Sabine'?'Edmund und Sabine':'Edmund';openModal('taskCompleteModal')}
 document.getElementById('taskCompleteForm').onsubmit=e=>{e.preventDefault();const t=data.tasks.find(x=>x.id===selectedTaskId);if(!t)return;const f=cleanObject(Object.fromEntries(new FormData(e.target)));t.done=true;t.completedAt=f.completedAt;t.completedBy=f.completedBy;t.result=f.result;const studentId=data.cases.find(c=>c.id===t.caseId)?.studentId||'';logChange('Wiedervorlage abgeschlossen',t.id,studentId,f.completedBy);if(t.recurrence==='WEBUNTIS_MONTHLY'){const due=followingWebUntisDue(t.due);if(!data.tasks.some(x=>x.recurrence==='WEBUNTIS_MONTHLY'&&!x.done))data.tasks.push({id:'task-webuntis-'+due,title:t.title,due,priority:t.priority||'Normal',taskType:'Datenimport',assignedTo:t.assignedTo||'Edmund und Sabine',expectedResult:'WebUntis-Fehlzeiten importiert und fachlich geprüft',caseId:'',done:false,recurrence:'WEBUNTIS_MONTHLY',instructions:WEBUNTIS_TASK_INSTRUCTIONS,createdAt:new Date().toISOString(),completedAt:'',result:''})}save();closeModal('taskCompleteModal');toast('Wiedervorlage wurde mit Ergebnis abgeschlossen.')};
@@ -2569,8 +2589,10 @@ function renderKanban(){
  const classes=[...new Set(data.cases.map(c=>classOf(c)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
  if(classFilter){const selected=classFilter.value;classFilter.innerHTML='<option value="all">Alle Klassen</option>'+classes.map(x=>'<option>'+x+'</option>').join('');classFilter.value=classes.includes(selected)?selected:'all'}
  const filterClass=classFilter?.value||'all';
+  const versteckteKanban=data.cases.filter(c=>fallArchiviert(c)&&c.status!=='Abgeschlossen').length;
+  archivZeigen('kanbanArchivHinweis',versteckteKanban,'Fallakte'+(versteckteKanban===1?'':'n'));
  board.innerHTML=KANBAN_SPALTEN.map(([titel,statuses,erklaerung])=>{
-  const cases=data.cases.filter(c=>statuses.includes(c.status)&&(filterClass==='all'||classOf(c)===filterClass)&&[cname(c.id),classOf(c),c.reason,c.goal].join(' ').toLocaleLowerCase('de-DE').includes(q)).sort((a,b)=>String(b.last).localeCompare(String(a.last)));
+  const cases=data.cases.filter(c=>!fallArchiviert(c)&&statuses.includes(c.status)&&(filterClass==='all'||classOf(c)===filterClass)&&[cname(c.id),classOf(c),c.reason,c.goal].join(' ').toLocaleLowerCase('de-DE').includes(q)).sort((a,b)=>String(b.last).localeCompare(String(a.last)));
   const drop=`ondragover="event.preventDefault()" ondrop="dropCaseOnKanban(event,'${statuses[0]}')"`;
   return `<section class="kanban-column" ${drop}><div class="kanban-head"><span title="${erklaerung}">${titel}</span><span class="tag gray">${cases.length}</span></div><p class="kanban-hinweis">${erklaerung}</p><div class="kanban-list">${cases.map(c=>{
    const a=naechsteAufgabe(c.id),ueberfaellig=a&&a.due&&a.due<today();
@@ -3851,7 +3873,7 @@ function verfahrenPunkte(studentId){
  return treffer.sort((a,b)=>b.punkte-a.punkte);
 }
 function verfahrenVorschlaege(){
- const offen=data.cases.filter(c=>c.status!=='Abgeschlossen');
+ const offen=data.cases.filter(c=>c.status!=='Abgeschlossen'&&!fallArchiviert(c));
  const liste=[];
  offen.forEach(c=>{
   const s=data.students.find(x=>x.id===c.studentId);if(!s)return;
@@ -4093,7 +4115,9 @@ async function verfahrenWiedervorlage(lid,nr){
 }
 function renderVerfahrenLaeufe(){
  const box=document.getElementById('verfahrenLaufListe');if(!box)return;
- const offen=data.verfahrenLaeufe.filter(verfahrenOffen);
+ const offen=data.verfahrenLaeufe.filter(l=>verfahrenOffen(l)&&!schuelerArchiviert(l.studentId));
+ const versteckteVerfahren=data.verfahrenLaeufe.filter(l=>verfahrenOffen(l)&&schuelerArchiviert(l.studentId)).length;
+ archivZeigen('verfahrenArchivHinweis',versteckteVerfahren,'laufende'+(versteckteVerfahren===1?'s Verfahren':' Verfahren'));
  box.innerHTML=offen.length?offen.map(l=>{
   const s=data.students.find(x=>x.id===l.studentId),f=verfahrenFortschritt(l),n=verfahrenNaechsterSchritt(l),plan=verfahrenPlan(l.workflowId)||[];
   return `<article class="card clickrow" onclick="verfahrenOeffnen('${l.id}')">
@@ -4113,6 +4137,33 @@ function renderVerfahrenVorschlaege(){
    <div class="subtle">Warum dieser Vorschlag: ${t.gruende.join('. ')}.</div>
    <button class="btn kleiner" onclick="verfahrenStarten('${t.wid}','${v.student.id}')">Verfahren starten</button></div>`).join('')}
  </article>`).join(''):'<div class="card empty">Derzeit gibt es keinen Vorschlag. Vorschläge entstehen aus Anlass, Sicherheitsprüfung und Stichworten deiner Fallverlaufseinträge sowie aus den Fehlzeiten.</div>';
+}
+
+/* ===== Archivierte Schüler:innen konsequent ausblenden ===== */
+function schuelerArchiviert(studentId){
+ if(!studentId)return false;
+ const s=data.students.find(x=>x.id===studentId);
+ return !!s&&s.active===false;
+}
+function fallArchiviert(c){return schuelerArchiviert(c&&c.studentId)}
+function aufgabeArchiviert(t){
+ if(t&&t.sourceStudentId&&schuelerArchiviert(t.sourceStudentId))return true;
+ const f=t&&t.caseId?data.cases.find(x=>x.id===t.caseId):null;
+ return !!f&&schuelerArchiviert(f.studentId);
+}
+function archivHinweis(anzahl,was){
+ if(!anzahl)return '';
+ return `<div class="notice" style="margin-top:11px">${anzahl} ${was} ${anzahl===1?'gehört':'gehören'} zu archivierten Schüler:innen und ${anzahl===1?'wird':'werden'} hier nicht angezeigt. Unter „Schüler:innen“ kannst du über den Filter „Alle“ auf das Archiv zugreifen und dort bei Bedarf reaktivieren.</div>`;
+}
+function archivZeigen(id,anzahl,was){
+ const e=document.getElementById(id);
+ if(e)e.innerHTML=archivHinweis(anzahl,was);
+}
+function archivStandStudent(studentId){
+ const fall=data.cases.find(c=>c.studentId===studentId&&c.status!=='Abgeschlossen');
+ const aufgaben=data.tasks.filter(t=>!t.done&&(t.sourceStudentId===studentId||(t.caseId&&fall&&t.caseId===fall.id))).length;
+ const verfahren=(data.verfahrenLaeufe||[]).filter(l=>l.studentId===studentId&&verfahrenOffen(l)).length;
+ return {fall:!!fall,aufgaben,verfahren};
 }
 
 /* ===== Personen in allen Auswahlfeldern ===== */
