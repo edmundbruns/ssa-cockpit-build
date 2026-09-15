@@ -10,7 +10,8 @@
     :root{--navy:#123047;--teal:#0f766e;--cyan:#0891b2;--cream:#f7f5ef;--paper:#fff;--ink:#183042;--muted:#64748b;--line:#dce4e8;--amber:#f59e0b;--red:#dc2626;--green:#16a34a;--shadow:0 12px 34px rgba(15,45,61,.10);--radius:18px}
     *{box-sizing:border-box} body{margin:0;background:var(--cream);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif} button,input,select,textarea{font:inherit} button{cursor:pointer}
     .app{min-height:100vh;display:grid;grid-template-columns:250px 1fr}.sidebar{background:linear-gradient(175deg,#102f46 0%,#164e63 62%,#0f766e 100%);color:white;padding:26px 18px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}.brand{display:flex;gap:12px;align-items:center;margin:0 8px 26px}.brandmark{width:44px;height:44px;border-radius:14px;background:#fff;color:var(--teal);display:grid;place-items:center;font-weight:900;font-size:19px}.brand strong{display:block;font-size:17px}.brand small{opacity:.72}.nav{display:grid;gap:5px}.nav button{border:0;background:transparent;color:#d9edf1;text-align:left;padding:11px 13px;border-radius:12px;display:flex;gap:11px;align-items:center}.nav button:hover,.nav button.active{background:rgba(255,255,255,.14);color:#fff}.nav .icon{width:22px;text-align:center}.sidefoot{margin-top:auto;padding:14px 10px;color:#d5e7ea;font-size:12px}.statusdot{display:inline-block;width:8px;height:8px;background:#6ee7b7;border-radius:50%;margin-right:6px}
-    main{min-width:0}.testbar{background:#fff7d6;border-bottom:1px solid #f4d777;padding:8px 28px;color:#6b4c00;font-size:13px;text-align:center}.topbar{padding:23px 30px 8px;display:flex;justify-content:space-between;align-items:center;gap:20px}.topbar h1{font-size:26px;margin:0;letter-spacing:-.4px}.topbar p{margin:2px 0 0;color:var(--muted)}.actions{display:flex;gap:9px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 13px;border-radius:11px;font-weight:650}.btn:hover{box-shadow:0 4px 14px #18304216}.btn.primary{background:var(--teal);border-color:var(--teal);color:white}.btn.reviewed{background:#e6f4f2;border-color:#8bc9c2;color:#0f6b65}.btn.danger{color:var(--red)}.content{padding:18px 30px 42px}.page{display:none}.page.active{display:block}.fortschritt{height:9px;border-radius:9px;background:var(--line);overflow:hidden;margin:9px 0}
+    main{min-width:0}.testbar{background:#fff7d6;border-bottom:1px solid #f4d777;padding:8px 28px;color:#6b4c00;font-size:13px;text-align:center}.topbar{padding:23px 30px 8px;display:flex;justify-content:space-between;align-items:center;gap:20px}.topbar h1{font-size:26px;margin:0;letter-spacing:-.4px}.topbar p{margin:2px 0 0;color:var(--muted)}.actions{display:flex;gap:9px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 13px;border-radius:11px;font-weight:650}.btn:hover{box-shadow:0 4px 14px #18304216}.btn.primary{background:var(--teal);border-color:var(--teal);color:white}.btn.reviewed{background:#e6f4f2;border-color:#8bc9c2;color:#0f6b65}.btn.danger{color:var(--red)}.content{padding:18px 30px 42px}.page{display:none}.page.active{display:block}[hidden]{display:none!important}
+.fortschritt{height:9px;border-radius:9px;background:var(--line);overflow:hidden;margin:9px 0}
 .fortschrittbalken{height:100%;background:var(--teal);border-radius:9px;transition:width .25s}
 .cleanlist{list-style:none;padding:0;margin:0}
 .cleanlist li{padding:6px 0;border-bottom:1px solid var(--line);font-size:13.5px}
@@ -174,7 +175,7 @@
         </div>
       </div>
     </nav>
-    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.10</span></div>
+    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.9.11</span></div>
   </aside>
   <main>
     <header class="topbar"><div><h1 id="pageTitle">Guten Morgen, Dr. Bruns</h1><p id="pageSubtitle">Freitag, 11. September 2026 · Schuljahr 2026/27</p></div><div class="kopfsuche"><input class="field" id="globalSearch" type="search" autocomplete="off" placeholder="Schüler:in suchen: Name, Vorname, Klasse oder Klassenleitung" oninput="globalSearchTippen()" onfocus="globalSearchTippen()"><div id="globalSearchResults"></div></div><div class="actions"><button class="btn" onclick="lockPrivacyScreen()">🔒 Sperren</button><button class="btn" onclick="openModal('taskModal')">＋ Aufgabe</button><button class="btn primary" onclick="verlaufOeffnen()">＋ Fallverlauf</button><button class="btn" onclick="dokuWaehlen()">＋ Anderes</button></div></header>
@@ -297,9 +298,39 @@
       </section>
       <section class="page" id="statistics">
         <div class="sectionhead"><div><h2>Interne Statistik 2026/27</h2><div class="subtle">Arbeitsübersicht für Sabine und Edmund</div></div><div class="actions"><button class="btn" onclick="druckDateiSpeichern()">Bericht als Datei speichern</button><button class="btn primary" onclick="printAnnualReport()">Jahresbericht / PDF</button><button class="btn" onclick="downloadAnnualReportDoc()">Word-Datei</button><button class="btn" onclick="exportCSV()">CSV exportieren</button></div></div>
-        <div class="grid kpis" id="statKpis"></div><div class="card" style="margin-bottom:17px"><div class="cardhead"><h3>Fachlicher Jahresrückblick</h3><span class="tag">erscheint anonymisiert im Bericht</span></div><textarea class="field report-note" id="annualNarrative" placeholder="Schwerpunkte, Entwicklungen, Kooperationen und fachliche Einordnung…" oninput="saveAnnualNarrative(this.value)"></textarea></div>
+        <div class="card" style="margin-bottom:15px"><div class="filters">
+         <select class="field" id="statZeitraum" onchange="statZeitraumUmschalten()">
+          <option value="schuljahr" selected>Laufendes Schuljahr</option>
+          <option value="hj1">1. Halbjahr</option>
+          <option value="hj2">2. Halbjahr</option>
+          <option value="tage30">Letzte 30 Tage</option>
+          <option value="tage90">Letzte 90 Tage</option>
+          <option value="frei">Freier Zeitraum</option>
+          <option value="alles">Gesamter Datenbestand</option>
+         </select>
+         <div class="formgroup" hidden style="margin:0"><input class="field" type="date" id="statVon" onchange="renderStats()"></div>
+         <div class="formgroup" hidden style="margin:0"><input class="field" type="date" id="statBis" onchange="renderStats()"></div>
+         <select class="field" id="statKlasse" onchange="renderStats()"><option value="all">Alle Klassen und Jahrgänge</option></select>
+        </div><div class="notice" id="statZeitraumInfo" style="margin-top:12px"></div></div>
+        <div class="grid kpis" id="statKpis"></div>
+        <div class="card" style="margin-bottom:17px"><div class="cardhead"><h3>Fachlicher Jahresrückblick</h3><span class="tag">erscheint anonymisiert im Bericht</span></div><textarea class="field report-note" id="annualNarrative" placeholder="Schwerpunkte, Entwicklungen, Kooperationen und fachliche Einordnung…" oninput="saveAnnualNarrative(this.value)"></textarea></div>
         <div class="card" style="margin-bottom:17px"><div class="cardhead"><h3>Prozess- und Ergebnisqualität</h3><span class="tag gray">keine Rangliste von Personen</span></div><p class="subtle">Dokumentationsqualität, Umsetzung und Ergebnisse werden getrennt betrachtet. Fallzahl und Reichweite allein sind kein Wirksamkeitsnachweis.</p><div id="qualityBars"></div></div>
-        <div class="grid two"><div class="card"><div class="cardhead"><h2>Beratungen nach Monat</h2></div><div id="statMonths"></div></div><div class="card"><div class="cardhead"><h2>Themen nach Jahrgang</h2></div><div id="statGradeThemes"></div></div><div class="card"><div class="cardhead"><h2>Einzelkontakte und Gruppenangebote</h2></div><div id="statContactMix"></div></div><div class="card"><div class="cardhead"><h2>Fehlzeitenentwicklung</h2></div><div id="statAbsenceTrend"></div></div><div class="card"><div class="cardhead"><h2>Weitervermittlungen</h2></div><div id="statReferrals"></div></div><div class="card"><div class="cardhead"><h2>Zielentwicklung</h2></div><div id="statGoals"></div></div><div class="card"><div class="cardhead"><h2>Zeitaufwand nach Tätigkeitsfeld</h2></div><div id="statTimeFields"></div></div><div class="card"><div class="cardhead"><h2>Präventive und intervenierende Arbeit</h2></div><div id="statPrevention"></div></div><div class="card"><div class="cardhead"><h2>Wiederkehrende Problemlagen</h2></div><div id="statReasons"></div></div><div class="card"><div class="cardhead"><h2>Arbeitsebenen</h2></div><div id="statLevels"></div></div><div class="card"><div class="cardhead"><h2>Kontakt- und Angebotsarten</h2></div><div id="statTypes"></div></div></div>
+
+        <div class="sectionhead"><div><h3>Arbeitsvolumen</h3><div class="subtle">Wie viel Arbeit ist angefallen und wie verteilt sie sich.</div></div></div>
+        <div class="grid two"><div class="card" id="statMonths"></div><div class="card" id="statTimeFields"></div><div class="card" id="statContactMix"></div><div class="card" id="statPrevention"></div></div>
+
+        <div class="sectionhead" style="margin-top:14px"><div><h3>Wer und weshalb</h3><div class="subtle">Anlässe, Jahrgänge, Klassen und Arbeitsebenen.</div></div></div>
+        <div class="grid two"><div class="card" id="statReasons"></div><div class="card" id="statGrades"></div><div class="card" id="statClasses"></div><div class="card" id="statLevels"></div><div class="card" id="statTypes"></div><div class="card" id="statGradeThemes"></div></div>
+
+        <div class="sectionhead" style="margin-top:14px"><div><h3>Vorgehen</h3><div class="subtle">Welche Maßnahmen, welche Wege, wie wurden Erziehungsberechtigte einbezogen.</div></div></div>
+        <div class="grid two"><div class="card" id="statMeasures"></div><div class="card" id="statChannels"></div><div class="card" id="statFamily"></div><div class="card" id="statTrend"></div><div class="card" id="statSafety"></div><div class="card" id="statVerfahren"></div></div>
+
+        <div class="sectionhead" style="margin-top:14px"><div><h3>Ergebnisse und Verbindlichkeit</h3><div class="subtle">Ziele, Fallabschlüsse, Fristtreue und Fachverfahren.</div></div></div>
+        <div class="grid two"><div class="card" id="statGoals"></div><div class="card" id="statCaseStatus"></div><div class="card" id="statResults"></div><div class="card" id="statTasks"></div><div class="card" id="statVerfahrenStatus"></div><div class="card" id="statReferrals"></div></div>
+
+        <div class="sectionhead" style="margin-top:14px"><div><h3>Fehlzeiten</h3><div class="subtle">Aus den importierten WebUntis-Auswertungen.</div></div></div>
+        <div class="grid two"><div class="card" id="statAbsenceTrend"></div></div>
+        <p class="hint">Alle Diagramme zeigen ausschließlich Zahlen. Namen, Beratungsinhalte und Vermutungen erscheinen nirgends. Für den Jahresbericht nutze oben „Jahresbericht / PDF“ oder die Word-Datei.</p>
       </section>
       <section class="page" id="settings">
         <div class="sectionhead"><div><h2>Daten und Sicherung</h2><div class="subtle">Verschlüsselter lokaler Datentresor</div></div></div>
@@ -809,7 +840,7 @@ let vaultReady=false;
 const invoke=(command,args={})=>window.__TAURI__?.core?.invoke(command,args)??Promise.reject(new Error('Diese Datei muss als Desktopanwendung gestartet werden.'));
 async function persistState(){if(!vaultReady)return;await invoke('save_state',{stateJson:JSON.stringify(data)})}
 function save(){void persistState().catch(showVaultError);renderAll();sicherungNachSpeichern()}
-const fmt=d=>new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(d+'T12:00:00'));
+const fmt=d=>{const t=String(d||'').slice(0,10),x=new Date(t+'T12:00:00');return isNaN(x.getTime())?String(d||''):new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}).format(x)};
 const initials=c=>(c?.first?.[0]||'?')+(c?.last?.[0]||''); const studentOfCase=c=>data.students.find(s=>s.id===c?.studentId);const cname=id=>{const c=data.cases.find(x=>x.id===id),s=studentOfCase(c);return s?s.first+' '+s.last:c?c.first+' '+c.last:'Anonymer Kontakt'};const classOf=c=>studentOfCase(c)?.className||c.className||'';
 function go(id){document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===(id==='kanban'?'cases':id)));const names={dashboard:'Übersicht',requests:'Schüler-Anfragen',cases:'Fallarbeit',kanban:'Fallarbeit als Board',students:'Schüler:innen',classes:'Klassen und Klassenlisten',trainingroom:'Sozialer Trainingsraum',signals:'Frühindikatoren',workflows:'Fachverfahren',teachers:'Personen und Zuständigkeiten',projects:'Projekte',ctc:'CTC-Bedarfsplanung',network:'Gruppengespräche und Netzwerk',tasks:'Aufgaben und Wiedervorlagen',statistics:'Interne Statistik',settings:'Daten und Sicherung'};document.getElementById('pageTitle').textContent=id==='dashboard'?'Guten Morgen, Dr. Bruns':names[id];document.getElementById('pageSubtitle').textContent=id==='dashboard'?`${new Intl.DateTimeFormat('de-DE',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).format(new Date())} · Schuljahr ${data.settings.currentSchoolYear}`:'SSA-Cockpit Ludgerusschule · verschlüsselte Desktopversion';scrollTo(0,0)}
 document.querySelectorAll('.nav button[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));
@@ -1185,9 +1216,173 @@ function qualityValues(){const contacts=data.contacts.length,signals=data.school
 function qualityBars(){return qualityValues().map(q=>`<div style="margin:14px 0"><div class="cardhead" style="margin-bottom:6px"><span>${q.label}</span><strong>${q.value} %</strong></div><div class="progress"><span style="width:${q.value}%"></span></div><div class="subtle" style="margin-top:5px">${q.note}</div></div>`).join('')}
 function classGrade(className){return String(className||'').match(/^\d+/)?.[0]||String(className||'ohne Jahrgang')}
 function statisticBreakdowns(){const gradeThemes={};for(const c of data.contacts){const student=studentOfCase(data.cases.find(x=>x.id===c.caseId)),key=`Jahrgang ${classGrade(student?.className)} · ${c.reason||'ohne Anlass'}`;gradeThemes[key]=(gradeThemes[key]||0)+1}const absenceTrend={};for(const s of data.schoolSignals){const key=s.period||'ohne Zeitraum';absenceTrend[key]=(absenceTrend[key]||0)+Number(s.absences||0)}const goalStatuses=countBy(data.casePlans,'status'),referrals=data.contacts.filter(c=>/vermittel|jugendamt|beratungsstelle|schulpsycholog/i.test([c.type,c.intervention,c.measure,c.cooperationForm,c.result].join(' '))).length,recurring={};for(const c of data.contacts){const key=c.reason||'ohne Anlass';recurring[key]=(recurring[key]||0)+1}return {gradeThemes,absenceTrend,goalStatuses,referrals,recurring}}
-function renderStats(){const v=statisticValues(),b=statisticBreakdowns(),timeFields={'Einzelfallkontakte in Minuten':v.contactMins,'Gruppengespräche in Minuten':v.groupMins,'Klassenangebote in Minuten':v.classMins,'Trainingsraum in Minuten':v.trainingMins},preventive=v.classMins,intervening=v.contactMins+v.groupMins+v.trainingMins;document.getElementById('statKpis').innerHTML=kpi('Dokumentierte Vorgänge',v.total,'einschließlich Trainingsraum')+kpi('Gesamtzeit',Math.floor(v.totalMins/60)+' h '+v.totalMins%60+' min','alle dokumentierten Ebenen')+kpi('Teilnahmen',v.participants,'Gruppen- und Klassenarbeit')+kpi('Abgeschlossene Fälle',data.cases.filter(c=>c.status==='Abgeschlossen').length,'im Schuljahr');document.getElementById('qualityBars').innerHTML=qualityBars();document.getElementById('statReasons').innerHTML=bars(b.recurring);document.getElementById('statTypes').innerHTML=bars({...countBy(data.contacts,'type'),'Gruppengespräch':data.groupTalks.length,'Klassenmaßnahme':data.classActivities.length,'Trainingsraum':data.trainingRoom.length});document.getElementById('statLevels').innerHTML=bars({...countBy(data.contacts,'level'),'Gruppe':data.groupTalks.length,'Klasse':data.classActivities.length,'Trainingsraum':data.trainingRoom.length});document.getElementById('statMonths').innerHTML=bars(monthCounts());document.getElementById('statGradeThemes').innerHTML=bars(b.gradeThemes);document.getElementById('statContactMix').innerHTML=bars({'Einzelkontakte':data.contacts.length,'Gruppengespräche':data.groupTalks.length,'Klassenangebote':data.classActivities.length,'Trainingsraum':data.trainingRoom.length});document.getElementById('statAbsenceTrend').innerHTML=bars(b.absenceTrend);document.getElementById('statReferrals').innerHTML=bars({'Dokumentierte Weitervermittlungen':b.referrals});document.getElementById('statGoals').innerHTML=bars(b.goalStatuses);document.getElementById('statTimeFields').innerHTML=bars(timeFields);document.getElementById('statPrevention').innerHTML=bars({'Präventiv, Klassenangebote in Minuten':preventive,'Intervenierend, Kontakte, Gruppen und Trainingsraum in Minuten':intervening})}
+/* ===== Statistik: Zeitraum, Filter und Auswertung ===== */
+function schuljahrGrenzen(jahr){
+ const m=String(jahr||'').match(/(\d{4})\s*\/\s*(\d{2,4})/);
+ const start=m?Number(m[1]):new Date().getFullYear();
+ return {von:start+'-08-01',bis:(start+1)+'-07-31'};
+}
+function statZeitraum(){
+ const modus=(document.getElementById('statZeitraum')||{}).value||'schuljahr';
+ const sj=schuljahrGrenzen(data.settings.currentSchoolYear),heute=today();
+ const start=Number(sj.von.slice(0,4));
+ if(modus==='hj1')return {von:sj.von,bis:(start+1)+'-01-31',label:'1. Halbjahr '+data.settings.currentSchoolYear};
+ if(modus==='hj2')return {von:(start+1)+'-02-01',bis:sj.bis,label:'2. Halbjahr '+data.settings.currentSchoolYear};
+ if(modus==='tage30'){const d=new Date(Date.now()-29*864e5).toISOString().slice(0,10);return {von:d,bis:heute,label:'letzte 30 Tage'}}
+ if(modus==='tage90'){const d=new Date(Date.now()-89*864e5).toISOString().slice(0,10);return {von:d,bis:heute,label:'letzte 90 Tage'}}
+ if(modus==='frei'){
+  const a=(document.getElementById('statVon')||{}).value||sj.von,b=(document.getElementById('statBis')||{}).value||heute;
+  return {von:a,bis:b,label:'Zeitraum '+fmt(a)+' bis '+fmt(b)};
+ }
+ if(modus==='alles')return {von:'1900-01-01',bis:'2999-12-31',label:'gesamter Datenbestand'};
+ return {von:sj.von,bis:sj.bis,label:'Schuljahr '+data.settings.currentSchoolYear};
+}
+function statKlasse(){return (document.getElementById('statKlasse')||{}).value||'all'}
+function imZeitraum(x,z){const d=String(x&&(x.date||x.startedAt||x.createdAt)||'').slice(0,10);return !d||(d>=z.von&&d<=z.bis)}
+function statSchuelerPasst(studentId){
+ const w=statKlasse();if(w==='all')return true;
+ const s=data.students.find(x=>x.id===studentId);if(!s)return false;
+ return w.startsWith('jg:')?classGrade(s.className)===w.slice(3):s.className===w;
+}
+function statDaten(){
+ const z=statZeitraum();
+ const fallVon=c=>{const f=data.cases.find(x=>x.id===c.caseId);return f?f.studentId:''};
+ const kontakte=data.contacts.filter(c=>imZeitraum(c,z)&&statSchuelerPasst(fallVon(c)));
+ const gruppen=data.groupTalks.filter(x=>imZeitraum(x,z));
+ const klassen=data.classActivities.filter(x=>imZeitraum(x,z)&&(statKlasse()==='all'||x.className===statKlasse()||('jg:'+classGrade(x.className))===statKlasse()));
+ const training=data.trainingRoom.filter(x=>imZeitraum(x,z)&&statSchuelerPasst(x.studentId));
+ const faelle=data.cases.filter(c=>statSchuelerPasst(c.studentId)&&kontakte.some(k=>k.caseId===c.id));
+ const aufgaben=data.tasks.filter(t=>imZeitraum(t,z));
+ const verfahren=(data.verfahrenLaeufe||[]).filter(l=>imZeitraum(l,z)&&statSchuelerPasst(l.studentId));
+ const plaene=data.casePlans.filter(p=>imZeitraum(p,z)&&statSchuelerPasst(p.studentId));
+ return {z,kontakte,gruppen,klassen,training,faelle,aufgaben,verfahren,plaene};
+}
+function minuten(liste){return liste.reduce((a,x)=>a+Number(x.duration||0),0)}
+function stunden(min){return Math.floor(min/60)+' h '+String(min%60).padStart(2,'0')+' min'}
+function statMonatspunkte(d){
+ const namen=['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+ const alle=[...d.kontakte,...d.gruppen,...d.klassen,...d.training];
+ const monate={};
+ alle.forEach(x=>{const k=String(x.date||'').slice(0,7);if(k)monate[k]=(monate[k]||0)+1});
+ return Object.keys(monate).sort().map(k=>({label:namen[Number(k.slice(5,7))-1]+' '+k.slice(2,4),wert:monate[k],titel:k+': '+monate[k]+' Vorgänge'}));
+}
+function statFristtreue(d){
+ const erledigt=d.aufgaben.filter(t=>t.done&&t.completedAt&&t.due);
+ const puenktlich=erledigt.filter(t=>String(t.completedAt).slice(0,10)<=t.due).length;
+ return {erledigt:erledigt.length,puenktlich,quote:erledigt.length?Math.round(puenktlich/erledigt.length*100):0};
+}
+function statAmpel(label){
+ if(/akut|gefähr|Kindeswohl|Notfall/i.test(label))return 'var(--red)';
+ if(/nicht abschließend|Fremdgefähr/i.test(label))return 'var(--amber)';
+ return 'var(--teal)';
+}
+function statFilterFuellen(){
+ const sel=document.getElementById('statKlasse');if(!sel)return;
+ const klassen=currentClasses(),jg=[...new Set(klassen.map(classGrade))].sort((a,b)=>String(a).localeCompare(String(b),'de',{numeric:true}));
+ const marke=klassen.join('|');
+ if(sel.dataset.marke===marke)return;
+ sel.dataset.marke=marke;const wert=sel.value;
+ sel.innerHTML='<option value="all">Alle Klassen und Jahrgänge</option>'
+  +(jg.length?'<optgroup label="Jahrgänge">'+jg.map(g=>`<option value="jg:${g}">Jahrgang ${g}</option>`).join('')+'</optgroup>':'')
+  +(klassen.length?'<optgroup label="Klassen">'+klassen.map(k=>`<option value="${k}">Klasse ${k}</option>`).join('')+'</optgroup>':'');
+ if(wert&&[...sel.options].some(o=>o.value===wert))sel.value=wert;
+}
+function statZeitraumUmschalten(){
+ const frei=((document.getElementById('statZeitraum')||{}).value||'')==='frei';
+ ['statVon','statBis'].forEach(k=>{const e=document.getElementById(k);if(e)e.closest('.formgroup').hidden=!frei});
+ renderStats();
+}
+function renderStats(){
+ if(!document.getElementById('statKpis'))return;
+ statFilterFuellen();
+ const d=statDaten(),z=d.z;
+ const minKontakt=minuten(d.kontakte),minGruppe=minuten(d.gruppen),minKlasse=minuten(d.klassen),minTraining=minuten(d.training);
+ const gesamtMin=minKontakt+minGruppe+minKlasse+minTraining;
+ const schueler=new Set(d.kontakte.map(c=>{const f=data.cases.find(x=>x.id===c.caseId);return f&&f.studentId}).filter(Boolean));
+ const teilnahmen=d.klassen.reduce((a,p)=>a+(p.participantIds||[]).length,0)+d.gruppen.reduce((a,p)=>a+(p.participantIds||[]).length,0);
+ const abgeschlossen=d.faelle.filter(c=>c.status==='Abgeschlossen').length;
+ const ft=statFristtreue(d);
+ const hinweis=document.getElementById('statZeitraumInfo');
+ const vorgaenge=d.kontakte.length+d.gruppen.length+d.klassen.length+d.training.length;
+ if(hinweis){
+  hinweis.className=vorgaenge?'notice':'notice warning';
+  hinweis.innerHTML=`<strong>Ausgewertet wird: ${z.label}${statKlasse()==='all'?'':', '+(statKlasse().startsWith('jg:')?'Jahrgang '+statKlasse().slice(3):'Klasse '+statKlasse())}.</strong> Alle Zahlen und Diagramme auf dieser Seite beziehen sich auf diese Auswahl. Fallzahlen und Reichweite allein sind kein Wirksamkeitsnachweis.`
+   +(vorgaenge?'':'<br>In diesem Zeitraum ist nichts dokumentiert. Stelle oben auf „Gesamter Datenbestand“ um, wenn deine Einträge aus einem früheren Schuljahr stammen.');
+ }
+ document.getElementById('statKpis').innerHTML=
+  kpi('Dokumentierte Vorgänge',d.kontakte.length+d.gruppen.length+d.klassen.length+d.training.length,'Einzel, Gruppe, Klasse, Trainingsraum')
+  +kpi('Gesamtzeit',stunden(gesamtMin),'alle dokumentierten Ebenen')
+  +kpi('Begleitete Schüler:innen',schueler.size,'mit mindestens einem Einzelkontakt')
+  +kpi('Teilnahmen',teilnahmen,'Gruppen- und Klassenarbeit')
+  +kpi('Fallakten im Zeitraum',d.faelle.length,abgeschlossen+' davon abgeschlossen')
+  +kpi('Fachverfahren',d.verfahren.length,(data.verfahrenLaeufe||[]).filter(verfahrenOffen).length+' derzeit offen')
+  +kpi('Aufgaben erledigt',ft.erledigt,ft.erledigt?ft.quote+' % davon fristgerecht':'noch keine abgeschlossene Aufgabe')
+  +kpi('Offene Wiedervorlagen',data.tasks.filter(t=>!t.done).length,'unabhängig vom Zeitraum');
+
+ const setz=(id,html)=>{const e=document.getElementById(id);if(e)e.innerHTML=html};
+ setz('qualityBars',qualityBars());
+
+ /* Arbeitsvolumen */
+ setz('statMonths',ssaBalken('Vorgänge nach Monat',statMonatspunkte(d)));
+ setz('statTimeFields',ssaBalken('Zeitaufwand in Minuten',[
+  {label:'Einzelfall',wert:minKontakt,titel:'Einzelfallkontakte: '+stunden(minKontakt)},
+  {label:'Gruppe',wert:minGruppe,titel:'Gruppengespräche: '+stunden(minGruppe)},
+  {label:'Klasse',wert:minKlasse,titel:'Klassenangebote: '+stunden(minKlasse)},
+  {label:'Trainingsraum',wert:minTraining,titel:'Trainingsraum: '+stunden(minTraining)}]));
+ setz('statContactMix',ssaBalken('Vorgänge nach Arbeitsform',[
+  {label:'Einzelkontakt',wert:d.kontakte.length},{label:'Gruppe',wert:d.gruppen.length},
+  {label:'Klasse',wert:d.klassen.length},{label:'Trainingsraum',wert:d.training.length}]));
+ setz('statPrevention',ssaBalken('Präventiv und intervenierend in Minuten',[
+  {label:'Präventiv',wert:minKlasse,farbe:'var(--green)',titel:'Klassen- und Gruppenangebote: '+stunden(minKlasse)},
+  {label:'Intervenierend',wert:minKontakt+minGruppe+minTraining,farbe:'var(--teal)',titel:'Einzelfall, Gruppen und Trainingsraum: '+stunden(minKontakt+minGruppe+minTraining)}]));
+
+ /* Wer und weshalb */
+ setz('statReasons',ssaBalken('Anlässe der Einzelfallarbeit',alsPunkte(zaehleNach(d.kontakte,c=>c.reason||'ohne Anlass'),{max:9})));
+ setz('statGrades',ssaBalken('Einzelkontakte nach Jahrgang',alsPunkte(zaehleNach(d.kontakte,c=>{
+   const f=data.cases.find(x=>x.id===c.caseId),s=f&&data.students.find(y=>y.id===f.studentId);
+   return s?'Jg '+classGrade(s.className):'ohne Zuordnung'}),{sortiert:false})));
+ setz('statClasses',ssaBalken('Einzelkontakte nach Klasse',alsPunkte(zaehleNach(d.kontakte,c=>{
+   const f=data.cases.find(x=>x.id===c.caseId),s=f&&data.students.find(y=>y.id===f.studentId);
+   return s?s.className:'ohne Zuordnung'}),{max:12})));
+ setz('statLevels',ssaBalken('Arbeitsebenen',alsPunkte(Object.assign(zaehleNach(d.kontakte,'level'),
+   {'Gruppe':d.gruppen.length,'Klasse':d.klassen.length,'Trainingsraum':d.training.length}))));
+ setz('statTypes',ssaBalken('Kontakt- und Angebotsarten',alsPunkte(zaehleNach(d.kontakte,'type'),{max:9})));
+
+ /* Vorgehen */
+ setz('statMeasures',ssaBalken('Dokumentierte Maßnahmen',alsPunkte(zaehleNach(d.kontakte,c=>c.measure||'ohne Angabe'),{max:9})));
+ setz('statChannels',ssaBalken('Kontaktwege',alsPunkte(zaehleNach(d.kontakte,c=>c.channel||'ohne Angabe'))));
+ setz('statFamily',ssaBalken('Einbezug der Erziehungsberechtigten',alsPunkte(zaehleNach(d.kontakte,c=>c.familyInvolvement||'nicht dokumentiert'),{max:7})));
+ setz('statTrend',ssaBalken('Fachliche Entwicklungseinschätzung',alsPunkte(zaehleNach(d.kontakte,c=>c.trend||'Nicht bewertet'),{max:8,
+   farbe:l=>/verschlechtert|zugespitzt/i.test(l)?'var(--red)':/verbessert/i.test(l)?'var(--green)':undefined})));
+ setz('statSafety',ssaBalken('Sicherheitsprüfungen',alsPunkte(zaehleNach(d.kontakte,c=>String(c.safetyStatus||'ohne Angabe').replace('Kein akuter Sicherheitshinweis in diesem Vorgang','ohne Hinweis')),
+   {max:7,farbe:statAmpel})));
+
+ /* Fachverfahren */
+ setz('statVerfahren',ssaBalken('Fachverfahren nach Typ',alsPunkte(zaehleNach(d.verfahren,l=>verfahrenTitel(l.workflowId)),{max:9})));
+ setz('statVerfahrenStatus',ssaBalken('Fachverfahren nach Status',alsPunkte(zaehleNach(d.verfahren,'status'),{max:9,
+   farbe:l=>l==='Abgeschlossen'?'var(--green)':/Wartet|eingebunden|Unterbrochen/.test(l)?'var(--amber)':undefined})));
+
+ /* Ergebnisse */
+ setz('statGoals',ssaBalken('Zielentwicklung',alsPunkte(zaehleNach(d.plaene,'status'),{max:8,
+   farbe:l=>l==='Erreicht'?'var(--green)':l==='Verworfen'?'var(--red)':undefined})));
+ setz('statCaseStatus',ssaBalken('Fallakten nach Status',alsPunkte(zaehleNach(d.faelle,'status'),{max:9,
+   farbe:l=>l==='Abgeschlossen'?'var(--green)':undefined})));
+ setz('statResults',ssaBalken('Ergebnis der Einzelkontakte',alsPunkte(zaehleNach(d.kontakte,c=>c.result||'ohne Angabe'),{max:8})));
+ setz('statTasks',ssaBalken('Aufgaben im Zeitraum',[
+  {label:'Fristgerecht',wert:ft.puenktlich,farbe:'var(--green)'},
+  {label:'Verspätet',wert:ft.erledigt-ft.puenktlich,farbe:'var(--amber)'},
+  {label:'Noch offen',wert:d.aufgaben.filter(t=>!t.done).length,farbe:'var(--teal)'}]));
+
+ /* Netzwerk und Fehlzeiten */
+ const vermittlungen=d.kontakte.filter(c=>c.partnerName||/vermittel/i.test(String(c.measure||'')));
+ setz('statReferrals',ssaBalken('Weitervermittlungen nach Stelle',alsPunkte(zaehleNach(vermittlungen,c=>c.partnerName||'ohne benannte Stelle'),{max:8})));
+ const absence={};
+ data.schoolSignals.filter(r=>statSchuelerPasst(r.studentId)).forEach(r=>{const k=r.period||'ohne Zeitraum';absence[k]=(absence[k]||0)+Number(r.absences||0)});
+ setz('statAbsenceTrend',ssaBalken('Fehlstunden nach Auswertungszeitraum',alsPunkte(absence,{sortiert:false,max:10})));
+ setz('statGradeThemes',ssaBalken('Häufigste Themen nach Jahrgang',alsPunkte(statisticBreakdowns().gradeThemes,{max:8})));
+}
 function reportRows(obj){return Object.entries(obj).sort((a,b)=>b[1]-a[1]).map(([label,value])=>`<tr><td>${label}</td><td>${value}</td></tr>`).join('')||'<tr><td colspan="2">Keine Vorgänge dokumentiert</td></tr>'}
-function annualReportHtml(){const v=statisticValues(),types={...countBy(data.contacts,'type'),'Gruppengespräche':data.groupTalks.length,'Klassenmaßnahmen':data.classActivities.length,'Trainingsraumvorgänge':data.trainingRoom.length},levels={...countBy(data.contacts,'level'),'Gruppe':data.groupTalks.length,'Klasse':data.classActivities.length,'Trainingsraum':data.trainingRoom.length},activeCases=data.cases.filter(c=>c.status!=='Abgeschlossen').length;return `<h1>Anonymisierter Jahresbericht Schulsozialarbeit</h1><p><strong>Ludgerusschule Rhede (Ems)</strong><br>Schuljahr ${data.settings.currentSchoolYear}</p><p class="muted">Erstellt am ${new Intl.DateTimeFormat('de-DE').format(new Date())}. Der Bericht enthält ausschließlich aggregierte Angaben, keine Namen oder Schüler-IDs.</p><h2>Kennzahlen</h2><table><tr><th>Kennzahl</th><th>Wert</th></tr><tr><td>Dokumentierte Vorgänge</td><td>${v.total}</td></tr><tr><td>Dokumentierte Gesamtzeit</td><td>${Math.floor(v.totalMins/60)} Stunden ${v.totalMins%60} Minuten</td></tr><tr><td>Teilnahmen an Gruppen- und Klassenangeboten</td><td>${v.participants}</td></tr><tr><td>Aktive Fallakten</td><td>${activeCases}</td></tr><tr><td>Abgeschlossene Fallakten</td><td>${data.cases.filter(c=>c.status==='Abgeschlossen').length}</td></tr></table><h2>Prozess- und Ergebnisqualität</h2><table><tr><th>Indikator</th><th>Wert</th><th>Grundlage</th></tr>${qualityValues().map(q=>`<tr><td>${q.label}</td><td>${q.value} %</td><td>${q.note}</td></tr>`).join('')}</table><p class="muted">Dokumentationsquote, Reichweite und Fallzahl sind kein alleiniger Wirksamkeitsnachweis. Kleine Gruppen und indirekt identifizierbare Angaben dürfen nicht ausgewiesen werden.</p><h2>Vorgangsarten</h2><table><tr><th>Art</th><th>Anzahl</th></tr>${reportRows(types)}</table><h2>Arbeitsebenen</h2><table><tr><th>Ebene</th><th>Anzahl</th></tr>${reportRows(levels)}</table><h2>Beratungsanlässe</h2><table><tr><th>Anlass</th><th>Anzahl</th></tr>${reportRows(countBy(data.contacts,'reason'))}</table><h2>Monatsverteilung</h2><table><tr><th>Monat</th><th>Anzahl</th></tr>${reportRows(monthCounts())}</table><h2>Fachlicher Jahresrückblick</h2><div class="box">${data.settings.annualNarrative||'Noch keine fachliche Einordnung hinterlegt.'}</div><p class="muted">Die Zahlen beruhen auf den in dieser lokalen Arbeitsdatei dokumentierten Vorgängen. Vor Weitergabe bitte Vollständigkeit und Aussagegrenzen fachlich prüfen.</p>`}
+function annualReportHtml(){const v=statisticValues(),types={...countBy(data.contacts,'type'),'Gruppengespräche':data.groupTalks.length,'Klassenmaßnahmen':data.classActivities.length,'Trainingsraumvorgänge':data.trainingRoom.length},levels={...countBy(data.contacts,'level'),'Gruppe':data.groupTalks.length,'Klasse':data.classActivities.length,'Trainingsraum':data.trainingRoom.length},activeCases=data.cases.filter(c=>c.status!=='Abgeschlossen').length;return `<h1>Anonymisierter Jahresbericht Schulsozialarbeit</h1><p><strong>Ludgerusschule Rhede (Ems)</strong><br>Schuljahr ${data.settings.currentSchoolYear}</p><p class="muted">Erstellt am ${new Intl.DateTimeFormat('de-DE').format(new Date())}. Der Bericht enthält ausschließlich aggregierte Angaben, keine Namen oder Schüler-IDs.</p><h2>Kennzahlen</h2><table><tr><th>Kennzahl</th><th>Wert</th></tr><tr><td>Dokumentierte Vorgänge</td><td>${v.total}</td></tr><tr><td>Dokumentierte Gesamtzeit</td><td>${Math.floor(v.totalMins/60)} Stunden ${v.totalMins%60} Minuten</td></tr><tr><td>Teilnahmen an Gruppen- und Klassenangeboten</td><td>${v.participants}</td></tr><tr><td>Aktive Fallakten</td><td>${activeCases}</td></tr><tr><td>Abgeschlossene Fallakten</td><td>${data.cases.filter(c=>c.status==='Abgeschlossen').length}</td></tr></table><h2>Prozess- und Ergebnisqualität</h2><table><tr><th>Indikator</th><th>Wert</th><th>Grundlage</th></tr>${qualityValues().map(q=>`<tr><td>${q.label}</td><td>${q.value} %</td><td>${q.note}</td></tr>`).join('')}</table><p class="muted">Dokumentationsquote, Reichweite und Fallzahl sind kein alleiniger Wirksamkeitsnachweis. Kleine Gruppen und indirekt identifizierbare Angaben dürfen nicht ausgewiesen werden.</p><h2>Vorgangsarten</h2><table><tr><th>Art</th><th>Anzahl</th></tr>${reportRows(types)}</table><h2>Arbeitsebenen</h2><table><tr><th>Ebene</th><th>Anzahl</th></tr>${reportRows(levels)}</table><h2>Beratungsanlässe</h2><table><tr><th>Anlass</th><th>Anzahl</th></tr>${reportRows(countBy(data.contacts,'reason'))}</table><h2>Monatsverteilung</h2><table><tr><th>Monat</th><th>Anzahl</th></tr>${reportRows(monthCounts())}</table><h2>Erreichte Jahrgänge</h2><table><tr><th>Jahrgang</th><th>Einzelkontakte</th></tr>${reportRows(zaehleNach(data.contacts,c=>{const f=data.cases.find(x=>x.id===c.caseId),st=f&&data.students.find(y=>y.id===f.studentId);return st?'Jahrgang '+classGrade(st.className):'ohne Zuordnung'}))}</table><h2>Einbezug der Erziehungsberechtigten</h2><table><tr><th>Form</th><th>Anzahl</th></tr>${reportRows(zaehleNach(data.contacts,c=>c.familyInvolvement||'nicht dokumentiert'))}</table><h2>Fachliche Entwicklungseinschätzung</h2><table><tr><th>Einschätzung</th><th>Anzahl</th></tr>${reportRows(zaehleNach(data.contacts,c=>c.trend||'Nicht bewertet'))}</table><h2>Sicherheitsprüfungen</h2><table><tr><th>Ergebnis</th><th>Anzahl</th></tr>${reportRows(zaehleNach(data.contacts,c=>String(c.safetyStatus||'ohne Angabe').replace('Kein akuter Sicherheitshinweis in diesem Vorgang','ohne Hinweis')))}</table><h2>Zielentwicklung</h2><table><tr><th>Status</th><th>Anzahl</th></tr>${reportRows(zaehleNach(data.casePlans,'status'))}</table><h2>Fachverfahren</h2><table><tr><th>Verfahren</th><th>Anzahl</th></tr>${reportRows(zaehleNach(data.verfahrenLaeufe||[],l=>verfahrenTitel(l.workflowId)))}</table><table><tr><th>Status der Verfahren</th><th>Anzahl</th></tr>${reportRows(zaehleNach(data.verfahrenLaeufe||[],'status'))}</table><h2>Aufgaben und Verbindlichkeit</h2><table><tr><th>Kennzahl</th><th>Wert</th></tr><tr><td>Erledigte Aufgaben</td><td>${data.tasks.filter(t=>t.done).length}</td></tr><tr><td>Davon fristgerecht</td><td>${data.tasks.filter(t=>t.done&&t.completedAt&&t.due&&String(t.completedAt).slice(0,10)<=t.due).length}</td></tr><tr><td>Offene Aufgaben und Wiedervorlagen</td><td>${data.tasks.filter(t=>!t.done).length}</td></tr></table><h2>Weitervermittlungen</h2><table><tr><th>Stelle</th><th>Anzahl</th></tr>${reportRows(zaehleNach(data.contacts.filter(c=>c.partnerName),c=>c.partnerName))}</table><h2>Fachlicher Jahresrückblick</h2><div class="box">${data.settings.annualNarrative||'Noch keine fachliche Einordnung hinterlegt.'}</div><p class="muted">Die Zahlen beruhen auf den in dieser lokalen Arbeitsdatei dokumentierten Vorgängen. Vor Weitergabe bitte Vollständigkeit und Aussagegrenzen fachlich prüfen.</p>`}
 function printAnnualReport(){printDocument('Anonymisierter Jahresbericht '+data.settings.currentSchoolYear,annualReportHtml())}
 function downloadAnnualReportDoc(){const body=annualReportHtml(),doc=`<!doctype html><html lang="de"><head><meta charset="utf-8"><title>Jahresbericht</title><style>body{font:11pt Arial,sans-serif;color:#172f40}h1{font-size:20pt}h2{font-size:14pt;margin-top:20pt}table{width:100%;border-collapse:collapse;margin-bottom:12pt}th,td{border:1px solid #aab6bd;padding:6pt;text-align:left}.box{border:1px solid #aab6bd;padding:10pt;min-height:55pt}.muted{color:#607080;font-size:9pt}</style></head><body>${body}</body></html>`;download(`SSA-Jahresbericht-${data.settings.currentSchoolYear.replace('/','-')}.doc`,'\ufeff'+doc,'application/msword');toast('Der anonymisierte Word-Bericht wurde erstellt.')}
 function saveAnnualNarrative(value){data.settings.annualNarrative=clean(value);void persistState().catch(showVaultError)}
