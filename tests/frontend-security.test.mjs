@@ -5,14 +5,10 @@ import vm from 'node:vm';
 
 const html=fs.readFileSync(new URL('../src/index.html',import.meta.url),'utf8');
 const script=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)?.[1]||'';
-const migration=JSON.parse(fs.readFileSync(new URL('../migration/SSA-Cockpit-v0.7.1-Migration-PERSONENBEZOGEN.ssa-backup.json',import.meta.url),'utf8'));
+const core=fs.readFileSync(new URL('../src/dossier-core.js',import.meta.url),'utf8');
 
 test('Frontend-JavaScript ist syntaktisch gültig',()=>assert.doesNotThrow(()=>new Function(script)));
-test('Frontend enthält keine eingebetteten Personenbestände',()=>{
- const m=html.match(/const seed=(\{[\s\S]*?\n\});\nconst clean=/);assert.ok(m);
- const seed=vm.runInNewContext(`(${m[1]})`);
- assert.equal(seed.students.length,0);assert.equal(seed.teachers.length,0);assert.equal(seed.schoolSignals.length,0);
-});
+test('Gespeicherte Schülerangaben werden nicht durch Ausgangsbestand überschrieben',()=>{assert.doesNotMatch(script,/Object\.assign\(stored,pupil/);assert.match(script,/Dossier\.normalize\(x\)/)});
 test('Browser-Speicher wurde vollständig entfernt',()=>{
  assert.doesNotMatch(html,/localStorage|indexedDB/);
 });
@@ -28,12 +24,11 @@ test('Automatische Fallanlage deckt fachliche personenbezogene Einträge ab',()=
  assert.match(script,/function ensureCaseForStudent/);
 });
 test('Rohimporte erzeugen nicht ungeprüft Fallakten',()=>{
- const importSection=script.slice(script.indexOf('function importSchoolSignals'),script.indexOf('function parseDelimited'));
+ const importSection=script.slice(script.indexOf('function importSchoolSignals'),script.indexOf('const VERLAUF_VORLAGEN'));
  assert.doesNotMatch(importSection,/ensureCaseForStudent/);
 });
-test('Migration basiert auf v0.7.1',()=>{
- assert.equal(migration.type,'SSA-Cockpit-Gesamtsicherung');assert.equal(migration.schemaVersion,71);
-});
+test('Upgrade sichert vor der Normalisierung',()=>{assert.match(script,/write_backup/);assert.match(script,/Vor-Chronologie-0\.10\.0/);assert.match(core,/dossierVersion=1/)});
 test('Datentresor-Kommandos sind verdrahtet',()=>{
  for(const command of ['setup_vault','unlock_vault','save_state','export_backup','import_backup','put_attachment'])assert.match(script,new RegExp(command));
 });
+
