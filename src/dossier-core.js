@@ -88,6 +88,20 @@ function archive(state,sid,date,reason){
  state.yearTransitions.push(stamp(state,{id:uid('year'),studentId:sid,date,title:reason,reason,createdAt:new Date().toISOString()}));
  for(const t of state.tasks)if(!t.done&&ids(state,t).includes(sid))t.assignmentReview='Bestätigter Abgang: offene Aufgabe und Zuständigkeit prüfen.';
 }
+function localSuggestions(entry){
+ const text=[entry.type,entry.title,entry.content,entry.childView,entry.otherView,entry.observation,entry.assessment,entry.agreement,entry.goal,entry.result].join(' ').toLocaleLowerCase('de');
+ const out=[],add=(title,rationale,taskType='Überprüfung')=>{if(!out.some(x=>x.title===title))out.push({id:uid('suggestion'),title,rationale,taskType,status:'offen',createdAt:new Date().toISOString()});};
+ if(/akut|selbstgefährd|suizid|gewalt|waffe|kindeswohl|missbrauch|sexualisiert/.test(text))add('Schutzlage fachlich prüfen','Dringlichkeit, unmittelbaren Schutz und den verbindlichen schulischen Schutzweg prüfen. Keine automatische Gefährdungsbewertung.','Fachliche Prüfung');
+ if(/trainingsraum/.test(text))add('Kurzes Reflexionsgespräch anbieten','Sicht des Kindes, vereinbarte Verhaltensschritte und Rückkehr in den Unterricht gemeinsam überprüfen.','Rückmeldung');
+ if(/elterngespräch|elternkontakt|erziehungsberechtigt/.test(text))add('Vereinbarte Rückmeldung nachhalten','Prüfen, ob Absprachen umgesetzt wurden und ob Kind, Familie oder Schule weiteren Klärungsbedarf sehen.','Rückmeldung');
+ if(/gruppe|konflikt|vermittlung|sozialtraining|klassentraining/.test(text))add('Wirkung und Fairness überprüfen','Nach angemessener Zeit aus Sicht der Beteiligten prüfen, ob Vereinbarungen tragen und erneute Belastungen auftreten.','Überprüfung');
+ if(/dokument|befund|zusätzliche information/.test(text))add('Fachliche Relevanz klären','Prüfen, welche Bedeutung die Information für die Unterstützung hat und ob ein konkreter nächster Schritt erforderlich ist.','Fachliche Prüfung');
+ if(/rückmeldung|überprüfung|zielentwicklung/.test(text))add('Weiteres Vorgehen entscheiden','Unterstützung bewusst fortführen, anpassen oder fachlich begründet abschließen.','Überprüfung');
+ if(entry.agreement||/vereinbar|absprache|ziel/.test(text))add('Vereinbarung zu einem passenden Termin prüfen','Rückmeldung zur Umsetzung einholen und Ergebnis beziehungsweise Zielentwicklung dokumentieren.','Überprüfung');
+ if(!entry.childView)add('Perspektive des Kindes ergänzen','Bei nächster Gelegenheit klären, wie das Kind die Situation und mögliche Unterstützung selbst erlebt.','Rückmeldung');
+ add('Nächsten Schritt und Zuständigkeit prüfen','Nur bei fachlichem Bedarf eine zuständige Person und einen realistischen Prüftermin festlegen.','Nächster Schritt');
+ return out.slice(0,3);
+}
 function apply(state,plan){
  const errors=validate(state,plan);if(errors.length)throw Error(errors.join('\n'));
  normalize(state); // Freeze all historical contexts BEFORE changing any class.
@@ -114,6 +128,7 @@ function addEntry(state,input){
  if(!participantIds.length||participantIds.some(sid=>!state.students.some(s=>s.id===sid)))throw Error('Teilnehmende Kinder auswählen.');
  if(!iso(input.date)||!String(input.content||'').trim())throw Error('Datum und Inhalt angeben.');
  const e=stamp(state,{...input,id:uid('entry'),participantIds,createdAt:new Date().toISOString(),duration:Math.max(0,Number(input.duration)||0),individualNotes:input.individualNotes||{},revisions:[],pinnedFor:[]});
+ e.actionSuggestions=localSuggestions(e);
  if(participantIds.length>1&&input.individualNotes&&Object.keys(input.individualNotes).some(sid=>!participantIds.includes(sid)))throw Error('Individuelle Notiz ist keinem teilnehmenden Kind zugeordnet.');
  state.journal.push(e);return e;
 }
@@ -141,7 +156,9 @@ function assess(state,sid,input){
 function currentAssessment(state,sid){return state.assessments.filter(a=>a.studentId===sid).sort((a,b)=>b.date.localeCompare(a.date)||b.createdAt.localeCompare(a.createdAt))[0]||null}
 function work(state,sid){return state.tasks.filter(t=>ids(state,t).includes(sid))}
 function timeline(state,sid,legacy=[]){
- const items=legacy.filter(e=>!state.tasks.some(t=>t.id===e.id)).map(e=>({...e,key:'legacy:'+e.id,legacy:true,context:recordContext(state,e,sid)}));
+ // Fallstatus-Einträge steuern das Fallboard. Sie sind keine eigenen fachlichen
+ // Ereignisse und würden dort echte Kontakte oder Aufgaben doppelt darstellen.
+ const items=legacy.filter(e=>e.eventKind!=='Fallstatus'&&!state.tasks.some(t=>t.id===e.id)).map(e=>({...e,key:'legacy:'+e.id,legacy:true,context:recordContext(state,e,sid)}));
  for(const e of state.journal.filter(e=>e.participantIds.includes(sid)))items.push({...e,key:'entry:'+e.id,eventKind:e.type,context:recordContext(state,e,sid),individualNote:e.individualNotes?.[sid]||''});
  for(const e of state.assessments.filter(e=>e.studentId===sid))items.push({...e,key:'assessment:'+e.id,eventKind:'Fachliche Ampelbewertung',title:e.color,content:e.reason,responsible:e.author,context:recordContext(state,e,sid)});
  for(const e of state.yearTransitions.filter(e=>e.studentId===sid))items.push({...e,key:'year:'+e.id,eventKind:'Schuljahresverlauf',content:e.reason,context:recordContext(state,e,sid)});
@@ -154,5 +171,5 @@ function journalStats(state,year='',className='all'){
  return state.journal.filter(e=>!e.planned&&e.type!=='zusätzliche Information'&&(!year||e.schoolYear===year)&& (className==='all'||e.participantIds.some(sid=>{const cl=recordContext(state,e,sid).className;return className.startsWith('jg:')?cl.match(/^\d+/)?.[0]===className.slice(3):cl===className}))).map(e=>({...e,duration:e.duration*Math.max(1,(e.facilitators||[]).length)}));
 }
 function restore(raw,sanitize){const state=sanitize(raw);for(const [i,e]of (state.journal||[]).entries()){const original=raw.journal?.[i];if(!original)continue;for(const key of ['content','childView','otherView','observation','assessment','agreement','goal','result','source','people'])if(typeof original[key]==='string')e[key]=original[key];if(original.individualNotes&&typeof original.individualNotes==='object')for(const key of Object.keys(e.individualNotes||{}))if(typeof original.individualNotes[key]==='string')e.individualNotes[key]=original.individualNotes[key];}return state;}
-root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats};
+root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats};
 })(globalThis);
