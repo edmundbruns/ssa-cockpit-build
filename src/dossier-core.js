@@ -52,7 +52,14 @@ function normalize(state){
  for(const k of collections)for(const r of state[k])stamp(state,r);
  for(const t of state.tasks){if(!t.participantIds)t.participantIds=ids(state,t);if(t.status==='erledigt'||t.status==='entfällt')t.done=true;else if(t.done)t.status='erledigt';else if(!t.status)t.status='offen';stamp(state,t);}
  // Repair records created by earlier versions without a corresponding case.
- for(const entry of state.journal)if(!entry.generalInfo)for(const sid of entry.participantIds||[])journalCase(state,sid,entry);
+ for(const entry of state.journal){
+  if(!entry.generalInfo)for(const sid of entry.participantIds||[])journalCase(state,sid,entry);
+  if((entry.suggestionVersion||0)<2){
+   const decided=(entry.actionSuggestions||[]).filter(s=>s.status==='übernommen'||s.status==='nicht verwendet');
+   entry.actionSuggestions=entry.generalInfo?[]:[...decided,...localSuggestions(entry,state).filter(s=>!decided.some(d=>d.title===s.title))].slice(0,Math.max(3,decided.length));
+   entry.suggestionVersion=2;
+  }
+ }
  state.settings.dossierVersion=1;return state;
 }
 function lookup(state,p,source){
@@ -105,22 +112,42 @@ function archive(state,sid,date,reason){
  state.yearTransitions.push(stamp(state,{id:uid('year'),studentId:sid,date,title:reason,reason,createdAt:new Date().toISOString()}));
  for(const t of state.tasks)if(!t.done&&ids(state,t).includes(sid))t.assignmentReview='Bestätigter Abgang: offene Aufgabe und Zuständigkeit prüfen.';
 }
-function localSuggestions(entry){
- const text=[entry.type,entry.title,entry.content,entry.childView,entry.otherView,entry.observation,entry.assessment,entry.agreement,entry.goal,entry.result].join(' ').toLocaleLowerCase('de');
- const out=[],add=(title,rationale,taskType='Überprüfung')=>{if(!out.some(x=>x.title===title))out.push({id:uid('suggestion'),title,rationale,taskType,status:'offen',createdAt:new Date().toISOString()});};
- if(/akut|selbstgefährd|suizid|gewalt|waffe|kindeswohl|missbrauch|sexualisiert/.test(text))add('Schutzlage fachlich prüfen','Dringlichkeit, unmittelbaren Schutz und den verbindlichen schulischen Schutzweg prüfen. Keine automatische Gefährdungsbewertung.','Fachliche Prüfung');
- if(/trainingsraum/.test(text))add('Kurzes Reflexionsgespräch anbieten','Sicht des Kindes, vereinbarte Verhaltensschritte und Rückkehr in den Unterricht gemeinsam überprüfen.','Rückmeldung');
- if(/fehlzeit|schulabsent|webuntis/.test(text))add('Klassenleitung und Erziehungsberechtigte einbeziehen','Fehlzeiten und mögliche Gründe gemeinsam klären; vereinbarte Unterstützung und einen Prüftermin dokumentieren.','Rücksprache');
- if(/belastung|angst|krise|wohlbefinden/.test(text))add('Schulpsychologische Beratung erwägen','Mit dem Kind besprechen, ob die Schulpsychologie als passende Unterstützung angefragt werden soll.','Fachliche Prüfung');
- if(/lern|förder|inklusion/.test(text))add('Mobilen Dienst oder Beratungslehrkraft prüfen','Passende schulische Unterstützung und Zuständigkeit im konkreten Fall prüfen.','Rücksprache');
- if(/konflikt|ausgrenz|mobbing/.test(text))add('Konfliktklärung oder Sozialtraining erwägen','Mit den Beteiligten eine passende Vermittlung oder ein Sozialtraining vereinbaren und die Wirkung überprüfen.','Überprüfung');
- if(/elterngespräch|elternkontakt|erziehungsberechtigt/.test(text))add('Vereinbarte Rückmeldung nachhalten','Prüfen, ob Absprachen umgesetzt wurden und ob Kind, Familie oder Schule weiteren Klärungsbedarf sehen.','Rückmeldung');
- if(/gruppe|konflikt|vermittlung|sozialtraining|klassentraining/.test(text))add('Wirkung und Fairness überprüfen','Nach angemessener Zeit aus Sicht der Beteiligten prüfen, ob Vereinbarungen tragen und erneute Belastungen auftreten.','Überprüfung');
- if(/dokument|befund|zusätzliche information/.test(text))add('Fachliche Relevanz klären','Prüfen, welche Bedeutung die Information für die Unterstützung hat und ob ein konkreter nächster Schritt erforderlich ist.','Fachliche Prüfung');
- if(/rückmeldung|überprüfung|zielentwicklung/.test(text))add('Weiteres Vorgehen entscheiden','Unterstützung bewusst fortführen, anpassen oder fachlich begründet abschließen.','Überprüfung');
- if(entry.agreement||/vereinbar|absprache|ziel/.test(text))add('Vereinbarung zu einem passenden Termin prüfen','Rückmeldung zur Umsetzung einholen und Ergebnis beziehungsweise Zielentwicklung dokumentieren.','Überprüfung');
- if(!entry.childView)add('Perspektive des Kindes ergänzen','Bei nächster Gelegenheit klären, wie das Kind die Situation und mögliche Unterstützung selbst erlebt.','Rückmeldung');
- add('Nächsten Schritt und Zuständigkeit prüfen','Nur bei fachlichem Bedarf eine zuständige Person und einen realistischen Prüftermin festlegen.','Nächster Schritt');
+function localSuggestions(entry,state){
+ const type=String(entry.type||'').toLocaleLowerCase('de'),text=[type,entry.title,entry.content,entry.childView,entry.otherView,entry.observation,entry.assessment,entry.agreement,entry.goal,entry.result].join(' ').toLocaleLowerCase('de');
+ const sid=entry.participantIds?.[0],student=state?.students?.find(s=>s.id===sid),lead=String(state?.settings?.classLeads?.[student?.className]||'').trim();
+ const teacher=lead?`Klassenleitung ${lead}`:'Klassenleitung';
+ const out=[],add=(title,rationale,taskType='Nächster Schritt',dueDays=3)=>{if(!out.some(x=>x.title===title))out.push({id:uid('suggestion'),title,rationale,taskType,dueDays,status:'offen',createdAt:new Date().toISOString()});};
+ if(/akut|selbstgefährd|suizid|waffe|kindeswohl|missbrauch|sexualisiert/.test(text)){
+  add('Heute Schutzlage mit Schulleitung und zuständiger Fachkraft abstimmen','Konkret festhalten, wer den unmittelbaren Schutz übernimmt und welches Verfahren nach den örtlichen Absprachen jetzt eingeleitet wird. Keine automatische Gefährdungsbewertung.','Schutzweg',0);
+  add('Heute dokumentierte Beobachtungen und Aussagen getrennt festhalten','Wörtliche Aussagen, eigene Beobachtungen, Uhrzeit und bereits ergriffene Schutzschritte sachlich sichern.','Dokumentation',0);
+  add('Kinderschutzfachberatung oder Jugendamt nach örtlichem Schutzweg einbeziehen','Nach der Abstimmung mit der Schulleitung dokumentieren, wer wann welche Fachberatung nach dem örtlich vereinbarten Verfahren anfragt.','Schutzweg',0);
+ }else if(/trainingsraum/.test(text)){
+  add('Mit dem Kind ein Reflexionsgespräch zum Trainingsraumbesuch führen','Auslöser aus Sicht des Kindes und einen konkreten Schritt für die Rückkehr in den Unterricht schriftlich festhalten.','Schülergespräch',2);
+  add(`${teacher} zur vereinbarten Rückkehr in den Unterricht befragen`,'Eine kurze Rückmeldung einholen, ob die vereinbarten Verhaltensschritte im Unterricht umsetzbar waren.','Rückmeldung',5);
+ }else if(/fehlzeit|schulabsent|webuntis/.test(text)){
+  add(`${teacher} um Rückmeldung zu den dokumentierten Fehlzeiten bitten`,'Zeitraum und offene Entschuldigungen nennen; nach bekannten schulischen Gründen und bereits erfolgtem Kontakt fragen.','Rücksprache',2);
+  add('Offene Entschuldigungen mit den Sorgeberechtigten klären','Fehlzeitenzeitraum benennen und festhalten, was tatsächlich geklärt wurde.','Elternkontakt',5);
+ }else if(/konflikt|ausgrenz|mobbing|gewalt/.test(text)){
+  add('Mit den beteiligten Kindern getrennte kurze Gespräche vereinbaren','Jeweils eigene Sicht und mögliche Sicherheit im Schulalltag festhalten; keine Schuldzuweisung aus dem Eintrag ableiten.','Konfliktklärung',2);
+  add(`${teacher} zu Beobachtungen in der Klasse befragen`,'Konkrete Situationen, betroffene Zeiten und bereits vereinbarte Schritte erfragen.','Rücksprache',3);
+  add('Vermittlungstermin im Palaverzelt anbieten','Mit den beteiligten Kindern getrennt klären, ob und unter welchen Bedingungen eine gemeinsame Vermittlung sinnvoll ist.','Konfliktklärung',5);
+ }else if(/elterngespräch|elternkontakt|erziehungsberechtigt/.test(text)){
+  add('Mit den Sorgeberechtigten die Umsetzung der Gesprächsabsprache nachhalten','Zu der dokumentierten Vereinbarung eine konkrete Rückmeldung einholen und das Ergebnis am Gesprächseintrag ergänzen.','Rückmeldung',7);
+  add('Das Kind zur Wirkung der vereinbarten Unterstützung befragen','In einem kurzen Gespräch erfragen, was sich im Schulalltag tatsächlich verändert hat.','Schülergespräch',7);
+ }else if(/sozialtraining|klassentraining|gruppe|präventionsangebot/.test(text)){
+  add(`${teacher} nach der Wirkung des Angebots in der Klasse fragen`,'Eine beobachtbare Veränderung und möglichen weiteren Bedarf festhalten.','Rückmeldung',10);
+ }else if(/schulpsycholog|angst|krise|belastung|wohlbefinden/.test(text)){
+  add('Mit dem Kind ein Gespräch über die aktuelle Belastung vereinbaren','Aktuelle Situation und gewünschte Unterstützung erfragen; bei Bedarf den Kontakt zur Schulpsychologie mit geklärter Einwilligung anbieten.','Schülergespräch',2);
+ }else if(/lernen|lernproblem|förderbedarf|inklusion|unterrichtsbegleitung/.test(text)){
+  add('Beratungslehrkraft oder Mobilen Dienst zum schulischen Unterstützungsbedarf anfragen','Einen konkreten Beobachtungsanlass und die nötigen Einwilligungen vor dem Kontakt klären.','Rücksprache',5);
+ }else if(/therapie|ergotherap|logopäd|operation|\bop\b|medizin/.test(text)){
+  add('Mit dem Kind besprechen, ob im Schulalltag Unterstützung gebraucht wird','Konkreten schulischen Unterstützungsbedarf erfragen; medizinische Angaben nur soweit erforderlich aufnehmen.','Schülergespräch',5);
+ }else if(/extern|jugendamt|weitervermittlung|netzwerk/.test(text)){
+  add('Rückmeldung zur vereinbarten Weitervermittlung einholen','Bei der dokumentierten zuständigen Stelle nur im Rahmen der geklärten Einwilligung nach dem vereinbarten nächsten Schritt fragen.','Rückmeldung',5);
+ }else if(/ziel|maßnahme|vereinbar|absprache/.test(text)||entry.agreement){
+  add('Die dokumentierte Vereinbarung mit den Beteiligten überprüfen','Eine beobachtbare Umsetzung erfragen, das Ergebnis festhalten und den nächsten Termin gemeinsam bestimmen.','Überprüfung',7);
+ }
+ if(!out.length&&type!=='zusätzliche information')add('Mit dem Kind ein kurzes Anschlussgespräch zum dokumentierten Anlass vereinbaren','Aus seiner Sicht einen konkreten Unterstützungsbedarf und gegebenenfalls einen nächsten Termin festhalten.','Schülergespräch',5);
  return out.slice(0,3);
 }
 function apply(state,plan){
@@ -149,7 +176,7 @@ function addEntry(state,input){
  if(!participantIds.length||participantIds.some(sid=>!state.students.some(s=>s.id===sid)))throw Error('Teilnehmende Kinder auswählen.');
  if(!iso(input.date)||!String(input.content||'').trim())throw Error('Datum und Inhalt angeben.');
  const e=stamp(state,{...input,id:uid('entry'),participantIds,createdAt:new Date().toISOString(),duration:Math.max(0,Number(input.duration)||0),individualNotes:input.individualNotes||{},revisions:[],pinnedFor:[]});
- e.actionSuggestions=e.generalInfo?[]:localSuggestions(e);
+ e.actionSuggestions=e.generalInfo?[]:localSuggestions(e,state);e.suggestionVersion=2;
  if(participantIds.length>1&&input.individualNotes&&Object.keys(input.individualNotes).some(sid=>!participantIds.includes(sid)))throw Error('Individuelle Notiz ist keinem teilnehmenden Kind zugeordnet.');
  state.journal.push(e);
  if(!e.generalInfo)for(const sid of participantIds)journalCase(state,sid,e,true);
@@ -181,7 +208,7 @@ function work(state,sid){return state.tasks.filter(t=>ids(state,t).includes(sid)
 function timeline(state,sid,legacy=[]){
  // Fallstatus-Einträge steuern das Fallboard. Sie sind keine eigenen fachlichen
  // Ereignisse und würden dort echte Kontakte oder Aufgaben doppelt darstellen.
- const items=legacy.filter(e=>e.eventKind!=='Fallstatus'&&!state.tasks.some(t=>t.id===e.id)).map(e=>({...e,key:'legacy:'+e.id,legacy:true,context:recordContext(state,e,sid)}));
+ const items=legacy.filter(e=>e.eventKind!=='Fallstatus'&&!(e.eventKind==='Dokument'&&e.attachmentId&&e.sourceEntryKey)&&!state.tasks.some(t=>t.id===e.id)).map(e=>({...e,key:'legacy:'+e.id,legacy:true,context:recordContext(state,e,sid)}));
  for(const e of state.journal.filter(e=>e.participantIds.includes(sid)))items.push({...e,key:'entry:'+e.id,eventKind:e.type,context:recordContext(state,e,sid),individualNote:e.individualNotes?.[sid]||''});
  for(const e of state.assessments.filter(e=>e.studentId===sid))items.push({...e,key:'assessment:'+e.id,eventKind:'Fachliche Ampelbewertung',title:e.color,content:e.reason,responsible:e.author,context:recordContext(state,e,sid)});
  for(const e of state.yearTransitions.filter(e=>e.studentId===sid))items.push({...e,key:'year:'+e.id,eventKind:'Schuljahresverlauf',content:e.reason,context:recordContext(state,e,sid)});

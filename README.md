@@ -1,8 +1,7 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Bereinigter Quellstand für den Windows-Installer (Version 0.8.0).
+Version 0.11.1. Die Windows-Installer (NSIS und MSI) entstehen über den GitHub-Actions-Workflow `Windows Installer`.
 
-Der Build erzeugt NSIS- und MSI-Installer über GitHub Actions. Die lokale Migrationsdatei mit personenbezogenen Schuldaten ist bewusst nicht Bestandteil dieses Repositorys. Sie bleibt auf dem Dienstgerät und wird nach der Installation im Cockpit importiert.
+Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
-Die Anwendung speichert Falldaten lokal in einem verschlüsselten Datentresor. Vor dem Produktivbetrieb sind die schulischen Freigaben, Berechtigungen, Sicherungs- und Löschregeln zu prüfen.
-
+Die lokale Migrationsdatei mit personenbezogenen Schuldaten ist nicht Bestandteil dieses Repositorys; sie bleibt auf dem Dienstgerät. Vor einer Installation bitte im Cockpit eine Gesamtsicherung erstellen.

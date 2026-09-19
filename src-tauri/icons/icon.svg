@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#102f46"/>
-  <path d="M256 78 405 137v105c0 95-55 158-149 192-94-34-149-97-149-192V137z" fill="#0f766e"/>
-  <path d="M176 206h160v112H176z" fill="#fff" opacity=".98"/>
-  <path d="M205 179h102v41H205z" fill="#fff"/>
-  <text x="256" y="286" text-anchor="middle" font-family="Arial,sans-serif" font-size="72" font-weight="700" fill="#102f46">SSA</text>
-</svg>
