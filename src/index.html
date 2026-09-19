@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#164e63">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230f766e'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='Arial' font-size='25' font-weight='700' fill='white'%3ESSA%3C/text%3E%3C/svg%3E">
-  <title>SSA-Cockpit Ludgerusschule · Desktop 0.10.2</title>
+  <title>SSA-Cockpit Ludgerusschule · Desktop 0.10.3</title>
   <style>
     :root{--navy:#123047;--teal:#0f766e;--cyan:#0891b2;--cream:#f7f5ef;--paper:#fff;--ink:#183042;--muted:#64748b;--line:#dce4e8;--amber:#f59e0b;--red:#dc2626;--green:#16a34a;--shadow:0 12px 34px rgba(15,45,61,.10);--radius:18px}
     *{box-sizing:border-box} body{margin:0;background:var(--cream);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif} button,input,select,textarea{font:inherit} button{cursor:pointer}
@@ -80,7 +80,7 @@
     @media(max-width:950px){.app{grid-template-columns:212px 1fr}.sidebar{padding:20px 12px}.brand div:last-child,.nav .label,.sidefoot span{display:revert}.nav button{justify-content:flex-start}}
     @media(max-width:650px){.app{display:grid;grid-template-columns:60px 1fr}.sidebar{position:sticky;inset:0 auto auto 0;height:100vh;padding:12px 5px;display:flex}.brand div:last-child,.nav .navhead,.sidefoot{display:none}.nav{display:grid;overflow-x:hidden;overflow-y:auto}.nav button{justify-content:center;padding:11px 5px}.nav .label{display:none}.navgroup{margin-top:3px;border-top:1px solid rgba(255,255,255,.12);padding-top:4px}.navgroup.collapsed .navitems{display:grid}.nav .navitems button{padding:11px 5px}.content{padding:14px 14px 40px}.testbar{padding:7px 12px}}
   
-    /* Desktop 0.10.2: mittige Wechsel-Zeitachse */
+    /* Desktop 0.10.3: direkter Sprung aus der Fallarbeit zur Zeitachse */
     :root{--cream:#f4f7f8;--shadow:0 2px 10px rgba(15,45,61,.06);--radius:13px}
     body{background:#f4f7f8}.sidebar{background:#102f46}.card{border-color:#e3e9ec}
     .topbar{background:rgba(255,255,255,.94);border-bottom:1px solid var(--line);padding:17px 30px 13px;position:sticky;top:0;z-index:10}
@@ -193,7 +193,7 @@
         </div>
       </div>
     </nav>
-    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.10.2</span></div>
+    <div class="sidefoot"><span class="statusdot"></span><span>Offline · lokal gespeichert<br>Desktopversion 0.10.3</span></div>
   </aside>
   <main>
     <header class="topbar"><div><h1 id="pageTitle">Guten Morgen, Dr. Bruns</h1><p id="pageSubtitle">Freitag, 11. September 2026 · Schuljahr 2026/27</p></div><div class="kopfsuche"><input class="field" id="globalSearch" type="search" autocomplete="off" placeholder="Schüler:in suchen: Name, Vorname, Klasse oder Klassenleitung" oninput="globalSearchTippen()" onfocus="globalSearchTippen()"><div id="globalSearchResults"></div></div><div class="actions"><button class="btn" onclick="lockPrivacyScreen()">🔒 Sperren</button><button class="btn" onclick="openModal('taskModal')">＋ Aufgabe</button><button class="btn primary" onclick="verlaufOeffnen()">＋ Fallverlauf</button><button class="btn" onclick="dokuWaehlen()">＋ Anderes</button></div></header>
@@ -904,7 +904,7 @@ function renderCases(){
  });
  const versteckteFaelle=data.cases.filter(fallArchiviert).length;
  archivZeigen('caseArchivHinweis',versteckteFaelle,'Fallakte'+(versteckteFaelle===1?'':'n'));
- document.getElementById('caseTable').innerHTML=cases.map(c=>`<tr class="clickrow" onclick="showCase('${c.id}')"><td class="namecell">${ampelPunkt(ampelFall(c))} ${cname(c.id)}${c.id===BEISPIEL_FALL_ID?' <span class="tag amber">Beispiel</span>':''}</td><td>${classOf(c)}</td><td>${c.reason}</td><td><span class="tag ${c.status==='Beobachtung'?'amber':c.status==='Abgeschlossen'?'gray':''}">${c.status}</span></td><td>${fmt(c.last)}</td><td>${c.contacts}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">Keine passenden Fälle oder Verlaufseinträge gefunden. Eine Fallakte entsteht automatisch, sobald du zu einer Person etwas dokumentierst.</td></tr>'
+ document.getElementById('caseTable').innerHTML=cases.map(c=>`<tr class="clickrow" data-student-id="${DE(c.studentId)}" onclick="openCaseTimeline(this.dataset.studentId)"><td class="namecell">${ampelPunkt(ampelFall(c))} <button type="button" class="linkbutton" onclick="event.stopPropagation();openCaseTimeline(this.closest('tr').dataset.studentId)" aria-label="Chronologie von ${DE(cname(c.id))} öffnen">${DE(cname(c.id))}</button>${c.id===BEISPIEL_FALL_ID?' <span class="tag amber">Beispiel</span>':''}</td><td>${classOf(c)}</td><td>${c.reason}</td><td><span class="tag ${c.status==='Beobachtung'?'amber':c.status==='Abgeschlossen'?'gray':''}">${c.status}</span></td><td>${fmt(c.last)}</td><td>${c.contacts}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">Keine passenden Fälle oder Verlaufseinträge gefunden. Eine Fallakte entsteht automatisch, sobald du zu einer Person etwas dokumentierst.</td></tr>'
 }
 document.getElementById('caseSearch').oninput=renderCases;document.getElementById('caseFilter').onchange=renderCases;document.getElementById('caseClassFilter').onchange=renderCases;
 function renderStudents(){const q=(document.getElementById('studentSearch').value||'').toLowerCase(),f=document.getElementById('studentFilter').value;const list=data.students.filter(s=>(f==='all'||s.active)&&(`${s.id} ${s.first} ${s.last} ${s.className} ${s.phone||''} ${s.guardian1||''} ${s.guardian2||''}`).toLowerCase().includes(q)).sort((a,b)=>a.className.localeCompare(b.className,undefined,{numeric:true})||a.last.localeCompare(b.last));document.getElementById('currentYearLabel').textContent=data.settings.currentSchoolYear;document.getElementById('studentTable').innerHTML=list.map(s=>{const c=data.cases.find(x=>x.studentId===s.id);return `<tr class="clickrow" onclick="showStudent('${s.id}')"><td>${s.id}</td><td class="namecell">${s.last}, ${s.first}${s.id===BEISPIEL_ID?' <span class="tag amber">Beispiel</span>':''}</td><td>${s.className}</td><td>${s.phone||'–'}</td><td><span class="tag ${s.active?'':'gray'}">${s.active?'aktiv':'Abgang'}</span></td><td>${c?`<span class="tag ${c.status==='Abgeschlossen'?'gray':''}">${c.status}</span>`:'–'}</td></tr>`}).join('')||'<tr><td colspan="6" class="empty">Keine Schüler:innen gefunden. Falls du noch keine Liste eingelesen hast, nutze oben beim Excel-kompatiblen Import die Schaltfläche Datei auswählen.</td></tr>'}
@@ -2631,13 +2631,13 @@ function renderKanban(){
   const drop=`ondragover="event.preventDefault()" ondrop="dropCaseOnKanban(event,'${statuses[0]}')"`;
   return `<section class="kanban-column" ${drop}><div class="kanban-head"><span title="${erklaerung}">${titel}</span><span class="tag gray">${cases.length}</span></div><p class="kanban-hinweis">${erklaerung}</p><div class="kanban-list">${cases.map(c=>{
    const a=naechsteAufgabe(c.id),ueberfaellig=a&&a.due&&a.due<today();
-   return `<article class="kanban-card" draggable="true" ondragstart="event.dataTransfer.setData('text/plain','${c.id}')" onclick="showCase('${c.id}')">
-    <h4>${ampelPunkt(ampelFall(c))} ${cname(c.id)}${c.id===BEISPIEL_FALL_ID?' <span class="tag amber">Beispiel</span>':''}</h4>
+   return `<article class="kanban-card" data-student-id="${DE(c.studentId)}" draggable="true" ondragstart="event.dataTransfer.setData('text/plain','${c.id}')" onclick="openCaseTimeline(this.dataset.studentId)">
+    <h4>${ampelPunkt(ampelFall(c))} <button type="button" class="linkbutton" onclick="event.stopPropagation();openCaseTimeline(this.closest('article').dataset.studentId)" aria-label="Chronologie von ${DE(cname(c.id))} öffnen">${DE(cname(c.id))}</button>${c.id===BEISPIEL_FALL_ID?' <span class="tag amber">Beispiel</span>':''}</h4>
     <p class="kanban-meta">${classOf(c)} · ${c.status}</p>
     <p class="kanban-auftrag"><strong>Aufgabe:</strong> ${a?a.title:(c.reason||'Anlass noch zu klären')}</p>
     <p class="kanban-meta"><strong>Frist:</strong> ${a&&a.due?fmt(a.due):'keine Frist gesetzt'} · <strong>Zuständig:</strong> ${a?(a.assignedTo||'nicht zugeordnet'):'Edmund oder Sabine'}</p>
     <div class="eventmeta"><span class="tag ${ueberfaellig?'red':a?'':'gray'}">${ueberfaellig?'überfällig':a?(a.priority||'Normal'):'keine offene Aufgabe'}</span><span class="tag gray">letzter Eintrag ${c.last?fmt(c.last):'–'}</span></div>
-    <div class="kanban-aktionen"><button class="btn kleiner" onclick="event.stopPropagation();kanbanVerschieben('${c.id}')">⇄ Verschieben</button><button class="btn kleiner" onclick="event.stopPropagation();verlaufOeffnen('${c.studentId}')">✎ Eintrag</button><button class="btn kleiner" onclick="event.stopPropagation();closeModal('detailModal');showStudent('${c.studentId}')">Fallakte</button></div></article>`}).join('')
+    <div class="kanban-aktionen"><button class="btn kleiner" onclick="event.stopPropagation();kanbanVerschieben('${c.id}')">⇄ Verschieben</button><button class="btn kleiner" onclick="event.stopPropagation();verlaufOeffnen('${c.studentId}')">✎ Eintrag</button><button class="btn kleiner" onclick="event.stopPropagation();openCaseTimeline(this.closest('article').dataset.studentId)">Chronologie</button></div></article>`}).join('')
    ||`<div class="empty">${erklaerung}</div>`}</div></section>`}).join('')
 }
 
