@@ -153,7 +153,7 @@ impl Vault {
     pub fn lock_json(&mut self)->Result<Value,VaultError>{self.key=None;Ok(json!({"ok":true}))}
 
     pub fn put_attachment_json(&mut self,student_id:String,name:String,mime_type:String,bytes:Vec<u8>)->Result<Value,VaultError>{
-        if !["application/pdf","image/jpeg","image/png"].contains(&mime_type.as_str()) || bytes.len()>MAX_ATTACHMENT || student_id.len()>80 || name.len()>220 {return Err(VaultError::Attachment)}
+        if !["application/pdf","image/jpeg","image/png","application/vnd.openxmlformats-officedocument.wordprocessingml.document"].contains(&mime_type.as_str()) || bytes.len()>MAX_ATTACHMENT || student_id.len()>80 || name.len()>220 {return Err(VaultError::Attachment)}
         let id=format!("att-{}-{:08x}",now(),rand::random::<u32>());
         let added=now().to_string();
         let payload=BackupAttachment{id:id.clone(),student_id,name:name.clone(),mime_type:mime_type.clone(),added:added.clone(),bytes_b64:B64.encode(&bytes)};
@@ -278,7 +278,7 @@ impl Vault {
         let tx=self.conn.transaction()?;
         tx.execute("DELETE FROM attachments",[])?;
         tx.execute("INSERT INTO state(id,nonce,ciphertext) VALUES(1,?1,?2) ON CONFLICT(id) DO UPDATE SET nonce=excluded.nonce,ciphertext=excluded.ciphertext",params![sn,sc])?;
-        for a in plain.attachments { let bytes=B64.decode(&a.bytes_b64).map_err(|_|VaultError::Invalid)?; if bytes.len()>MAX_ATTACHMENT||!["application/pdf","image/jpeg","image/png"].contains(&a.mime_type.as_str())||a.student_id.len()>80||a.name.len()>220{return Err(VaultError::Attachment)} let id=a.id.clone();let (n,c)=Self::encrypt(&current,&serde_json::to_vec(&a)?)?;tx.execute("INSERT INTO attachments(id,student_id,name,mime_type,added,nonce,ciphertext) VALUES(?1,'','','','',?2,?3)",params![id,n,c])?; }
+        for a in plain.attachments { let bytes=B64.decode(&a.bytes_b64).map_err(|_|VaultError::Invalid)?; if bytes.len()>MAX_ATTACHMENT||!["application/pdf","image/jpeg","image/png","application/vnd.openxmlformats-officedocument.wordprocessingml.document"].contains(&a.mime_type.as_str())||a.student_id.len()>80||a.name.len()>220{return Err(VaultError::Attachment)} let id=a.id.clone();let (n,c)=Self::encrypt(&current,&serde_json::to_vec(&a)?)?;tx.execute("INSERT INTO attachments(id,student_id,name,mime_type,added,nonce,ciphertext) VALUES(?1,'','','','',?2,?3)",params![id,n,c])?; }
         tx.commit()?;
         Ok(json!({"stateJson":plain.state_json}))
     }
@@ -310,3 +310,4 @@ mod tests {
     #[test] fn password_policy(){assert!(Vault::validate_password("zu-kurz").is_err());assert!(Vault::validate_password("Mindestens-12").is_ok());}
     #[test] fn vault_roundtrip(){let d=tempfile::tempdir().unwrap();let mut v=Vault::open_at(d.path().join("t.db")).unwrap();v.setup_json("SehrSicher!2026".into(),"{\"cases\":[]}".into()).unwrap();v.save_state_json("{\"cases\":[1]}".into()).unwrap();let b=v.export_backup_json().unwrap()["payloadJson"].as_str().unwrap().to_string();v.lock_json().unwrap();assert_eq!(v.unlock_json("SehrSicher!2026".into()).unwrap()["stateJson"],"{\"cases\":[1]}");let r=v.import_backup_json(b,"SehrSicher!2026".into()).unwrap();assert_eq!(r["stateJson"],"{\"cases\":[1]}");}
 }
+
