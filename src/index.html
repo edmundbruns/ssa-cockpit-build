@@ -304,7 +304,7 @@
         <div class="sectionhead"><div><h3>Netzwerkpartner und schulinterne Hilfen</h3><div class="subtle" id="netzZaehler"></div></div><div class="actions"><button class="btn" onclick="netzwerkVorlageSpeichern()">CSV-Vorlage speichern</button><label class="btn primary">Netzwerkliste importieren<input type="file" accept=".csv,.txt,text/csv,text/plain" hidden onchange="netzwerkImport(event)"></label><button class="btn" onclick="openModal('partnerModal')">＋ Einzelner Kontakt</button></div></div>
         <div class="filters" style="margin-bottom:14px"><input class="field search" id="netzSuche" placeholder="Einrichtung, Angebot, Ort oder Stichwort" oninput="renderNetzwerkBereiche()"><select class="field" id="netzRegion" onchange="renderNetzwerkBereiche()"><option value="all">Alle Regionen</option></select><select class="field" id="netzBereich" onchange="renderNetzwerkBereiche()"><option value="all">Alle Bereiche</option><option>Schulintern</option><option>Kooperationspartner</option><option>Sozialraum</option><option>Krise und Notfall</option><option>Übergang Schule und Beruf</option></select><select class="field" id="netzPrio" onchange="renderNetzwerkBereiche()"><option value="all">Alle Prioritäten</option><option value="sehr hoch">sehr hoch</option><option value="hoch">hoch</option><option value="mittel">mittel</option></select></div>
         <div id="netzwerkBereiche"></div>
-        <div class="filters" style="margin-bottom:15px"><input class="field search" id="networkSearch" placeholder="Einrichtung, Person oder Angebot suchen"><select class="field" id="networkCategory"><option value="all">Alle Bereiche</option></select><select class="field" id="networkNeed"><option value="">Passende Hilfe auswählen</option><option>Schulinterne Unterstützung</option><option>Konfliktklärung</option><option>Medien und Cyberkonflikte</option><option>Soziales Lernen und Klassenklima</option><option>Kinderschutz</option><option>Familie und Erziehung</option><option>Sucht</option><option>Schulische Krise</option><option>Gewalt und Polizei</option><option>Sexualisierte Gewalt</option><option>Soziale Notlage</option></select></div><div class="notice" id="networkSuggestion">Wähle ein Anliegen aus, um passende regionale oder schulinterne Ansprechstellen hervorzuheben.</div><div class="grid two"><div class="card"><div class="cardhead"><h3>Gruppengespräche</h3><span class="tag" id="groupTalkCount"></span></div><div class="list" id="groupTalkList"></div></div><div class="card"><div class="cardhead"><h3>Kooperationspartner und schulinterne Hilfen</h3><span class="tag" id="partnerCount"></span></div><div class="list" id="partnerList"></div></div></div>
+        <div class="filters" style="margin-bottom:15px"><input class="field search" id="networkSearch" placeholder="Einrichtung, Person oder Angebot suchen"><select class="field" id="networkCategory"><option value="all">Alle Bereiche</option></select><select class="field" id="networkNeed"><option value="">Passende Hilfe auswählen</option><option>Schulinterne Unterstützung</option><option>Konfliktklärung</option><option>Medien und Cyberkonflikte</option><option>Soziales Lernen und Klassenklima</option><option>Kinderschutz</option><option>Familie und Erziehung</option><option>Sucht</option><option>Schulische Krise</option><option>Gewalt und Polizei</option><option>Sexualisierte Gewalt</option><option>Soziale Notlage</option></select></div><div class="notice" id="networkSuggestion">Wähle ein Anliegen aus, um passende regionale oder schulinterne Ansprechstellen hervorzuheben.</div><div class="card"><div class="cardhead"><h3>Kooperationspartner und schulinterne Hilfen</h3><span class="tag" id="partnerCount"></span></div><div class="list" id="partnerList"></div></div>
       </section>
       <section class="page" id="tasks">
         <div class="sectionhead"><div><h2>Aufgaben und Wiedervorlagen</h2><div class="subtle">Verbindliche nächste Schritte im Blick behalten</div></div><button class="btn primary" onclick="openModal('taskModal')">＋ Aufgabe</button></div>
@@ -737,17 +737,20 @@ function ensureNetzwerkpartner(state){
  for(const p of NETZWERK_GRUNDBESTAND)if(!state.partners.some(x=>x.id===p.id))state.partners.push(Object.assign({},p));
  return state;
 }
-const PERSON_ROLLEN=['Schulleitung','Stellvertretende Schulleitung','Didaktische Leitung','Sekretariat','Klassenleitung','Beratungslehrkraft','Vertrauenslehrkraft','Förderschullehrkraft','Schulsozialarbeit','Schulsozialpädagogik','Inklusion und Teilhabe','Schulbegleitung','Ansprechperson Mobbing und Cybermobbing','Ansprechperson Schulabsentismus','Ansprechperson Trainingsraum','Ansprechperson VGS','Ansprechperson Ganztag GTS','Ansprechperson Medien','Ansprechperson Berufsorientierung','Ersthelferin oder Ersthelfer','Sicherheitsbeauftragung','Jugendamt und ASD','Insoweit erfahrene Fachkraft','Erziehungsberatung','Schulpsychologie','Polizei und Prävention','Therapie und Klinik','Jobcenter und Berufsberatung','Weitere Zuständigkeit'];
-const PERSON_FUNKTIONEN=['Lehrkraft','Lehrkraft und Klassenleitung','Schulleitung','Stellvertretende Schulleitung','Didaktische Leitung','Förderschullehrkraft','Pädagogische Mitarbeiterin oder Mitarbeiter','Schulsozialarbeit','Schulsozialpädagogik','Sekretariat','Hausmeisterei','Schulbegleitung','Fachkraft einer externen Stelle','Weitere Funktion'];
+const PERSON_ROLLEN=['Schulleitung','Konrektor','Didaktische Leitung','Sekretariat','Klassenleitung','Beratungslehrkraft','Vertrauenslehrkraft','Förderschullehrkraft','Schulsozialarbeit','Inklusion und Teilhabe','Schulbegleiterin','Pädagogische Mitarbeiterin','Reinigungskraft','Ganztag GTS','Ansprechperson VGS','Ansprechperson Medien','Ansprechperson Berufsorientierung','Ersthelferin oder Ersthelfer','Sicherheitsbeauftragung','Jugendamt und ASD','Insoweit erfahrene Fachkraft','Erziehungsberatung','Schulpsychologie','Polizei und Prävention','Therapie und Klinik','Jobcenter und Berufsberatung','Weitere Zuständigkeit'];
+const PERSON_FUNKTIONEN=['Lehrkraft','Lehrkraft und Klassenleitung','Schulleitung','Konrektor','Didaktische Leitung','Förderschullehrkraft','Pädagogische Mitarbeiterin','Schulsozialarbeit','Sekretariat','Hausmeisterei','Reinigungskraft','Ganztag GTS','Schulbegleiterin','Fachkraft einer externen Stelle','Weitere Funktion'];
 function personRollenAusFunktion(t){const r=[],f=String(t.role||'');
- if(/Stellvertretend/i.test(f))r.push('Stellvertretende Schulleitung'); else if(/Schulleitung/i.test(f))r.push('Schulleitung');
+ if(/Stellvertretend|Konrektor/i.test(f))r.push('Konrektor'); else if(/Schulleitung/i.test(f))r.push('Schulleitung');
  if(/Didaktisch/i.test(f))r.push('Didaktische Leitung');
  if(/Förderschul/i.test(f))r.push('Förderschullehrkraft');
  if(/Sekretariat/i.test(f))r.push('Sekretariat');
- if(/Sozialpädagog/i.test(f))r.push('Schulsozialpädagogik');
+ if(/Sozialpädagog/i.test(f))r.push('Schulsozialarbeit');
  if(/Sozialarbeit/i.test(f))r.push('Schulsozialarbeit');
  if(/Beratungslehr/i.test(f))r.push('Beratungslehrkraft');
- if(/Schulbegleit/i.test(f))r.push('Schulbegleitung');
+ if(/Schulbegleit/i.test(f))r.push('Schulbegleiterin');
+ if(/Pädagogische Mitarbeiter/i.test(f))r.push('Pädagogische Mitarbeiterin');
+ if(/Reinigung/i.test(f))r.push('Reinigungskraft');
+ if(/Ganztag|GTS/i.test(f))r.push('Ganztag GTS');
  if(String(t.classLead||'').trim())r.push('Klassenleitung');
  return [...new Set(r)]}
 function ensurePersonen(state){
@@ -756,7 +759,11 @@ function ensurePersonen(state){
   if(!Array.isArray(t.roles))t.roles=[];
   if(!t.roles.length)t.roles=personRollenAusFunktion(t);
   if(String(t.classLead||'').trim()&&!t.roles.includes('Klassenleitung'))t.roles.push('Klassenleitung');
-  if(t.roles.includes('Ansprechperson Ganztag und VGS')){t.roles=t.roles.filter(r=>r!=='Ansprechperson Ganztag und VGS');['Ansprechperson VGS','Ansprechperson Ganztag GTS'].forEach(r=>{if(!t.roles.includes(r))t.roles.push(r)})}
+  if(t.roles.includes('Ansprechperson Ganztag und VGS')){t.roles=t.roles.filter(r=>r!=='Ansprechperson Ganztag und VGS');['Ansprechperson VGS','Ganztag GTS'].forEach(r=>{if(!t.roles.includes(r))t.roles.push(r)})}
+  const rolleNeu={'Stellvertretende Schulleitung':'Konrektor','Schulsozialpädagogik':'Schulsozialarbeit','Schulbegleitung':'Schulbegleiterin','Ansprechperson Ganztag GTS':'Ganztag GTS'};
+  const entfallen=['Ansprechperson Mobbing und Cybermobbing','Ansprechperson Schulabsentismus','Ansprechperson Trainingsraum'];
+  t.ehemaligeRollen=[...new Set([...(t.ehemaligeRollen||[]),...t.roles.filter(r=>entfallen.includes(r))])];
+  t.roles=[...new Set(t.roles.filter(r=>!entfallen.includes(r)).map(r=>rolleNeu[r]||r))];
   if(!Array.isArray(t.aliases))t.aliases=[];
   if(!t.bereich)t.bereich=/extern|Jugendamt|Polizei|Beratungsstelle|Klinik|Jobcenter|Fachstelle/i.test(String(t.role||'')+' '+String(t.org||''))?'Extern':'Schulintern';
   if(!t.status)t.status='aktiv';
@@ -1101,7 +1108,7 @@ function personDuplikat(last,first,ignoreId){
 function personenMitRolle(rolle){return data.teachers.filter(t=>personAktiv(t)&&personRollen(t).includes(rolle))}
 function personRollenFeldFuellen(gewaehlt){
  const box=document.getElementById('personRollenBox');if(!box)return;
- const set=new Set(gewaehlt||[]);
+ const set=new Set((gewaehlt||[]).filter(r=>PERSON_ROLLEN.includes(r)));
  const alle=[...new Set([...PERSON_ROLLEN,...set])];
  box.innerHTML=alle.map(r=>`<label><input type="checkbox" value="${r}"${set.has(r)?' checked':''}><span>${r}</span></label>`).join('');
 }
@@ -1213,8 +1220,6 @@ function studentName(id){const s=data.students.find(x=>x.id===id);return s?`${s.
 function networkCategoriesForNeed(need){return {'Schulinterne Unterstützung':['Schulinterne Unterstützung'],'Konfliktklärung':['Schulinterne Unterstützung','Beratung'],'Medien und Cyberkonflikte':['Schulinterne Unterstützung','Polizeiliche Prävention'],'Soziales Lernen und Klassenklima':['Schulinterne Unterstützung'],'Kinderschutz':['Jugendhilfe und Kinderschutz','Kinderschutz'],'Familie und Erziehung':['Beratung','Soziale Beratung','Jugendhilfe und Kinderschutz'],'Sucht':['Suchtberatung'],'Schulische Krise':['Schulpsychologie','Beratung'],'Gewalt und Polizei':['Polizei','Polizeiliche Prävention'],'Sexualisierte Gewalt':['Sexualpädagogik und Beratung','Krisenhilfe'],'Soziale Notlage':['Soziale Beratung','Beratung']}[need]||[]}
 function renderNetwork(){
  const q=(document.getElementById('networkSearch').value||'').toLocaleLowerCase('de-DE'),category=document.getElementById('networkCategory').value,need=document.getElementById('networkNeed').value,wanted=networkCategoriesForNeed(need);
- document.getElementById('groupTalkCount').textContent=data.groupTalks.length+' Gespräche';
- document.getElementById('groupTalkList').innerHTML=[...data.groupTalks].sort((a,b)=>b.date.localeCompare(a.date)).map(g=>`<div class="row"><div class="datebox"><b>${new Date(g.date+'T12:00').getDate()}</b>${new Intl.DateTimeFormat('de-DE',{month:'short'}).format(new Date(g.date+'T12:00')).toUpperCase()}</div><div class="grow"><strong>${g.type} · ${g.participantIds.length} Beteiligte</strong><span class="subtle">${g.participantIds.map(studentName).join(', ')} · ${g.responsible} · ${g.duration} Min.</span></div></div>`).join('')||'<div class="empty">Noch keine Gruppengespräche.</div>';
  const partners=[...data.partners].filter(p=>{const hay=[p.organization,p.contact,p.category,p.phone,p.email,p.address,p.note].join(' ').toLocaleLowerCase('de-DE');return (category==='all'||p.category===category)&&(!wanted.length||wanted.some(w=>p.category===w||p.category.includes(w)))&&hay.includes(q)}).sort((a,b)=>a.category.localeCompare(b.category)||a.organization.localeCompare(b.organization));
  document.getElementById('partnerCount').textContent=partners.length+' von '+data.partners.length+' Kontakten';
  document.getElementById('networkSuggestion').innerHTML=need?`Passende Stellen für <strong>${need}</strong> werden angezeigt. Die Auswahl ist eine Arbeitshilfe und ersetzt keine fachliche Zuständigkeitsprüfung.`:'Wähle ein Anliegen aus, um passende regionale Ansprechstellen hervorzuheben.';
@@ -4605,7 +4610,7 @@ function vorschlaegeFuer(studentId){
   warum:'Die Klassenleitung erlebt das Kind täglich und kann Beobachtungen beisteuern.',
   knopf:'In einem Eintrag festhalten',code:`closeModal('studentModal');verlaufOeffnen('${studentId}','Lehrkräfterückmeldung')`});
  const anlass=letzter&&letzter.reason||fall&&fall.reason||'';
- const rolleZuAnlass={'Mobbing oder Cybermobbing':'Ansprechperson Mobbing und Cybermobbing','Schulbesuch und Fehlzeiten':'Ansprechperson Schulabsentismus',
+ const rolleZuAnlass={'Mobbing oder Cybermobbing':'Beratungslehrkraft','Schulbesuch und Fehlzeiten':'Schulsozialarbeit',
   'Kinderschutz':'Insoweit erfahrene Fachkraft','Psychische Belastung, Angst oder Rückzug':'Schulpsychologie',
   'Familie und Erziehung':'Erziehungsberatung','Suchtmittel, Mediennutzung oder Glücksspiel':'Polizei und Prävention',
   'Berufsorientierung oder Übergang':'Ansprechperson Berufsorientierung','Inklusion und Teilhabe':'Förderschullehrkraft',
@@ -4732,23 +4737,23 @@ function personenAuswahlFuellen(){
 const VERFAHREN_ROLLEN={
  beratung:['Schulsozialarbeit','Klassenleitung'],
  case:['Schulsozialarbeit','Klassenleitung','Jugendamt und ASD'],
- absence:['Schulsozialarbeit','Klassenleitung','Ansprechperson Schulabsentismus','Schulleitung'],
+ absence:['Schulsozialarbeit','Klassenleitung','Schulsozialarbeit','Schulleitung'],
  kinderschutz:['Schulsozialarbeit','Insoweit erfahrene Fachkraft','Schulleitung','Jugendamt und ASD'],
  selfharm:['Schulsozialarbeit','Schulleitung','Schulpsychologie','Therapie und Klinik'],
  violence:['Schulleitung','Schulsozialarbeit','Polizei und Prävention'],
  'sexualisierte-gewalt':['Schulleitung','Insoweit erfahrene Fachkraft','Schulsozialarbeit'],
- mobbing:['Schulsozialarbeit','Klassenleitung','Ansprechperson Mobbing und Cybermobbing','Schulleitung'],
+ mobbing:['Schulsozialarbeit','Klassenleitung','Beratungslehrkraft','Schulleitung'],
  psychisch:['Schulsozialarbeit','Schulpsychologie','Erziehungsberatung'],
  sucht:['Schulsozialarbeit','Klassenleitung','Polizei und Prävention'],
- konflikt:['Schulsozialarbeit','Klassenleitung','Ansprechperson Trainingsraum'],
+ konflikt:['Schulsozialarbeit','Klassenleitung','Pädagogische Mitarbeiterin'],
  sel:['Schulsozialarbeit','Klassenleitung'],
  familie:['Schulsozialarbeit','Erziehungsberatung','Jugendamt und ASD'],
  armut:['Schulsozialarbeit','Sekretariat','Jobcenter und Berufsberatung'],
- inklusion:['Förderschullehrkraft','Inklusion und Teilhabe','Schulsozialarbeit','Schulbegleitung'],
+ inklusion:['Förderschullehrkraft','Inklusion und Teilhabe','Schulsozialarbeit','Schulbegleiterin'],
  diversitaet:['Schulsozialarbeit','Klassenleitung','Schulleitung'],
  trauer:['Schulsozialarbeit','Klassenleitung','Schulleitung'],
  uebergang:['Schulsozialarbeit','Ansprechperson Berufsorientierung','Jobcenter und Berufsberatung'],
- partizipation:['Schulsozialarbeit','Vertrauenslehrkraft','Ansprechperson Ganztag GTS','Ansprechperson VGS'],
+ partizipation:['Schulsozialarbeit','Vertrauenslehrkraft','Ganztag GTS','Ansprechperson VGS'],
  netzwerk:['Schulsozialarbeit','Schulleitung','Jugendamt und ASD']
 };
 function verfahrenRollen(vid){return VERFAHREN_ROLLEN[vid]||['Schulsozialarbeit','Klassenleitung','Schulleitung']}
