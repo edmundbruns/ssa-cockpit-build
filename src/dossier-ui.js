@@ -39,7 +39,7 @@ function dossierSuggestionHtml(e){const rows=e.actionSuggestions||[],visible=row
 function dossierKiAnonymize(value,e){
  let text=String(value||'');
  for(const sid of e.participantIds||[]){const st=data.students.find(x=>x.id===sid);if(!st)continue;for(const name of [st.first,st.last,[st.first,st.last].filter(Boolean).join(' ')])if(name)text=text.split(name).join('Schüler:in');}
- return text.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/gi,'[E-MAIL]').replace(/(?:\\+?49|0)\\s?\\(?\\d{3,5}\\)?[\\s/-]?\\d{3,}/g,'[TELEFON]');
+ return text.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,'[E-MAIL]').replace(/(?:\+?49|0)\s?\(?\d{3,5}\)?[\s/-]?\d{3,}/g,'[TELEFON]');
 }
 function dossierKiPayload(e){
  const field=k=>dossierKiAnonymize(e[k],e);
