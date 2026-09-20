@@ -114,28 +114,47 @@ function archive(state,sid,date,reason){
 }
 // Versionierte Fachverfahren für die automatische Chronik-Einordnung.
 const FACHVERFAHREN_KATALOG=[
-{id:'absentismus',version:'1.0',topic:'Schulabsentismus und Schulvermeidung',keywords:['fehlzeit','schulabsent','schulvermeidung','webuntis','entschuldigung'],steps:[
-{title:'Fehlzeiten mit Klassenleitung und Kind klären',rationale:'Zeitraum, Entschuldigungsstatus und bekannte Gründe konkret abgleichen.',taskType:'Rücksprache',dueDays:2},
-{title:'Mit Sorgeberechtigten eine Rückkehrvereinbarung prüfen',rationale:'Einen erreichbaren nächsten Schultag und einen festen Rückmeldetermin vereinbaren.',taskType:'Unterstützungsplan',dueDays:5},
-{title:'Bei Wiederholung das schulinterne Stufenverfahren prüfen',rationale:'Verlauf und bisherigen Unterstützungsschritt dokumentieren.',taskType:'Fachverfahren',dueDays:5}]},
-{id:'stoerung',version:'1.0',topic:'Unterrichtsstörung und Trainingsraum',keywords:['unterrichtsstörung','trainingsraum','störung','schimpfwort','rückkehrvereinbarung'],steps:[
+{id:'absentismus',version:'1.1',topic:'Schulabsentismus',keywords:['fehlzeit','fehlzeiten','schulabsent','schulvermeidung','webuntis','entschuldigung'],steps:[
+{title:'Fehlzeiten und Entschuldigungsstatus mit Klassenleitung abgleichen',rationale:'Zeitraum, Fehlstunden, offene Entschuldigungen und bekannte schulische Beobachtungen gemeinsam prüfen.',taskType:'Rücksprache',dueDays:2},
+{title:'Mit dem Kind und den Sorgeberechtigten eine Rückkehrvereinbarung prüfen',rationale:'Einen erreichbaren nächsten Schultag, Unterstützung im Alltag und einen festen Rückmeldetermin vereinbaren.',taskType:'Unterstützungsplan',dueDays:5},
+{title:'Bei Wiederholung die nächste Stufe des Schulabsentismus-Verfahrens prüfen',rationale:'Verlauf, bisherige Gespräche und Unterstützungsangebote dokumentiert bewerten.',taskType:'Fachverfahren',dueDays:5}]},
+{id:'mobbing',version:'1.1',topic:'Mobbing und Cybermobbing',keywords:['mobbing','cybermobbing','ausgrenz','gruppenchat','beleidigung','bloßstellung'],steps:[
+{title:'Betroffene und beschuldigte Kinder getrennt anhören',rationale:'Konkrete Handlungen, Zeitpunkte, Orte, digitale Belege und das aktuelle Sicherheitsgefühl getrennt dokumentieren.',taskType:'Konfliktklärung',dueDays:1},
+{title:'Sofortige Schutz- und Aufsichtsmaßnahmen mit der Schulleitung abstimmen',rationale:'Sicherheit im Unterricht, in Pausen und in digitalen Gruppen klären. Keine gemeinsame Mediation bei Machtungleichgewicht.',taskType:'Schutzweg',dueDays:1},
+{title:'Klassenleitung und Sorgeberechtigte abgestimmt einbeziehen',rationale:'Informationsumfang, Zuständigkeit und ein überprüfbarer Rückmeldetermin müssen festgelegt werden.',taskType:'Fallbesprechung',dueDays:3}]},
+{id:'konflikt',version:'1.1',topic:'Konfliktklärung',keywords:['konflikt','streit','auseinandersetzung','mediation','versöhnung','palaverzelt'],steps:[
+{title:'Beteiligte Kinder getrennt anhören',rationale:'Sichtweisen, Auslöser, Bedürfnisse und mögliche Sicherheit getrennt festhalten.',taskType:'Konfliktklärung',dueDays:2},
+{title:'Prüfen, ob eine freiwillige Vermittlung geeignet ist',rationale:'Vermittlung nur bei ausreichender Sicherheit, Freiwilligkeit und ohne erhebliches Machtungleichgewicht anbieten.',taskType:'Konfliktklärung',dueDays:3},
+{title:'Gemeinsame Vereinbarung und Überprüfungstermin dokumentieren',rationale:'Konkretes Verhalten, Zuständigkeit und Termin zur Rückmeldung festlegen.',taskType:'Vereinbarung',dueDays:5}]},
+{id:'psychisch',version:'1.1',topic:'Psychische Belastung',keywords:['angst','rückzug','belastung','krise','wohlbefinden','schulpsycholog','panik','traurig'],steps:[
+{title:'Belastung und Unterstützungswunsch des Kindes klären',rationale:'Aktuelle Situation, Ressourcen, schulische Auslöser und einen kleinen nächsten Schritt festhalten.',taskType:'Schülergespräch',dueDays:2},
+{title:'Schulpsychologische Beratung als Option prüfen',rationale:'Mit Kind und Sorgeberechtigten Einwilligung und Umfang einer möglichen Weitervermittlung klären.',taskType:'Fachberatung',dueDays:5},
+{title:'Bei akuter Krise sofort den schulischen Schutzweg aktivieren',rationale:'Akute Hinweise nicht aufschieben und mit Schulleitung sowie zuständiger Fachberatung abstimmen.',taskType:'Schutzweg',dueDays:0}]},
+{id:'kinderschutz',version:'1.1',topic:'Kinderschutz',keywords:['kindeswohl','kinderschutz','vernachlässig','missbrauch','selbstgefährd','suizid','sexualisiert','waffe'],steps:[
+{title:'Heute Schutzlage mit der Schulleitung abstimmen',rationale:'Unmittelbaren Schutz, Zuständigkeit und das örtlich vereinbarte Verfahren klären.',taskType:'Schutzweg',dueDays:0},
+{title:'Beobachtungen und Aussagen getrennt dokumentieren',rationale:'Wörtliche Aussagen, eigene Beobachtungen, Zeitpunkte und bereits ergriffene Schritte sachlich sichern.',taskType:'Dokumentation',dueDays:0},
+{title:'Kinderschutzfachberatung oder Jugendamt nach Schutzweg einbeziehen',rationale:'Nach der internen Abstimmung den vorgesehenen Beratungsweg dokumentiert nutzen.',taskType:'Schutzweg',dueDays:0}]},
+{id:'lernen',version:'1.1',topic:'Lern- und Unterstützungsbedarf',keywords:['lernproblem','förderbedarf','inklusion','teilhabe','mobiler dienst','unterrichtsbegleitung','konzentration'],steps:[
+{title:'Beobachtbaren Unterstützungsbedarf beschreiben',rationale:'Konkrete Situationen, Ressourcen und eine kleine überprüfbare Veränderung festhalten.',taskType:'Fallklärung',dueDays:3},
+{title:'Klassenleitung und Beratungslehrkraft einbeziehen',rationale:'Unterrichtsbeobachtung und bisherige Fördermaßnahmen gemeinsam abgleichen.',taskType:'Rücksprache',dueDays:5},
+{title:'Mobilen Dienst oder weitere Fachberatung als Option prüfen',rationale:'Erforderliche Informationen und Einwilligung vor einer Weitergabe klären.',taskType:'Fachberatung',dueDays:7}]},
+{id:'eltern',version:'1.1',topic:'Elterngespräch und Vereinbarung',keywords:['elterngespräch','elternkontakt','sorgeberechtigt','familie','erziehungsberechtigt'],steps:[
+{title:'Gesprächsanliegen und Ziel mit den Sorgeberechtigten klären',rationale:'Beobachtungen sachlich benennen, Sichtweisen aufnehmen und ein erreichbares Ziel festlegen.',taskType:'Elterngespräch',dueDays:5},
+{title:'Vereinbarung mit Zuständigkeit und Termin dokumentieren',rationale:'Wer macht was bis wann? Die Vereinbarung muss für alle Beteiligten verständlich sein.',taskType:'Vereinbarung',dueDays:5},
+{title:'Rückmeldung zur Umsetzung einholen',rationale:'Zum vereinbarten Termin prüfen, was sich verändert hat und ob weitere Unterstützung nötig ist.',taskType:'Rückmeldung',dueDays:14}]},
+{id:'sozialtraining',version:'1.1',topic:'Sozialtraining und Klassenklima',keywords:['sozialtraining','klassentraining','klassenklima','soziales lernen','gruppenangebot','präventionsangebot'],steps:[
+{title:'Ziel und beobachtbares Verhalten für das Training festlegen',rationale:'Ein konkretes Klassen- oder Gruppenziel mit kurzer Auswertung vereinbaren.',taskType:'Projektplanung',dueDays:5},
+{title:'Sozialtraining mit Klassenleitung und SSA abstimmen',rationale:'Teilnehmende, Termine, Rolle der Durchführenden und Rückmeldeweg festlegen.',taskType:'Sozialtraining',dueDays:7},
+{title:'Wirkung des Angebots nach dem vereinbarten Zeitraum prüfen',rationale:'Beobachtungen und Rückmeldungen auswerten, ohne automatisch eine Wirkung zu behaupten.',taskType:'Überprüfung',dueDays:21}]},
+{id:'weitervermittlung',version:'1.1',topic:'Externe Weitervermittlung',keywords:['extern','weitervermittlung','jugendamt','beratungsstelle','therapie','fachstelle','netzwerk'],steps:[
+{title:'Unterstützungsbedarf und Einwilligung für eine Weitervermittlung klären',rationale:'Vor einer Kontaktaufnahme Zweck, Informationsumfang und Einwilligung dokumentieren.',taskType:'Fallklärung',dueDays:3},
+{title:'Passende interne oder externe Fachstelle auswählen',rationale:'Nur eine Stelle aus dem hinterlegten Netzwerk mit nachvollziehbarem Anlass vorschlagen.',taskType:'Fachberatung',dueDays:5},
+{title:'Rückmeldung zur Weitervermittlung mit Termin nachhalten',rationale:'Offenhalten, ob Kontakt hergestellt wurde und welcher nächste schulische Schritt vereinbart ist.',taskType:'Rückmeldung',dueDays:14}]},
+{id:'stoerung',version:'1.1',topic:'Unterrichtsstörung und Trainingsraum',keywords:['unterrichtsstörung','trainingsraum','störung','schimpfwort','rückkehrvereinbarung'],steps:[
 {title:'Reflexionsgespräch und Rückkehrvereinbarung dokumentieren',rationale:'Auslöser, Sicht des Kindes und einen konkreten Rückkehrschritt festhalten.',taskType:'Schülergespräch',dueDays:3},
-{title:'Klassenleitung zur Umsetzung befragen',rationale:'Nach einigen Schultagen Rückmeldung zur vereinbarten Verhaltensänderung einholen.',taskType:'Rückmeldung',dueDays:5}]},
-{id:'konflikt',version:'1.0',topic:'Konflikt, Mobbing und Cybermobbing',keywords:['konflikt','ausgrenz','mobbing','cybermobbing','gewalt','bedroh'],steps:[
-{title:'Beteiligte Kinder getrennt anhören',rationale:'Sichtweisen, konkrete Situationen und aktuelle Sicherheit getrennt dokumentieren.',taskType:'Konfliktklärung',dueDays:2},
-{title:'Klassenleitung nach Beobachtungen fragen',rationale:'Häufigkeit, Orte und bisherige Klärungsschritte abgleichen.',taskType:'Rücksprache',dueDays:3},
-{title:'Geeignete Unterstützungsform auswählen',rationale:'Vermittlung, Sozialtraining oder Fachberatung fachlich prüfen.',taskType:'Fachverfahren',dueDays:5}]},
-{id:'psychisch',version:'1.0',topic:'Psychische Belastung und Krisen',keywords:['angst','rückzug','belastung','krise','wohlbefinden','schulpsycholog'],steps:[
-{title:'Belastung und Unterstützungswunsch des Kindes klären',rationale:'Situation, Ressourcen und einen kleinen nächsten Schritt festhalten.',taskType:'Schülergespräch',dueDays:2},
-{title:'Schulpsychologische Beratung als Option prüfen',rationale:'Einwilligung und Umfang einer Weitervermittlung klären.',taskType:'Fachberatung',dueDays:5}]},
-{id:'kinderschutz',version:'1.0',topic:'Kinderschutz und akute Schutzlage',keywords:['kindeswohl','kinderschutz','missbrauch','selbstgefährd','suizid','sexualisiert','waffe'],steps:[
-{title:'Heute Schutzlage mit der Schulleitung abstimmen',rationale:'Unmittelbaren Schutz, Zuständigkeit und örtliches Vorgehen klären.',taskType:'Schutzweg',dueDays:0},
-{title:'Beobachtungen und Aussagen getrennt dokumentieren',rationale:'Aussagen, Beobachtungen, Zeitpunkte und Schritte sachlich sichern.',taskType:'Dokumentation',dueDays:0},
-{title:'Zuständige Kinderschutzfachberatung einbeziehen',rationale:'Den vorgesehenen Beratungsweg dokumentiert nutzen.',taskType:'Schutzweg',dueDays:0}]},
-{id:'lernen',version:'1.0',topic:'Lern- und Unterstützungsbedarf',keywords:['lernproblem','förderbedarf','inklusion','teilhabe','mobiler dienst','unterrichtsbegleitung'],steps:[
-{title:'Beobachtbaren Unterstützungsbedarf beschreiben',rationale:'Konkrete Situationen, Ressourcen und eine überprüfbare Veränderung festhalten.',taskType:'Fallklärung',dueDays:3},
-{title:'Beratungslehrkraft oder Mobilen Dienst anfragen',rationale:'Erforderliche Informationen und Einwilligung vor der Weitergabe klären.',taskType:'Fachberatung',dueDays:5}]},
-{id:'vereinbarung',version:'1.0',topic:'Vereinbarung und Zielüberprüfung',keywords:['vereinbarung','absprache','ziel','maßnahme','rückmeldung','überprüfung'],steps:[
+{title:'Klassenleitung zur Umsetzung befragen',rationale:'Nach einigen Schultagen Rückmeldung zur vereinbarten Verhaltensänderung einholen.',taskType:'Rückmeldung',dueDays:5},
+{title:'Bei Wiederholung ein Sozialtraining oder Fachverfahren prüfen',rationale:'Bisherige Schritte und einen passenden nächsten Unterstützungsrahmen gemeinsam bewerten.',taskType:'Fachverfahren',dueDays:7}]},
+{id:'vereinbarung',version:'1.1',topic:'Vereinbarung und Zielüberprüfung',keywords:['vereinbarung','absprache','ziel','maßnahme','überprüfung'],steps:[
 {title:'Umsetzung der Vereinbarung überprüfen',rationale:'Veränderung und nächster sinnvoller Termin mit den Beteiligten klären.',taskType:'Überprüfung',dueDays:7}]}
 ];
 function fachverfahren_match(entry,state){
