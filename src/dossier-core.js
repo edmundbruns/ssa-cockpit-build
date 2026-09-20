@@ -112,6 +112,45 @@ function archive(state,sid,date,reason){
  state.yearTransitions.push(stamp(state,{id:uid('year'),studentId:sid,date,title:reason,reason,createdAt:new Date().toISOString()}));
  for(const t of state.tasks)if(!t.done&&ids(state,t).includes(sid))t.assignmentReview='Bestätigter Abgang: offene Aufgabe und Zuständigkeit prüfen.';
 }
+// Versionierte Fachverfahren für die automatische Chronik-Einordnung.
+const FACHVERFAHREN_KATALOG=[
+{id:'absentismus',version:'1.0',topic:'Schulabsentismus und Schulvermeidung',keywords:['fehlzeit','schulabsent','schulvermeidung','webuntis','entschuldigung'],steps:[
+{title:'Fehlzeiten mit Klassenleitung und Kind klären',rationale:'Zeitraum, Entschuldigungsstatus und bekannte Gründe konkret abgleichen.',taskType:'Rücksprache',dueDays:2},
+{title:'Mit Sorgeberechtigten eine Rückkehrvereinbarung prüfen',rationale:'Einen erreichbaren nächsten Schultag und einen festen Rückmeldetermin vereinbaren.',taskType:'Unterstützungsplan',dueDays:5},
+{title:'Bei Wiederholung das schulinterne Stufenverfahren prüfen',rationale:'Verlauf und bisherigen Unterstützungsschritt dokumentieren.',taskType:'Fachverfahren',dueDays:5}]},
+{id:'stoerung',version:'1.0',topic:'Unterrichtsstörung und Trainingsraum',keywords:['unterrichtsstörung','trainingsraum','störung','schimpfwort','rückkehrvereinbarung'],steps:[
+{title:'Reflexionsgespräch und Rückkehrvereinbarung dokumentieren',rationale:'Auslöser, Sicht des Kindes und einen konkreten Rückkehrschritt festhalten.',taskType:'Schülergespräch',dueDays:3},
+{title:'Klassenleitung zur Umsetzung befragen',rationale:'Nach einigen Schultagen Rückmeldung zur vereinbarten Verhaltensänderung einholen.',taskType:'Rückmeldung',dueDays:5}]},
+{id:'konflikt',version:'1.0',topic:'Konflikt, Mobbing und Cybermobbing',keywords:['konflikt','ausgrenz','mobbing','cybermobbing','gewalt','bedroh'],steps:[
+{title:'Beteiligte Kinder getrennt anhören',rationale:'Sichtweisen, konkrete Situationen und aktuelle Sicherheit getrennt dokumentieren.',taskType:'Konfliktklärung',dueDays:2},
+{title:'Klassenleitung nach Beobachtungen fragen',rationale:'Häufigkeit, Orte und bisherige Klärungsschritte abgleichen.',taskType:'Rücksprache',dueDays:3},
+{title:'Geeignete Unterstützungsform auswählen',rationale:'Vermittlung, Sozialtraining oder Fachberatung fachlich prüfen.',taskType:'Fachverfahren',dueDays:5}]},
+{id:'psychisch',version:'1.0',topic:'Psychische Belastung und Krisen',keywords:['angst','rückzug','belastung','krise','wohlbefinden','schulpsycholog'],steps:[
+{title:'Belastung und Unterstützungswunsch des Kindes klären',rationale:'Situation, Ressourcen und einen kleinen nächsten Schritt festhalten.',taskType:'Schülergespräch',dueDays:2},
+{title:'Schulpsychologische Beratung als Option prüfen',rationale:'Einwilligung und Umfang einer Weitervermittlung klären.',taskType:'Fachberatung',dueDays:5}]},
+{id:'kinderschutz',version:'1.0',topic:'Kinderschutz und akute Schutzlage',keywords:['kindeswohl','kinderschutz','missbrauch','selbstgefährd','suizid','sexualisiert','waffe'],steps:[
+{title:'Heute Schutzlage mit der Schulleitung abstimmen',rationale:'Unmittelbaren Schutz, Zuständigkeit und örtliches Vorgehen klären.',taskType:'Schutzweg',dueDays:0},
+{title:'Beobachtungen und Aussagen getrennt dokumentieren',rationale:'Aussagen, Beobachtungen, Zeitpunkte und Schritte sachlich sichern.',taskType:'Dokumentation',dueDays:0},
+{title:'Zuständige Kinderschutzfachberatung einbeziehen',rationale:'Den vorgesehenen Beratungsweg dokumentiert nutzen.',taskType:'Schutzweg',dueDays:0}]},
+{id:'lernen',version:'1.0',topic:'Lern- und Unterstützungsbedarf',keywords:['lernproblem','förderbedarf','inklusion','teilhabe','mobiler dienst','unterrichtsbegleitung'],steps:[
+{title:'Beobachtbaren Unterstützungsbedarf beschreiben',rationale:'Konkrete Situationen, Ressourcen und eine überprüfbare Veränderung festhalten.',taskType:'Fallklärung',dueDays:3},
+{title:'Beratungslehrkraft oder Mobilen Dienst anfragen',rationale:'Erforderliche Informationen und Einwilligung vor der Weitergabe klären.',taskType:'Fachberatung',dueDays:5}]},
+{id:'vereinbarung',version:'1.0',topic:'Vereinbarung und Zielüberprüfung',keywords:['vereinbarung','absprache','ziel','maßnahme','rückmeldung','überprüfung'],steps:[
+{title:'Umsetzung der Vereinbarung überprüfen',rationale:'Veränderung und nächster sinnvoller Termin mit den Beteiligten klären.',taskType:'Überprüfung',dueDays:7}]}
+];
+function fachverfahren_match(entry,state){
+ const hay=[entry.type,entry.title,entry.content,entry.observation,entry.assessment,entry.agreement,entry.goal,entry.result].join(' ').toLocaleLowerCase('de');
+ return FACHVERFAHREN_KATALOG.filter(v=>v.keywords.some(k=>hay.includes(k))).map(v=>({...v,matchedKeywords:v.keywords.filter(k=>hay.includes(k))}));
+}
+function fachverfahren_suggestions(entry,state,matches){
+ const existing=new Set((entry.actionSuggestions||[]).map(s=>s.title)),out=[];
+ for(const procedure of matches){for(const step of procedure.steps){
+  if(existing.has(step.title)||out.some(s=>s.title===step.title))continue;
+  out.push({id:uid('suggestion'),title:step.title,rationale:step.rationale,taskType:step.taskType,dueDays:step.dueDays,status:'offen',source:'Fachverfahren',procedureId:procedure.id,procedureVersion:procedure.version,createdAt:new Date().toISOString()});
+  if(out.length>=3)break;
+ } if(out.length>=3)break;}
+ return out;
+}
 function localSuggestions(entry,state){
  const type=String(entry.type||'').toLocaleLowerCase('de'),text=[type,entry.title,entry.content,entry.childView,entry.otherView,entry.observation,entry.assessment,entry.agreement,entry.goal,entry.result].join(' ').toLocaleLowerCase('de');
  const sid=entry.participantIds?.[0],student=state?.students?.find(s=>s.id===sid),lead=String(state?.settings?.classLeads?.[student?.className]||'').trim();
@@ -152,7 +191,7 @@ function localSuggestions(entry,state){
   add('Die dokumentierte Vereinbarung mit den Beteiligten überprüfen','Eine beobachtbare Umsetzung erfragen, das Ergebnis festhalten und den nächsten Termin gemeinsam bestimmen.','Überprüfung',7);
  }
  if(!out.length&&type!=='zusätzliche information')add('Mit dem Kind ein kurzes Anschlussgespräch zum dokumentierten Anlass vereinbaren','Aus seiner Sicht einen konkreten Unterstützungsbedarf und gegebenenfalls einen nächsten Termin festhalten.','Schülergespräch',5);
- return out.slice(0,3);
+ const matches=fachverfahren_match(entry,state); return [...out,...fachverfahren_suggestions(entry,state,matches)].slice(0,4);
 }
 function apply(state,plan){
  const errors=validate(state,plan);if(errors.length)throw Error(errors.join('\n'));
@@ -180,7 +219,7 @@ function addEntry(state,input){
  if(!participantIds.length||participantIds.some(sid=>!state.students.some(s=>s.id===sid)))throw Error('Teilnehmende Kinder auswählen.');
  if(!iso(input.date)||!String(input.content||'').trim())throw Error('Datum und Inhalt angeben.');
  const e=stamp(state,{...input,id:uid('entry'),participantIds,createdAt:new Date().toISOString(),duration:Math.max(0,Number(input.duration)||0),individualNotes:input.individualNotes||{},revisions:[],pinnedFor:[]});
- e.actionSuggestions=e.generalInfo?[]:localSuggestions(e,state);e.suggestionVersion=2;
+ const fachverfahren=fachverfahren_match(e,state);e.oberThemen=[...new Set(fachverfahren.map(v=>v.topic))];e.fachverfahren=fachverfahren.map(v=>({id:v.id,title:v.topic,version:v.version,matchedKeywords:v.matchedKeywords}));e.actionSuggestions=e.generalInfo?[]:localSuggestions(e,state);e.suggestionVersion=3;
  if(participantIds.length>1&&input.individualNotes&&Object.keys(input.individualNotes).some(sid=>!participantIds.includes(sid)))throw Error('Individuelle Notiz ist keinem teilnehmenden Kind zugeordnet.');
  state.journal.push(e);
  if(!e.generalInfo)for(const sid of participantIds)journalCase(state,sid,e,true);
