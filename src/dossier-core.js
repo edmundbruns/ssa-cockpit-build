@@ -191,7 +191,7 @@ function localSuggestions(entry,state){
   add('Die dokumentierte Vereinbarung mit den Beteiligten überprüfen','Eine beobachtbare Umsetzung erfragen, das Ergebnis festhalten und den nächsten Termin gemeinsam bestimmen.','Überprüfung',7);
  }
  if(!out.length&&type!=='zusätzliche information')add('Mit dem Kind ein kurzes Anschlussgespräch zum dokumentierten Anlass vereinbaren','Aus seiner Sicht einen konkreten Unterstützungsbedarf und gegebenenfalls einen nächsten Termin festhalten.','Schülergespräch',5);
- const matches=fachverfahren_match(entry,state); return [...out,...fachverfahren_suggestions(entry,state,matches)].slice(0,4);
+ const matches=fachverfahren_match(entry,state); return [...out,...fachverfahren_suggestions(entry,state,matches)].slice(0,3);
 }
 function apply(state,plan){
  const errors=validate(state,plan);if(errors.length)throw Error(errors.join('\n'));
