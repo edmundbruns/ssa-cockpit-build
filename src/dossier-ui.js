@@ -266,3 +266,75 @@ dossierMaximizeButtons();new MutationObserver(dossierMaximizeButtons).observe(do
 
 AMPEL_TEXT.grau='Noch nicht eingeschätzt';
 ampelErledigt=function(sid){selectedStudentId=sid;dossierAssessment();};
+
+/* UX-Erweiterung: Arbeitskorb, Schnellvorlagen, Aufgabenfilter, Dokument- und Qualitätsprüfung */
+let dossierTaskView={status:'offen',assignee:'alle',due:'alle',query:''};
+function dossierTaskMatches(t){
+ const status=String(t.status||'offen');
+ if(dossierTaskView.status==='offen' && t.done)return false;
+ if(dossierTaskView.status==='erledigt' && !t.done)return false;
+ if(dossierTaskView.status!=='offen'&&dossierTaskView.status!=='erledigt'&&status!==dossierTaskView.status)return false;
+ if(dossierTaskView.assignee==='mir' && String(t.assignedTo||'')!==String(data.settings.activeUser||''))return false;
+ if(dossierTaskView.assignee==='unzugeordnet' && String(t.assignedTo||'').trim())return false;
+ const d=String(t.due||''); const now=today();
+ if(dossierTaskView.due==='ueberfaellig' && (!d||d>=now||t.done))return false;
+ if(dossierTaskView.due==='heute' && d!==now)return false;
+ if(dossierTaskView.due==='ohne' && d)return false;
+ const q=dossierTaskView.query.trim().toLocaleLowerCase('de');
+ if(q && !(String(t.title||'')+' '+String(t.assignedTo||'')+' '+String(t.result||'')).toLocaleLowerCase('de').includes(q))return false;
+ return true;
+}
+function dossierTaskRow(t){
+ const ids=Dossier.ids(data,t);
+ return '<div class="row '+(t.done?'taskdone':'')+'"><div class="grow"><strong>'+DE(t.title)+'</strong><span class="subtle">'+DE(t.due?fmt(t.due):'Ohne Termin')+' · '+DE(t.status||'offen')+' · '+DE(t.assignedTo||'nicht festgelegt')+'</span><span>'+ids.map(sid=>{const s=data.students.find(x=>x.id===sid);return '<button class="linkbutton" onclick="showStudent(\''+DE(sid)+'\')">'+DE(s?s.first+' '+s.last:'Unklare Zuordnung')+'</button>';}).join(' · ')+'</span>'+(t.assignmentReview?'<p class="notice warning">'+DE(t.assignmentReview)+'</p>':'')+(t.instructions?'<details><summary>Anleitung</summary><p>'+DE(t.instructions)+'</p></details>':'')+(t.result?'<p>'+DE(t.result)+'</p>':'')+'</div><div class="actions">'+(t.done?'<button class="btn" onclick="reopenTask(\''+DE(t.id)+'\')">Wieder öffnen</button>':'<button class="btn primary" onclick="openTaskComplete(\''+DE(t.id)+'\')">Erledigt markieren</button>')+'<button class="btn" onclick="dossierTask(\''+DE(t.id)+'\')">Bearbeiten</button><button class="btn danger" onclick="dossierDeleteTask(\''+DE(t.id)+'\')">Entfernen</button></div></div>';
+}
+function dossierTaskControls(){
+ const statuses=['offen','in Bearbeitung','wartet auf Rückmeldung','erledigt'];
+ const users=[...new Set(data.tasks.map(t=>String(t.assignedTo||'').trim()).filter(Boolean))].sort();
+ return '<div class="dossier-toolbar"><button class="btn" onclick="dossierWorkbasket()">Arbeitskorb</button><button class="btn" onclick="dossierCalendar()">Kalender / Aufgabenboard</button><button class="btn" onclick="dossierDocumentReview()">Dokumentprüfung</button><button class="btn" onclick="dossierWebUntisReview()">WebUntis prüfen</button><label class="sr-only" for="dossierTaskSearch">Aufgaben suchen</label><input id="dossierTaskSearch" class="field" placeholder="Aufgaben suchen …" value="'+DE(dossierTaskView.query)+'" oninput="dossierTaskView.query=this.value;dossierRenderTaskList()"><select class="field" aria-label="Aufgabenstatus" onchange="dossierTaskView.status=this.value;dossierRenderTaskList()"><option value="offen" '+(dossierTaskView.status==='offen'?'selected':'')+'>Offene Aufgaben</option>'+statuses.slice(1).map(s=>'<option value="'+DE(s)+'" '+(dossierTaskView.status===s?'selected':'')+'>'+DE(s)+'</option>').join('')+'<option value="alle" '+(dossierTaskView.status==='alle'?'selected':'')+'>Alle Aufgaben</option></select><select class="field" aria-label="Zuständigkeit" onchange="dossierTaskView.assignee=this.value;dossierRenderTaskList()"><option value="alle">Alle Zuständigkeiten</option><option value="mir">Mir zugewiesen</option><option value="unzugeordnet">Nicht zugeordnet</option>'+users.map(u=>'<option value="'+DE(u)+'">'+DE(u)+'</option>').join('')+'</select><select class="field" aria-label="Terminfilter" onchange="dossierTaskView.due=this.value;dossierRenderTaskList()"><option value="alle">Alle Termine</option><option value="ueberfaellig">Überfällig</option><option value="heute">Heute</option><option value="ohne">Ohne Termin</option></select></div>';
+}
+function dossierRenderTaskList(){
+ const list=document.getElementById('taskList');if(!list)return;
+ const rows=data.tasks.slice().sort((a,b)=>Number(a.done)-Number(b.done)||String(a.due||'9999').localeCompare(String(b.due||'9999'))).filter(dossierTaskMatches);
+ list.innerHTML=dossierTaskControls()+'<p class="subtle">'+rows.length+' von '+data.tasks.length+' Aufgaben sichtbar.</p>'+rows.map(dossierTaskRow).join('');
+}
+renderTasks=function(){dossierRenderTaskList();};
+function dossierWorkbasket(){
+ const open=data.tasks.filter(t=>!t.done), overdue=open.filter(t=>t.due&&t.due<today()), unassigned=open.filter(t=>!String(t.assignedTo||'').trim());
+ const body='<div class="notice"><strong>'+open.length+' offene Aufgaben</strong> · '+overdue.length+' überfällig · '+unassigned.length+' ohne Zuständigkeit. Jede Aufgabe bleibt mit ihrer Schülerakte verknüpft.</div><div id="dossierWorkbasketBody"></div>';
+ dossierPopup('Arbeitskorb · nächste Schritte',body,async()=>closeModal('dossierEditModal'));
+ const box=document.getElementById('dossierWorkbasketBody');
+ box.innerHTML='<div class="dossier-grid"><section><h3>Überfällig</h3>'+overdue.map(dossierTaskRow).join('')+'</section><section><h3>Ohne Zuständigkeit</h3>'+unassigned.map(dossierTaskRow).join('')+'</section><section class="full"><h3>Alle offenen Aufgaben</h3>'+open.map(dossierTaskRow).join('')+'</section></div>';
+}
+function dossierApplyTemplate(kind){
+ const f=document.getElementById('dossierEditForm');if(!f)return;
+ const p={trainingsraum:{type:'Trainingsraumbesuch',title:'Trainingsraumbesuch',content:'Anlass, Beobachtung, vereinbarte Rückkehr und nächster Prüftermin dokumentieren.'},eltern:{type:'Elterngespräch / Elternkontakt',title:'Elterngespräch',content:'Anlass, Sichtweisen, Vereinbarungen, Zuständigkeit und Rückmeldung dokumentieren.'},fehlzeit:{type:'Vorfall / Beobachtung',title:'Fehlzeitenprüfung',content:'Zeitraum, entschuldigte und unentschuldigte Fehlzeiten, Kontakt und vereinbarte nächste Schritte dokumentieren.'},weiterleitung:{type:'Einbeziehung externer Fachkräfte oder Einrichtungen',title:'Weitervermittlung prüfen',content:'Anlass, passende Fachstelle, Einverständnis, Zuständigkeit und Rückmeldung dokumentieren.'}}[kind];
+ if(!p)return;
+ if(f.elements.type)f.elements.type.value=p.type;
+ if(f.elements.title&&!f.elements.title.value)f.elements.title.value=p.title;
+ if(f.elements.content&&!f.elements.content.value)f.elements.content.value=p.content;
+ toast('Schnellvorlage eingefügt. Angaben bitte konkretisieren.');
+}
+const dossierEntryBase=dossierEntry;
+dossierEntry=function(){dossierEntryBase.apply(this,arguments);requestAnimationFrame(()=>{const f=document.getElementById('dossierEditForm'),body=document.getElementById('dossierEditBody');if(!f||!body||body.querySelector('.dossier-quicktemplates'))return;const p=document.createElement('div');p.className='notice dossier-quicktemplates';p.innerHTML='<strong>Schnellvorlage:</strong> <button type="button" class="btn" onclick="dossierApplyTemplate(\\'trainingsraum\\')">Trainingsraum</button> <button type="button" class="btn" onclick="dossierApplyTemplate(\\'eltern\\')">Elterngespräch</button> <button type="button" class="btn" onclick="dossierApplyTemplate(\\'fehlzeit\\')">Fehlzeiten</button> <button type="button" class="btn" onclick="dossierApplyTemplate(\\'weiterleitung\\')">Weitervermittlung</button>';body.prepend(p);});};
+function dossierDocumentReview(){
+ const docs=data.documentEvents||[], rows=docs.map(d=>{const s=data.students.find(x=>x.id===d.studentId),events=d.studentId?Dossier.timeline(data,d.studentId,legacyStudentEvents(d.studentId)):[],linked=d.sourceEntryKey&&events.some(e=>e.key===d.sourceEntryKey);return {...d,s,linked};});
+ const unlinked=rows.filter(r=>!r.linked);
+ const body='<div class="notice"><strong>'+docs.length+' Dokumente</strong> · '+unlinked.length+' ohne konkreten Chronikeintrag. Die Originaldatei wird dabei nicht erneut hochgeladen.</div><table class="table dossier-review"><thead><tr><th>Datei</th><th>Schülerakte</th><th>Zuordnung</th><th></th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+DE(r.name||'Datei')+'</td><td>'+DE(r.s?r.s.first+' '+r.s.last:'Unbekannte Akte')+'</td><td>'+DE(r.linked?r.sourceEntryKey:'Nur in Schülerakte')+'</td><td>'+ (r.s?'<button type="button" class="btn" onclick="showStudent(\\''+DE(r.s.id)+'\\')">Akte öffnen</button>':'')+'</td></tr>').join('')+'</tbody></table><p>Die konkrete Zuordnung erfolgt im Dokumentfenster der jeweiligen Akte über „Chronikeintrag zuordnen“.</p>';
+ dossierPopup('Dokumentprüfung',body,async()=>closeModal('dossierEditModal'));
+}
+function dossierQualityReview(eid){
+ const e=data.journal.find(x=>x.id===eid);if(!e)return;
+ const linked=(data.tasks||[]).filter(t=>t.sourceEntryKey==='entry:'+eid);
+ const checks=[['Datum vorhanden',!!e.date],['Eintragsart und Titel',!!(e.type||e.eventKind)&&!!e.title],['Sachinhalt dokumentiert',String(e.content||'').trim().length>=20],['Zuständigkeit oder Beteiligte',!!(e.responsible||(e.participantIds||[]).length)],['Fachverfahren geprüft',Array.isArray(e.fachverfahren)&&e.fachverfahren.length>0],['Nächster Schritt oder Ergebnis',linked.length>0||!!e.result||!!e.agreement]];
+ const good=checks.filter(x=>x[1]).length;
+ const body='<div class="dossier-rating"><strong>'+good+'/'+checks.length+' Prüfpunkte erfüllt</strong><p>Die Prüfung ist eine Arbeitsunterstützung. Sie ändert keine historische Chronologie automatisch.</p></div><ul>'+checks.map(x=>'<li>'+ (x[1]?'✅ ':'⚠️ ')+DE(x[0])+'</li>').join('')+'</ul><p><strong>Konkrete nächste Schritte aus diesem Eintrag:</strong></p>'+ (linked.length?linked.map(t=>'<p>• '+DE(t.title)+' · '+DE(t.assignedTo||'Zuständigkeit prüfen')+' · '+DE(t.due?fmt(t.due):'ohne Termin')+'</p>').join(''):'<p class="subtle">Noch kein Folgeschritt verknüpft. Über „Nächsten Schritt vereinbaren“ direkt am Chronikeintrag anlegen.</p>');
+ dossierPopup('Fachliche Qualitätsprüfung',body,async()=>closeModal('dossierEditModal'));
+}
+function dossierWebUntisReview(){
+ const signals=data.schoolSignals||[], open=signals.filter(s=>String(s.reviewStatus||'').toLowerCase().includes('nicht')||s.unresolvedNames?.length||s.classChanges?.length);
+ const body='<div class="notice"><strong>'+signals.length+' WebUntis-Signale gespeichert</strong> · '+open.length+' benötigen noch Prüfung. Keine fehlende Importzeile archiviert eine Akte automatisch.</div><table class="table dossier-review"><thead><tr><th>Datum</th><th>Schüler:in</th><th>Fehlzeiten</th><th>Status</th></tr></thead><tbody>'+signals.slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))).map(s=>'<tr><td>'+DE(s.date||'unbekannt')+'</td><td>'+DE(s.studentName||s.name||s.unresolvedNames?.join(', ')||'Zuordnung prüfen')+'</td><td>'+DE(String(s.absentHours??s.hours??s.fehltage??''))+'</td><td>'+DE(s.reviewStatus||'Noch nicht geprüft')+'</td></tr>').join('')+'</tbody></table><p>Der Rohimport bleibt unverändert nachvollziehbar. Klassenzuordnungen und unklare Treffer werden erst nach der Vorschau übernommen.</p>';
+ dossierPopup('WebUntis · Importprüfung',body,async()=>closeModal('dossierEditModal'));
+}
+const dossierShowStudentBase=showStudent;
+showStudent=function(sid){dossierShowStudentBase(sid);requestAnimationFrame(()=>{const buttons=[...document.querySelectorAll('#studentDetailBody button')];const ki=buttons.find(b=>String(b.textContent||'').includes('KI-Analyse'));if(ki&&!buttons.some(b=>String(b.textContent||'').includes('Qualitätsprüfung'))){const q=document.createElement('button');q.className='btn';q.textContent='Fachliche Qualitätsprüfung';q.onclick=()=>dossierQualityReview(data.journal.find(e=>(e.participantIds||[]).includes(sid))?.id);ki.parentElement?.append(q);}});};
