@@ -152,8 +152,18 @@ impl Vault {
 
     pub fn lock_json(&mut self)->Result<Value,VaultError>{self.key=None;Ok(json!({"ok":true}))}
 
+    fn attachment_bytes_match(mime_type:&str,bytes:&[u8])->bool{
+        match mime_type {
+            "application/pdf"=>bytes.starts_with(b"%PDF"),
+            "image/jpeg"=>bytes.starts_with(&[0xFF,0xD8,0xFF]),
+            "image/png"=>bytes.starts_with(&[0x89,0x50,0x4E,0x47,0x0D,0x0A,0x1A,0x0A]),
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document"=>bytes.starts_with(&[0x50,0x4B,0x03,0x04]),
+            _=>false,
+        }
+    }
+
     pub fn put_attachment_json(&mut self,student_id:String,name:String,mime_type:String,bytes:Vec<u8>)->Result<Value,VaultError>{
-        if !["application/pdf","image/jpeg","image/png","application/vnd.openxmlformats-officedocument.wordprocessingml.document"].contains(&mime_type.as_str()) || bytes.len()>MAX_ATTACHMENT || student_id.len()>80 || name.len()>220 {return Err(VaultError::Attachment)}
+        if !Self::attachment_bytes_match(&mime_type,&bytes) || bytes.len()>MAX_ATTACHMENT || student_id.len()>80 || name.len()>220 {return Err(VaultError::Attachment)}
         let id=format!("att-{}-{:08x}",now(),rand::random::<u32>());
         let added=now().to_string();
         let payload=BackupAttachment{id:id.clone(),student_id,name:name.clone(),mime_type:mime_type.clone(),added:added.clone(),bytes_b64:B64.encode(&bytes)};
@@ -278,7 +288,7 @@ impl Vault {
         let tx=self.conn.transaction()?;
         tx.execute("DELETE FROM attachments",[])?;
         tx.execute("INSERT INTO state(id,nonce,ciphertext) VALUES(1,?1,?2) ON CONFLICT(id) DO UPDATE SET nonce=excluded.nonce,ciphertext=excluded.ciphertext",params![sn,sc])?;
-        for a in plain.attachments { let bytes=B64.decode(&a.bytes_b64).map_err(|_|VaultError::Invalid)?; if bytes.len()>MAX_ATTACHMENT||!["application/pdf","image/jpeg","image/png","application/vnd.openxmlformats-officedocument.wordprocessingml.document"].contains(&a.mime_type.as_str())||a.student_id.len()>80||a.name.len()>220{return Err(VaultError::Attachment)} let id=a.id.clone();let (n,c)=Self::encrypt(&current,&serde_json::to_vec(&a)?)?;tx.execute("INSERT INTO attachments(id,student_id,name,mime_type,added,nonce,ciphertext) VALUES(?1,'','','','',?2,?3)",params![id,n,c])?; }
+        for a in plain.attachments { let bytes=B64.decode(&a.bytes_b64).map_err(|_|VaultError::Invalid)?; if bytes.len()>MAX_ATTACHMENT||!Self::attachment_bytes_match(&a.mime_type,&bytes)||a.student_id.len()>80||a.name.len()>220{return Err(VaultError::Attachment)} let id=a.id.clone();let (n,c)=Self::encrypt(&current,&serde_json::to_vec(&a)?)?;tx.execute("INSERT INTO attachments(id,student_id,name,mime_type,added,nonce,ciphertext) VALUES(?1,'','','','',?2,?3)",params![id,n,c])?; }
         tx.commit()?;
         Ok(json!({"stateJson":plain.state_json}))
     }
