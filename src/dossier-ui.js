@@ -44,7 +44,7 @@ function dossierKiAnonymize(value,e){
 function dossierKiChronology(e){
  const sid=(e.participantIds||[])[0]||selectedStudentId;
  const events=sid?Dossier.timeline(data,sid,legacyStudentEvents(sid)):[e];
- return events.map(item=>({datum:item.date||'',schuljahr:item.context?.schoolYear||item.schoolYear||'',damalige_klasse:item.context?.className||item.className||'unbekannt',eintragstyp:item.type||item.eventKind||'',titel:dossierKiAnonymize(item.title||'',item),inhalt:dossierKiAnonymize(dossierLegacyContent(item),item),fachverfahren:(item.fachverfahren||[]).map(v=>v.title||v.id).filter(Boolean),oberthemen:Array.isArray(item.oberThemen)?item.oberThemen:[],status:item.status||'',quelle:item.source||item.sourceKey||''}));
+ return events.map(item=>{const safeItem={...item,participantIds:[...new Set([...(item.participantIds||[]),sid].filter(Boolean))]};return {datum:item.date||'',schuljahr:item.context?.schoolYear||item.schoolYear||'',damalige_klasse:item.context?.className||item.className||'unbekannt',eintragstyp:item.type||item.eventKind||'',titel:dossierKiAnonymize(item.title||'',safeItem),inhalt:dossierKiAnonymize(dossierLegacyContent(item),safeItem),fachverfahren:(item.fachverfahren||[]).map(v=>v.title||v.id).filter(Boolean),oberthemen:Array.isArray(item.oberThemen)?item.oberThemen:[],status:item.status||'',quelle:item.source||item.sourceKey||''};});
 }
 function dossierKiPayload(e){
  const field=k=>dossierKiAnonymize(e[k],e);
