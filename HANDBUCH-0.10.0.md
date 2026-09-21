@@ -13,7 +13,7 @@ Unter **Schüler:innen** öffnest du die dauerhafte Akte eines Kindes. Die zwei 
 - **Ereignis / Gespräch eintragen**: Datum, Inhalt und dokumentierende Person. Eintragsart, Titel und Beteiligte ergänzen.
 - **Information hinzufügen**: Freitext, Mitteilungsdatum und optional die Quelle. Beispielsweise Ergotherapie, Familieninformation oder ein mitgeteilter Befund. Eine Aufgabe oder Ampeländerung ist nicht erforderlich.
 
-Das Kind ist vorausgewählt. Weitere Felder lassen sich bei Bedarf aufklappen: Aussagen des Kindes, Berichte anderer Personen, eigene Beobachtung, fachliche Einschätzung, Vereinbarungen, Ziele, Ergebnis, Dauer und Dokumente. Freitext und die vorhandene Diktierfunktion bleiben verfügbar.
+Das Kind ist vorausgewählt. Weitere Felder lassen sich bei Bedarf aufklappen: Aussagen des Kindes, Berichte anderer Personen, eigene Beobachtung, fachliche Einschätzung, Vereinbarungen, Ziele, Ergebnis, Dauer und Dokumente. Freitext bleibt verfügbar. Sprachmemo, Diktat und OCR sind in dieser Version nicht Bestandteil des SSA-Cockpits.
 
 ## Chronologie
 
