@@ -54,12 +54,27 @@ function dossierKiOpen(eid){
  dossierPopup('KI-Analyse für Chronikeintrag',body,async fd=>{await dossierKiImportResponse(eid,fd.get('kiResponse'));});
 }
 async function dossierKiImportResponse(eid,raw){
- let parsed;try{const clean=String(raw||'').trim().replace(/^\`\`\`(?:json)?/i,'').replace(/\`\`\`$/,'').trim();parsed=JSON.parse(clean);}catch(err){throw new Error('Die KI-Antwort ist kein gültiges JSON.');}
- if(!parsed||!Array.isArray(parsed.naechste_schritte)||!Array.isArray(parsed.ober_themen)||!Array.isArray(parsed.fachverfahren))throw new Error('Die Antwort entspricht nicht dem erwarteten Cockpit-Schema.');
+ let parsed;
+ try{
+  let text=String(raw??'').normalize('NFC').replace(/^\\uFEFF/,'').trim();
+  text=text.replace(/^\\s*\`\`\`(?:json)?\\s*/i,'').replace(/\\s*\`\`\`\\s*$/,'').trim();
+  const candidates=[text];
+  const first=text.indexOf('{'),last=text.lastIndexOf('}');
+  if(first>=0&&last>first&&text.slice(first,last+1)!==text)candidates.push(text.slice(first,last+1));
+  let error;
+  for(const candidate of candidates){
+   try{parsed=JSON.parse(candidate);if(typeof parsed==='string')parsed=JSON.parse(parsed);break;}catch(err){error=err;}
+  }
+  if(!parsed)throw error||new Error('JSON fehlt');
+ }catch(err){throw new Error('Die KI-Antwort konnte nicht als JSON gelesen werden. Bitte nur das JSON-Ergebnis einfügen.');}
+ const stepsInput=parsed.naechste_schritte??parsed.naechsteSchritte??parsed.next_steps;
+ const topicsInput=parsed.ober_themen??parsed.oberThemen;
+ const proceduresInput=parsed.fachverfahren;
+ if(!parsed||!Array.isArray(stepsInput)||!Array.isArray(topicsInput)||!Array.isArray(proceduresInput))throw new Error('Die Antwort entspricht nicht dem erwarteten Cockpit-Schema. Erwartet werden die drei Listen „ober_themen“, „fachverfahren“ und „naechste_schritte“.');
  const e=data.journal.find(x=>x.id===eid);if(!e)throw new Error('Chronikeintrag nicht gefunden.');
- const suggestions=parsed.naechste_schritte.slice(0,3).filter(x=>x&&String(x.titel||'').trim()).map(x=>({id:dossierKiId(),title:String(x.titel).trim(),rationale:String(x.beschreibung||x.begruendung||'').trim(),taskType:String(x.zustaendigkeit||'Nächster Schritt'),dueDays:Number.isFinite(Number(x.frist_tage))?Math.max(0,Number(x.frist_tage)):3,status:'offen',source:'Externe KI',createdAt:new Date().toISOString()}));
- const fach=parsed.fachverfahren.slice(0,8).filter(x=>x&&String(x.id||x.bezeichnung||'').trim()).map(x=>({id:String(x.id||x.bezeichnung),title:String(x.bezeichnung||x.id),version:String(x.version||'1.0'),matchedKeywords:Array.isArray(x.passende_kriterien)?x.passende_kriterien:[]}));
- const topics=parsed.ober_themen.slice(0,8).filter(x=>x&&String(x.bezeichnung||x.id||'').trim()).map(x=>String(x.bezeichnung||x.id));
+ const suggestions=stepsInput.slice(0,3).filter(x=>x&&String(x.titel||x.title||'').trim()).map(x=>({id:dossierKiId(),title:String(x.titel||x.title).trim(),rationale:String(x.beschreibung||x.begruendung||x.description||'').trim(),taskType:String(x.zustaendigkeit||x.responsibility||'Nächster Schritt'),dueDays:Number.isFinite(Number(x.frist_tage))?Math.max(0,Number(x.frist_tage)):3,status:'offen',source:'Externe KI',createdAt:new Date().toISOString()}));
+ const fach=proceduresInput.slice(0,8).filter(x=>x&&String(x.id||x.bezeichnung||x.title||'').trim()).map(x=>({id:String(x.id||x.bezeichnung||x.title),title:String(x.bezeichnung||x.title||x.id),version:String(x.version||'1.0'),matchedKeywords:Array.isArray(x.passende_kriterien)?x.passende_kriterien:[]}));
+ const topics=topicsInput.slice(0,8).filter(x=>x&&String(x.bezeichnung||x.id||x.title||'').trim()).map(x=>String(x.bezeichnung||x.title||x.id));
  Dossier.editEntry(data,e,{oberThemen:[...new Set(topics)],fachverfahren:fach,actionSuggestions:[...(e.actionSuggestions||[]).filter(x=>x.status==='übernommen'),...suggestions],kiAnalysis:{status:parsed.status||'ok',hinweise:Array.isArray(parsed.hinweise)?parsed.hinweise.slice(0,8):[],moeglicheFachstellen:Array.isArray(parsed.moegliche_fachstellen)?parsed.moegliche_fachstellen.slice(0,8):[],at:new Date().toISOString()}},data.settings.activeUser||'SSA');
  await dossierSave();closeModal('dossierEditModal');dossierRefresh();toast('KI-Auswertung geprüft und als Vorschläge gespeichert.');
 }
