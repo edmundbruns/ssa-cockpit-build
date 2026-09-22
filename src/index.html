@@ -1683,7 +1683,7 @@ function staffImportBestaetigen(){if(!staffPending)return;
  data.settings.staffImportUndo={zeit:new Date().toISOString(),dateiname:p.dateiname,teachers:JSON.parse(JSON.stringify(data.teachers))};
  const vorhanden=new Map(data.teachers.map(t=>[staffKey(t.last,t.first,t.role),t]));
  let neu=0,akt=0;
- p.gelesen.forEach(q=>{const t=vorhanden.get(staffKey(q.last,q.first,q.role));
+ p.gelesen.forEach(q=>{const t=vorhanden.get(staffKey(q.last,q.first,q.role))||(!q.role&&q.phone?data.teachers.find(x=>staffLose(x.last,x.first)===staffLose(q.last,q.first)):null);
   if(t){['first','displayName','role','classLead','status','note','source','org','email','phone'].forEach(f=>{if(q[f])t[f]=q[f]});
        if(Array.isArray(q.roles)&&q.roles.length)t.roles=[...new Set([...(Array.isArray(t.roles)?t.roles:[]),...q.roles])];
        akt++}
