@@ -143,8 +143,9 @@ function dossierCard(e,index=0,mode='dated'){
 const dossierCardBase=dossierCard;
 dossierCard=function(e,index=0,mode='dated'){
  let html=dossierCardBase(e,index,mode);
- html=html.replace('<small>','<div class="dossier-drag-handle" draggable="true" ondragstart="dossierDragStart(event,\''+DE(e.key)+'\')" ondragend="dossierDragEnd(event)" title="Kachel an diesem Griff ziehen">↕ Kachel verschieben</div><small>');
+ html=html.replace(/(<article class="dossier-card[^>]*>)/,'$1<div class="dossier-drag-handle" draggable="true" ondragstart="dossierDragStart(event,\''+DE(e.key)+'\')" ondragend="dossierDragEnd(event)" title="Kachel an diesem Griff ziehen">↕ Kachel verschieben</div>');
  if(e.key?.startsWith('entry:'))html=html.replace('<details class="dossier-card-actions">','<div class="dossier-card-quick-actions"><button class="btn" type="button" onclick="dossierMoveCard(\''+DE(e.key)+'\',-1)">↑ Nach oben</button><button class="btn" type="button" onclick="dossierMoveCard(\''+DE(e.key)+'\',1)">↓ Nach unten</button><button class="btn" type="button" onclick="dossierEntry(\'edit\',\'entry:'+DE(e.id)+'\')">Bearbeiten</button><button class="btn" type="button" onclick="dossierDeleteParts(\''+DE(e.key)+'\')">Teilinhalte löschen</button><button class="btn danger" type="button" onclick="dossierDeleteEntry(\''+DE(e.id)+'\')">Kachel löschen</button></div><details class="dossier-card-actions">');
+ if(e.task)html=html.replace('<details class="dossier-card-actions">','<div class="dossier-card-quick-actions"><button class="btn" type="button" onclick="dossierTask(\''+DE(e.id)+'\')">Aufgabe bearbeiten</button><button class="btn danger" type="button" onclick="dossierDeleteTask(\''+DE(e.id)+'\')">Aufgabe löschen</button></div><details class="dossier-card-actions">');
  return html;
 };
 showStudent=function(sid){
