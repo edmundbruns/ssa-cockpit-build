@@ -478,4 +478,17 @@ async function dossierDeleteEntry(eid){
  if(data.settings.timelineOrder&&data.settings.timelineOrder[selectedStudentId])data.settings.timelineOrder[selectedStudentId]=data.settings.timelineOrder[selectedStudentId].filter(function(k){return k!=='entry:'+eid});
  logChange('Chronikeintrag vollständig gelöscht',eid,selectedStudentId,data.settings.activeUser||'SSA');await dossierSave();dossierRefresh();toast('Chronikeintrag und direkt verknüpfte Folgeaktionen wurden gelöscht. Anhänge bleiben erhalten.');
 }
-async function doss
+async function dossierSuggestionDelete(eid,sugid){const found=dossierSuggestionFind(eid,sugid);if(!found.e)return;const before=found.e.actionSuggestions&&found.e.actionSuggestions.length||0;found.e.actionSuggestions=(found.e.actionSuggestions||[]).filter(function(s){return s.id!==sugid});if(found.e.actionSuggestions.length===before)return;await dossierSave();dossierRefresh();}
+async function dossierSuggestionClear(eid){const e=data.journal.find(function(x){return x.id===eid});if(!e)return;if(!await appConfirm('Alle lokalen Handlungsvorschläge dieses Eintrags entfernen? Ihr eigener Chroniktext bleibt erhalten.'))return;e.actionSuggestions=[];await dossierSave();dossierRefresh();}
+function dossierDeleteParts(key){
+ const e=dossierRecord(key);if(!e||!key.startsWith('entry:'))return;
+ const fields=[['observation','Eigene Beobachtung'],['assessment','Fachliche Einschätzung'],['agreement','Vereinbarungen'],['goal','Ziele'],['result','Ergebnis / Wirkung'],['decision','Entscheidung zur Unterstützung'],['source','Informationsquelle'],['people','Beteiligte Personen'],['time','Uhrzeit'],['channel','Kontaktweg'],['referenceDate','Bezugsdatum'],['since','Besteht seit']];
+ const available=fields.filter(([name])=>String(e[name]||'').trim());
+ if(e.individualNotes?.[selectedStudentId])available.push(['individualNotes','Individuelle Ergänzung für dieses Kind']);
+ if(!available.length){appAlert('In dieser Kachel gibt es keine zusätzlichen Inhalte zum Entfernen.');return;}
+ dossierPopup('Einzelne Inhalte aus der Kachel entfernen',`<div class="notice warning">Der eigentliche Chronikeintrag bleibt erhalten. Wähle nur die Zusatzinhalte aus, die entfernt werden sollen. Die Änderung wird in der Änderungshistorie vermerkt.</div><div class="dossier-people">${available.map(([name,label])=>`<label><input type="checkbox" name="parts" value="${DE(name)}"> ${DE(label)}</label>`).join('')}</div>`,async fd=>{
+  const selected=fd.getAll('parts');if(!selected.length)throw Error('Bitte mindestens einen Zusatzinhalt auswählen.');
+  const changes={};for(const name of selected)changes[name]=name==='individualNotes'?{...(e.individualNotes||{}),[selectedStudentId]:''}:'';
+  Dossier.editEntry(data,e,changes,data.settings.activeUser||'SSA');await dossierSave();closeModal('dossierEditModal');dossierRefresh();toast('Ausgewählte Zusatzinhalte wurden entfernt. Der Chronikeintrag bleibt erhalten.');
+ });
+}
