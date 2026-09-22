@@ -1,12 +1,26 @@
-[eval]:1
-process.stdout.write(require('fs').readFileSync(.github/workflows/windows-installer.yml,'utf8'))
-                                                ^
-Expression expected
+name: Windows Installer
 
-SyntaxError: Unexpected token '.'
-    at makeContextifyScript (node:internal/vm:194:14)
-    at compileScript (node:internal/process/execution:388:10)
-    at evalTypeScript (node:internal/process/execution:260:22)
-    at node:internal/main/eval_string:71:3
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
 
-Node.js v24.19.0
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm ci
+      - run: npm test
+      - run: npm run test:ui
+      - run: cargo test --manifest-path src-tauri/Cargo.toml --no-default-features --features bundled-sqlite
+      - run: npx tauri build --bundles nsis,msi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SSA-Cockpit-Windows-Installer
+          path: src-tauri/target/release/bundle/**
