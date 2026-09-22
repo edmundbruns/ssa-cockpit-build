@@ -146,6 +146,15 @@ dossierCard=function(e,index=0,mode='dated'){
  html=html.replace(/(<article class="dossier-card[^>]*>)/,'$1<div class="dossier-drag-handle" draggable="true" ondragstart="dossierDragStart(event,\''+DE(e.key)+'\')" ondragend="dossierDragEnd(event)" title="Kachel an diesem Griff ziehen">↕ Kachel verschieben</div>');
  if(e.key?.startsWith('entry:'))html=html.replace('<details class="dossier-card-actions">','<div class="dossier-card-quick-actions"><button class="btn" type="button" onclick="dossierMoveCard(\''+DE(e.key)+'\',-1)">↑ Nach oben</button><button class="btn" type="button" onclick="dossierMoveCard(\''+DE(e.key)+'\',1)">↓ Nach unten</button><button class="btn" type="button" onclick="dossierEntry(\'edit\',\'entry:'+DE(e.id)+'\')">Bearbeiten</button><button class="btn" type="button" onclick="dossierDeleteParts(\''+DE(e.key)+'\')">Teilinhalte löschen</button><button class="btn danger" type="button" onclick="dossierDeleteEntry(\''+DE(e.id)+'\')">Kachel löschen</button></div><details class="dossier-card-actions">');
  if(e.task)html=html.replace('<details class="dossier-card-actions">','<div class="dossier-card-quick-actions"><button class="btn" type="button" onclick="dossierTask(\''+DE(e.id)+'\')">Aufgabe bearbeiten</button><button class="btn danger" type="button" onclick="dossierDeleteTask(\''+DE(e.id)+'\')">Aufgabe löschen</button></div><details class="dossier-card-actions">');
+return html;
+};
+const dossierCardUniversal=dossierCard;
+dossierCard=function(e,index=0,mode='dated'){
+ let html=dossierCardUniversal(e,index,mode);
+ html=html.replace('ondragover="event.preventDefault()"','ondragover="dossierDragOver(event,this)" ondragleave="dossierDragLeave(event,this)"');
+ html=html.replace(/(<article class="dossier-card[^>]*?) draggable="true" ondragstart="[^"]*"/,'$1');
+ if(!e.key?.startsWith('entry:')&&!e.task)html=html.replace('<details class="dossier-card-actions">','<div class="dossier-card-quick-actions"><button class="btn" type="button" onclick="dossierMoveCard(\''+DE(e.key)+'\',-1)">↑ Nach oben</button><button class="btn" type="button" onclick="dossierMoveCard(\''+DE(e.key)+'\',1)">↓ Nach unten</button></div><details class="dossier-card-actions">');
+ if(!e.key?.startsWith('entry:'))html=html.replace(/<button class="btn" onclick="dossierQualityReview\([^<]+<\/button>/,'');
  return html;
 };
 showStudent=function(sid){
@@ -451,8 +460,8 @@ openAttachment=async function(id){const a=await getAttachment(id);if(!a)return;c
 function dossierTimelineOrder(sid){
  const rows=Dossier.timeline(data,sid,legacyStudentEvents(sid))||[],keys=rows.map(function(e){return e.key}),saved=data.settings&&data.settings.timelineOrder&&data.settings.timelineOrder[sid]||[],valid=saved.filter(function(k){return keys.includes(k)});return valid.concat(keys.filter(function(k){return !valid.includes(k)}));
 }
-function dossierDragStart(event,key){event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',key);event.currentTarget.setAttribute('aria-grabbed','true');event.currentTarget.classList.add('dossier-dragging');}
-function dossierDragEnd(event){event.currentTarget.removeAttribute('aria-grabbed');event.currentTarget.classList.remove('dossier-dragging');}
+function dossierDragStart(event,key){const card=event.currentTarget.closest?.('.dossier-card')||event.currentTarget;event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',key);card.setAttribute('aria-grabbed','true');card.classList.add('dossier-dragging');}
+function dossierDragEnd(event){const card=event.currentTarget.closest?.('.dossier-card')||event.currentTarget;card.removeAttribute('aria-grabbed');card.classList.remove('dossier-dragging');}
 function dossierDragOver(event,card){event.preventDefault();card.classList.add('dossier-drop-target');if(event.dataTransfer)event.dataTransfer.dropEffect='move';}
 function dossierDragLeave(event,card){if(!card.contains(event.relatedTarget))card.classList.remove('dossier-drop-target');}
 document.addEventListener('dragend',function(event){const card=event.target.closest?.('.dossier-card');if(card)dossierDragEnd({currentTarget:card});});
