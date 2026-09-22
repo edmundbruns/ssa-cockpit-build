@@ -1,8 +1,8 @@
 [eval]:1
-process.stdout.write(require('fs').readFileSync(src/dossier-ui.js,'utf8'))
+process.stdout.write(require('fs').readFileSync(tests/roles.test.mjs,'utf8'))
                                                 ^
 
-ReferenceError: src is not defined
+ReferenceError: tests is not defined
     at [eval]:1:49
     at runScriptInThisContext (node:internal/vm:219:10)
     at node:internal/process/execution:451:12
