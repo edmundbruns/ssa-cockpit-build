@@ -907,7 +907,7 @@ function renderCases(){
  const q=(document.getElementById('caseSearch').value||'').toLocaleLowerCase('de-DE'),status=document.getElementById('caseFilter').value,classFilter=document.getElementById('caseClassFilter').value;
  const cases=data.cases.filter(c=>{
   const s=studentOfCase(c),events=s?studentEvents(s.id):[],hay=[cname(c.id),c.reason,classOf(c),c.goal,...events.flatMap(e=>[e.title,e.note,...(e.details||[]),e.measure,e.result])].join(' ').toLocaleLowerCase('de-DE');
-  return (status==='all'||c.status===status)&&(classFilter==='all'||classOf(c)===classFilter)&&hay.includes(q)&&!fallArchiviert(c)
+  return c.status!=='Abgeschlossen'&&(status==='all'||c.status===status)&&(classFilter==='all'||classOf(c)===classFilter)&&hay.includes(q)&&!fallArchiviert(c)
  });
  const versteckteFaelle=data.cases.filter(fallArchiviert).length;
  archivZeigen('caseArchivHinweis',versteckteFaelle,'Fallakte'+(versteckteFaelle===1?'':'n'));
@@ -2632,7 +2632,7 @@ function renderKanban(){
   const versteckteKanban=data.cases.filter(c=>fallArchiviert(c)&&c.status!=='Abgeschlossen').length;
   archivZeigen('kanbanArchivHinweis',versteckteKanban,'Fallakte'+(versteckteKanban===1?'':'n'));
  board.innerHTML=KANBAN_SPALTEN.map(([titel,statuses,erklaerung])=>{
-  const cases=data.cases.filter(c=>!fallArchiviert(c)&&statuses.includes(c.status)&&(filterClass==='all'||classOf(c)===filterClass)&&[cname(c.id),classOf(c),c.reason,c.goal].join(' ').toLocaleLowerCase('de-DE').includes(q)).sort((a,b)=>String(b.last).localeCompare(String(a.last)));
+  const cases=data.cases.filter(c=>c.status!=='Abgeschlossen'&&!fallArchiviert(c)&&statuses.includes(c.status)&&(filterClass==='all'||classOf(c)===filterClass)&&[cname(c.id),classOf(c),c.reason,c.goal].join(' ').toLocaleLowerCase('de-DE').includes(q)).sort((a,b)=>String(b.last).localeCompare(String(a.last)));
   const drop=`ondragover="event.preventDefault()" ondrop="dropCaseOnKanban(event,'${statuses[0]}')"`;
   return `<section class="kanban-column" ${drop}><div class="kanban-head"><span title="${erklaerung}">${titel}</span><span class="tag gray">${cases.length}</span></div><p class="kanban-hinweis">${erklaerung}</p><div class="kanban-list">${cases.map(c=>{
    const a=naechsteAufgabe(c.id),ueberfaellig=a&&a.due&&a.due<today();
