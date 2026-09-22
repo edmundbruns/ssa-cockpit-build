@@ -85,7 +85,7 @@
     body{background:#f4f7f8}.sidebar{background:#102f46}.card{border-color:#e3e9ec}
     .topbar{background:rgba(255,255,255,.94);border-bottom:1px solid var(--line);padding:17px 30px 13px;position:sticky;top:0;z-index:10}
     .content{padding-top:20px}.kpi .value{font-size:28px}.btn{border-radius:9px}.field{border-radius:9px}
-    .kanban-wrap{overflow-x:auto;padding-bottom:8px}.kanban-board{display:grid;grid-template-columns:repeat(6,minmax(235px,1fr));gap:12px;min-width:1470px}
+    .kanban-wrap{overflow-x:auto;padding-bottom:8px}.kanban-board{display:grid;grid-template-columns:repeat(2,minmax(300px,1fr));gap:12px;min-width:640px}
     .kanban-column{background:#eaf0f2;border:1px solid #dbe4e8;border-radius:12px;padding:10px;min-height:430px}
     .kanban-head{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:5px 4px 10px;font-weight:750}
     .kanban-list{display:grid;gap:9px;min-height:350px}.kanban-card{background:white;border:1px solid #dfe7ea;border-left:4px solid var(--teal);border-radius:10px;padding:11px;box-shadow:0 1px 5px #12304710;cursor:grab}
@@ -224,8 +224,8 @@
         <div class="card tablewrap"><table><thead><tr><th>Schüler:in</th><th>Klasse</th><th>Anlass</th><th>Status</th><th>Letzter Kontakt</th><th>Kontakte</th></tr></thead><tbody id="caseTable"></tbody></table></div>
       </section>
       <section class="page" id="kanban">
-        <div class="sectionhead"><div><h2>Fallarbeit als Board</h2><div class="subtle">Dieselben Fallakten wie in der Tabelle. Verschiebungen werden in der Historie dokumentiert.</div><div class="actions" style="margin-top:9px"><button class="btn" onclick="go('cases')">Als Tabelle</button><button class="btn primary" disabled>Als Board</button></div></div><div class="filters"><input class="field search" id="kanbanSearch" placeholder="Name, Klasse oder Anlass" oninput="renderKanban()"><select class="field" id="kanbanClassFilter" onchange="renderKanban()"><option value="all">Alle Klassen</option></select></div></div>
-        <div class="notice">Das Fallboard ergänzt die tabellarische Fallarbeit. Es legt keine parallelen Daten an. Abschlüsse werden weiterhin in der vollständigen Fallakte dokumentiert.</div>
+        <div class="sectionhead"><div><h2>Fallarbeit als Board</h2><div class="subtle">Zwei Arbeitsansichten. Verschiebungen werden in der Historie dokumentiert.</div><div class="actions" style="margin-top:9px"><button class="btn" onclick="go('cases')">Als Tabelle</button><button class="btn primary" disabled>Als Board</button></div></div><div class="filters"><input class="field search" id="kanbanSearch" placeholder="Name, Klasse oder Anlass" oninput="renderKanban()"><select class="field" id="kanbanClassFilter" onchange="renderKanban()"><option value="all">Alle Klassen</option></select></div></div>
+        <div class="notice">Das Board bündelt alle offenen fachlichen Status in „In Bearbeitung“. Nach „Erledigt“ verschobene Fälle verschwinden aus der Tabelle, bleiben aber mit sämtlichen Chronikbeiträgen vollständig erhalten und können hier wieder aufgenommen werden.</div>
         <div id="kanbanArchivHinweis"></div>
         <div class="kanban-wrap"><div class="kanban-board" id="kanbanBoard"></div></div>
       </section>
@@ -1448,7 +1448,7 @@ function ensureCaseForStudent(studentId,reason='Personenbezogener fachlicher Ein
  logChange('Fallakte automatisch angelegt',caseId,studentId,responsible);return c
 }
 const KANBAN_COLUMNS=[['Klärung',['Erste Kontaktaufnahme','Klärungsphase']],['Beratung',['Beratung']],['Begleitung',['Aktive Begleitung','Wiederaufgenommen']],['Vermittlung',['Weitervermittlung']],['Beobachtung',['Beobachtung','Vorläufig beendet']],['Abgeschlossen',['Abgeschlossen']]];
-async function dropCaseOnKanban(event,newStatus){event.preventDefault();const caseId=event.dataTransfer.getData('text/plain'),c=data.cases.find(x=>x.id===caseId);if(!c||c.status===newStatus)return;if(newStatus==='Abgeschlossen'){fallAbschlussFuehren(c.studentId);return}const s=studentOfCase(c);if(!await appConfirm(`${s?s.last+', '+s.first:'Fall'} von „${c.status}“ nach „${newStatus}“ verschieben?`))return;const old=c.status;c.status=newStatus;c.last=today();data.statusHistory.push({id:id('sh'),caseId:c.id,studentId:c.studentId,date:today(),fromStatus:old,status:newStatus,responsible:'Edmund oder Sabine',reason:'Statusänderung über das Fallboard'});logChange(`Fallstatus über Fallboard geändert: ${old} zu ${newStatus}`,c.id,c.studentId);save();toast('Statusänderung wurde in der Fallhistorie gespeichert.')}
+async function dropCaseOnKanban(event,zielSpalte){event.preventDefault();const caseId=event.dataTransfer.getData('text/plain'),c=data.cases.find(x=>x.id===caseId);if(!c)return;const ziel=zielSpalte==='Erledigt'?'Abgeschlossen':(c.status==='Abgeschlossen'?'Wiederaufgenommen':c.status);if(c.status===ziel)return;if(ziel==='Abgeschlossen'){fallAbschlussFuehren(c.studentId);return}const s=studentOfCase(c);if(!await appConfirm(`${s?s.last+', '+s.first:'Fall'} wieder in „In Bearbeitung“ aufnehmen?`))return;const old=c.status;c.status=ziel;c.last=today();data.statusHistory.push({id:id('sh'),caseId:c.id,studentId:c.studentId,date:today(),fromStatus:old,status:ziel,responsible:'Edmund oder Sabine',reason:'Statusänderung über das Fallboard: In Bearbeitung'});logChange(`Fallstatus über Fallboard geändert: ${old} zu ${ziel}`,c.id,c.studentId);save();renderCases();renderKanban();toast('Der Fall steht wieder in „In Bearbeitung“. Die Chronik bleibt erhalten.')}
 function isInstructionDay(date){const iso=date.toISOString().slice(0,10),weekday=date.getDay(),extra=new Set(data.settings.additionalNonSchoolDays||[]);return weekday!==0&&weekday!==6&&!NDS_WEEKDAY_HOLIDAYS_2026_27.has(iso)&&!extra.has(iso)&&!NDS_FREE_RANGES_2026_27.some(([a,b])=>iso>=a&&iso<=b)}
 function addSchoolDays(start,count){const d=new Date(start+'T12:00');let remaining=Math.max(0,Number(count)||0);while(remaining){d.setDate(d.getDate()+1);if(isInstructionDay(d))remaining--}return d.toISOString().slice(0,10)}
 function setSchoolDayDue(targetId,count){if(!count)return;document.getElementById(targetId).value=addSchoolDays(today(),count)}
@@ -2613,11 +2613,8 @@ function fehlzeitenImportBestaetigen(){
 
 /* ===== Kanban nach Arbeitsstand ===== */
 const KANBAN_SPALTEN=[
- ['Neu',['Erste Kontaktaufnahme'],'Fallakte besteht, die Klärung hat noch nicht begonnen.'],
- ['In Bearbeitung',['Klärungsphase','Beratung','Aktive Begleitung','Wiederaufgenommen'],'Laufende Beratung oder Begleitung.'],
- ['Rückmeldung ausstehend',['Rückmeldung ausstehend','Weitervermittlung'],'Es wurde etwas angestoßen, eine Antwort steht aus.'],
- ['Wiedervorlage',['Beobachtung','Vorläufig beendet'],'Ruht bis zum vereinbarten Termin.'],
- ['Erledigt',['Abgeschlossen'],'Fallarbeit abgeschlossen. Beim Verschieben hierher öffnet sich der geführte Fallabschluss.']
+ ['In Bearbeitung',['Erste Kontaktaufnahme','Klärungsphase','Beratung','Aktive Begleitung','Rückmeldung ausstehend','Weitervermittlung','Beobachtung','Vorläufig beendet','Wiederaufgenommen'],'Alle laufenden Fälle. Der fachliche Detailstatus bleibt in der Fallakte erhalten.'],
+ ['Erledigt',['Abgeschlossen'],'Abgeschlossene Fälle. Sie verschwinden aus der Tabelle, die vollständige Chronik bleibt erhalten.']
 ];
 function naechsteAufgabe(caseId){
  return data.tasks.filter(t=>t.caseId===caseId&&!t.done).sort((a,b)=>String(a.due).localeCompare(String(b.due)))[0]||null;
@@ -2632,8 +2629,8 @@ function renderKanban(){
   const versteckteKanban=data.cases.filter(c=>fallArchiviert(c)&&c.status!=='Abgeschlossen').length;
   archivZeigen('kanbanArchivHinweis',versteckteKanban,'Fallakte'+(versteckteKanban===1?'':'n'));
  board.innerHTML=KANBAN_SPALTEN.map(([titel,statuses,erklaerung])=>{
-  const cases=data.cases.filter(c=>c.status!=='Abgeschlossen'&&!fallArchiviert(c)&&statuses.includes(c.status)&&(filterClass==='all'||classOf(c)===filterClass)&&[cname(c.id),classOf(c),c.reason,c.goal].join(' ').toLocaleLowerCase('de-DE').includes(q)).sort((a,b)=>String(b.last).localeCompare(String(a.last)));
-  const drop=`ondragover="event.preventDefault()" ondrop="dropCaseOnKanban(event,'${statuses[0]}')"`;
+  const cases=data.cases.filter(c=>!fallArchiviert(c)&&statuses.includes(c.status)&&(filterClass==='all'||classOf(c)===filterClass)&&[cname(c.id),classOf(c),c.reason,c.goal].join(' ').toLocaleLowerCase('de-DE').includes(q)).sort((a,b)=>String(b.last).localeCompare(String(a.last)));
+  const drop=`ondragover="event.preventDefault()" ondrop="dropCaseOnKanban(event,'${titel}')"`;
   return `<section class="kanban-column" ${drop}><div class="kanban-head"><span title="${erklaerung}">${titel}</span><span class="tag gray">${cases.length}</span></div><p class="kanban-hinweis">${erklaerung}</p><div class="kanban-list">${cases.map(c=>{
    const a=naechsteAufgabe(c.id),ueberfaellig=a&&a.due&&a.due<today();
    return `<article class="kanban-card" data-student-id="${DE(c.studentId)}" draggable="true" ondragstart="event.dataTransfer.setData('text/plain','${c.id}')" onclick="openCaseTimeline(this.dataset.studentId)">
@@ -2844,12 +2841,14 @@ async function kanbanVerschieben(caseId){
 }
 async function kanbanZielSetzen(caseId,neuerStatus){
  document.querySelectorAll('.modal.open').forEach(m=>{if(!m.id)m.remove()});
- const c=data.cases.find(x=>x.id===caseId);if(!c||c.status===neuerStatus)return;
- if(neuerStatus==='Abgeschlossen'){fallAbschlussFuehren(c.studentId);return}
- const alt=c.status;c.status=neuerStatus;c.last=today();
- data.statusHistory.push({id:id('sh'),caseId:c.id,studentId:c.studentId,date:today(),fromStatus:alt,status:neuerStatus,responsible:'Edmund oder Sabine',reason:'Statusänderung über das Fallboard'});
+ const c=data.cases.find(x=>x.id===caseId);if(!c)return;
+ const ziel=neuerStatus==='Erledigt'?'Abgeschlossen':(c.status==='Abgeschlossen'?'Wiederaufgenommen':c.status);
+ if(c.status===ziel)return;
+ if(ziel==='Abgeschlossen'){fallAbschlussFuehren(c.studentId);return}
+ const alt=c.status;c.status=ziel;c.last=today();
+ data.statusHistory.push({id:id('sh'),caseId:c.id,studentId:c.studentId,date:today(),fromStatus:alt,status:ziel,responsible:'Edmund oder Sabine',reason:'Statusänderung über das Fallboard: In Bearbeitung'});
  logChange('Fallstatus geändert',c.id,c.studentId);
- save();toast('Der Fall steht jetzt in der Spalte für „'+neuerStatus+'“.');
+ save();renderCases();renderKanban();toast('Der Fall steht jetzt in „In Bearbeitung“. Die Chronik bleibt erhalten.');
 }
 
 /* ===== Netzwerkpartner ===== */
