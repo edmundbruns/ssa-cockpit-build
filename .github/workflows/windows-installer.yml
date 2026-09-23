@@ -1,6 +1,7 @@
 name: Windows Installer
 # Current verified build
 # Use the current Windows runner
+# Public build retry
 
 on:
   workflow_dispatch:
