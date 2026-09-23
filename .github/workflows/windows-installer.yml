@@ -1,4 +1,5 @@
 name: Windows Installer
+# Current verified build
 
 on:
   workflow_dispatch:
