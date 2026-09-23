@@ -29,3 +29,5 @@ jobs:
         with:
           name: SSA-Cockpit-Windows-Installer
           path: src-tauri/target/release/bundle/**
+
+# Public repository build retry
