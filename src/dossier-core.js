@@ -8,6 +8,7 @@ const iso=v=>/^\d{4}-\d{2}-\d{2}$/.test(String(v))&&!isNaN(Date.parse(v))&&new D
 function schoolYear(date){if(!iso(String(date).slice(0,10)))return '';const y=Number(date.slice(0,4))-(Number(date.slice(5,7))<8?1:0);return y+'/'+String(y+1).slice(-2)}
 const validYear=y=>/^20\d{2}\/\d{2}$/.test(y)&&Number(y.slice(-2))===(Number(y.slice(0,4))+1)%100;
 const classValid=c=>/^(?:[1-9]|10)[a-z]?$/i.test(c)||/^skg(?:[ -]?[12ab])?$/i.test(c);
+const germanDate=v=>{const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}.${m[2]}.${m[1]}`:''};
 function nextClass(value){
  const raw=String(value||'').trim();
  if(/^skg(?:[ -]?[12ab])?$/i.test(raw))return '1a';
@@ -172,9 +173,13 @@ function fachverfahren_match(entry,state){
 }
 function fachverfahren_suggestions(entry,state,matches){
  const existing=new Set((entry.actionSuggestions||[]).map(s=>s.title)),out=[];
+ const sid=entry.participantIds?.[0],student=state?.students?.find(s=>s.id===sid);
+ const context=student?[student.first,student.last].filter(Boolean).join(' '):'das Kind';
+ const date=germanDate(entry.date);
+ const anchor=[context,date&&`Eintrag vom ${date}`,entry.title&&`„${entry.title}“`].filter(Boolean).join(' · ');
  for(const procedure of matches){for(const step of procedure.steps){
   if(existing.has(step.title)||out.some(s=>s.title===step.title))continue;
-  out.push({id:uid('suggestion'),title:step.title,rationale:step.rationale,taskType:step.taskType,dueDays:step.dueDays,status:'offen',source:'Fachverfahren',procedureId:procedure.id,procedureVersion:procedure.version,createdAt:new Date().toISOString()});
+  out.push({id:uid('suggestion'),title:step.title,rationale:step.rationale,taskType:step.taskType,dueDays:step.dueDays,status:'offen',source:'Fachverfahren',procedureId:procedure.id,procedureVersion:procedure.version,context:anchor,specificity:'fachlich konkret',createdAt:new Date().toISOString()});
   if(out.length>=3)break;
  } if(out.length>=3)break;}
  return out;
@@ -183,42 +188,50 @@ function localSuggestions(entry,state){
  const type=String(entry.type||'').toLocaleLowerCase('de'),text=[type,entry.title,entry.content,entry.childView,entry.otherView,entry.observation,entry.assessment,entry.agreement,entry.goal,entry.result].join(' ').toLocaleLowerCase('de');
  const sid=entry.participantIds?.[0],student=state?.students?.find(s=>s.id===sid),lead=String(state?.settings?.classLeads?.[student?.className]||'').trim();
  const teacher=lead?`Klassenleitung ${lead}`:'Klassenleitung';
+ const child=student?[student.first,student.last].filter(Boolean).join(' '):'das Kind';
+ const date=germanDate(entry.date);
+ const title=String(entry.title||entry.type||'dokumentierten Anlass').trim();
+ const anchor=[child,date&&`Eintrag vom ${date}`,title&&`„${title}“`].filter(Boolean).join(' · ');
+ const people=String(entry.people||'').trim();
+ const existingAgreement=String(entry.agreement||'').trim();
+ const existingResult=String(entry.result||'').trim();
  const out=[],add=(title,rationale,taskType='Nächster Schritt',dueDays=3)=>{if(!out.some(x=>x.title===title))out.push({id:uid('suggestion'),title,rationale,taskType,dueDays,status:'offen',createdAt:new Date().toISOString()});};
+ const addConcrete=(suggestedTitle,rationale,taskType='Nächster Schritt',dueDays=3)=>{add(suggestedTitle,`${rationale} Bezug: ${anchor}.${people?` Beteiligte laut Eintrag: ${people}.`:''}${existingResult?` Bereits dokumentiertes Ergebnis berücksichtigen: ${existingResult}`:''}`,taskType,dueDays);out.at(-1).context=anchor;out.at(-1).specificity='konkret';};
  if(/akut|selbstgefährd|suizid|waffe|kindeswohl|missbrauch|sexualisiert/.test(text)){
-  add('Heute Schutzlage mit Schulleitung und zuständiger Fachkraft abstimmen','Konkret festhalten, wer den unmittelbaren Schutz übernimmt und welches Verfahren nach den örtlichen Absprachen jetzt eingeleitet wird. Keine automatische Gefährdungsbewertung.','Schutzweg',0);
-  add('Heute dokumentierte Beobachtungen und Aussagen getrennt festhalten','Wörtliche Aussagen, eigene Beobachtungen, Uhrzeit und bereits ergriffene Schutzschritte sachlich sichern.','Dokumentation',0);
-  add('Kinderschutzfachberatung oder Jugendamt nach örtlichem Schutzweg einbeziehen','Nach der Abstimmung mit der Schulleitung dokumentieren, wer wann welche Fachberatung nach dem örtlich vereinbarten Verfahren anfragt.','Schutzweg',0);
+  addConcrete('Heute Schutzlage mit Schulleitung und zuständiger Fachkraft abstimmen','Konkret festhalten, wer den unmittelbaren Schutz übernimmt und welches Verfahren nach den örtlichen Absprachen jetzt eingeleitet wird. Keine automatische Gefährdungsbewertung.','Schutzweg',0);
+  addConcrete('Heute dokumentierte Beobachtungen und Aussagen getrennt festhalten','Wörtliche Aussagen, eigene Beobachtungen, Uhrzeit und bereits ergriffene Schutzschritte sachlich sichern.','Dokumentation',0);
+  addConcrete('Kinderschutzfachberatung oder Jugendamt nach örtlichem Schutzweg einbeziehen','Nach der Abstimmung mit der Schulleitung dokumentieren, wer wann welche Fachberatung nach dem örtlich vereinbarten Verfahren anfragt.','Schutzweg',0);
  }else if(/trainingsraum/.test(text)){
-  add('Mit dem Kind ein Reflexionsgespräch zum Trainingsraumbesuch führen','Auslöser aus Sicht des Kindes und einen konkreten Schritt für die Rückkehr in den Unterricht schriftlich festhalten.','Schülergespräch',2);
-  add(`${teacher} zur vereinbarten Rückkehr in den Unterricht befragen`,'Eine kurze Rückmeldung einholen, ob die vereinbarten Verhaltensschritte im Unterricht umsetzbar waren.','Rückmeldung',5);
+  addConcrete(`Mit ${child} ein Reflexionsgespräch zum Trainingsraumbesuch führen`,'Auslöser aus Sicht des Kindes und einen konkreten Schritt für die Rückkehr in den Unterricht schriftlich festhalten.','Schülergespräch',2);
+  addConcrete(`${teacher} zur vereinbarten Rückkehr in den Unterricht befragen`,'Eine kurze Rückmeldung einholen, ob die vereinbarten Verhaltensschritte im Unterricht umsetzbar waren.','Rückmeldung',5);
  }else if(/fehlzeit|schulabsent|webuntis/.test(text)){
-  add(`${teacher} um Rückmeldung zu den dokumentierten Fehlzeiten bitten`,'Zeitraum und offene Entschuldigungen nennen; nach bekannten schulischen Gründen und bereits erfolgtem Kontakt fragen.','Rücksprache',2);
-  add('Offene Entschuldigungen mit den Sorgeberechtigten klären','Fehlzeitenzeitraum benennen und festhalten, was tatsächlich geklärt wurde.','Elternkontakt',5);
-  add('Bei wiederkehrenden Fehlzeiten eine abgestimmte Rückkehrvereinbarung prüfen','Mit Kind, Sorgeberechtigten und Klassenleitung einen machbaren ersten Schultag und einen konkreten Rückmeldetermin abstimmen.','Unterstützungsplan',5);
+  addConcrete(`${teacher} um Rückmeldung zu den dokumentierten Fehlzeiten bitten`,'Zeitraum und offene Entschuldigungen nennen; nach bekannten schulischen Gründen und bereits erfolgtem Kontakt fragen.','Rücksprache',2);
+  addConcrete('Offene Entschuldigungen mit den Sorgeberechtigten klären','Fehlzeitenzeitraum benennen und festhalten, was tatsächlich geklärt wurde.','Elternkontakt',5);
+  addConcrete('Bei wiederkehrenden Fehlzeiten eine abgestimmte Rückkehrvereinbarung prüfen','Mit Kind, Sorgeberechtigten und Klassenleitung einen machbaren ersten Schultag und einen konkreten Rückmeldetermin abstimmen.','Unterstützungsplan',5);
  }else if(/konflikt|ausgrenz|mobbing|gewalt/.test(text)){
-  add('Mit den beteiligten Kindern getrennte kurze Gespräche vereinbaren','Jeweils eigene Sicht und mögliche Sicherheit im Schulalltag festhalten; keine Schuldzuweisung aus dem Eintrag ableiten.','Konfliktklärung',2);
-  add(`${teacher} zu Beobachtungen in der Klasse befragen`,'Konkrete Situationen, betroffene Zeiten und bereits vereinbarte Schritte erfragen.','Rücksprache',3);
-  add('Vermittlungstermin im Palaverzelt anbieten','Mit den beteiligten Kindern getrennt klären, ob und unter welchen Bedingungen eine gemeinsame Vermittlung sinnvoll ist.','Konfliktklärung',5);
+  addConcrete('Mit den beteiligten Kindern getrennte kurze Gespräche vereinbaren','Jeweils eigene Sicht und mögliche Sicherheit im Schulalltag festhalten; keine Schuldzuweisung aus dem Eintrag ableiten.','Konfliktklärung',2);
+  addConcrete(`${teacher} zu Beobachtungen in der Klasse befragen`,'Konkrete Situationen, betroffene Zeiten und bereits vereinbarte Schritte erfragen.','Rücksprache',3);
+  addConcrete('Vermittlungstermin im Palaverzelt anbieten','Mit den beteiligten Kindern getrennt klären, ob und unter welchen Bedingungen eine gemeinsame Vermittlung sinnvoll ist.','Konfliktklärung',5);
  }else if(/elterngespräch|elternkontakt|erziehungsberechtigt/.test(text)){
-  add('Mit den Sorgeberechtigten die Umsetzung der Gesprächsabsprache nachhalten','Zu der dokumentierten Vereinbarung eine konkrete Rückmeldung einholen und das Ergebnis am Gesprächseintrag ergänzen.','Rückmeldung',7);
-  add('Das Kind zur Wirkung der vereinbarten Unterstützung befragen','In einem kurzen Gespräch erfragen, was sich im Schulalltag tatsächlich verändert hat.','Schülergespräch',7);
+  addConcrete('Mit den Sorgeberechtigten die Umsetzung der Gesprächsabsprache nachhalten','Zu der dokumentierten Vereinbarung eine konkrete Rückmeldung einholen und das Ergebnis am Gesprächseintrag ergänzen.','Rückmeldung',7);
+  addConcrete(` ${child} zur Wirkung der vereinbarten Unterstützung befragen`.trim(),'In einem kurzen Gespräch erfragen, was sich im Schulalltag tatsächlich verändert hat.','Schülergespräch',7);
  }else if(/sozialtraining|klassentraining|gruppe|präventionsangebot/.test(text)){
-  add(`${teacher} nach der Wirkung des Angebots in der Klasse fragen`,'Eine beobachtbare Veränderung und möglichen weiteren Bedarf festhalten.','Rückmeldung',10);
-  add('Bei anhaltendem Bedarf ein Sozialtraining mit klarer Zielbeobachtung anbieten','Thema, Teilnehmende, Durchführung und Auswertung mit der Klassenleitung abstimmen; keine automatische Teilnahme eintragen.','Projektidee',10);
+  addConcrete(`${teacher} nach der Wirkung des Angebots in der Klasse fragen`,'Eine beobachtbare Veränderung und möglichen weiteren Bedarf festhalten.','Rückmeldung',10);
+  addConcrete('Bei anhaltendem Bedarf ein Sozialtraining mit klarer Zielbeobachtung anbieten','Thema, Teilnehmende, Durchführung und Auswertung mit der Klassenleitung abstimmen; keine automatische Teilnahme eintragen.','Projektidee',10);
  }else if(/schulpsycholog|angst|krise|belastung|wohlbefinden/.test(text)){
-  add('Mit dem Kind ein Gespräch über die aktuelle Belastung vereinbaren','Aktuelle Situation und gewünschte Unterstützung erfragen; bei Bedarf den Kontakt zur Schulpsychologie mit geklärter Einwilligung anbieten.','Schülergespräch',2);
-  add('Beratung durch die Schulpsychologie als mögliche Unterstützung prüfen','Mit Kind und Sorgeberechtigten klären, ob die Weitervermittlung gewünscht ist und welche Angaben weitergegeben werden dürfen.','Fachberatung',5);
+  addConcrete(`Mit ${child} ein Gespräch über die aktuelle Belastung vereinbaren`,'Aktuelle Situation und gewünschte Unterstützung erfragen; bei Bedarf den Kontakt zur Schulpsychologie mit geklärter Einwilligung anbieten.','Schülergespräch',2);
+  addConcrete('Beratung durch die Schulpsychologie als mögliche Unterstützung prüfen','Mit Kind und Sorgeberechtigten klären, ob die Weitervermittlung gewünscht ist und welche Angaben weitergegeben werden dürfen.','Fachberatung',5);
  }else if(/lernen|lernproblem|förderbedarf|inklusion|unterrichtsbegleitung/.test(text)){
-  add('Beratungslehrkraft oder Mobilen Dienst zum schulischen Unterstützungsbedarf anfragen','Einen konkreten Beobachtungsanlass und die nötigen Einwilligungen vor dem Kontakt klären.','Rücksprache',5);
-  add('Abgestimmtes Lern- oder Unterstützungsangebot mit Klassenleitung prüfen','Eine kleine beobachtbare Veränderung, Zuständigkeit und einen Termin zur Rückmeldung festlegen.','Projektidee',7);
+  addConcrete('Beratungslehrkraft oder Mobilen Dienst zum schulischen Unterstützungsbedarf anfragen','Einen konkreten Beobachtungsanlass und die nötigen Einwilligungen vor dem Kontakt klären.','Rücksprache',5);
+  addConcrete('Abgestimmtes Lern- oder Unterstützungsangebot mit Klassenleitung prüfen','Eine kleine beobachtbare Veränderung, Zuständigkeit und einen Termin zur Rückmeldung festlegen.','Projektidee',7);
  }else if(/therapie|ergotherap|logopäd|operation|\bop\b|medizin/.test(text)){
-  add('Mit dem Kind besprechen, ob im Schulalltag Unterstützung gebraucht wird','Konkreten schulischen Unterstützungsbedarf erfragen; medizinische Angaben nur soweit erforderlich aufnehmen.','Schülergespräch',5);
+  addConcrete(`Mit ${child} besprechen, ob im Schulalltag Unterstützung gebraucht wird`,'Konkreten schulischen Unterstützungsbedarf erfragen; medizinische Angaben nur soweit erforderlich aufnehmen.','Schülergespräch',5);
  }else if(/extern|jugendamt|weitervermittlung|netzwerk/.test(text)){
-  add('Rückmeldung zur vereinbarten Weitervermittlung einholen','Bei der dokumentierten zuständigen Stelle nur im Rahmen der geklärten Einwilligung nach dem vereinbarten nächsten Schritt fragen.','Rückmeldung',5);
+  addConcrete('Rückmeldung zur vereinbarten Weitervermittlung einholen','Bei der dokumentierten zuständigen Stelle nur im Rahmen der geklärten Einwilligung nach dem vereinbarten nächsten Schritt fragen.','Rückmeldung',5);
  }else if(/ziel|maßnahme|vereinbar|absprache/.test(text)||entry.agreement){
-  add('Die dokumentierte Vereinbarung mit den Beteiligten überprüfen','Eine beobachtbare Umsetzung erfragen, das Ergebnis festhalten und den nächsten Termin gemeinsam bestimmen.','Überprüfung',7);
+  addConcrete('Die dokumentierte Vereinbarung mit den Beteiligten überprüfen','Eine beobachtbare Umsetzung erfragen, das Ergebnis festhalten und den nächsten Termin gemeinsam bestimmen.','Überprüfung',7);
  }
- if(!out.length&&type!=='zusätzliche information')add('Mit dem Kind ein kurzes Anschlussgespräch zum dokumentierten Anlass vereinbaren','Aus seiner Sicht einen konkreten Unterstützungsbedarf und gegebenenfalls einen nächsten Termin festhalten.','Schülergespräch',5);
+ if(!out.length&&type!=='zusätzliche information')addConcrete(`Mit ${child} ein kurzes Anschlussgespräch zu ${title} vereinbaren`,'Aus seiner Sicht einen konkreten Unterstützungsbedarf und gegebenenfalls einen nächsten Termin festhalten.','Schülergespräch',5);
  const matches=fachverfahren_match(entry,state); return [...out,...fachverfahren_suggestions(entry,state,matches)].slice(0,3);
 }
 function apply(state,plan){
