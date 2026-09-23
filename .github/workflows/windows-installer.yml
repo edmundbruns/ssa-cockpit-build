@@ -1,17 +1,18 @@
 name: Windows Installer
-# Current verified build
-# Use the current Windows runner
-# Public build retry
-# Retry after publishing concrete suggestions
 
 on:
   workflow_dispatch:
   push:
     branches: [main]
 
+concurrency:
+  group: windows-installer-main
+  cancel-in-progress: true
+
 jobs:
   build:
-    runs-on: windows-2025
+    runs-on: windows-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
