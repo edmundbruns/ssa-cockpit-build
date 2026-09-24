@@ -64,10 +64,10 @@ function normalize(state){
  // Repair records created by earlier versions without a corresponding case.
  for(const entry of state.journal){
   if(!entry.generalInfo)for(const sid of entry.participantIds||[])journalCase(state,sid,entry);
-  if((entry.suggestionVersion||0)<2){
+  if((entry.suggestionVersion||0)<4){
    const decided=(entry.actionSuggestions||[]).filter(s=>s.status==='übernommen'||s.status==='nicht verwendet');
    entry.actionSuggestions=entry.generalInfo?[]:[...decided,...localSuggestions(entry,state).filter(s=>!decided.some(d=>d.title===s.title))].slice(0,Math.max(3,decided.length));
-   entry.suggestionVersion=2;
+   entry.suggestionVersion=4;
   }
  }
  state.settings.dossierVersion=1;return state;
@@ -171,6 +171,42 @@ function fachverfahren_match(entry,state){
  const hay=[entry.type,entry.title,entry.content,entry.observation,entry.assessment,entry.agreement,entry.goal,entry.result].join(' ').toLocaleLowerCase('de');
  return FACHVERFAHREN_KATALOG.filter(v=>v.keywords.some(k=>hay.includes(k))).map(v=>({...v,matchedKeywords:v.keywords.filter(k=>hay.includes(k))}));
 }
+function suggestionResponsible(taskType){
+ const map={
+  'Schutzweg':'Schulleitung und zuständige Fachkraft',
+  'Dokumentation':'Schulsozialarbeit',
+  'Rücksprache':'Klassenleitung',
+  'Rückmeldung':'Klassenleitung und Schulsozialarbeit',
+  'Schülergespräch':'Schulsozialarbeit',
+  'Elternkontakt':'Schulsozialarbeit und Sorgeberechtigte',
+  'Elterngespräch':'Schulsozialarbeit und Sorgeberechtigte',
+  'Unterstützungsplan':'Schulsozialarbeit, Klassenleitung und Sorgeberechtigte',
+  'Konfliktklärung':'Schulsozialarbeit',
+  'Fachberatung':'Schulsozialarbeit',
+  'Projektidee':'Klassenleitung und Schulsozialarbeit',
+  'Sozialtraining':'Klassenleitung und Schulsozialarbeit',
+  'Überprüfung':'Schulsozialarbeit mit den Beteiligten'
+ };
+ return map[taskType]||'Zuständigkeit nach der Prüfung festlegen';
+}
+function suggestionGoal(taskType){
+ const map={
+  'Schutzweg':'Schutz und Zuständigkeit sind geklärt.',
+  'Dokumentation':'Beobachtungen, Aussagen und bereits ergriffene Schritte sind sachlich gesichert.',
+  'Rücksprache':'Die schulische Beobachtung und der nächste abgestimmte Schritt sind geklärt.',
+  'Rückmeldung':'Die Umsetzung und das Ergebnis sind nachvollziehbar dokumentiert.',
+  'Schülergespräch':'Unterstützungsbedarf und ein machbarer nächster Schritt sind geklärt.',
+  'Elternkontakt':'Die Sicht der Sorgeberechtigten und eine konkrete Vereinbarung sind dokumentiert.',
+  'Elterngespräch':'Ein gemeinsames Ziel, Zuständigkeiten und ein Rückmeldetermin sind festgelegt.',
+  'Unterstützungsplan':'Ein erreichbarer nächster Schritt und ein Rückmeldetermin sind vereinbart.',
+  'Konfliktklärung':'Sichtweisen, Sicherheit und ein tragfähiger nächster Schritt sind geklärt.',
+  'Fachberatung':'Die passende Unterstützung und der zulässige Informationsumfang sind geklärt.',
+  'Projektidee':'Ziel, Durchführung und beobachtbare Wirkung des Angebots sind festgelegt.',
+  'Sozialtraining':'Das vereinbarte soziale Ziel und die Wirkung des Angebots sind überprüfbar.',
+  'Überprüfung':'Wirkung und Zielentwicklung sind dokumentiert. Danach wird entschieden: fortführen, anpassen oder abschließen.'
+ };
+ return map[taskType]||'Der nächste Schritt ist konkret vereinbart und überprüfbar.';
+}
 function fachverfahren_suggestions(entry,state,matches){
  const existing=new Set((entry.actionSuggestions||[]).map(s=>s.title)),out=[];
  const sid=entry.participantIds?.[0],student=state?.students?.find(s=>s.id===sid);
@@ -179,7 +215,7 @@ function fachverfahren_suggestions(entry,state,matches){
  const anchor=[context,date&&`Eintrag vom ${date}`,entry.title&&`„${entry.title}“`].filter(Boolean).join(' · ');
  for(const procedure of matches){for(const step of procedure.steps){
   if(existing.has(step.title)||out.some(s=>s.title===step.title))continue;
-  out.push({id:uid('suggestion'),title:step.title,rationale:step.rationale,taskType:step.taskType,dueDays:step.dueDays,status:'offen',source:'Fachverfahren',procedureId:procedure.id,procedureVersion:procedure.version,context:anchor,specificity:'fachlich konkret',createdAt:new Date().toISOString()});
+  out.push({id:uid('suggestion'),title:step.title,rationale:step.rationale,taskType:step.taskType,dueDays:step.dueDays,responsible:suggestionResponsible(step.taskType),goal:suggestionGoal(step.taskType),followUp:'Ergebnis im Chronikeintrag festhalten und anschließend entscheiden: fortführen, anpassen oder abschließen.',status:'offen',source:'Fachverfahren',procedureId:procedure.id,procedureVersion:procedure.version,context:anchor,specificity:'fachlich konkret',createdAt:new Date().toISOString()});
   if(out.length>=3)break;
  } if(out.length>=3)break;}
  return out;
@@ -195,8 +231,8 @@ function localSuggestions(entry,state){
  const people=String(entry.people||'').trim();
  const existingAgreement=String(entry.agreement||'').trim();
  const existingResult=String(entry.result||'').trim();
- const out=[],add=(title,rationale,taskType='Nächster Schritt',dueDays=3)=>{if(!out.some(x=>x.title===title))out.push({id:uid('suggestion'),title,rationale,taskType,dueDays,status:'offen',createdAt:new Date().toISOString()});};
- const addConcrete=(suggestedTitle,rationale,taskType='Nächster Schritt',dueDays=3)=>{add(suggestedTitle,`${rationale} Bezug: ${anchor}.${people?` Beteiligte laut Eintrag: ${people}.`:''}${existingResult?` Bereits dokumentiertes Ergebnis berücksichtigen: ${existingResult}`:''}`,taskType,dueDays);out.at(-1).context=anchor;out.at(-1).specificity='konkret';};
+ const out=[],add=(title,rationale,taskType='Nächster Schritt',dueDays=3)=>{if(!out.some(x=>x.title===title))out.push({id:uid('suggestion'),title,rationale,taskType,dueDays,responsible:suggestionResponsible(taskType),goal:suggestionGoal(taskType),followUp:'Ergebnis im Chronikeintrag festhalten und anschließend entscheiden: fortführen, anpassen oder abschließen.',status:'offen',createdAt:new Date().toISOString()});};
+ const addConcrete=(suggestedTitle,rationale,taskType='Nächster Schritt',dueDays=3)=>{add(suggestedTitle,`${rationale} Bezug: ${anchor}.${people?` Beteiligte laut Eintrag: ${people}.`:''}${existingAgreement?` Vorhandene Vereinbarung berücksichtigen: ${existingAgreement}.`:''}${existingResult?` Bereits dokumentiertes Ergebnis berücksichtigen: ${existingResult}`:''}`,taskType,dueDays);out.at(-1).context=anchor;out.at(-1).specificity='konkret';};
  if(/akut|selbstgefährd|suizid|waffe|kindeswohl|missbrauch|sexualisiert/.test(text)){
   addConcrete('Heute Schutzlage mit Schulleitung und zuständiger Fachkraft abstimmen','Konkret festhalten, wer den unmittelbaren Schutz übernimmt und welches Verfahren nach den örtlichen Absprachen jetzt eingeleitet wird. Keine automatische Gefährdungsbewertung.','Schutzweg',0);
   addConcrete('Heute dokumentierte Beobachtungen und Aussagen getrennt festhalten','Wörtliche Aussagen, eigene Beobachtungen, Uhrzeit und bereits ergriffene Schutzschritte sachlich sichern.','Dokumentation',0);
@@ -260,7 +296,7 @@ function addEntry(state,input){
  if(!participantIds.length||participantIds.some(sid=>!state.students.some(s=>s.id===sid)))throw Error('Teilnehmende Kinder auswählen.');
  if(!iso(input.date)||!String(input.content||'').trim())throw Error('Datum und Inhalt angeben.');
  const e=stamp(state,{...input,id:uid('entry'),participantIds,createdAt:new Date().toISOString(),duration:Math.max(0,Number(input.duration)||0),individualNotes:input.individualNotes||{},revisions:[],pinnedFor:[]});
- const fachverfahren=fachverfahren_match(e,state);e.oberThemen=[...new Set(fachverfahren.map(v=>v.topic))];e.fachverfahren=fachverfahren.map(v=>({id:v.id,title:v.topic,version:v.version,matchedKeywords:v.matchedKeywords}));e.actionSuggestions=e.generalInfo?[]:localSuggestions(e,state);e.suggestionVersion=3;
+ const fachverfahren=fachverfahren_match(e,state);e.oberThemen=[...new Set(fachverfahren.map(v=>v.topic))];e.fachverfahren=fachverfahren.map(v=>({id:v.id,title:v.topic,version:v.version,matchedKeywords:v.matchedKeywords}));e.actionSuggestions=e.generalInfo?[]:localSuggestions(e,state);e.suggestionVersion=4;
  if(participantIds.length>1&&input.individualNotes&&Object.keys(input.individualNotes).some(sid=>!participantIds.includes(sid)))throw Error('Individuelle Notiz ist keinem teilnehmenden Kind zugeordnet.');
  state.journal.push(e);
  if(!e.generalInfo)for(const sid of participantIds)journalCase(state,sid,e,true);
