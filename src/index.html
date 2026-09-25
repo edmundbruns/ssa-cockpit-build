@@ -150,7 +150,7 @@
 
 .bausteinwahl{margin-bottom:7px;font-size:13px;color:var(--muted);background:var(--surface-2,transparent)}
 .bausteinwahl:focus{color:var(--ink)}
-/* Fallboard: vier Kacheln pro Reihe auf großen Bildschirmen, einspaltig auf kleinen. */</style>
+</style>
 </head>
 <body>
 <div class="auth-gate" id="authGate">
@@ -1513,7 +1513,7 @@ function openAiPrompt(){if(!selectedStudentId)return;document.getElementById('ai
 async function copyAiPrompt(){const el=document.getElementById('aiPromptText');try{await navigator.clipboard.writeText(el.value)}catch{el.select();document.execCommand('copy')}toast('Der geprüfte Prompt wurde in die Zwischenablage kopiert.')}
 async function attachmentRows(studentId){return await invoke('list_attachments',{studentId})}
 async function openAttachments(sourceKey=''){if(!selectedStudentId)return;dossierAttachmentSourceKey=sourceKey;openModal('attachmentModal');await renderAttachments()}
-async function renderAttachments(){const list=document.getElementById('attachmentList');list.innerHTML='<div class="empty">Dateien werden geladen…</div>';try{const rows=await attachmentRows(selectedStudentId);list.innerHTML=rows.map(a=>`<div class="row attachment"><div class="avatar">${a.mimeType==='application/pdf'?'PDF':a.mimeType.startsWith('image/')?'BILD':'DOCX'}</div><div class="grow"><strong>${DE(a.name)}</strong><span class="subtle">${new Date(Number(a.added)*1000).toLocaleDateString('de-DE')} · ${(a.size/1024).toFixed(0)} KB</span>${dossierAttachmentSelect(a)}</div><button class="btn" onclick="downloadAttachment('${DE(a.id)}')">Öffnen</button><button class="btn danger" onclick="deleteAttachment('${DE(a.id)}')">Löschen</button></div>`).join('')||'<div class="empty">Noch keine Dateien gespeichert.</div>'}catch{list.innerHTML='<div class="empty">Dateien konnten nicht geladen werden.</div>'}}
+async function renderAttachments(){const list=document.getElementById('attachmentList');list.innerHTML='<div class="empty">Dateien werden geladen…</div>';try{const rows=await attachmentRows(selectedStudentId);list.innerHTML=rows.map(a=>`<div class="row attachment"><div class="avatar">${a.mimeType==='application/pdf'?'PDF':a.mimeType.startsWith('image/')?'BILD':'DOCX'}</div><div class="grow"><button type="button" class="linkbutton attachment-open" onclick="openAttachment('${DE(a.id)}')">📎 ${DE(a.name)}</button><span class="subtle">${new Date(Number(a.added)*1000).toLocaleDateString('de-DE')} · ${(a.size/1024).toFixed(0)} KB · PDF/Bild wird geöffnet, DOCX wird heruntergeladen</span>${dossierAttachmentSelect(a)}</div><button class="btn primary" onclick="openAttachment('${DE(a.id)}')">Öffnen</button><button class="btn" onclick="downloadAttachment('${DE(a.id)}')">Herunterladen</button><button class="btn danger" onclick="deleteAttachment('${DE(a.id)}')">Löschen</button></div>`).join('')||'<div class="empty">Noch keine Dateien gespeichert.</div>'}catch{list.innerHTML='<div class="empty">Dateien konnten nicht geladen werden.</div>'}}
 async function addAttachment(event){const file=event.target.files[0];event.target.value='';if(!file)return;const docx='application/vnd.openxmlformats-officedocument.wordprocessingml.document';if(!['application/pdf','image/jpeg','image/png',docx].includes(file.type)||file.size>5*1024*1024){alert('Erlaubt sind PDF, JPG, PNG und DOCX bis 5 MB.');return}try{const result=await invoke('put_attachment',{studentId:selectedStudentId,name:clean(file.name),mimeType:file.type,bytes:Array.from(new Uint8Array(await file.arrayBuffer()))});ensureCaseForStudent(selectedStudentId,'Dokument zur Schülerakte hinzugefügt',today());data.documentEvents.push({id:id('doc'),attachmentId:result.id,studentId:selectedStudentId,date:today(),name:result.name,title:'Dokument hochgeladen',note:result.name,responsible:data.settings.activeUser||'SSA',result:'Verschlüsselt in der Schülerakte gespeichert',sourceEntryKey:dossierAttachmentSourceKey});logChange('Dokument hochgeladen',result.id,selectedStudentId);await persistState();await renderAttachments();if(document.getElementById('studentModal')?.classList.contains('open'))dossierRefresh();toast('Datei wurde verschlüsselt gespeichert und im Verlauf vermerkt.')}catch(err){alert('Die Datei konnte nicht gespeichert werden: '+String(err))}}
 async function getAttachment(id){return await invoke('get_attachment',{id})}
 async function downloadAttachment(id){const a=await getAttachment(id);if(!a)return;const url=URL.createObjectURL(new Blob([new Uint8Array(a.bytes)],{type:a.mimeType})),link=document.createElement('a');link.href=url;link.download=a.name;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
@@ -1538,7 +1538,7 @@ function dokuWaehlen(){
  const wege=[['Eine Schülerin oder ein Schüler','Ereignis, Maßnahme, Ergebnis und nächster Schritt in einer Maske','verlaufModal'],
   ['Eine ganze Klasse','Projekt, Präventionsstunde oder Maßnahme in einer Klasse','classActivityModal'],
   ['Mehrere Schüler:innen','Konfliktklärung oder Gruppengespräch mit mehreren Personen','groupTalkModal'],
-  ['Trainingsraumbesuch','Schulischer Vorgang im sozialen Trainingsraum','trainingRoomModal']];
+  ['Trainingsraum auswählen','Schulischer Vorgang im sozialen Trainingsraum – Person, Anlass und Rückkehr dokumentieren','trainingRoomModal']];
  const wrap=document.createElement('div');wrap.className='modal open';wrap.style.zIndex='60';
  wrap.innerHTML='<div class="dialog" style="width:min(620px,100%)"><div class="dialoghead"><h2>Was möchtest du dokumentieren?</h2><button class="close" data-x="1">×</button></div><div class="dialogbody"><p class="subtle" style="margin-top:0">Wähle aus, worum es geht. Danach öffnet sich das passende Formular.</p><div class="list">'
   +wege.map((w,i)=>'<div class="row" style="cursor:pointer" data-i="'+i+'"><div class="avatar">'+(i+1)+'</div><div class="grow"><strong>'+w[0]+'</strong><span class="subtle">'+w[1]+'</span></div><span class="subtle">›</span></div>').join('')
@@ -2835,8 +2835,8 @@ async function kanbanVerschieben(caseId){
  const s=studentOfCase(c);
  const html='<p class="subtle">Aktueller Stand: <strong>'+c.status+'</strong></p><div class="list">'
   +KANBAN_SPALTEN.map(([titel,statuses,erkl])=>{
-    const ziel=statuses[0],aktiv=statuses.includes(c.status);
-    return `<div class="row ${aktiv?'':'clickrow'}" ${aktiv?'':`onclick="kanbanZielSetzen('${caseId}','${ziel}')"`}><div class="grow"><strong>${titel}</strong><span class="subtle">${erkl}</span></div>${aktiv?'<span class="tag">aktuell</span>':'<span class="tag gray">hierhin</span>'}</div>`}).join('')
+    const aktiv=statuses.includes(c.status);
+    return `<div class="row ${aktiv?'':'clickrow'}" ${aktiv?'':`onclick="kanbanZielSetzen('${caseId}','${titel}')"`}><div class="grow"><strong>${titel}</strong><span class="subtle">${erkl}</span></div>${aktiv?'<span class="tag">aktuell</span>':'<span class="tag gray">hierhin</span>'}</div>`}).join('')
   +'</div>';
  appDialog({titel:'Fall verschieben: '+(s?s.last+', '+s.first:''),html:html,modus:'alert'});
 }
