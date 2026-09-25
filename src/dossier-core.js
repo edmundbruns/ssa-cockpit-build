@@ -97,6 +97,7 @@ function validate(state,plan){
   if(r.studentId){if(!state.students.some(s=>s.id===r.studentId))errors.push('Unbekannte Schüler-ID.');if(used.has(r.studentId))errors.push('Ein Kind ist mehrfach zugeordnet.');used.add(r.studentId);}
   if(['leave','transfer'].includes(r.action)){if(!r.studentId)errors.push('Abgang ohne Schüler-ID.');continue;}
   const p=r.pupil;if(!p||!classValid(p.className)||!p.last||!p.first)errors.push('Zeile '+(i+1)+': Name oder Klasse prüfen.');
+  if(r.action==='update'&&/^10(?:[a-z])?$/i.test(String(p?.className||''))&&!['Wiederholung','Überspringen'].includes(r.reason))errors.push('Zeile '+(i+1)+': Abschlussjahrgang bitte als Schulabgang, Schulwechsel, Wiederholung oder Überspringen kennzeichnen.');
   if(p&&p.schoolYear!==plan.schoolYear)errors.push('Die Liste enthält unterschiedliche Schuljahre.');
   if(r.action==='update'&&!r.studentId)errors.push('Bestehende Akte auswählen.');
   if(r.action==='new'&&r.studentId)errors.push('Neuaufnahme ist bereits zugeordnet.');
