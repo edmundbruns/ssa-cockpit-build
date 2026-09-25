@@ -9,6 +9,11 @@ test('Automatische Klassenfortschreibung schlägt nächste Klasse vor und markie
  assert.equal(D.nextClass('SKG 1'),'1a');
  assert.equal(D.nextClass('10a'),'');
 });
+test('Abschlussjahrgang braucht eine ausdrückliche Entscheidung',()=>{
+ const s=fixture(),p=plan(s,'10a');p.rows[0].reason='Abschlussjahrgang – Abgang / Wechsel prüfen';
+ assert.throws(()=>D.apply(s,p),/Abschlussjahrgang/);
+ p.rows[0].reason='Wiederholung';D.apply(s,p);assert.equal(s.students[0].className,'10a');
+});
 function entry(s,extra={}){return D.addEntry(s,{date:'2026-09-15',type:'Elterngespräch / Elternkontakt',content:'Mutter berichtet vollständig.',participantIds:['stable-a'],duration:45,...extra});}
 function plan(s,cls='6a'){return D.preview(s,[{givenId:'stable-a',first:'Anna',last:'Test',className:cls,schoolYear:'2027/28'}],{year:'2027/28',effectiveDate:'2027-08-01',classLeads:{[cls]:'Neu'}});}
 test('Vollständige Akte bleibt identisch, neue Einträge in derselben Akte, offene Aufgaben und Termine bleiben',()=>{const s=fixture(),e=entry(s);e.pinnedFor=['stable-a'];D.assess(s,'stable-a',{date:'2026-09-15',color:'gelb',reason:'Klärung',author:'Sabine'});const before=structuredClone({journal:s.journal,contacts:s.contacts,tasks:s.tasks,docs:s.documentEvents,goals:s.casePlans,assess:s.assessments});D.apply(s,plan(s));assert.equal(s.students.length,2);assert.equal(s.students[0].id,'stable-a');for(const [k,v]of [['journal',before.journal],['contacts',before.contacts],['documentEvents',before.docs],['casePlans',before.goals],['assessments',before.assess]])assert.deepEqual(s[k],v);assert.equal(s.tasks[0].due,'2027-09-01');assert.equal(s.tasks[0].assignedTo,'Alt');assert.ok(s.tasks[0].assignmentReview);assert.equal(s.students[1].active,true);assert.equal(s.yearTransitions.length,1);const later=entry(s,{date:'2027-09-15'});assert.equal(later.studentContexts['stable-a'].className,'6a');assert.equal(e.studentContexts['stable-a'].className,'5a');assert.equal(s.settings.classLeads['6a'],'Neu');assert.equal(s.classLeadHistory['2026/27']['5a'],'Alt');assert.equal(D.work(s,'stable-a').length,1);});
