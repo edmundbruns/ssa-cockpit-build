@@ -31,4 +31,9 @@ test('Upgrade sichert vor der Normalisierung',()=>{assert.match(script,/write_ba
 test('Datentresor-Kommandos sind verdrahtet',()=>{
  for(const command of ['setup_vault','unlock_vault','save_state','export_backup','import_backup','put_attachment'])assert.match(script,new RegExp(command));
 });
-
+test('Wiederherstellung archiviert den aktuellen Bestand und Diktat bietet lokale Wege',()=>{
+ assert.match(script,/vorWiederherstellung/);
+ assert.match(script,/Verschlüsselte Sicherung wiederherstellen/);
+ assert.match(script,/SpeechRecognition|webkitSpeechRecognition/);
+ assert.match(script,/faster-whisper/);
+});
