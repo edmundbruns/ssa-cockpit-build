@@ -1,7 +1,8 @@
 /* Dauerhafte Schülerakten. Reine Datenfunktionen, auch unter Node testbar. */
 (function(root){
 'use strict';
-const collections=['contacts','groupTalks','classActivities','trainingRoom','schoolSignals','casePlans','statusHistory','outcomeAssessments','documentEvents','portalRequests','events','verfahrenLaeufe','journal','assessments','yearTransitions'];
+const collections=['contacts','groupTalks','classActivities','trainingRoom','schoolSignals','casePlans','statusHistory','outcomeAssessments','documentEvents','portalRequests','events','verfahrenLaeufe','journal','assessments','yearTransitions','auftraege','quickContacts'];
+const SAFETY_NOTICE='Das Programm erkennt keine Gefährdung. Maßgeblich sind deine Einschätzung und das Schutzkonzept der Schule.';
 const uid=prefix=>prefix+'-'+(globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2));
 const day=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
 const iso=v=>/^\d{4}-\d{2}-\d{2}$/.test(String(v))&&!isNaN(Date.parse(v))&&new Date(v).toISOString().slice(0,10)===v;
@@ -64,7 +65,7 @@ function normalize(state){
  for(const t of state.tasks){if(!t.participantIds)t.participantIds=ids(state,t);if(t.status==='erledigt'||t.status==='entfällt')t.done=true;else if(t.done)t.status='erledigt';else if(!t.status)t.status='offen';stamp(state,t);}
  // Repair records created by earlier versions without a corresponding case.
  for(const entry of state.journal){
-  if(!entry.generalInfo)for(const sid of entry.participantIds||[])journalCase(state,sid,entry);
+  if(entry.type!=='Kurzkontakt'&&!entry.generalInfo)for(const sid of entry.participantIds||[])journalCase(state,sid,entry);
   if((entry.suggestionVersion||0)<4){
    const decided=(entry.actionSuggestions||[]).filter(s=>s.status==='übernommen'||s.status==='nicht verwendet');
    entry.actionSuggestions=entry.generalInfo?[]:[...decided,...localSuggestions(entry,state).filter(s=>!decided.some(d=>d.title===s.title))].slice(0,Math.max(3,decided.length));
@@ -323,11 +324,58 @@ function addEntry(state,input){
  if(!participantIds.length||participantIds.some(sid=>!state.students.some(s=>s.id===sid)))throw Error('Teilnehmende Kinder auswählen.');
  if(!iso(input.date)||!String(input.content||'').trim())throw Error('Datum und Inhalt angeben.');
  const e=stamp(state,{...input,id:uid('entry'),participantIds,createdAt:new Date().toISOString(),duration:Math.max(0,Number(input.duration)||0),individualNotes:input.individualNotes||{},revisions:[],pinnedFor:[]});
- const fachverfahren=fachverfahren_match(e,state);e.oberThemen=[...new Set(fachverfahren.map(v=>v.topic))];e.fachverfahren=fachverfahren.map(v=>({id:v.id,title:v.topic,version:v.version,matchedKeywords:v.matchedKeywords}));e.safetyStatus=fachverfahren.some(v=>['selbstgefaehrdung','gewalt-bedrohung','kinderschutz'].includes(v.id))?'Sicherheitshinweis, bitte prüfen':'';e.actionSuggestions=e.generalInfo?[]:localSuggestions(e,state);e.suggestionVersion=4;
+ const fachverfahren=fachverfahren_match(e,state);e.oberThemen=[...new Set(fachverfahren.map(v=>v.topic))];e.fachverfahren=fachverfahren.map(v=>({id:v.id,title:v.topic,version:v.version,matchedKeywords:v.matchedKeywords}));e.safetyStatus=fachverfahren.some(v=>['selbstgefaehrdung','gewalt-bedrohung','kinderschutz'].includes(v.id))?'Mögliche Schutzfrage laut Stichworten, bitte selbst prüfen':'';e.actionSuggestions=[];e.suggestionVersion=5;
  if(participantIds.length>1&&input.individualNotes&&Object.keys(input.individualNotes).some(sid=>!participantIds.includes(sid)))throw Error('Individuelle Notiz ist keinem teilnehmenden Kind zugeordnet.');
  state.journal.push(e);
  if(!e.generalInfo)for(const sid of participantIds)journalCase(state,sid,e,true);
  return e;
+}
+function quickContact(state,input){
+ const date=input.date||day();if(!iso(date))throw Error('Datum prüfen.');
+ const duration=[5,10,15,20].includes(Number(input.duration))?Number(input.duration):5;
+ const occasions=[...new Set((input.occasions||input.occasion||[]).filter(Boolean).map(String))];if(!occasions.length)throw Error('Mindestens einen Anlass auswählen.');
+ const row={id:uid('quick'),date,occasions,duration,className:String(input.className||''),grade:String(input.grade||''),anonymous:!!input.anonymous,note:String(input.note||'').trim(),createdAt:new Date().toISOString()};
+ if(!row.anonymous){
+  if(!input.studentId||!state.students.some(s=>s.id===input.studentId))throw Error('Kind auswählen.');
+  row.studentId=input.studentId;row.participantIds=[input.studentId];
+  const entry=stamp(state,{id:uid('entry'),date,type:'Kurzkontakt',title:occasions.join(' · '),content:row.note||'Kurzkontakt dokumentiert.',participantIds:[input.studentId],occasions,duration,createdAt:row.createdAt,actionSuggestions:[],suggestionVersion:5,revisions:[],pinnedFor:[]});
+  state.journal.push(entry);return entry;
+ }
+ state.quickContacts.push(row);return row;
+}
+function addPromise(state,input){
+ const title=String(input.title||'').trim();if(!title)throw Error('Zusage angeben.');
+ const promisedTo=String(input.promisedTo||'').trim();if(!promisedTo)throw Error('Wem die Zusage gilt, angeben.');
+ if(input.due&&!iso(input.due))throw Error('Termin prüfen.');
+ const t=stamp(state,{...input,id:uid('promise'),title,kind:'zusage',promisedTo,status:'offen',done:false,createdAt:new Date().toISOString(),history:[]});state.tasks.push(t);return t;
+}
+function completePromise(state,t,result='',author=''){
+ if(!t||t.kind!=='zusage')throw Error('Zusage fehlt.');
+ return setTask(state,t,{status:'erledigt',result:String(result||'').trim()||'Zusage eingehalten.',completedAt:day()},author||'SSA');
+}
+function saveAuftrag(state,studentId,input){
+ if(!state.students.some(s=>s.id===studentId))throw Error('Schülerakte fehlt.');
+ const requester=String(input.requester||'').trim(),childNeed=String(input.childNeed||'').trim(),assigned=String(input.assignedOrder||'').trim();
+ if(!requester||(!childNeed&&!input.noChildNeed)||!assigned)throw Error('Auftragsklärung vollständig ausfüllen.');
+ const row={id:uid('auftrag'),studentId,date:input.date||day(),requester,childNeed:noChildNeedText(input.noChildNeed,childNeed),requesterNeed:String(input.requesterNeed||'').trim(),assignedOrder:assigned,createdAt:new Date().toISOString()};
+ state.auftraege.push(row);return row;
+}
+function noChildNeedText(noNeed,text){return noNeed?'Kind hat (noch) kein eigenes Anliegen.':text;}
+function safetyCheck(state,entryId,input){
+ const e=state.journal.find(x=>x.id===entryId);if(!e)throw Error('Chronikeintrag fehlt.');
+ e.safetyCheck={...input,checkedAt:new Date().toISOString()};return e.safetyCheck;
+}
+function ideasForEntry(state,entryId){
+ const e=state.journal.find(x=>x.id===entryId);if(!e)throw Error('Chronikeintrag fehlt.');
+ if(e.noFurtherStep)return {notice:'Bewusst kein weiterer Schritt, Tür bleibt offen',ideas:[],safety:false};
+ const text=[e.type,e.title,e.content,e.observation,e.assessment,e.agreement].join(' ').toLocaleLowerCase('de');
+ const safety=/nicht mehr leben|suizid|selbstverletz|kinderschutz|missbrauch|waffe|bedroh|akut/.test(text);
+ if(safety)return {notice:SAFETY_NOTICE,ideas:[],safety:true};
+ const ideas=localSuggestions({...e,actionSuggestions:[]},state).slice(0,2).map(x=>({...x,status:'offen',dueDays:undefined}));
+ return {notice:'',ideas,safety:false};
+}
+function markNoFurtherStep(state,entryId){
+ const e=state.journal.find(x=>x.id===entryId);if(!e)throw Error('Chronikeintrag fehlt.');e.noFurtherStep=true;e.noFurtherStepAt=new Date().toISOString();e.noFurtherStepText='Bewusst kein weiterer Schritt, Tür bleibt offen';return e;
 }
 function editEntry(state,e,changes,author){if(changes.date&&!iso(changes.date))throw Error('Datum prüfen.');if(e.generalInfo&&changes.type&&changes.type!==e.type)throw Error('Art einer allgemeinen Mitteilung nicht nachträglich ändern.');e.revisions=e.revisions||[];const before=structuredClone(e);delete before.revisions;e.revisions.push({at:new Date().toISOString(),author,before});for(const k of ['content','title','type','date','time','channel','people','source','childView','otherView','observation','assessment','agreement','goal','result','decision','planned','plannedDate','individualNotes','workflowId','oberThemen','fachverfahren','actionSuggestions','kiAnalysis'])if(k in changes)e[k]=changes[k];if(changes.date&&changes.date!==before.date){e.schoolYear=schoolYear(e.date);e.studentContexts={};e.className='';stamp(state,e);}}
 function addTask(state,input){
@@ -369,5 +417,5 @@ function journalStats(state,year='',className='all'){
  return state.journal.filter(e=>!e.generalInfo&&!e.planned&&e.type!=='zusätzliche Information'&&(!year||e.schoolYear===year)&& (className==='all'||e.participantIds.some(sid=>{const cl=recordContext(state,e,sid).className;return className.startsWith('jg:')?cl.match(/^\d+/)?.[0]===className.slice(3):cl===className}))).map(e=>({...e,duration:e.duration*Math.max(1,(e.facilitators||[]).length)}));
 }
 function restore(raw,sanitize){const state=sanitize(raw);for(const [i,e]of (state.journal||[]).entries()){const original=raw.journal?.[i];if(!original)continue;for(const key of ['content','childView','otherView','observation','assessment','agreement','goal','result','source','people'])if(typeof original[key]==='string')e[key]=original[key];if(original.individualNotes&&typeof original.individualNotes==='object')for(const key of Object.keys(e.individualNotes||{}))if(typeof original.individualNotes[key]==='string')e.individualNotes[key]=original.individualNotes[key];}return state;}
-root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats};
+root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,SAFETY_NOTICE};
 })(globalThis);
