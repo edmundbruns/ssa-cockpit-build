@@ -3,7 +3,7 @@
 'use strict';
 const collections=['contacts','groupTalks','classActivities','trainingRoom','schoolSignals','casePlans','statusHistory','outcomeAssessments','documentEvents','portalRequests','events','verfahrenLaeufe','journal','assessments','yearTransitions'];
 const uid=prefix=>prefix+'-'+(globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2));
-const day=()=>new Date().toISOString().slice(0,10);
+const day=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
 const iso=v=>/^\d{4}-\d{2}-\d{2}$/.test(String(v))&&!isNaN(Date.parse(v))&&new Date(v).toISOString().slice(0,10)===v;
 function schoolYear(date){if(!iso(String(date).slice(0,10)))return '';const y=Number(date.slice(0,4))-(Number(date.slice(5,7))<8?1:0);return y+'/'+String(y+1).slice(-2)}
 const validYear=y=>/^20\d{2}\/\d{2}$/.test(y)&&Number(y.slice(-2))===(Number(y.slice(0,4))+1)%100;
@@ -46,17 +46,18 @@ function journalCase(state,sid,entry,reopen=false){
    state.statusHistory.push(stamp(state,{id:uid('sh'),caseId:existing.id,studentId:sid,date:entry.date,fromStatus:existing.status,status:'Wiederaufgenommen',responsible:entry.responsible||'SSA',reason:'Neuer Chronikeintrag'}));
    existing.status='Wiederaufgenommen';
   }
-  if(reopen&&(!existing.last||existing.last<entry.date))existing.last=entry.date;
+  if(reopen&&(!existing.lastContact||existing.lastContact<entry.date))existing.lastContact=entry.date;
   return;
  }
  const caseId=uid('c');
- state.cases.push({id:caseId,studentId:sid,first:student.first,className:student.className,status:'Klärungsphase',reason:entry.type||entry.title||'Dokumentierter Chronikeintrag',goal:'',last:entry.date,contacts:0,createdAt:entry.createdAt||new Date().toISOString()});
+ state.cases.push({id:caseId,studentId:sid,first:student.first,last:student.last,lastContact:entry.date,className:student.className,status:'Klärungsphase',reason:entry.type||entry.title||'Dokumentierter Chronikeintrag',goal:'',contacts:0,createdAt:entry.createdAt||new Date().toISOString()});
  state.statusHistory.push(stamp(state,{id:uid('sh'),caseId,studentId:sid,date:entry.date,status:'Klärungsphase',fromStatus:'',responsible:entry.responsible||'SSA',reason:'Fallakte aus personenbezogenem Chronikeintrag angelegt'}));
 }
 function normalize(state){
  state.settings=state.settings||{};state.students=state.students||[];state.cases=state.cases||[];state.tasks=state.tasks||[];
  for(const k of collections)state[k]=state[k]||[];
  state.importLinks=state.importLinks||{};state.classLeadHistory=state.classLeadHistory||{};
+ for(const c of state.cases){const student=state.students.find(s=>s.id===c.studentId);if(!c.lastContact&&/^\d{4}-\d{2}-\d{2}$/.test(String(c.last||''))){c.lastContact=c.last;c.last=student?.last||'';}if(!c.lastContact)c.lastContact=c.last||'';}
  if(state.settings.currentSchoolYear&&!state.classLeadHistory[state.settings.currentSchoolYear])state.classLeadHistory[state.settings.currentSchoolYear]={...(state.settings.classLeads||{})};
  for(const s of state.students){s.enrollments=s.enrollments||[];if(!s.enrollments.length&&s.schoolYear&&s.className)s.enrollments.push({schoolYear:s.schoolYear,className:s.className,validFrom:'',validTo:'',dateUnknown:true});}
  for(const k of collections)for(const r of state[k])stamp(state,r);
@@ -125,11 +126,11 @@ function archive(state,sid,date,reason){
 }
 // Versionierte Fachverfahren für die automatische Chronik-Einordnung.
 const FACHVERFAHREN_KATALOG=[
-{id:'absentismus',version:'1.1',topic:'Schulabsentismus',keywords:['fehlzeit','fehlzeiten','schulabsent','schulvermeidung','webuntis','entschuldigung'],steps:[
+{id:'absentismus',version:'1.1',topic:'Schulabsentismus',keywords:['fehlzeit','fehlzeiten','fehlstund','fehltag','unentschuldigt','schwänz','schulabsent','schulvermeidung','webuntis','entschuldigung'],steps:[
 {title:'Fehlzeiten und Entschuldigungsstatus mit Klassenleitung abgleichen',rationale:'Zeitraum, Fehlstunden, offene Entschuldigungen und bekannte schulische Beobachtungen gemeinsam prüfen.',taskType:'Rücksprache',dueDays:2},
 {title:'Mit dem Kind und den Sorgeberechtigten eine Rückkehrvereinbarung prüfen',rationale:'Einen erreichbaren nächsten Schultag, Unterstützung im Alltag und einen festen Rückmeldetermin vereinbaren.',taskType:'Unterstützungsplan',dueDays:5},
 {title:'Bei Wiederholung die nächste Stufe des Schulabsentismus-Verfahrens prüfen',rationale:'Verlauf, bisherige Gespräche und Unterstützungsangebote dokumentiert bewerten.',taskType:'Fachverfahren',dueDays:5}]},
-{id:'mobbing',version:'1.1',topic:'Mobbing und Cybermobbing',keywords:['mobbing','cybermobbing','ausgrenz','gruppenchat','beleidigung','bloßstellung'],steps:[
+{id:'mobbing',version:'1.1',topic:'Mobbing und Cybermobbing',keywords:['mobbing','cybermobbing','ausgrenz','gruppenchat','beleidigung','bloßstellung','hänsel','ausgelacht','auslach','seit wochen','immer wieder','schubs'],steps:[
 {title:'Betroffene und beschuldigte Kinder getrennt anhören',rationale:'Konkrete Handlungen, Zeitpunkte, Orte, digitale Belege und das aktuelle Sicherheitsgefühl getrennt dokumentieren.',taskType:'Konfliktklärung',dueDays:1},
 {title:'Sofortige Schutz- und Aufsichtsmaßnahmen mit der Schulleitung abstimmen',rationale:'Sicherheit im Unterricht, in Pausen und in digitalen Gruppen klären. Keine gemeinsame Mediation bei Machtungleichgewicht.',taskType:'Schutzweg',dueDays:1},
 {title:'Klassenleitung und Sorgeberechtigte abgestimmt einbeziehen',rationale:'Informationsumfang, Zuständigkeit und ein überprüfbarer Rückmeldetermin müssen festgelegt werden.',taskType:'Fallbesprechung',dueDays:3}]},
@@ -141,7 +142,15 @@ const FACHVERFAHREN_KATALOG=[
 {title:'Belastung und Unterstützungswunsch des Kindes klären',rationale:'Aktuelle Situation, Ressourcen, schulische Auslöser und einen kleinen nächsten Schritt festhalten.',taskType:'Schülergespräch',dueDays:2},
 {title:'Schulpsychologische Beratung als Option prüfen',rationale:'Mit Kind und Sorgeberechtigten Einwilligung und Umfang einer möglichen Weitervermittlung klären.',taskType:'Fachberatung',dueDays:5},
 {title:'Bei akuter Krise sofort den schulischen Schutzweg aktivieren',rationale:'Akute Hinweise nicht aufschieben und mit Schulleitung sowie zuständiger Fachberatung abstimmen.',taskType:'Schutzweg',dueDays:0}]},
-{id:'kinderschutz',version:'1.1',topic:'Kinderschutz',keywords:['kindeswohl','kinderschutz','vernachlässig','missbrauch','selbstgefährd','suizid','sexualisiert','waffe'],steps:[
+{id:'selbstgefaehrdung',version:'1.0',topic:'Akute Selbstgefährdung',keywords:['nicht mehr leben','umbringen','suizid','ritzen','selbstverletz','sterben wollen'],steps:[
+{title:'Kind nicht allein lassen und sofort die Schulleitung informieren',rationale:'Die aktuelle Sicherheit unmittelbar klären und den schulischen Krisenweg aktivieren.',taskType:'Schutzweg',dueDays:0},
+{title:'Sorgeberechtigte und bei akuter Gefahr den Notruf nach Schutzweg einbeziehen',rationale:'Kontakt und Informationsumfang fachlich sowie entlang der Leitungslinie festlegen; bei unmittelbarer Gefahr 112.',taskType:'Schutzweg',dueDays:0},
+{title:'Krisendienst oder zuständige Fachberatung als nächsten Schritt prüfen',rationale:'Nach der akuten Sicherung eine passende fachliche Unterstützung und Rückmeldung vereinbaren.',taskType:'Fachberatung',dueDays:1}]},
+{id:'gewalt-bedrohung',version:'1.0',topic:'Gewalt, Bedrohung und Waffen',keywords:['messer','waffe','bedroh','geschlagen','schlägt','getreten'],steps:[
+{title:'Sicherheit herstellen und schulischen Notfallplan aktivieren',rationale:'Beteiligte trennen, unmittelbare Gefahr einschätzen und die Schulleitung sofort einbeziehen.',taskType:'Schutzweg',dueDays:0},
+{title:'Beobachtungen, Aussagen und Beteiligte sachlich dokumentieren',rationale:'Zeitpunkt, Ort, konkrete Handlung und bereits ergriffene Schutzmaßnahmen festhalten.',taskType:'Dokumentation',dueDays:0},
+{title:'Weitere Schritte mit Schulleitung und zuständigen Stellen prüfen',rationale:'Je nach Gefahrenlage, Leitungslinie und schulischem Notfallplan über weitere Beteiligung entscheiden.',taskType:'Schutzweg',dueDays:0}]},
+{id:'kinderschutz',version:'1.1',topic:'Kinderschutz',keywords:['kindeswohl','kinderschutz','vernachlässig','missbrauch','blaue flecken','hämatom','geschlagen','anfass','sexualisiert'],steps:[
 {title:'Heute Schutzlage mit der Schulleitung abstimmen',rationale:'Unmittelbaren Schutz, Zuständigkeit und das örtlich vereinbarte Verfahren klären.',taskType:'Schutzweg',dueDays:0},
 {title:'Beobachtungen und Aussagen getrennt dokumentieren',rationale:'Wörtliche Aussagen, eigene Beobachtungen, Zeitpunkte und bereits ergriffene Schritte sachlich sichern.',taskType:'Dokumentation',dueDays:0},
 {title:'Kinderschutzfachberatung oder Jugendamt nach Schutzweg einbeziehen',rationale:'Nach der internen Abstimmung den vorgesehenen Beratungsweg dokumentiert nutzen.',taskType:'Schutzweg',dueDays:0}]},
@@ -169,8 +178,13 @@ const FACHVERFAHREN_KATALOG=[
 {title:'Umsetzung der Vereinbarung überprüfen',rationale:'Veränderung und nächster sinnvoller Termin mit den Beteiligten klären.',taskType:'Überprüfung',dueDays:7}]}
 ];
 function fachverfahren_match(entry,state){
- const hay=[entry.type,entry.title,entry.content,entry.observation,entry.assessment,entry.agreement,entry.goal,entry.result].join(' ').toLocaleLowerCase('de');
- return FACHVERFAHREN_KATALOG.filter(v=>v.keywords.some(k=>hay.includes(k))).map(v=>({...v,matchedKeywords:v.keywords.filter(k=>hay.includes(k))}));
+ const hay=[entry.type,entry.title,entry.content,entry.observation,entry.assessment,entry.agreement,entry.goal,entry.result].filter(Boolean).join(' ').normalize('NFC');
+ const hit=(keyword)=>{const escaped=String(keyword).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');const re=new RegExp('(?:^|[^\\p{L}\\p{N}])'+escaped+'[\\p{L}\\p{N}]*','iu');const m=re.exec(hay);if(!m)return false;if(/^nicht\s/i.test(String(keyword)))return true;const start=Math.max(0,m.index-80),end=Math.min(hay.length,m.index+m[0].length+80);return !/(?:^|[^\\p{L}\\p{N}])(nicht|kein|keine|keinen|keiner|verneint|bestreitet)(?:$|[^\\p{L}\\p{N}])/iu.test(hay.slice(start,end));};
+ const matches=FACHVERFAHREN_KATALOG.map(v=>{const matchedKeywords=v.keywords.filter(hit);return matchedKeywords.length?{...v,matchedKeywords}:null}).filter(Boolean);
+ const hasMobbing=matches.some(v=>v.id==='mobbing');
+ const hasChildProtectionEvidence=/(?:blaue\s+flecken|hämatom|vater|mutter|zuhause).{0,80}(?:geschlagen|getreten|anfass)/iu.test(hay);
+ const filtered=hasChildProtectionEvidence?matches.filter(v=>v.id!=='gewalt-bedrohung'):matches;
+ return hasMobbing?filtered.filter(v=>v.id!=='konflikt'):filtered;
 }
 function suggestionResponsible(taskType){
  const map={
@@ -309,7 +323,7 @@ function addEntry(state,input){
  if(!participantIds.length||participantIds.some(sid=>!state.students.some(s=>s.id===sid)))throw Error('Teilnehmende Kinder auswählen.');
  if(!iso(input.date)||!String(input.content||'').trim())throw Error('Datum und Inhalt angeben.');
  const e=stamp(state,{...input,id:uid('entry'),participantIds,createdAt:new Date().toISOString(),duration:Math.max(0,Number(input.duration)||0),individualNotes:input.individualNotes||{},revisions:[],pinnedFor:[]});
- const fachverfahren=fachverfahren_match(e,state);e.oberThemen=[...new Set(fachverfahren.map(v=>v.topic))];e.fachverfahren=fachverfahren.map(v=>({id:v.id,title:v.topic,version:v.version,matchedKeywords:v.matchedKeywords}));e.actionSuggestions=e.generalInfo?[]:localSuggestions(e,state);e.suggestionVersion=4;
+ const fachverfahren=fachverfahren_match(e,state);e.oberThemen=[...new Set(fachverfahren.map(v=>v.topic))];e.fachverfahren=fachverfahren.map(v=>({id:v.id,title:v.topic,version:v.version,matchedKeywords:v.matchedKeywords}));e.safetyStatus=fachverfahren.some(v=>['selbstgefaehrdung','gewalt-bedrohung','kinderschutz'].includes(v.id))?'Sicherheitshinweis, bitte prüfen':'';e.actionSuggestions=e.generalInfo?[]:localSuggestions(e,state);e.suggestionVersion=4;
  if(participantIds.length>1&&input.individualNotes&&Object.keys(input.individualNotes).some(sid=>!participantIds.includes(sid)))throw Error('Individuelle Notiz ist keinem teilnehmenden Kind zugeordnet.');
  state.journal.push(e);
  if(!e.generalInfo)for(const sid of participantIds)journalCase(state,sid,e,true);
