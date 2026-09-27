@@ -143,7 +143,7 @@ const FACHVERFAHREN_KATALOG=[
 {title:'Belastung und Unterstützungswunsch des Kindes klären',rationale:'Aktuelle Situation, Ressourcen, schulische Auslöser und einen kleinen nächsten Schritt festhalten.',taskType:'Schülergespräch',dueDays:2},
 {title:'Schulpsychologische Beratung als Option prüfen',rationale:'Mit Kind und Sorgeberechtigten Einwilligung und Umfang einer möglichen Weitervermittlung klären.',taskType:'Fachberatung',dueDays:5},
 {title:'Bei akuter Krise sofort den schulischen Schutzweg aktivieren',rationale:'Akute Hinweise nicht aufschieben und mit Schulleitung sowie zuständiger Fachberatung abstimmen.',taskType:'Schutzweg',dueDays:0}]},
-{id:'selbstgefaehrdung',version:'1.0',topic:'Akute Selbstgefährdung',keywords:['nicht mehr leben','umbringen','suizid','ritzen','selbstverletz','sterben wollen'],steps:[
+{id:'selbstgefaehrdung',version:'1.0',topic:'Akute Selbstgefährdung',keywords:['nicht mehr leben','umbringen','suizid','ritz','selbstverletz','sterben wollen'],steps:[
 {title:'Kind nicht allein lassen und sofort die Schulleitung informieren',rationale:'Die aktuelle Sicherheit unmittelbar klären und den schulischen Krisenweg aktivieren.',taskType:'Schutzweg',dueDays:0},
 {title:'Sorgeberechtigte und bei akuter Gefahr den Notruf nach Schutzweg einbeziehen',rationale:'Kontakt und Informationsumfang fachlich sowie entlang der Leitungslinie festlegen; bei unmittelbarer Gefahr 112.',taskType:'Schutzweg',dueDays:0},
 {title:'Krisendienst oder zuständige Fachberatung als nächsten Schritt prüfen',rationale:'Nach der akuten Sicherung eine passende fachliche Unterstützung und Rückmeldung vereinbaren.',taskType:'Fachberatung',dueDays:1}]},
@@ -151,7 +151,7 @@ const FACHVERFAHREN_KATALOG=[
 {title:'Sicherheit herstellen und schulischen Notfallplan aktivieren',rationale:'Beteiligte trennen, unmittelbare Gefahr einschätzen und die Schulleitung sofort einbeziehen.',taskType:'Schutzweg',dueDays:0},
 {title:'Beobachtungen, Aussagen und Beteiligte sachlich dokumentieren',rationale:'Zeitpunkt, Ort, konkrete Handlung und bereits ergriffene Schutzmaßnahmen festhalten.',taskType:'Dokumentation',dueDays:0},
 {title:'Weitere Schritte mit Schulleitung und zuständigen Stellen prüfen',rationale:'Je nach Gefahrenlage, Leitungslinie und schulischem Notfallplan über weitere Beteiligung entscheiden.',taskType:'Schutzweg',dueDays:0}]},
-{id:'kinderschutz',version:'1.1',topic:'Kinderschutz',keywords:['kindeswohl','kinderschutz','vernachlässig','missbrauch','blaue flecken','hämatom','geschlagen','anfass','sexualisiert'],steps:[
+{id:'kinderschutz',version:'1.1',topic:'Kinderschutz',keywords:['kindeswohl','kinderschutz','vernachlässig','missbrauch','blaue flecken','hämatom','geschlagen','angefasst','anfass','unsittlich','übergriff','sexualisiert'],steps:[
 {title:'Heute Schutzlage mit der Schulleitung abstimmen',rationale:'Unmittelbaren Schutz, Zuständigkeit und das örtlich vereinbarte Verfahren klären.',taskType:'Schutzweg',dueDays:0},
 {title:'Beobachtungen und Aussagen getrennt dokumentieren',rationale:'Wörtliche Aussagen, eigene Beobachtungen, Zeitpunkte und bereits ergriffene Schritte sachlich sichern.',taskType:'Dokumentation',dueDays:0},
 {title:'Kinderschutzfachberatung oder Jugendamt nach Schutzweg einbeziehen',rationale:'Nach der internen Abstimmung den vorgesehenen Beratungsweg dokumentiert nutzen.',taskType:'Schutzweg',dueDays:0}]},
@@ -180,7 +180,7 @@ const FACHVERFAHREN_KATALOG=[
 ];
 function fachverfahren_match(entry,state){
  const hay=[entry.type,entry.title,entry.content,entry.observation,entry.assessment,entry.agreement,entry.goal,entry.result].filter(Boolean).join(' ').normalize('NFC');
- const hit=(keyword)=>{const escaped=String(keyword).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');const re=new RegExp('(?:^|[^\\p{L}\\p{N}])'+escaped+'[\\p{L}\\p{N}]*','iu');const m=re.exec(hay);if(!m)return false;if(/^nicht\s/i.test(String(keyword)))return true;const start=Math.max(0,m.index-80),end=Math.min(hay.length,m.index+m[0].length+80);return !/(?:^|[^\\p{L}\\p{N}])(nicht|kein|keine|keinen|keiner|verneint|bestreitet)(?:$|[^\\p{L}\\p{N}])/iu.test(hay.slice(start,end));};
+ const hit=(keyword)=>{const escaped=String(keyword).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');const re=new RegExp('(?:^|[^\\p{L}\\p{N}])'+escaped+'[\\p{L}\\p{N}]*','iu');const m=re.exec(hay);if(!m)return false;const before=hay.slice(0,m.index).split(/[^\\p{L}\\p{N}]+/u).filter(Boolean).slice(-3);const negated=before.some(w=>/^(nicht|kein|keine|keinen|keiner|nie)$/iu.test(w));const after=hay.slice(m.index+m[0].length,m.index+m[0].length+45);if(/^kindeswohl$/iu.test(keyword)&&/(?:ist|sei|wäre|war)?\s*nicht\s+gefährdet/iu.test(after))return false;return !negated;};
  const matches=FACHVERFAHREN_KATALOG.map(v=>{const matchedKeywords=v.keywords.filter(hit);return matchedKeywords.length?{...v,matchedKeywords}:null}).filter(Boolean);
  const hasMobbing=matches.some(v=>v.id==='mobbing');
  const hasChildProtectionEvidence=/(?:blaue\s+flecken|hämatom|vater|mutter|zuhause).{0,80}(?:geschlagen|getreten|anfass)/iu.test(hay);
@@ -367,15 +367,16 @@ function safetyCheck(state,entryId,input){
 }
 function ideasForEntry(state,entryId){
  const e=state.journal.find(x=>x.id===entryId);if(!e)throw Error('Chronikeintrag fehlt.');
+ if(e.safetyStatus||(e.fachverfahren||[]).some(v=>['selbstgefaehrdung','gewalt-bedrohung','kinderschutz'].includes(v.id)))return {notice:SAFETY_NOTICE,ideas:[],safety:true};
  if(e.noFurtherStep)return {notice:'Bewusst kein weiterer Schritt, Tür bleibt offen',ideas:[],safety:false};
  const text=[e.type,e.title,e.content,e.observation,e.assessment,e.agreement].join(' ').toLocaleLowerCase('de');
- const safety=/nicht mehr leben|suizid|selbstverletz|kinderschutz|missbrauch|waffe|bedroh|akut/.test(text);
+ const safety=/nicht mehr leben|suizid|selbstverletz|ritz|kinderschutz|missbrauch|angefasst|unsittlich|übergriff|waffe|bedroh|akut/.test(text);
  if(safety)return {notice:SAFETY_NOTICE,ideas:[],safety:true};
  const ideas=localSuggestions({...e,actionSuggestions:[]},state).slice(0,2).map(x=>({...x,status:'offen',dueDays:undefined}));
  return {notice:'',ideas,safety:false};
 }
 function markNoFurtherStep(state,entryId){
- const e=state.journal.find(x=>x.id===entryId);if(!e)throw Error('Chronikeintrag fehlt.');e.noFurtherStep=true;e.noFurtherStepAt=new Date().toISOString();e.noFurtherStepText='Bewusst kein weiterer Schritt, Tür bleibt offen';return e;
+ const e=state.journal.find(x=>x.id===entryId);if(!e)throw Error('Chronikeintrag fehlt.');if(e.safetyStatus||(e.fachverfahren||[]).some(v=>['selbstgefaehrdung','gewalt-bedrohung','kinderschutz'].includes(v.id)))throw Error('Bei einer Schutzfrage ist eine fachliche Prüfung erforderlich.');e.noFurtherStep=true;e.noFurtherStepAt=new Date().toISOString();e.noFurtherStepText='Bewusst kein weiterer Schritt, Tür bleibt offen';return e;
 }
 function editEntry(state,e,changes,author){if(changes.date&&!iso(changes.date))throw Error('Datum prüfen.');if(e.generalInfo&&changes.type&&changes.type!==e.type)throw Error('Art einer allgemeinen Mitteilung nicht nachträglich ändern.');e.revisions=e.revisions||[];const before=structuredClone(e);delete before.revisions;e.revisions.push({at:new Date().toISOString(),author,before});for(const k of ['content','title','type','date','time','channel','people','source','childView','otherView','observation','assessment','agreement','goal','result','decision','planned','plannedDate','individualNotes','workflowId','oberThemen','fachverfahren','actionSuggestions','kiAnalysis'])if(k in changes)e[k]=changes[k];if(changes.date&&changes.date!==before.date){e.schoolYear=schoolYear(e.date);e.studentContexts={};e.className='';stamp(state,e);}}
 function addTask(state,input){
@@ -404,13 +405,13 @@ function timeline(state,sid,legacy=[]){
  // Fallstatus-Einträge steuern das Fallboard. Sie sind keine eigenen fachlichen
  // Ereignisse und würden dort echte Kontakte oder Aufgaben doppelt darstellen.
  const items=legacy.filter(e=>e.eventKind!=='Fallstatus'&&!(e.eventKind==='Dokument'&&e.attachmentId&&e.sourceEntryKey)&&!(e.eventKind==='Trainingsraum'&&e.journalEntryId&&state.journal.some(j=>j.id===e.journalEntryId))&&!state.tasks.some(t=>t.id===e.id)).map(e=>({...e,key:'legacy:'+e.id,legacy:true,context:recordContext(state,e,sid)}));
- for(const e of state.journal.filter(e=>e.participantIds.includes(sid)))items.push({...e,key:'entry:'+e.id,eventKind:e.type,context:recordContext(state,e,sid),individualNote:e.individualNotes?.[sid]||''});
+ for(const e of state.journal.filter(e=>!e.deletedAt&&e.participantIds.includes(sid)))items.push({...e,key:'entry:'+e.id,eventKind:e.type,context:recordContext(state,e,sid),individualNote:e.individualNotes?.[sid]||''});
  for(const e of state.assessments.filter(e=>e.studentId===sid))items.push({...e,key:'assessment:'+e.id,eventKind:'Fachliche Ampelbewertung',title:e.color,content:e.reason,responsible:e.author,context:recordContext(state,e,sid)});
  for(const e of state.yearTransitions.filter(e=>e.studentId===sid))items.push({...e,key:'year:'+e.id,eventKind:'Schuljahresverlauf',content:e.reason,context:recordContext(state,e,sid)});
  for(const e of state.relatedPersons||[])if(e.studentId===sid)items.push({...e,key:'related:'+e.id,date:recordDate(e)||'',eventKind:'Bezugsperson / Netzwerk',title:e.name||'Kontakt',content:[e.role,e.agreements,e.informationScope].filter(Boolean).join(' · '),context:recordContext(state,e,sid)});
  for(const t of work(state,sid))items.push({...t,key:'task:'+t.id,task:true,date:t.due||'',eventKind:'Nächster Schritt',content:t.result||t.expectedResult||'',planned:!t.done,context:recordContext(state,t,sid)});
  for(const k of ['portalRequests','events','verfahrenLaeufe'])for(const e of state[k]||[])if(ids(state,e).includes(sid)&&!items.some(x=>x.id===e.id))items.push({...e,key:'legacy:'+e.id,date:recordDate(e),eventKind:k==='portalRequests'?'Schüleranfrage':k==='verfahrenLaeufe'?'Fachverfahren':'Termin',title:e.title||e.topic||e.workflowId||'Weiterer Eintrag',content:e.message||e.note||'',legacy:true,context:recordContext(state,e,sid)});
- for(const e of state.journal.filter(e=>e.participantIds.includes(sid)&&e.planned&&e.plannedDate))items.push({key:'appointment:'+e.id,id:e.id,date:e.plannedDate,eventKind:'Geplanter Termin',title:e.title,content:'Durchführung noch nicht bestätigt.',planned:true,sourceEntryKey:'entry:'+e.id,context:context(state,sid,e.plannedDate)});
+ for(const e of state.journal.filter(e=>!e.deletedAt&&e.participantIds.includes(sid)&&e.planned&&e.plannedDate))items.push({key:'appointment:'+e.id,id:e.id,date:e.plannedDate,eventKind:'Geplanter Termin',title:e.title,content:'Durchführung noch nicht bestätigt.',planned:true,sourceEntryKey:'entry:'+e.id,context:context(state,sid,e.plannedDate)});
  return items.sort((a,b)=>String(a.date||'9999').localeCompare(String(b.date||'9999'))||String(a.time||'').localeCompare(String(b.time||''))||String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
 }
 function journalStats(state,year='',className='all'){
