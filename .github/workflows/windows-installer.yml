@@ -19,7 +19,7 @@ jobs:
       - run: npm test
       - run: npm run test:ui
       - run: cargo test --manifest-path src-tauri/Cargo.toml --no-default-features --features bundled-sqlite
-      - run: npx tauri build --bundles nsis,msi
+      - run: npx tauri build --bundles nsis
       - uses: actions/upload-artifact@v4
         with:
           name: SSA-Cockpit-Windows-Installer
