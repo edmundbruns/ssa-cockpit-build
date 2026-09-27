@@ -288,7 +288,7 @@ impl Vault {
         let tx=self.conn.transaction()?;
         tx.execute("DELETE FROM attachments",[])?;
         tx.execute("INSERT INTO state(id,nonce,ciphertext) VALUES(1,?1,?2) ON CONFLICT(id) DO UPDATE SET nonce=excluded.nonce,ciphertext=excluded.ciphertext",params![sn,sc])?;
-        for a in plain.attachments { let bytes=B64.decode(&a.bytes_b64).map_err(|_|VaultError::Invalid)?; if bytes.len()>MAX_ATTACHMENT||!Self::attachment_bytes_match(&a.mime_type,&bytes)||a.student_id.len()>80||a.name.len()>220{return Err(VaultError::Attachment)} let id=a.id.clone();let (n,c)=Self::encrypt(&current,&serde_json::to_vec(&a)?)?;tx.execute("INSERT INTO attachments(id,student_id,name,mime_type,added,nonce,ciphertext) VALUES(?1,'','','','',?2,?3)",params![id,n,c])?; }
+        for a in plain.attachments { let bytes=B64.decode(&a.bytes_b64).map_err(|_|VaultError::Invalid)?; if bytes.len()>MAX_ATTACHMENT||!Self::attachment_bytes_match(&a.mime_type,&bytes)||a.student_id.len()>80||a.name.len()>220{return Err(VaultError::Attachment)} let id=a.id.clone();let (n,c)=Self::encrypt(&current,&serde_json::to_vec(&a)?)?;tx.execute("INSERT INTO attachments(id,student_id,name,mime_type,added,nonce,ciphertext) VALUES(?1,?2,?3,?4,?5,?6,?7)",params![id,a.student_id,a.name,a.mime_type,a.added,n,c])?; }
         tx.commit()?;
         Ok(json!({"stateJson":plain.state_json}))
     }
@@ -306,7 +306,7 @@ impl Vault {
         let (cn,cc)=Self::encrypt(&new_key,CHECK_TEXT)?;let (sn,sc)=Self::encrypt(&new_key,state.as_bytes())?;
         let tx=self.conn.transaction()?;tx.execute("DELETE FROM attachments",[])?;
         tx.execute("UPDATE meta SET value=?1 WHERE key='salt'",[B64.encode(new_salt)])?;tx.execute("UPDATE meta SET value=?1 WHERE key='check_nonce'",[B64.encode(cn)])?;tx.execute("UPDATE meta SET value=?1 WHERE key='check'",[B64.encode(cc)])?;tx.execute("UPDATE state SET nonce=?1,ciphertext=?2 WHERE id=1",params![sn,sc])?;
-        for (id,n,c) in encrypted {let plain=Self::decrypt(&old_key,&n,&c)?;let (nn,nc)=Self::encrypt(&new_key,&plain)?;tx.execute("INSERT INTO attachments(id,student_id,name,mime_type,added,nonce,ciphertext) VALUES(?1,'','','','',?2,?3)",params![id,nn,nc])?;}
+        for (id,n,c) in encrypted {let plain=Self::decrypt(&old_key,&n,&c)?;let item:BackupAttachment=serde_json::from_slice(&plain)?;let (nn,nc)=Self::encrypt(&new_key,&plain)?;tx.execute("INSERT INTO attachments(id,student_id,name,mime_type,added,nonce,ciphertext) VALUES(?1,?2,?3,?4,?5,?6,?7)",params![id,item.student_id,item.name,item.mime_type,item.added,nn,nc])?;}
         tx.commit()?;self.key=Some(SessionKey(new_key));Ok(json!({"ok":true}))
     }
 }
@@ -318,6 +318,5 @@ mod tests {
     use super::*;
     #[test] fn encryption_roundtrip(){let key=[7u8;32];let(n,c)=Vault::encrypt(&key,b"geheim").unwrap();assert_eq!(Vault::decrypt(&key,&n,&c).unwrap(),b"geheim");}
     #[test] fn password_policy(){assert!(Vault::validate_password("zu-kurz").is_err());assert!(Vault::validate_password("Mindestens-12").is_ok());}
-    #[test] fn vault_roundtrip(){let d=tempfile::tempdir().unwrap();let mut v=Vault::open_at(d.path().join("t.db")).unwrap();v.setup_json("SehrSicher!2026".into(),"{\"cases\":[]}".into()).unwrap();v.save_state_json("{\"cases\":[1]}".into()).unwrap();let b=v.export_backup_json().unwrap()["payloadJson"].as_str().unwrap().to_string();v.lock_json().unwrap();assert_eq!(v.unlock_json("SehrSicher!2026".into()).unwrap()["stateJson"],"{\"cases\":[1]}");let r=v.import_backup_json(b,"SehrSicher!2026".into()).unwrap();assert_eq!(r["stateJson"],"{\"cases\":[1]}");}
+    #[test] fn vault_roundtrip(){let d=tempfile::tempdir().unwrap();let mut v=Vault::open_at(d.path().join("t.db")).unwrap();v.setup_json("SehrSicher!2026".into(),"{\"cases\":[]}".into()).unwrap();v.save_state_json("{\"cases\":[1]}".into()).unwrap();let a=v.put_attachment_json("student-1".into(),"protokoll.txt".into(),"text/plain".into(),b"geschuetzt".to_vec()).unwrap();let id=a["id"].as_str().unwrap().to_string();let b=v.export_backup_json().unwrap()["payloadJson"].as_str().unwrap().to_string();v.lock_json().unwrap();assert_eq!(v.unlock_json("SehrSicher!2026".into()).unwrap()["stateJson"],"{\"cases\":[1]}");let r=v.import_backup_json(b,"SehrSicher!2026".into()).unwrap();assert_eq!(r["stateJson"],"{\"cases\":[1]}");let restored=v.get_attachment_json(id).unwrap();assert_eq!(restored["name"],"protokoll.txt");assert_eq!(restored["mimeType"],"text/plain");assert_eq!(restored["bytes"].as_array().unwrap().len(),10);}
 }
-
