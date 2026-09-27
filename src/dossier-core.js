@@ -208,6 +208,16 @@ function suggestionGoal(taskType){
  };
  return map[taskType]||'Der nächste Schritt ist konkret vereinbart und überprüfbar.';
 }
+function suggestionNetwork(entry,state,procedure,step){
+ const sid=entry.participantIds?.[0],student=state?.students?.find(s=>s.id===sid),klasse=student?.className||'';
+ const taskHints={Schutzweg:'kinderschutz jugendamt schutz fachberatung',Fachberatung:'beratung fachstelle schulpsychologie inklusion',Rücksprache:'klassenleitung beratungslehrkraft',Elternkontakt:'erziehungsberatung familie',Unterstützungsplan:'schulsozialarbeit klassenleitung'};
+ const hay=[procedure.topic,procedure.keywords?.join(' '),step.title,step.taskType,taskHints[step.taskType]||''].join(' ').toLocaleLowerCase('de');
+ const words=hay.split(/[^a-zäöüß]+/).filter(x=>x.length>5);
+ const internal=(state?.teachers||[]).filter(t=>t.status!=='inaktiv'&&(String(t.classLead||'').split(/[,;]/).map(x=>x.trim()).includes(klasse)||words.some(w=>[t.role,t.roles,t.area,t.note].flat().join(' ').toLocaleLowerCase('de').includes(w.slice(0,7))))).slice(0,3).map(t=>({name:t.displayName||[t.last,t.first].filter(Boolean).join(', '),kind:'intern',role:t.role||'schulinterne Zuständigkeit'}));
+ const external=(state?.partners||[]).filter(p=>String(p.active??true)!=='false'&&netzwerkBereichForSuggestion(p)!=='Schulintern'&&words.some(w=>[p.organization,p.category,p.contact,p.note].join(' ').toLocaleLowerCase('de').includes(w.slice(0,7)))).slice(0,3).map(p=>({name:p.organization,kind:'extern',role:p.category||'Netzwerkpartner'}));
+ return [...internal,...external];
+}
+function netzwerkBereichForSuggestion(p){return String(p?.category||p?.bereich||p?.area||'').toLocaleLowerCase('de').includes('intern')?'Schulintern':String(p?.category||p?.bereich||p?.area||'');}
 function fachverfahren_suggestions(entry,state,matches){
  const existing=new Set((entry.actionSuggestions||[]).map(s=>s.title)),out=[];
  const sid=entry.participantIds?.[0],student=state?.students?.find(s=>s.id===sid);
@@ -216,7 +226,7 @@ function fachverfahren_suggestions(entry,state,matches){
  const anchor=[context,date&&`Eintrag vom ${date}`,entry.title&&`„${entry.title}“`].filter(Boolean).join(' · ');
  for(const procedure of matches){for(const step of procedure.steps){
   if(existing.has(step.title)||out.some(s=>s.title===step.title))continue;
-  out.push({id:uid('suggestion'),title:step.title,rationale:step.rationale,taskType:step.taskType,dueDays:step.dueDays,responsible:suggestionResponsible(step.taskType),goal:suggestionGoal(step.taskType),followUp:'Ergebnis im Chronikeintrag festhalten und anschließend entscheiden: fortführen, anpassen oder abschließen.',status:'offen',source:'Fachverfahren',procedureId:procedure.id,procedureVersion:procedure.version,context:anchor,specificity:'fachlich konkret',createdAt:new Date().toISOString()});
+  out.push({id:uid('suggestion'),title:step.title,rationale:step.rationale,taskType:step.taskType,dueDays:step.dueDays,responsible:suggestionResponsible(step.taskType),goal:suggestionGoal(step.taskType),followUp:'Ergebnis im Chronikeintrag festhalten und anschließend entscheiden: fortführen, anpassen oder abschließen.',networkOptions:suggestionNetwork(entry,state,procedure,step),status:'offen',source:'Fachverfahren',procedureId:procedure.id,procedureVersion:procedure.version,context:anchor,specificity:'fachlich konkret',createdAt:new Date().toISOString()});
   if(out.length>=3)break;
  } if(out.length>=3)break;}
  return out;
@@ -269,7 +279,9 @@ function localSuggestions(entry,state){
   addConcrete('Die dokumentierte Vereinbarung mit den Beteiligten überprüfen','Eine beobachtbare Umsetzung erfragen, das Ergebnis festhalten und den nächsten Termin gemeinsam bestimmen.','Überprüfung',7);
  }
  if(!out.length&&type!=='zusätzliche information')addConcrete(`Mit ${child} ein kurzes Anschlussgespräch zu ${title} vereinbaren`,'Aus seiner Sicht einen konkreten Unterstützungsbedarf und gegebenenfalls einen nächsten Termin festhalten.','Schülergespräch',5);
- const matches=fachverfahren_match(entry,state); return [...out,...fachverfahren_suggestions(entry,state,matches)].slice(0,3);
+ const matches=fachverfahren_match(entry,state);
+ const lokale=out.map(s=>({...s,networkOptions:suggestionNetwork(entry,state,{topic:entry.type||entry.title||'',keywords:[entry.title||'',entry.content||'']},s)}));
+ return [...lokale,...fachverfahren_suggestions(entry,state,matches)].slice(0,3);
 }
 function apply(state,plan){
  const errors=validate(state,plan);if(errors.length)throw Error(errors.join('\n'));
