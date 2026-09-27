@@ -178,6 +178,17 @@
     @media(max-width:760px){.formgrid,.detailgrid,.two,.three{grid-template-columns:1fr}.formgroup.full{grid-column:auto}.topbar{padding:14px 16px}.content{padding-left:16px;padding-right:16px}.speechrow{grid-template-columns:1fr}.speechrow .btn{width:100%}.modal{padding:10px}.modal>.dialog{width:100%;max-height:96vh}.modal>.dialog>.dialoghead,.modal>.dialog>.dialogbody,.modal>.dialog>.dialogfoot{padding-left:16px;padding-right:16px}}
     @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
     .today-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}.today-row{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.today-row:last-child{border-bottom:0}.chiprow{display:flex;gap:7px;flex-wrap:wrap}.chip{display:inline-flex;gap:5px;align-items:center;padding:7px 9px;border:1px solid var(--line);border-radius:999px;background:#f7fafb;font-size:13px;cursor:pointer}.chip:has(input:checked){background:#e6f4f2;border-color:#8bc9c2;color:#0f6b65}.task-day{margin-bottom:12px}.active-view{background:#e6f4f2;border-color:#8bc9c2;color:#0f6b65}@media(max-width:850px){.today-grid{grid-template-columns:1fr}}
+    /* Gemeinsame, zentrierte Arbeitsfläche neben der Navigation. */
+    @media screen {
+      main{--work-width:1440px;--work-gutter:clamp(24px,3.5vw,64px)}
+      .content{width:100%;max-width:var(--work-width);margin-inline:auto;padding:28px var(--work-gutter) 48px}
+      .topbar{padding-inline:max(var(--work-gutter),calc((100% - var(--work-width))/2 + var(--work-gutter)));flex-wrap:wrap}
+      .sectionhead{align-items:flex-start;flex-wrap:wrap;row-gap:16px}
+      .sectionhead>.filters{flex:1 1 420px;max-width:100%;align-items:center}
+      .filters>.field{width:auto;flex:1 1 160px;min-width:0}
+      .filters>.search{flex:2 1 240px}
+    }
+    @media screen and (max-width:760px){main{--work-gutter:16px}.content{padding-top:18px}.sectionhead>.filters{flex-basis:auto;width:100%}.filters>.field{width:100%}}
 </style>
 </head>
 <body>
@@ -205,6 +216,7 @@
     <nav class="nav" aria-label="Hauptnavigation">
       <button class="active" data-page="dashboard"><span class="icon">⌂</span><span class="label">Heute</span></button>
       <button data-page="students"><span class="icon">♙</span><span class="label">Schüler:innen</span></button>
+      <button data-page="cases" title="Übersicht der laufenden Fallakten"><span class="icon">▣</span><span class="label">Fallarbeit</span></button>
       <button data-page="tasks"><span class="icon">✓</span><span class="label">Aufgaben und Zusagen</span></button>
       <div class="navgroup" data-group="weitere">
         <button class="navhead" type="button"><span class="chev">▾</span><span class="label">Weitere Bereiche</span></button>
