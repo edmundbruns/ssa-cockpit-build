@@ -112,7 +112,10 @@
     .modal>.dialog>.dialogbody{flex:1 1 auto;min-height:0;overflow:auto;padding:20px 24px}
     .modal>.dialog>.dialogfoot{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;border-top:1px solid var(--line)}
     button[onclick*="dossierQualityReview"]{display:none!important}
-    #signalReviewModal>.dialog{width:min(1080px,calc(100vw - 48px))}
+    #signalReviewModal>.dialog{width:min(820px,calc(100vw - 72px))}
+    #signalReviewModal .formgrid{grid-template-columns:1fr;gap:14px}
+    #signalReviewModal .formgroup{display:grid;gap:6px}
+    #signalReviewModal .formgroup label{font-weight:700;color:var(--ink)}
     @media(max-width:650px){.modal{padding:10px}.modal>.dialog,#signalReviewModal>.dialog{width:100%;max-height:96vh}.modal>.dialog>.dialoghead,.modal>.dialog>.dialogbody,.modal>.dialog>.dialogfoot{padding-left:16px;padding-right:16px}}
 .kopfsuche{position:relative;flex:0 1 380px;min-width:210px}
 .kopfsuche .field{width:100%}
@@ -1769,7 +1772,10 @@ function classEmailErzeugen(){
   ? '\n\nEntwicklung zum vorherigen ausgewerteten Zeitraum:\n'+trendValues.map(z=>'· '+z.name+': '+(z.delta>0?'+'+z.delta:z.delta)+' Fehlstunden').join('\n')
   : '';
  const diagram=includeTrend&&saetze.length
-  ? '\n\nBalkenübersicht Fehlstunden (je Zeichen ≈ 1 Fehlstunde):\n'+zeilen.slice(0,12).map(z=>'· '+z.name+': '+('▮'.repeat(Math.min(30,Math.max(0,z.abs)))||'–')).join('\n')
+  ? '\n\nBalkenübersicht Fehlstunden (Textdarstellung für E-Mail):\n'+zeilen.slice(0,12).map(z=>{
+      const balken=z.abs?('#'.repeat(Math.min(30,Math.max(1,Math.round(z.abs))))):'-';
+      return '  '+z.name+': '+balken+' ('+compactNumber(z.abs)+' Std.)';
+    }).join('\n')
   : '';
  const fmtD=d=>d?fmt(d):'…';
  const absender=(data.settings.emailAbsender||'SSA-Team');
