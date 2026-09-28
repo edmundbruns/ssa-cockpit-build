@@ -1,6 +1,6 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Version 0.12.2. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
+Version 0.12.3. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
 
 Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
@@ -24,3 +24,7 @@ Arbeitskorb, Schnellvorlagen, Aufgabenfilter, Dokumentprüfung, fachliche Qualit
 - Gruppengespräch mit „Individuelle Hinweise“ lässt sich wieder speichern. Prüffehler werden angezeigt.
 - Das Ereignisdatum ist in allen Dialogen mit heute vorbelegt.
 - Nach „Schutzfrage prüfen“ verschwindet nur der offene Merker auf „Heute“. Chronikeintrag und Checkliste bleiben erhalten, es entsteht keine Aufgabe.
+
+## Neu in 0.12.3
+
+- Korrektur: Heute dokumentierte Gespräche und Kurzkontakte erscheinen wieder sofort in der Chronik, im Abschnitt „Heute dokumentiert“ direkt unter der Heute-Linie. In 0.12.2 wurden sie erst am Folgetag angezeigt.

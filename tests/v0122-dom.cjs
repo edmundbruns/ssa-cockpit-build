@@ -82,6 +82,8 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  assert(!isOpen('dossierEditModal'),'Gesprächsdialog schließt sofort');
  await waitSaved();
  const entry=saved().journal.find(e=>e.title==='Gespräch Pause');assert(entry,'Chronikeintrag liegt im Tresor');
+ run(`showStudent('s1')`);{const t=w.document.getElementById('studentDetailBody').textContent,i=t.indexOf('Gespräch Pause');
+ assert(i>=0,'heute dokumentiertes Gespräch steht in der Chronik');assert(i>t.indexOf('Heute dokumentiert')&&i<t.indexOf('Spätere Termine'),'es steht im Heute-Block, nicht bei späteren Terminen');}
  // Chronikeintrag bearbeiten
  run(`dossierEntry('edit','entry:${entry.id}')`);
  f=w.document.getElementById('dossierEditForm');f.elements.content.value+=' Nachtrag: Klassenleitung informiert.';

@@ -6,20 +6,20 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('..',import.meta.url));
 const read=f=>fs.readFileSync(path.join(root,f),'utf8').replace(/\r\n/g,'\n');
-const VERSION='0.12.2';
+const VERSION='0.12.3';
 
-test('Versionsnummer ist überall 0.12.2',()=>{
+test('Versionsnummer ist überall gleich',()=>{
  assert.equal(JSON.parse(read('package.json')).version,VERSION);
  assert.equal(JSON.parse(read('package-lock.json')).version,VERSION);
  assert.equal(JSON.parse(read('src-tauri/tauri.conf.json')).version,VERSION);
- assert.match(read('src-tauri/Cargo.toml'),/^version = "0\.12\.2"$/m);
- assert.match(read('src-tauri/Cargo.lock'),/name = "ssa-cockpit-ludgerusschule"\nversion = "0\.12\.2"/);
+ assert.match(read('src-tauri/Cargo.toml'),new RegExp('^version = "'+VERSION.replace(/\./g,'\\.')+'"$','m'));
+ assert.match(read('src-tauri/Cargo.lock'),new RegExp('name = "ssa-cockpit-ludgerusschule"\\nversion = "'+VERSION.replace(/\./g,'\\.')+'"'));
  const html=read('src/index.html');
- assert.match(html,/<title>SSA-Cockpit Ludgerusschule · Desktop 0\.12\.2<\/title>/);
+ assert(html.includes('<title>SSA-Cockpit Ludgerusschule · Desktop '+VERSION+'</title>'),'Fenstertitel');
  const shown=[...html.matchAll(/Desktopversion (\d+\.\d+\.\d+)/g)].map(m=>m[1]);
  assert(shown.length>0);assert(shown.every(v=>v===VERSION),'Anzeige in der Seitenleiste: '+shown.join(', '));
- assert.match(read('src/dossier-ui.js'),/Handbuch · Version 0\.12\.2/);
- assert.match(read('README.md'),/Version 0\.12\.2\./);
+ assert(read('src/dossier-ui.js').includes('Handbuch · Version '+VERSION),'Handbuch-Dialog');
+ assert(read('README.md').includes('Version '+VERSION+'.'),'README');
 });
 
 test('Tresorbefehle laufen asynchron und blockieren das Fenster nicht',()=>{
