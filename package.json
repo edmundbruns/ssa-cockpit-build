@@ -7,7 +7,7 @@
     "test": "node --test tests/*.test.mjs",
     "tauri": "tauri",
     "build:windows": "npm run test && tauri build --bundles nsis,msi",
-    "test:ui": "node tests/dossier-dom.cjs"
+    "test:ui": "node tests/dossier-dom.cjs && node tests/v0122-dom.cjs"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.8.0",
