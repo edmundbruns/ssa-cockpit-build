@@ -11,8 +11,10 @@ struct AppState(Mutex<vault::Vault>);
 #[cfg(feature = "desktop-app")]
 macro_rules! vault_command {
     ($name:ident ( $($arg:ident : $typ:ty),* ) => $method:ident) => {
+        // async: Tauri führt den Befehl außerhalb des Haupt-Threads aus. Ein langer Tresorzugriff
+        // (z. B. Sicherung mit Anhängen) friert so das Fenster nicht mehr ein.
         #[tauri::command]
-        fn $name(state: tauri::State<'_, AppState>, $($arg:$typ),*) -> Result<serde_json::Value, String> {
+        async fn $name(state: tauri::State<'_, AppState>, $($arg:$typ),*) -> Result<serde_json::Value, String> {
             let mut vault = state.0.lock().map_err(|_| "Datentresor ist gesperrt".to_string())?;
             vault.$method($($arg),*).map_err(|e| e.to_string())
         }
