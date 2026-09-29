@@ -44,6 +44,9 @@ const HILFE_TEXTE={
  erreichtePersonen:{titel:'Erreichte Personen',was:'Einzelkontakt zählt 1, Gruppe oder Klasse zählt die Teilnehmenden, dazu Teilnehmende bei Tätigkeiten ohne Fall.',warum:'Zeigt die Reichweite, auch von Projekten und Gruppen.',beispiel:'Ein Projekt mit 24 Kindern zählt 24.'},
  datenqualitaet:{titel:'Datenqualität',was:'Zeigt, wo Angaben für die Statistik fehlen.',warum:'Fehlende Angaben machen die Zahlen ungenau. Mit „Jetzt nachtragen“ ergänzt du sie Schritt für Schritt.',beispiel:'Ein Gespräch ohne Dauer fehlt sonst bei den Stunden.'},
  statFilter:{titel:'Filter',was:'Zeitraum und Merkmale lassen sich beliebig kombinieren; die Auswahl bleibt beim Seitenwechsel erhalten.',warum:'So beantwortest du Fragen wie „Wie viele Konflikte gab es in Klasse 7?“.',beispiel:'Zeitraum „1. Halbjahr“ und Thema „Konflikt / Mobbing“.'},
+ ssaTeam:{titel:'SSA-Team',was:'Die Personen, die in der Schulsozialarbeit dokumentieren und bei „Dokumentiert von“ zur Auswahl stehen.',warum:'Früher gab es verschiedene Schreibweisen für dieselbe Person. Die Zuordnung darunter fasst sie für die Statistik zusammen, ohne alte Einträge zu verändern.',beispiel:'„Edmund“ und „Bruns, Edmund“ zählen beide für Bruns, Edmund.'},
+ berichte:{titel:'Berichte zur Weitergabe',was:'Fertige, anonymisierte Berichte für Schulleitung, Träger oder RLSB.',warum:'Nur diese Berichte verlassen das Cockpit. Kleine Zahlen werden verdeckt, damit niemand auf einzelne Kinder schließen kann.',beispiel:'Der Jahresbericht zeigt „< 3“ statt 1 bei einem seltenen Thema.'},
+ weitergaben:{titel:'Weitergaben',was:'Protokoll, welcher Bericht wann an wen gegangen ist.',warum:'So kannst du jederzeit nachweisen, welche Zahlen die Schulsozialarbeit verlassen haben.',beispiel:'Jahresbericht 2026/27, als CSV an die Schulleitung.'},
  kreuztabelle:{titel:'Kreuztabelle',was:'Zwei Merkmale gegeneinander, mit Zeilen- und Spaltensummen.',warum:'Zeigt Zusammenhänge, zum Beispiel welche Themen in welcher Klassenstufe vorkommen.',beispiel:'Zeilen „Thema“, Spalten „Klassenstufe“.'},
  kontaktart:{titel:'Art des Kontakts',was:'Ob es ein Beratungsgespräch oder ein Krisengespräch war. Kurzkontakt, Gruppe und Klasse erkennt das Programm selbst.',warum:'So lässt sich später zeigen, wie viel Krisenarbeit anfällt.',beispiel:'Ein Kind kommt aufgelöst nach einem Streit zu Hause: Krisengespräch.'},
  zugangsweg:{titel:'Zugangsweg',was:'Wie der Kontakt zu diesem Kind in diesem Schuljahr zustande kam. Du wirst nur einmal pro Kind und Schuljahr gefragt.',warum:'Die Statistik zeigt, ob Kinder von selbst kommen oder vermittelt werden.',beispiel:'Die Klassenleitung hat das Kind geschickt: „Lehrkraft“.'},
@@ -153,7 +156,7 @@ function schnellnotizSpeichern(){
  const ids=[...new Set(snAktiveErwaehnungen().map(x=>x.id))].filter(id=>data.students.some(s=>s.id===id));
  const datum=today(),zeit=uhrzeitJetzt();
  try{
-  if(ids.length){const e=Dossier.addEntry(data,{date:datum,time:zeit,type:'Kurznotiz',title:typeof dossierAutoTitle==='function'?dossierAutoTitle(text.replace(/@/g,'')):text.slice(0,70),content:text,participantIds:ids,responsible:data.settings.activeUser||'SSA-Team'});e.actionSuggestions=[];}
+  if(ids.length){const e=Dossier.addEntry(data,{date:datum,time:zeit,type:'Kurznotiz',title:typeof dossierAutoTitle==='function'?dossierAutoTitle(text.replace(/@/g,'')):text.slice(0,70),content:text,participantIds:ids,responsible:Dossier.aktiveMitarbeitende(data)});e.actionSuggestions=[];}
   else data.schnellnotizen.push({id:Dossier.uid('notiz'),date:datum,time:zeit,text,createdAt:new Date().toISOString()});
   save();
  }catch(err){appAlert(err.message||String(err));return;}
@@ -197,7 +200,7 @@ function notizZuordnen(id){
  const n=(data.schnellnotizen||[]).find(x=>x.id===id);if(!n)return;
  dossierPopup('Notiz zuordnen',`<p class="subtle">Wähle das Kind oder die Kinder aus, zu denen die Notiz gehört. Sie erscheint dann in deren Chronik mit dem ursprünglichen Datum.</p><div class="notice">${DE(fmt(n.date))} · ${DE(n.time||'')}<br>${DE(n.text)}</div><div class="full">${dossierParticipantList([])}</div>`,async fd=>{
   const ids=fd.getAll('participantIds');if(!ids.length)throw Error('Bitte mindestens ein Kind auswählen.');
-  const e=Dossier.addEntry(data,{date:n.date,time:n.time,type:'Kurznotiz',title:typeof dossierAutoTitle==='function'?dossierAutoTitle(n.text.replace(/@/g,'')):n.text.slice(0,70),content:n.text,participantIds:ids,responsible:data.settings.activeUser||'SSA-Team'});e.actionSuggestions=[];
+  const e=Dossier.addEntry(data,{date:n.date,time:n.time,type:'Kurznotiz',title:typeof dossierAutoTitle==='function'?dossierAutoTitle(n.text.replace(/@/g,'')):n.text.slice(0,70),content:n.text,participantIds:ids,responsible:Dossier.aktiveMitarbeitende(data)});e.actionSuggestions=[];
   data.schnellnotizen=data.schnellnotizen.filter(x=>x.id!==id);save();closeModal('dossierEditModal');toast('Notiz zugeordnet.');
  });
 }
@@ -378,7 +381,7 @@ function statZeitraumGrenzen(){
   default:return {von,bis,text:'Schuljahr '+y+'/'+String(y+1).slice(2)};}
 }
 function statFilterObjekt(){const z=statZeitraumGrenzen();const f={von:z.von,bis:z.bis};for(const k of ['stufe','zweig','thema','zugangsweg','kontaktart','ergebnis','taetigkeit','mitarbeitend'])if(statF[k])f[k]=statF[k];return f;}
-function statWertText(merkmal,id){if(id===Dossier.NICHT_ERFASST)return 'nicht erfasst';if(merkmal==='stufe')return 'Klasse '+id;if(merkmal==='zweig')return id==='GS'?'Grundschule':id==='OBS'?'Oberschule':id;if(merkmal==='monat'){const d=new Date(id+'-15T12:00:00');return isNaN(d)?id:new Intl.DateTimeFormat('de-DE',{month:'short',year:'2-digit'}).format(d);}if(merkmal==='mitarbeitend')return id;if(merkmal==='arbeitsbereich')return {einzelfall:'Einzelfall',gruppen_klassen:'Gruppen und Klassen',kooperation:'Kooperation',verwaltung:'Verwaltung',fortbildung:'Fortbildung'}[id]||id;return Dossier.katLabel(merkmal,id);}
+function statWertText(merkmal,id){if(id===Dossier.NICHT_ERFASST)return merkmal==='mitarbeitend'?'nicht zugeordnet':'nicht erfasst';if(merkmal==='stufe')return 'Klasse '+id;if(merkmal==='zweig')return id==='GS'?'Grundschule':id==='OBS'?'Oberschule':id;if(merkmal==='monat'){const d=new Date(id+'-15T12:00:00');return isNaN(d)?id:new Intl.DateTimeFormat('de-DE',{month:'short',year:'2-digit'}).format(d);}if(merkmal==='mitarbeitend')return id;if(merkmal==='arbeitsbereich')return {einzelfall:'Einzelfall',gruppen_klassen:'Gruppen und Klassen',kooperation:'Kooperation',verwaltung:'Verwaltung',fortbildung:'Fortbildung'}[id]||id;return Dossier.katLabel(merkmal,id);}
 function statSelect(k,titel,optionen){return `<label class="stat-filter"><span>${DE(titel)}</span><select class="field" onchange="statF['${k}']=this.value;renderStatistikNeu()"><option value="">alle</option>${optionen.map(([v,l])=>`<option value="${DE(v)}" ${String(statF[k])===String(v)?'selected':''}>${DE(l)}</option>`).join('')}</select></label>`;}
 // Balken als eigenes SVG, darunter/daneben dieselben Zahlen als Tabelle
 function statBalkenTabelle(titel,merkmal,rows,einheit,hilfe){
@@ -391,12 +394,12 @@ function renderStatistikNeu(){
  const f=statFilterObjekt(),z=statZeitraumGrenzen(),zk=Dossier.zugangKarte(data),alle=Dossier.ereignisse(data),evs=Dossier.filterEreignisse(alle,f,zk),k=Dossier.kennzahlen(evs,f);
  const qEvs=Dossier.filterEreignisse(alle,{von:f.von,bis:f.bis},zk),q=Dossier.datenqualitaet(qEvs,zk);
  const stufen=[...new Set(alle.flatMap(e=>e.kinder.length?e.kinder.map(x=>x.stufe):[e.stufeAnonym]).filter(x=>x!=null&&x!==''))].sort((a,b)=>a-b);
- const mitarbeitende=[...new Set(alle.map(e=>e.mitarbeitend).filter(Boolean))].sort();
+ const mitarbeitende=[...new Set([...Dossier.ssaTeam(data),...alle.map(e=>e.mitarbeitend).filter(Boolean)])];
  const kat=m=>Dossier.katListe(m).map(x=>[x.id,x.label]);
  const aktiv=Object.entries(statF).filter(([key,v])=>v&&!['zeitraum','von','bis'].includes(key)).length;
  const kachel=(titel,wert,einheit,hilfe,zusatz='')=>`<div class="card kpi stat-kpi"><div class="label">${DE(titel)} ${hilfeKnopf(hilfe)}</div><div class="value">${String(wert).replace('.',',')}</div><div class="trend">${DE(einheit)}${zusatz}</div></div>`;
  const offen=q.ohneThema+q.ohneDauer+q.ohneZugang;
- box.innerHTML=`<div class="notice warning stat-intern"><strong>Intern – nicht weitergeben.</strong> Diese Ansicht zeigt exakte Zahlen, auch sehr kleine. Für Schulleitung und RLSB folgen anonymisierte Standardberichte.</div>
+ box.innerHTML=`<div class="notice warning stat-intern"><strong>Intern – nicht weitergeben.</strong> Diese Ansicht zeigt exakte Zahlen, auch sehr kleine. Für Schulleitung, Träger und RLSB gibt es unten die anonymisierten „Berichte zur Weitergabe“.</div>
  <section class="card stat-qualitaet ${offen?'':'ok'}"><div class="cardhead"><h3>Datenqualität ${hilfeKnopf('datenqualitaet')}</h3>${offen&&q.nachtragbar.length+q.kinderOhneZugang.length?`<button class="btn primary kleiner" onclick="statNachtragenStarten()">Jetzt nachtragen</button>`:''}</div><p>${offen?`Im gewählten Zeitraum: <strong>${q.ohneThema}</strong> Kontakte ohne Thema, <strong>${q.ohneDauer}</strong> ohne Dauer, <strong>${q.ohneZugang}</strong> Kinder ohne Zugangsweg.`:'Alle Kontakte im Zeitraum haben Thema, Dauer und Zugangsweg.'}${q.uebernommen?` <span class="subtle">${q.uebernommen} Kontakte stammen aus der Zeit vor 0.15 („übernommen“).</span>`:''}</p></section>
  <section class="card stat-filterleiste"><div class="cardhead"><h3>Filter ${hilfeKnopf('statFilter')}</h3>${aktiv||statF.zeitraum!=='schuljahr'?'<button class="btn kleiner" onclick="statFilterZuruecksetzen()">Filter zurücksetzen</button>':''}</div>
  <div class="stat-filter-reihe"><label class="stat-filter"><span>Zeitraum</span><select class="field" onchange="statF.zeitraum=this.value;renderStatistikNeu()">${[['schuljahr','Aktuelles Schuljahr'],['hj1','1. Halbjahr'],['hj2','2. Halbjahr'],['monat','Aktueller Monat'],['vorjahr','Vorjahr'],['frei','Frei wählen'],['alles','Gesamter Bestand']].map(([v,l])=>`<option value="${v}" ${statF.zeitraum===v?'selected':''}>${l}</option>`).join('')}</select></label>
@@ -415,9 +418,10 @@ function renderStatistikNeu(){
  ${statBalkenTabelle('Kontakte im Verlauf','monat',Dossier.aufschluesselung(evs.filter(e=>e.art==='kontakt'),'monat','kontakte',f,zk).sort((a,b)=>a.id.localeCompare(b.id)),'kontakte','')}
  ${statBalkenTabelle('Arbeitszeit nach Bereich','arbeitsbereich',Dossier.aufschluesselung(evs,'arbeitsbereich','stunden',f,zk),'stunden','stunden')}
  ${statBalkenTabelle('Tätigkeiten ohne Fall','taetigkeit',Dossier.aufschluesselung(evs,'taetigkeit','stunden',f,zk),'stunden','taetigkeit')}
- ${statBalkenTabelle('Kontakte nach Mitarbeitenden','mitarbeitend',Dossier.aufschluesselung(evs.filter(e=>e.art==='kontakt'),'mitarbeitend','kontakte',f,zk),'kontakte','')}
+ ${statBalkenTabelle('Kontakte nach Mitarbeitenden','mitarbeitend',Dossier.aufschluesselung(evs.filter(e=>e.art==='kontakt'),'mitarbeitend','kontakte',f,zk),'kontakte','ssaTeam').replace('</section>','<p class="subtle">Frühere Schreibweisen sind zusammengefasst. <button class="linkknopf" onclick="teamZuordnungOeffnen()">Zuordnung ansehen</button></p></section>')}
  </div>
- <section class="card stat-kreuz" id="statKreuzBereich">${statKreuzHtml(evs,f,zk)}</section>`;
+ <section class="card stat-kreuz" id="statKreuzBereich">${statKreuzHtml(evs,f,zk)}</section>
+ ${berichteHtml()}`;
 }
 function statKreuzHtml(evs,f,zk){
  const opt=sel=>Object.entries(STAT_MERKMALE).filter(([m])=>m!=='arbeitsbereich').map(([m,l])=>`<option value="${m}" ${sel===m?'selected':''}>${DE(l)}</option>`).join('');
@@ -449,6 +453,87 @@ function statNachtragZeigen(){
   try{if(x.typ==='eintrag'){const themen=fd.getAll('thema'),dauer=fd.get('dauer_min');if(!themen.length&&!dauer){appAlert('Bitte mindestens eine Angabe wählen oder „Überspringen“.');return;}Dossier.statNachtragen(data,x.entryId,{themen,dauer_min:dauer});}
    else{const z=fd.get('zugangsweg');if(!z){appAlert('Bitte einen Zugangsweg wählen oder „Überspringen“.');return;}Dossier.zugangswegSetzen(data,x.sid,z,x.date,'nachgetragen');}
    save();statNachtragPos++;statNachtragZeigen();}catch(err){appAlert(err.message||String(err));}};
+}
+
+/* ================================================================
+   7. SSA-TEAM (0.17) – eine Schreibweise je Person
+   ================================================================ */
+function renderTeamKarte(){
+ const box=document.getElementById('teamKarte');if(!box)return;
+ if(box.contains(document.activeElement)&&document.activeElement.tagName==='TEXTAREA')return;
+ const team=Dossier.ssaTeam(data),aktiv=aktivePerson(),sw=Dossier.mitarbeitendSchreibweisen(data);
+ const ergebnisText=x=>x.zuordnung===''?'nicht zugeordnet':team.includes(x.zuordnung)?x.zuordnung:'bleibt „'+x.zuordnung+'“';
+ box.innerHTML=`<div class="cardhead"><h3>SSA-Team ${hilfeKnopf('ssaTeam')}</h3></div>
+ <p class="subtle">Nur diese Personen stehen bei „Dokumentiert von“, „Verantwortlich“ und „Durchgeführt von“ zur Auswahl.</p>
+ <div class="formgroup"><label for="aktivePersonFeld">Wer arbeitet an diesem Rechner?</label><select class="field" id="aktivePersonFeld" onchange="aktivePersonSetzen(this.value)">${team.map(n=>`<option ${n===aktiv?'selected':''}>${DE(n)}</option>`).join('')}</select><span class="hint">Wird bei neuen Einträgen vorbelegt.</span></div>
+ <details class="team-bearbeiten"><summary>Team-Liste ändern</summary><div class="formgroup"><label for="teamListeFeld">Eine Person pro Zeile</label><textarea class="field" id="teamListeFeld" rows="4">${DE(team.join('\n'))}</textarea></div><button class="btn kleiner" onclick="teamSpeichern()">Team-Liste speichern</button></details>
+ ${sw.length?`<h4 class="team-sw-titel">Frühere Schreibweisen</h4><p class="subtle">Alte Einträge bleiben, wie sie sind. Hier legst du fest, wem sie in der Statistik zugerechnet werden.</p>
+ <div class="team-sw"><table class="stat-tabelle"><thead><tr><th>Eingetragen als</th><th class="zahl">Anzahl</th><th>Zählt für</th></tr></thead><tbody>${sw.map(x=>`<tr><td>${DE(x.roh)}</td><td class="zahl">${x.anzahl}</td><td><select class="field" data-roh="${DE(x.roh)}" onchange="schreibweiseZuordnen(this.dataset.roh,this.value)"><option value="__auto" ${x.auto?'selected':''}>${DE(ergebnisText(x))} (automatisch)</option>${team.map(n=>`<option value="${DE(n)}" ${!x.auto&&x.zuordnung===n?'selected':''}>${DE(n)}</option>`).join('')}<option value="" ${!x.auto&&x.zuordnung===''?'selected':''}>keiner Person zuordnen</option></select></td></tr>`).join('')}</tbody></table></div>`:''}`;
+}
+function teamSpeichern(){
+ const liste=[...new Set(String(document.getElementById('teamListeFeld')?.value||'').split(/\n/).map(x=>x.trim()).filter(Boolean))];
+ if(!liste.length){appAlert('Bitte mindestens eine Person eintragen.');return;}
+ const sammel=liste.find(x=>/^(ssa-team|ssa|team|schulsozialarbeit)$/i.test(x));
+ if(sammel){appAlert('„'+sammel+'“ ist kein Personenname. Bitte nur einzelne Personen eintragen.');return;}
+ data.settings.ssaTeam=liste;
+ if(!liste.includes(data.settings.activeUser))data.settings.activeUser=Dossier.aktiveMitarbeitende(data);
+ document.activeElement?.blur?.();save();renderTeamKarte();toast('Team-Liste gespeichert.');
+}
+function schreibweiseZuordnen(roh,ziel){
+ try{Dossier.mitarbeitendZuordnen(data,roh,ziel);}catch(err){appAlert(err.message||String(err));return;}
+ save();renderTeamKarte();toast('„'+roh+'“ wird jetzt '+(ziel==='__auto'?'automatisch zugeordnet.':ziel?'für '+ziel+' gezählt.':'keiner Person zugerechnet.'));
+}
+function teamZuordnungOeffnen(){go('settings');setTimeout(()=>document.getElementById('teamKarte')?.scrollIntoView({behavior:'smooth',block:'start'}),60);}
+
+/* ================================================================
+   8. BERICHTE ZUR WEITERGABE (0.17) – anonymisiert, mit Vorschau und Protokoll
+   ================================================================ */
+let berichtWahl={art:'jahresbericht',schuljahr:'',halbjahr:1};
+let berichtAktuell=null;
+function berichtSchuljahre(){
+ const akt=data.settings.currentSchoolYear||Dossier.schoolYear(today());
+ const jahre=new Set([akt,...Dossier.ereignisse(data).map(e=>e.schoolYear)].filter(Boolean));
+ return [...jahre].sort().reverse();
+}
+function berichteHtml(){
+ const jahre=berichtSchuljahre();if(!berichtWahl.schuljahr||!jahre.includes(berichtWahl.schuljahr))berichtWahl.schuljahr=jahre[0];
+ const w=data.weitergaben||[];
+ return `<section class="card stat-berichte" id="statBerichte"><div class="cardhead"><h3>Berichte zur Weitergabe ${hilfeKnopf('berichte')}</h3><span class="tag">anonymisiert</span></div>
+ <p class="subtle">Nur diese Standardberichte verlassen das Cockpit. Vor dem Speichern oder Drucken siehst du jede Tabelle in der Vorschau.</p>
+ <div class="stat-filter-reihe"><label class="stat-filter"><span>Bericht</span><select class="field" onchange="berichtWahl.art=this.value;renderStatistikNeu()">${Object.entries(Dossier.BERICHTE).map(([k,l])=>`<option value="${k}" ${berichtWahl.art===k?'selected':''}>${DE(l)}</option>`).join('')}</select></label>
+ <label class="stat-filter"><span>Schuljahr</span><select class="field" onchange="berichtWahl.schuljahr=this.value;renderStatistikNeu()">${jahre.map(j=>`<option ${berichtWahl.schuljahr===j?'selected':''}>${DE(j)}</option>`).join('')}</select></label>
+ ${berichtWahl.art==='halbjahr'?`<label class="stat-filter"><span>Halbjahr</span><select class="field" onchange="berichtWahl.halbjahr=Number(this.value);renderStatistikNeu()"><option value="1" ${berichtWahl.halbjahr===1?'selected':''}>1. Halbjahr</option><option value="2" ${berichtWahl.halbjahr===2?'selected':''}>2. Halbjahr</option></select></label>`:''}
+ <div class="stat-filter stat-bericht-knopf"><span>&nbsp;</span><button class="btn primary" onclick="berichtVorschau()">Vorschau öffnen</button></div></div></section>
+ <section class="card stat-weitergaben" id="statWeitergaben"><div class="cardhead"><h3>Weitergaben ${hilfeKnopf('weitergaben')}</h3><span class="tag gray">${w.length} protokolliert</span></div>
+ ${w.length?`<div class="team-sw"><table class="stat-tabelle"><thead><tr><th>Datum</th><th>Bericht</th><th>Zeitraum</th><th>Empfänger</th><th>Zweck</th><th>Format</th><th>von</th></tr></thead><tbody>${w.slice().reverse().map(x=>`<tr><td>${DE(fmt(String(x.am).slice(0,10)))}</td><td>${DE(x.bericht)}</td><td>${DE(x.zeitraum)}</td><td>${DE(x.empfaenger)}</td><td>${DE(x.zweck||'')}</td><td>${DE(x.format)}</td><td>${DE(x.von||'')}</td></tr>`).join('')}</tbody></table></div>`:'<p class="subtle">Noch keine Weitergabe. Jede gespeicherte oder gedruckte Weitergabe wird hier eingetragen.</p>'}</section>`;
+}
+function berichtTabellenHtml(b){
+ return (b.rueckblick?`<h2>Fachlicher Jahresrückblick</h2><p class="rueckblick">${DE(b.rueckblick).replace(/\n/g,'<br>')}</p>`:'')+b.abschnitte.map(a=>`<h2>${DE(a.titel)}</h2><table><thead><tr>${a.kopf.map((k,i)=>`<th${i?' class="zahl"':''}>${DE(k)}</th>`).join('')}</tr></thead><tbody>${a.zeilen.length?a.zeilen.map(r=>`<tr><td>${DE(r.label)}</td>${r.zellen.map(z=>`<td class="zahl">${DE(z)}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${a.kopf.length}">Keine Einträge im Zeitraum.</td></tr>`}</tbody>${a.fuss?`<tfoot><tr><th>${DE(a.fuss.label)}</th>${a.fuss.zellen.map(z=>`<th class="zahl">${DE(z)}</th>`).join('')}</tr></tfoot>`:''}</table>${a.hinweis?`<p class="hinweis">${DE(a.hinweis)}</p>`:''}`).join('');
+}
+function berichtDokumentHtml(b){
+ return `<h1>${DE(b.titel)} · ${DE(b.zeitraum)}</h1><p>Schulsozialarbeit an der Ludgerusschule Rhede (Ems) · erstellt am ${DE(fmt(String(b.erstellt).slice(0,10)))}</p>${berichtTabellenHtml(b)}<h2>Hinweise</h2><ul>${b.hinweise.map(h=>`<li>${DE(h)}</li>`).join('')}</ul>`;
+}
+function berichtVorschau(){
+ try{berichtAktuell=Dossier.standardbericht(data,berichtWahl.art,{schuljahr:berichtWahl.schuljahr,halbjahr:berichtWahl.halbjahr,rueckblick:data.settings.annualNarrative||''});}catch(err){appAlert(err.message||String(err));return;}
+ document.getElementById('berichtModal')?.remove();
+ const b=berichtAktuell,wrap=document.createElement('div');wrap.className='modal open';wrap.id='berichtModal';wrap.style.zIndex='57';
+ wrap.innerHTML=`<div class="dialog wide" role="dialog" aria-modal="true" aria-labelledby="berichtTitel"><div class="dialoghead"><h2 id="berichtTitel">${DE(b.titel)} · ${DE(b.zeitraum)}</h2><button class="close" onclick="document.getElementById('berichtModal').remove()">×</button></div><div class="dialogbody">
+ <div class="notice warning"><strong>Diese Tabelle verlässt das Cockpit. Bitte prüfen.</strong> Stimmen die Zahlen, und ist nichts dabei, das auf ein einzelnes Kind schließen lässt?</div>
+ <div class="bericht-vorschau">${berichtTabellenHtml(b)}<ul class="subtle">${b.hinweise.map(h=>`<li>${DE(h)}</li>`).join('')}</ul></div>
+ <form id="berichtForm" class="dossier-grid" onsubmit="event.preventDefault()"><label>An wen geht der Bericht? *<input class="field" name="empfaenger" required placeholder="z. B. Schulleitung, RLSB, Träger"></label><label>Zweck (optional)<input class="field" name="zweck" placeholder="z. B. Jahresgespräch"></label></form>
+ <div class="actions"><button class="btn" onclick="document.getElementById('berichtModal').remove()">Abbrechen</button><button class="btn" onclick="berichtWeitergeben('Druck')">Drucken</button><button class="btn primary" onclick="berichtWeitergeben('CSV')">Als CSV speichern</button></div></div></div>`;
+ document.body.appendChild(wrap);wrap.querySelector('input[name=empfaenger]')?.focus();
+}
+function berichtWeitergeben(format){
+ const b=berichtAktuell,form=document.getElementById('berichtForm');if(!b||!form)return;
+ const empfaenger=form.elements.empfaenger.value.trim(),zweck=form.elements.zweck.value.trim();
+ if(!empfaenger){form.elements.empfaenger.focus();form.elements.empfaenger.reportValidity?.();toast('Bitte angeben, an wen der Bericht geht.');return;}
+ try{Dossier.weitergabeProtokollieren(data,{bericht:b.titel,zeitraum:b.zeitraum,empfaenger,zweck,format});}catch(err){appAlert(err.message||String(err));return;}
+ save();document.getElementById('berichtModal')?.remove();
+ const name=(b.titel+'_'+b.zeitraum).replace(/[^A-Za-z0-9ÄÖÜäöüß]+/g,'_').replace(/_+$/,'');
+ if(format==='CSV'){download(name+'.csv',Dossier.berichtCsv(b),'text/csv;charset=utf-8');toast('Bericht gespeichert und im Protokoll „Weitergaben“ eingetragen.');}
+ else printDocument(b.titel+' '+b.zeitraum,berichtDokumentHtml(b));
+ renderStatistikNeu();
 }
 
 /* ================================================================

@@ -1,4 +1,4 @@
-# SSA-Cockpit 0.16.1
+# SSA-Cockpit 0.17.0
 
 ## Alltag
 
@@ -20,7 +20,17 @@ Für Arbeit ohne einzelnes Kind (Konferenz, Elternabend, Projekt, Pausenpräsenz
 
 ## Statistik
 
-Unter **Auswertung** steht die interne Statistik. Oben zeigt „Datenqualität“, wo Angaben fehlen; **Jetzt nachtragen** führt dich Eintrag für Eintrag durch die Lücken. Darunter stehen fünf Kennzahlen, die Filter und für jedes Merkmal ein Balkendiagramm mit derselben Tabelle. In der **Kreuztabelle** stellst du zwei Merkmale gegeneinander, zum Beispiel Thema und Klassenstufe. Diese Seite zeigt exakte Zahlen und ist nur für dich und dein Team gedacht – Berichte für Schulleitung und RLSB kommen als anonymisierte Standardberichte.
+Unter **Auswertung** steht die interne Statistik. Oben zeigt „Datenqualität“, wo Angaben fehlen; **Jetzt nachtragen** führt dich Eintrag für Eintrag durch die Lücken. Darunter stehen fünf Kennzahlen, die Filter und für jedes Merkmal ein Balkendiagramm mit derselben Tabelle. In der **Kreuztabelle** stellst du zwei Merkmale gegeneinander, zum Beispiel Thema und Klassenstufe. Diese Seite zeigt exakte Zahlen und ist nur für dich und dein Team gedacht.
+
+## Berichte zur Weitergabe
+
+Was die Schulsozialarbeit verlässt, geht nur über **Auswertung → Berichte zur Weitergabe**. Es gibt fünf Standardberichte: Jahresbericht, Halbjahresüberblick, Arbeitszeitverteilung, Prävention je Klassenstufe und Vorjahresvergleich. Die Zahlen sind anonymisiert: 1 und 2 erscheinen als „< 3“, in Kreuztabellen Werte unter 5 als „< 5“, und „•“ verdeckt zusätzlich eine Zahl, die sich sonst aus der Summe zurückrechnen ließe. Kinderschutz, Krise und Sucht stehen nur als Gesamtzahl im Jahresbericht; Namen und Mitarbeitende erscheinen nie. Sind zu viele Zahlen je Klassenstufe zu klein, fasst der Bericht zu Grundschule und Oberschule zusammen und sagt das dazu.
+
+**Vorschau öffnen** zeigt jede Tabelle mit dem Hinweis „Diese Tabelle verlässt das Cockpit. Bitte prüfen.“ Erst mit der Angabe, an wen der Bericht geht, lässt er sich als CSV speichern oder drucken. Jede Weitergabe steht danach im Protokoll **Weitergaben**. Der Text aus „Fachlicher Jahresrückblick“ kommt in den Jahresbericht.
+
+## SSA-Team
+
+Unter **Daten und Einstellungen → SSA-Team** steht, wer in der Schulsozialarbeit dokumentiert. Nur diese Personen stehen bei „Dokumentiert von“, „Verantwortlich“ und „Durchgeführt von“ zur Auswahl; „Wer arbeitet an diesem Rechner?“ legt die Vorbelegung fest. Unter **Frühere Schreibweisen** siehst du alte Angaben wie „Edmund“, „Sabine Thien“ oder „SSA-Team“ und wem sie in der Statistik zugerechnet werden. Die alten Einträge selbst bleiben unverändert.
 
 ## Gespräch vorbereiten
 

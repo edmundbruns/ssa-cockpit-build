@@ -58,7 +58,7 @@ function journalCase(state,sid,entry,reopen=false){
  state.statusHistory.push(stamp(state,{id:uid('sh'),caseId,studentId:sid,date:entry.date,status:'Klärungsphase',fromStatus:'',responsible:entry.responsible||'SSA',reason:'Fallakte aus personenbezogenem Chronikeintrag angelegt'}));
 }
 function normalize(state){
- state.settings=state.settings||{};state.auftraege=Array.isArray(state.auftraege)?state.auftraege:[];state.schnellnotizen=Array.isArray(state.schnellnotizen)?state.schnellnotizen:[];state.zugangswege=Array.isArray(state.zugangswege)?state.zugangswege:[];state.taetigkeiten=Array.isArray(state.taetigkeiten)?state.taetigkeiten:[];state.students=state.students||[];state.cases=state.cases||[];state.tasks=state.tasks||[];
+ state.settings=state.settings||{};state.auftraege=Array.isArray(state.auftraege)?state.auftraege:[];state.schnellnotizen=Array.isArray(state.schnellnotizen)?state.schnellnotizen:[];state.zugangswege=Array.isArray(state.zugangswege)?state.zugangswege:[];state.taetigkeiten=Array.isArray(state.taetigkeiten)?state.taetigkeiten:[];state.weitergaben=Array.isArray(state.weitergaben)?state.weitergaben:[];state.students=state.students||[];state.cases=state.cases||[];state.tasks=state.tasks||[];
  for(const k of collections)state[k]=state[k]||[];
  state.importLinks=state.importLinks||{};state.classLeadHistory=state.classLeadHistory||{};
  for(const c of state.cases){const student=state.students.find(s=>s.id===c.studentId);if(!c.lastContact&&/^\d{4}-\d{2}-\d{2}$/.test(String(c.last||''))){c.lastContact=c.last;c.last=student?.last||'';}if(!c.lastContact)c.lastContact=c.last||'';}
@@ -75,6 +75,7 @@ function normalize(state){
    entry.suggestionVersion=4;
   }
  }
+ if(!ssaTeam(state).includes(state.settings.activeUser))state.settings.activeUser=aktiveMitarbeitende(state);
  state.settings.dossierVersion=1;return state;
 }
 function lookup(state,p,source){
@@ -221,7 +222,7 @@ function stufeZweig(className){const m=String(className||'').match(/^\s*(\d{1,2}
 function klassenSnapshot(state,participantIds,date){const out={};for(const sid of participantIds||[]){const c=context(state,sid,date).className||'';out[sid]={klasse:c,...stufeZweig(c)};}return out;}
 function statErfassen(state,input,participantIds,date){
  const k=kategorien(date),ok=(m,v)=>(k.merkmale[m]||[]).some(e=>String(e[0])===String(v));
- const stat={version:k.version,quelle:'erfasst',kontaktart:ok('kontaktart',input.kontaktart)?input.kontaktart:'',themen:[...new Set((input.themen||[]).filter(v=>ok('thema',v)))],beteiligte:[...new Set((input.beteiligte||[]).filter(v=>ok('beteiligte',v)))],dauer_min:Math.max(0,Number(input.dauer_min)||0)||null,ergebnis:ok('ergebnis',input.ergebnis)?input.ergebnis:'',mitarbeitend:String(input.mitarbeitend||state.settings?.activeUser||'SSA-Team'),klassen:klassenSnapshot(state,participantIds,date)};
+ const stat={version:k.version,quelle:'erfasst',kontaktart:ok('kontaktart',input.kontaktart)?input.kontaktart:'',themen:[...new Set((input.themen||[]).filter(v=>ok('thema',v)))],beteiligte:[...new Set((input.beteiligte||[]).filter(v=>ok('beteiligte',v)))],dauer_min:Math.max(0,Number(input.dauer_min)||0)||null,ergebnis:ok('ergebnis',input.ergebnis)?input.ergebnis:'',mitarbeitend:String(input.mitarbeitend||aktiveMitarbeitende(state)),klassen:klassenSnapshot(state,participantIds,date)};
  if(input.teilnehmende)stat.teilnehmende=Math.max(0,Number(input.teilnehmende)||0);return stat;
 }
 // Zugangsweg: genau einmal je Kind und Schuljahr
@@ -235,7 +236,7 @@ function zugangswegSetzen(state,sid,zugangsweg,date,quelle='erfasst'){
 function addTaetigkeit(state,input){
  const date=input.date||day();if(!iso(date))throw Error('Datum prüfen.');
  if(!katListe('taetigkeit',date).some(e=>e.id===input.taetigkeit))throw Error('Bitte eine Tätigkeit auswählen.');
- const t=stamp(state,{id:uid('taetigkeit'),date,schoolYear:schoolYear(date),kategorieVersion:kategorien(date).version,taetigkeit:input.taetigkeit,dauer_min:Math.max(0,Number(input.dauer_min)||0)||null,klasse:String(input.klasse||'').trim(),...stufeZweig(input.klasse),teilnehmende:Math.max(0,Number(input.teilnehmende)||0)||null,notiz:String(input.notiz||'').trim(),mitarbeitend:String(input.mitarbeitend||state.settings?.activeUser||'SSA-Team'),createdAt:new Date().toISOString()});
+ const t=stamp(state,{id:uid('taetigkeit'),date,schoolYear:schoolYear(date),kategorieVersion:kategorien(date).version,taetigkeit:input.taetigkeit,dauer_min:Math.max(0,Number(input.dauer_min)||0)||null,klasse:String(input.klasse||'').trim(),...stufeZweig(input.klasse),teilnehmende:Math.max(0,Number(input.teilnehmende)||0)||null,notiz:String(input.notiz||'').trim(),mitarbeitend:String(input.mitarbeitend||aktiveMitarbeitende(state)),createdAt:new Date().toISOString()});
  state.taetigkeiten.push(t);return t;
 }
 // Merkmale eines Eintrags für die Auswertung. Gespeicherte Werte gelten; bei alten Einträgen wird nur Eindeutiges übernommen
@@ -255,6 +256,43 @@ function statMerkmale(state,e){
    Alle Zahlen entstehen aus ereignisse(): Chronik-Einträge, anonyme Kurzkontakte, alte Fallverlaufs-Kontakte,
    alte Gruppengespräche, Klassenmaßnahmen und Tätigkeiten ohne Fall. Keine zweite Datenhaltung. */
 const NICHT_ERFASST='nicht_erfasst';
+/* Mitarbeitende (0.17): feste Team-Liste, alte Schreibweisen werden beim Auswerten zugeordnet.
+   Gespeicherte Einträge bleiben unverändert; die Zuordnung liegt in settings.mitarbeitendZuordnung. */
+const SSA_TEAM_STANDARD=['Bruns, Edmund','Thien, Sabine','Anerkennungspraktikantin Laura Geiger'];
+const SAMMELNAMEN=['ssa-team','ssa team','ssa','schulsozialarbeit','team','ich'];
+function ssaTeam(state){const t=(state.settings?.ssaTeam||[]).map(x=>String(x||'').trim()).filter(Boolean);return t.length?[...new Set(t)]:[...SSA_TEAM_STANDARD];}
+function namensTeile(s){return String(s||'').toLowerCase().replace(/[.,;:()\/]+/g,' ').split(/\s+/).filter(Boolean);}
+// Automatische Zuordnung: alle Namensteile der alten Schreibweise kommen in genau einem Teammitglied vor
+function mitarbeitendAuto(team,roh){
+ const r=String(roh||'').trim();if(!r)return '';if(team.includes(r))return r;
+ if(SAMMELNAMEN.includes(r.toLowerCase()))return '';
+ const teile=namensTeile(r);if(!teile.length)return null;
+ const treffer=team.filter(t=>{const tt=namensTeile(t);return teile.every(x=>tt.includes(x));});
+ return treffer.length===1?treffer[0]:null;
+}
+// Ergebnis: Teammitglied, '' (nicht zugeordnet) oder die unveränderte Angabe (z. B. „Andere Person oder Institution“)
+function mitarbeitendKanonisch(state,roh){
+ const r=String(roh||'').trim(),team=ssaTeam(state),map=state.settings?.mitarbeitendZuordnung||{};
+ if(Object.prototype.hasOwnProperty.call(map,r)){const z=map[r];return z===''||team.includes(z)?z:r;}
+ const a=mitarbeitendAuto(team,r);return a===null?r:a;
+}
+// Alle vorkommenden Schreibweisen mit Anzahl und aktueller Zuordnung (für die Einstellungen)
+function mitarbeitendSchreibweisen(state){
+ const m=new Map(),team=ssaTeam(state),add=v=>{const r=String(v||'').trim();if(!r)return;m.set(r,(m.get(r)||0)+1);};
+ for(const e of state.journal||[])if(!e.deletedAt)add(e.stat?.mitarbeitend||e.responsible);
+ for(const q of state.quickContacts||[])if(q.anonymous)add(q.mitarbeitend);
+ for(const c of state.contacts||[])add(c.responsible);
+ for(const g of state.groupTalks||[])add(g.responsible);
+ for(const a of state.classActivities||[])add(a.facilitator);
+ for(const t of state.taetigkeiten||[])add(t.mitarbeitend);
+ return [...m.entries()].filter(([r])=>!team.includes(r)).map(([roh,anzahl])=>({roh,anzahl,zuordnung:mitarbeitendKanonisch(state,roh),auto:!Object.prototype.hasOwnProperty.call(state.settings?.mitarbeitendZuordnung||{},roh)})).sort((a,b)=>b.anzahl-a.anzahl||a.roh.localeCompare(b.roh,'de'));
+}
+function mitarbeitendZuordnen(state,roh,ziel){
+ state.settings=state.settings||{};const map=state.settings.mitarbeitendZuordnung=state.settings.mitarbeitendZuordnung||{};
+ const z=String(ziel??'').trim();if(z==='__auto')delete map[roh];else if(z===''||ssaTeam(state).includes(z))map[roh]=z;else throw new Error('Bitte eine Person aus dem SSA-Team wählen.');
+}
+// Wer arbeitet gerade? Immer ein Teammitglied.
+function aktiveMitarbeitende(state){const a=mitarbeitendKanonisch(state,state.settings?.activeUser);const team=ssaTeam(state);return team.includes(a)?a:team[0];}
 function zugangKarte(state){const m=new Map();for(const z of state.zugangswege||[])if(!m.has(z.studentId+'|'+z.schoolYear))m.set(z.studentId+'|'+z.schoolYear,z.zugangsweg);return m;}
 function kindAus(state,sid,date,snap){const s=snap&&snap[sid];if(s&&s.stufe!=null)return {sid,stufe:s.stufe,zweig:s.zweig};const c=context(state,sid,date).className||'';return {sid,...stufeZweig(c)};}
 function ereignisse(state){
@@ -272,6 +310,7 @@ function ereignisse(state){
  for(const a of state.classActivities||[]){const sz=stufeZweig(a.className);
   push({id:'class:'+a.id,art:'kontakt',quelle:'uebernommen',date:d(a.date),kontaktart:'klasse',themen:[],beteiligte:[],dauer_min:Number(a.duration)||null,ergebnis:'',mitarbeitend:a.facilitator||'',kinder:[],anonym:true,stufeAnonym:sz.stufe,zweigAnonym:sz.zweig,teilnehmende:(a.participantIds||[]).length||Number(a.participants)||null});}
  for(const t of state.taetigkeiten||[])push({id:'taetigkeit:'+t.id,art:'taetigkeit',quelle:'erfasst',date:d(t.date),taetigkeit:t.taetigkeit,dauer_min:t.dauer_min||null,mitarbeitend:t.mitarbeitend||'',kinder:[],anonym:true,stufeAnonym:t.stufe??null,zweigAnonym:t.zweig||'',teilnehmende:t.teilnehmende||null,themen:[],beteiligte:[],kontaktart:'',ergebnis:''});
+ for(const ev of out){ev.mitarbeitendRoh=ev.mitarbeitend;ev.mitarbeitend=mitarbeitendKanonisch(state,ev.mitarbeitend);}
  return out;
 }
 const KONTAKT_FILTER=['thema','zugangsweg','kontaktart','ergebnis'];
@@ -501,7 +540,7 @@ function quickContact(state,input){
  const date=input.date||day();if(!iso(date))throw Error('Datum prüfen.');
  const duration=Math.max(1,Math.min(240,Number(input.duration)||5));
  const occasions=[...new Set((input.occasions||input.occasion||[]).filter(Boolean).map(String))];const themen=[...new Set((input.themen||[]).map(String))];
- const row={id:uid('quick'),date,occasions,themen,kategorieVersion:kategorien(date).version,mitarbeitend:String(state.settings?.activeUser||'SSA-Team'),duration,className:String(input.className||''),grade:String(input.grade||''),anonymous:!!input.anonymous,note:String(input.note||'').trim(),createdAt:new Date().toISOString()};
+ const row={id:uid('quick'),date,occasions,themen,kategorieVersion:kategorien(date).version,mitarbeitend:aktiveMitarbeitende(state),duration,className:String(input.className||''),grade:String(input.grade||''),anonymous:!!input.anonymous,note:String(input.note||'').trim(),createdAt:new Date().toISOString()};
  if(!row.anonymous){
   if(!input.studentId||!state.students.some(s=>s.id===input.studentId))throw Error('Kind auswählen.');
   row.studentId=input.studentId;row.participantIds=[input.studentId];
@@ -612,5 +651,146 @@ function journalStats(state,year='',className='all'){
  return state.journal.filter(e=>!e.generalInfo&&!e.planned&&e.type!=='zusätzliche Information'&&e.type!=='Kurznotiz'&&e.type!=='Zusage erledigt'&&(!year||e.schoolYear===year)&& (className==='all'||e.participantIds.some(sid=>{const cl=recordContext(state,e,sid).className;return className.startsWith('jg:')?cl.match(/^\d+/)?.[0]===className.slice(3):cl===className}))).map(e=>({...e,duration:e.duration*Math.max(1,(e.facilitators||[]).length)}));
 }
 function restore(raw,sanitize){const state=sanitize(raw);for(const [i,e]of (state.journal||[]).entries()){const original=raw.journal?.[i];if(!original)continue;for(const key of ['content','childView','otherView','observation','assessment','agreement','goal','result','source','people'])if(typeof original[key]==='string')e[key]=original[key];if(original.individualNotes&&typeof original.individualNotes==='object')for(const key of Object.keys(e.individualNotes||{}))if(typeof original.individualNotes[key]==='string')e.individualNotes[key]=original.individualNotes[key];}return state;}
-root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,safetyHint,KATEGORIEN_VERSIONEN,kategorien,katListe,katLabel,stufeZweig,statErfassen,statMerkmale,zugangswegFuer,zugangswegSetzen,addTaetigkeit,ereignisse,zugangKarte,filterEreignisse,kennzahlen,aufschluesselung,kreuztabelle,datenqualitaet,statNachtragen,werteVon,NICHT_ERFASST,addStudent,similarStudents,zusageErledigtEintragen,SAFETY_NOTICE};
+/* ================================================================
+   WEITERGABE (0.17): Standardberichte mit Anonymisierung
+   Nur diese Berichte verlassen das Cockpit. Kleinste Einheiten: Halbjahr und Klassenstufe.
+   Mitarbeitende erscheinen nie. Kinderschutz, Krise und Sucht nur als Gesamtzahl je Schuljahr.
+   ================================================================ */
+const GESCHUETZTE_THEMEN=['kinderschutz','emotionen_krise','sucht'];
+const BERICHTE={jahresbericht:'Jahresbericht',halbjahr:'Halbjahresüberblick',arbeitszeit:'Arbeitszeitverteilung',praevention:'Prävention je Klassenstufe',vorjahr:'Vorjahresvergleich'};
+const ARBEITSBEREICHE={einzelfall:'Einzelfall',gruppen_klassen:'Gruppen und Klassen',kooperation:'Kooperation',verwaltung:'Verwaltung',fortbildung:'Fortbildung'};
+const GRENZE_LISTE=3,GRENZE_KREUZ=5,FOLGE='•';
+function wertLabel(merkmal,id){
+ if(id===NICHT_ERFASST||id==null||id==='')return 'nicht erfasst';
+ if(merkmal==='stufe')return 'Jahrgang '+id;
+ if(merkmal==='zweig')return id==='GS'?'Grundschule':id==='OBS'?'Oberschule':String(id);
+ if(merkmal==='arbeitsbereich')return ARBEITSBEREICHE[id]||String(id);
+ if(merkmal==='schuljahr')return 'Schuljahr '+id;
+ return katLabel(merkmal,id);
+}
+/* Kleinzahlregel mit wiederholtem Folgeschutz.
+   werte: Matrix [zeilen][spalten]. Summen werden aus den Zellen gebildet und mitgeprüft.
+   Jede angezeigte Summe bildet mit ihren Zellen eine Gleichung. Ist in einer Gleichung genau ein Wert
+   unterdrückt, wird der kleinste weitere Wert (> 0) unterdrückt – so lange, bis sich nichts mehr ändert. */
+function anonymMatrix(werte,{grenze=GRENZE_LISTE,zeilenSummen=false,spaltenSummen=false}={}){
+ const Z=werte.length,S=Z?werte[0].length:0,zelle=w=>({wert:Number(w)||0,s:''});
+ const zellen=werte.map(r=>r.map(zelle));
+ const R=zeilenSummen?zellen.map(r=>zelle(r.reduce((a,c)=>a+c.wert,0))):null;
+ const C=spaltenSummen?Array.from({length:S},(_,j)=>zelle(zellen.reduce((a,r)=>a+r[j].wert,0))):null;
+ const G=zeilenSummen&&spaltenSummen?zelle(zellen.reduce((a,r)=>a+r.reduce((b,c)=>b+c.wert,0),0)):null;
+ const alle=[...zellen.flat(),...(R||[]),...(C||[]),...(G?[G]:[])];
+ for(const c of alle)if(c.wert>0&&c.wert<grenze)c.s='klein';
+ const gl=[];
+ if(R)zellen.forEach((r,i)=>gl.push([...r,R[i]]));
+ if(C)for(let j=0;j<S;j++)gl.push([...zellen.map(r=>r[j]),C[j]]);
+ if(G){gl.push([...R,G]);gl.push([...C,G]);}
+ let geaendert=true,runden=0;
+ while(geaendert&&runden++<500){geaendert=false;
+  for(const g of gl){if(g.filter(c=>c.s).length!==1)continue;
+   const kand=g.filter(c=>!c.s&&c.wert>0).sort((a,b)=>a.wert-b.wert);
+   if(kand.length){kand[0].s='folge';geaendert=true;}}
+ }
+ const anzeige=c=>c.s==='klein'?'< '+grenze:c.s==='folge'?FOLGE:String(c.wert);
+ const unterdrueckt=alle.filter(c=>c.s).length,folge=alle.filter(c=>c.s==='folge').length;
+ return {zellen:zellen.map(r=>r.map(c=>({...c,anzeige:anzeige(c)}))),zeilenSummen:R&&R.map(c=>({...c,anzeige:anzeige(c)})),spaltenSummen:C&&C.map(c=>({...c,anzeige:anzeige(c)})),gesamt:G&&{...G,anzeige:anzeige(G)},unterdrueckt,folge,nichtNull:zellen.flat().filter(c=>c.wert>0).length,zellenUnterdrueckt:zellen.flat().filter(c=>c.s).length};
+}
+function kennzahlAnzeige(w){w=Number(w)||0;return w>0&&w<GRENZE_LISTE?'< '+GRENZE_LISTE:String(w);}
+function zahlText(w){return String(Math.round((Number(w)||0)*10)/10).replace('.',',');}
+function schuljahrGrenzen(sj){const y=Number(String(sj||'').slice(0,4));if(!y)throw new Error('Bitte ein Schuljahr wählen.');return {y,von:y+'-08-01',bis:(y+1)+'-07-31',sj:y+'/'+String(y+1).slice(2)};}
+// Abschnitt „Liste“: ein Merkmal, eine Spalte; additiv → mit Summe und Folgeschutz
+function listeAbschnitt(titel,merkmal,rows,{einheit='Kontakte',summe=true,anonym=true,hinweis=''}={}){
+ if(!anonym)return {titel,typ:'tabelle',kopf:[wertKopf(merkmal),einheit],zeilen:rows.map(r=>({label:wertLabel(merkmal,r.id),zellen:[zahlText(r.wert)]})),fuss:summe?{label:'Summe',zellen:[zahlText(rows.reduce((a,r)=>a+r.wert,0))]}:null,hinweis,anonym:false};
+ const a=anonymMatrix(rows.map(r=>[r.wert]),{grenze:GRENZE_LISTE,spaltenSummen:summe});
+ return {titel,typ:'tabelle',kopf:[wertKopf(merkmal),einheit],zeilen:rows.map((r,i)=>({label:wertLabel(merkmal,r.id),zellen:[a.zellen[i][0].anzeige]})),fuss:summe?{label:'Summe',zellen:[a.spaltenSummen[0].anzeige]}:null,hinweis:hinweis||(summe?'':'Mehrfachnennungen möglich, deshalb ohne Summe.'),anonym:true,unterdrueckt:a.unterdrueckt};
+}
+function wertKopf(m){return {kontaktart:'Art des Kontakts',thema:'Thema',zugangsweg:'Zugangsweg',ergebnis:'Ergebnis',stufe:'Klassenstufe',zweig:'Schulzweig',arbeitsbereich:'Arbeitsbereich',taetigkeit:'Tätigkeit'}[m]||m;}
+function ohneGeschuetzte(rows){return rows.filter(r=>!GESCHUETZTE_THEMEN.includes(r.id));}
+// Klassenstufe → Schulzweig, wenn mehr als die Hälfte der Zahlen unterdrückt würde
+function stufeOderZweig(evs,f,zk,titel){
+ const st=aufschluesselung(evs,'stufe','kinder',f,zk).sort((a,b)=>(a.id===NICHT_ERFASST)-(b.id===NICHT_ERFASST)||Number(a.id)-Number(b.id));
+ const a=anonymMatrix(st.map(r=>[r.wert]),{spaltenSummen:true});
+ if(a.nichtNull&&a.zellenUnterdrueckt*2>a.nichtNull){const zw=aufschluesselung(evs,'zweig','kinder',f,zk);return {abschnitt:listeAbschnitt(titel+' Schulzweig','zweig',zw,{einheit:'Kinder'}),hinweis:'Klassenstufen wurden zu Schulzweigen zusammengefasst, weil zu viele Zahlen zu klein waren.'};}
+ return {abschnitt:listeAbschnitt(titel+' Klassenstufe','stufe',st,{einheit:'Kinder'}),hinweis:''};
+}
+function kennzahlenAbschnitt(k,{mitAnonym=true}={}){
+ const zeilen=[['Erreichte Schüler:innen',kennzahlAnzeige(k.erreichteSchueler)],['Einzelfälle (Beratungs- oder Krisengespräch)',kennzahlAnzeige(k.einzelfaelle)],['Kontakte',kennzahlAnzeige(k.kontakte)],['Erreichte Personen',kennzahlAnzeige(k.erreichtePersonen)],['Stunden',zahlText(k.stunden)]];
+ if(mitAnonym)zeilen.push(['Anonyme Kurzkontakte',kennzahlAnzeige(k.anonymeKurzkontakte)]);
+ return {titel:'Kennzahlen',typ:'tabelle',kopf:['Kennzahl','Wert'],zeilen:zeilen.map(([l,w])=>({label:l,zellen:[w]})),fuss:null,hinweis:''};
+}
+function kreuzAbschnitt(titel,evs,a,b,f,zk,{ohneGeschuetzt=true}={}){
+ const kt=kreuztabelle(evs,a,b,'kontakte',f,zk);
+ let idx=kt.zeilen.map((z,i)=>i);if(ohneGeschuetzt&&a==='thema')idx=idx.filter(i=>!GESCHUETZTE_THEMEN.includes(kt.zeilen[i]));
+ const werte=idx.map(i=>kt.tabelle[i]);
+ if(!werte.length)return null;
+ const m=anonymMatrix(werte,{grenze:GRENZE_KREUZ,zeilenSummen:true,spaltenSummen:true});
+ return {titel,typ:'tabelle',kopf:[wertKopf(a)+' \\ '+wertKopf(b),...kt.spalten.map(x=>wertLabel(b,x)),'Summe'],zeilen:idx.map((i,n)=>({label:wertLabel(a,kt.zeilen[i]),zellen:[...m.zellen[n].map(c=>c.anzeige),m.zeilenSummen[n].anzeige]})),fuss:{label:'Summe',zellen:[...m.spaltenSummen.map(c=>c.anzeige),m.gesamt.anzeige]},hinweis:'Kreuztabelle: Werte unter 5 als „< 5“. '+(a==='thema'?'Kinderschutz, Krise und Sucht sind hier nicht aufgeschlüsselt. Mehrfachnennungen möglich.':''),anonym:true,unterdrueckt:m.unterdrueckt};
+}
+function berichtRahmen(art,zeitraum){return {art,titel:BERICHTE[art],zeitraum,erstellt:new Date().toISOString(),abschnitte:[],hinweise:['Anonymisiert: 1 und 2 erscheinen als „< 3“, in Kreuztabellen Werte unter 5 als „< 5“. „'+FOLGE+'“ = zum Schutz zusätzlich ausgeblendet (Folgeschutz).','Keine Namen, keine Angaben zu Mitarbeitenden, kleinste Einheiten: Halbjahr und Klassenstufe.']};}
+function standardbericht(state,art,opt={}){
+ if(!BERICHTE[art])throw new Error('Unbekannter Bericht.');
+ const zk=zugangKarte(state),alle=ereignisse(state),g=schuljahrGrenzen(opt.schuljahr||state.settings?.currentSchoolYear);
+ const imZeitraum=(von,bis)=>filterEreignisse(alle,{von,bis},zk);
+ if(art==='halbjahr'){
+  const hj=Number(opt.halbjahr)===2?2:1,von=hj===1?g.von:(g.y+1)+'-02-01',bis=hj===1?(g.y+1)+'-01-31':g.bis;
+  const b=berichtRahmen(art,hj+'. Halbjahr '+g.sj),evs=imZeitraum(von,bis),f={von,bis};
+  b.abschnitte.push(kennzahlenAbschnitt(kennzahlen(evs,f)));
+  b.abschnitte.push(listeAbschnitt('Art des Kontakts','kontaktart',aufschluesselung(evs,'kontaktart','kontakte',f,zk)));
+  b.abschnitte.push(listeAbschnitt('Themen','thema',ohneGeschuetzte(aufschluesselung(evs,'thema','kontakte',f,zk)),{summe:false,hinweis:'Mehrfachnennungen möglich. Kinderschutz, Krise und Sucht erscheinen nur als Gesamtzahl im Jahresbericht.'}));
+  b.abschnitte.push(listeAbschnitt('Erreichte Schüler:innen nach Schulzweig','zweig',aufschluesselung(evs,'zweig','kinder',f,zk),{einheit:'Kinder'}));
+  return b;
+ }
+ const evs=imZeitraum(g.von,g.bis),f={von:g.von,bis:g.bis},b=berichtRahmen(art,'Schuljahr '+g.sj);
+ if(art==='jahresbericht'){
+  const rb=String(opt.rueckblick||'').trim();if(rb)b.rueckblick=rb;
+  b.abschnitte.push(kennzahlenAbschnitt(kennzahlen(evs,f)));
+  b.abschnitte.push(listeAbschnitt('Art des Kontakts','kontaktart',aufschluesselung(evs,'kontaktart','kontakte',f,zk)));
+  b.abschnitte.push(listeAbschnitt('Themen','thema',aufschluesselung(evs,'thema','kontakte',f,zk),{summe:false,hinweis:'Mehrfachnennungen möglich. Kinderschutz, Krise und Sucht nur als Gesamtzahl für das Schuljahr.'}));
+  b.abschnitte.push(listeAbschnitt('Zugangsweg','zugangsweg',aufschluesselung(evs,'zugangsweg','kinder',f,zk),{einheit:'Kinder'}));
+  b.abschnitte.push(listeAbschnitt('Ergebnis der Gespräche','ergebnis',aufschluesselung(evs,'ergebnis','kontakte',f,zk)));
+  const sz=stufeOderZweig(evs,f,zk,'Erreichte Schüler:innen nach');b.abschnitte.push(sz.abschnitt);if(sz.hinweis)b.hinweise.push(sz.hinweis);
+  const kr=kreuzAbschnitt('Themen nach Schulzweig',evs,'thema','zweig',f,zk);if(kr)b.abschnitte.push(kr);
+  b.abschnitte.push(listeAbschnitt('Tätigkeiten ohne Fall (Stunden)','taetigkeit',aufschluesselung(evs,'taetigkeit','stunden',f,zk),{einheit:'Stunden',anonym:false,hinweis:'Arbeitszeit, keine Personenzahl.'}));
+ }else if(art==='arbeitszeit'){
+  b.abschnitte.push(listeAbschnitt('Arbeitszeit nach Bereich','arbeitsbereich',aufschluesselung(evs,'arbeitsbereich','stunden',f,zk),{einheit:'Stunden',anonym:false,hinweis:'Arbeitszeit, keine Personenzahl. Einträge ohne Dauer fehlen hier.'}));
+  b.abschnitte.push(listeAbschnitt('Stunden nach Art des Kontakts','kontaktart',aufschluesselung(evs,'kontaktart','stunden',f,zk),{einheit:'Stunden',anonym:false}));
+  b.abschnitte.push(listeAbschnitt('Tätigkeiten ohne Fall','taetigkeit',aufschluesselung(evs,'taetigkeit','stunden',f,zk),{einheit:'Stunden',anonym:false}));
+  const k=kennzahlen(evs,f);b.hinweise.push(k.ohneDauer?k.ohneDauer+' Einträge ohne Dauer sind nicht enthalten.':'Alle Einträge haben eine Dauer.');
+ }else if(art==='praevention'){
+  const pr=evs.filter(e=>e.kontaktart==='klasse'||(e.art==='taetigkeit'&&e.taetigkeit==='klassenprojekt_praevention'));
+  const st=[...new Set(pr.map(e=>e.stufeAnonym==null||e.stufeAnonym===''?NICHT_ERFASST:String(e.stufeAnonym)))].sort((a,b)=>(a===NICHT_ERFASST)-(b===NICHT_ERFASST)||Number(a)-Number(b));
+  const zeile=id=>{const x=pr.filter(e=>(e.stufeAnonym==null||e.stufeAnonym===''?NICHT_ERFASST:String(e.stufeAnonym))===id);return {label:wertLabel('stufe',id),zellen:[String(x.length),String(x.reduce((a,e)=>a+(e.teilnehmende||0),0)),zahlText(x.reduce((a,e)=>a+(e.dauer_min||0),0)/60)]};};
+  b.abschnitte.push({titel:'Präventionsangebote in Klassen',typ:'tabelle',kopf:['Klassenstufe','Angebote','Teilnehmende','Stunden'],zeilen:st.map(zeile),fuss:{label:'Summe',zellen:[String(pr.length),String(pr.reduce((a,e)=>a+(e.teilnehmende||0),0)),zahlText(pr.reduce((a,e)=>a+(e.dauer_min||0),0)/60)]},hinweis:'Klassenangebote betreffen ganze Klassen, nicht einzelne Kinder; deshalb ohne Kleinzahlregel.'});
+ }else if(art==='vorjahr'){
+  const v=schuljahrGrenzen((g.y-1)+'/'),evV=imZeitraum(v.von,v.bis),fV={von:v.von,bis:v.bis};
+  b.zeitraum='Schuljahr '+v.sj+' und '+g.sj;
+  const k1=kennzahlen(evV,fV),k2=kennzahlen(evs,f);
+  b.abschnitte.push({titel:'Kennzahlen im Vergleich',typ:'tabelle',kopf:['Kennzahl',v.sj,g.sj],zeilen:[['Erreichte Schüler:innen','erreichteSchueler'],['Einzelfälle','einzelfaelle'],['Kontakte','kontakte'],['Erreichte Personen','erreichtePersonen']].map(([l,k])=>({label:l,zellen:[kennzahlAnzeige(k1[k]),kennzahlAnzeige(k2[k])]})).concat([{label:'Stunden',zellen:[zahlText(k1.stunden),zahlText(k2.stunden)]}]),fuss:null,hinweis:''});
+  const vergleich=(titel,merkmal,einheit,summe,filter=x=>x)=>{
+   const a=filter(aufschluesselung(evV,merkmal,einheit,fV,zk)),c=filter(aufschluesselung(evs,merkmal,einheit,f,zk)),ids=[...new Set([...a,...c].map(r=>r.id))];
+   const wert=(rows,id)=>rows.find(r=>r.id===id)?.wert||0;
+   const m=anonymMatrix(ids.map(id=>[wert(a,id),wert(c,id)]),{grenze:GRENZE_LISTE,spaltenSummen:summe});
+   return {titel,typ:'tabelle',kopf:[wertKopf(merkmal),v.sj,g.sj],zeilen:ids.map((id,i)=>({label:wertLabel(merkmal,id),zellen:m.zellen[i].map(c=>c.anzeige)})),fuss:summe?{label:'Summe',zellen:m.spaltenSummen.map(c=>c.anzeige)}:null,hinweis:summe?'':'Mehrfachnennungen möglich, deshalb ohne Summe.',anonym:true};
+  };
+  b.abschnitte.push(vergleich('Art des Kontakts','kontaktart','kontakte',true));
+  b.abschnitte.push(vergleich('Themen','thema','kontakte',false));
+ }
+ return b;
+}
+function csvZelle(v){let t=String(v??'');if(/^[=+\-@]/.test(t))t="'"+t;return /[;"\r\n]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t;}
+function berichtCsv(b){
+ const z=[],zeile=arr=>z.push(arr.map(csvZelle).join(';'));
+ zeile(['SSA-Cockpit Ludgerusschule',b.titel]);zeile(['Zeitraum',b.zeitraum]);zeile(['Erstellt',String(b.erstellt||'').slice(0,10)]);
+ for(const h of b.hinweise)zeile(['Hinweis',h]);
+ if(b.rueckblick){z.push('');zeile(['Fachlicher Jahresrückblick']);zeile([b.rueckblick]);}
+ for(const a of b.abschnitte){z.push('');zeile([a.titel]);zeile(a.kopf);for(const r of a.zeilen)zeile([r.label,...r.zellen]);if(a.fuss)zeile([a.fuss.label,...a.fuss.zellen]);if(a.hinweis)zeile(['Hinweis',a.hinweis]);}
+ return '﻿'+z.join('\r\n')+'\r\n';
+}
+function weitergabeProtokollieren(state,{bericht,zeitraum,empfaenger,zweck='',format}){
+ const e=String(empfaenger||'').trim();if(!e)throw new Error('Bitte angeben, an wen der Bericht geht.');
+ if(!['CSV','Druck'].includes(format))throw new Error('Unbekanntes Format.');
+ state.weitergaben=Array.isArray(state.weitergaben)?state.weitergaben:[];
+ const w={id:uid('weitergabe'),am:new Date().toISOString(),bericht:String(bericht||''),zeitraum:String(zeitraum||''),empfaenger:e,zweck:String(zweck||'').trim(),format,von:aktiveMitarbeitende(state)};
+ state.weitergaben.push(w);return w;
+}
+root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,safetyHint,KATEGORIEN_VERSIONEN,kategorien,katListe,katLabel,stufeZweig,statErfassen,statMerkmale,zugangswegFuer,zugangswegSetzen,addTaetigkeit,ereignisse,zugangKarte,filterEreignisse,kennzahlen,aufschluesselung,kreuztabelle,datenqualitaet,statNachtragen,werteVon,NICHT_ERFASST,addStudent,similarStudents,GESCHUETZTE_THEMEN,BERICHTE,wertLabel,anonymMatrix,kennzahlAnzeige,standardbericht,berichtCsv,weitergabeProtokollieren,SSA_TEAM_STANDARD,ssaTeam,mitarbeitendKanonisch,mitarbeitendSchreibweisen,mitarbeitendZuordnen,aktiveMitarbeitende,zusageErledigtEintragen,SAFETY_NOTICE};
 })(globalThis);
