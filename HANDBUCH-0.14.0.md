@@ -1,8 +1,24 @@
-# SSA-Cockpit 0.13.0
+# SSA-Cockpit 0.14.0
 
 ## Alltag
 
 Die Seite **Heute** zeigt offene Schutzfragen und drei Arbeitsblöcke: Überfälliges, heute fällige Vorgänge und offene Zusagen. Oben stehen die drei schnellen Aktionen **Kurzkontakt** (auch mit Strg+K), **Gespräch** und **Zusage**.
+
+## Schnellnotiz
+
+Oben auf **Heute** steht ein Feld für kurze Notizen. Tippe `@` und die ersten Buchstaben eines Namens; eine Liste schlägt passende Kinder vor (mit Pfeiltasten und Enter oder mit der Maus auswählen, Esc schließt). Mehrere `@` in einer Notiz sind möglich – die Notiz erscheint dann einmal gemeinsam in jeder betroffenen Chronik. Findet das Programm keinen passenden Namen, fragt es „Meintest du …?“ oder bietet an, eine neue Akte nur mit Name und Klasse anzulegen. Notizen ohne `@` landen unter **Noch nicht zugeordnet** und können später zugeordnet werden. Speichern mit dem Knopf oder mit Strg+Enter.
+
+## Gespräch vorbereiten
+
+In der Akte öffnet **Gespräch vorbereiten** eine Übersicht: Auftrag, die letzten drei Einträge, offene Zusagen, laufende Maßnahmen und Fachverfahren. Ein Klick auf einen Punkt zeigt den Originaleintrag in der Chronik. Im Feld „Was will ich in diesem Gespräch klären?“ notierst du deine Fragen; **Gespräch jetzt dokumentieren** übernimmt sie ins Gesprächsformular. **Drucken** liefert eine Seite zum Mitnehmen.
+
+## Zusagen
+
+An jedem Chronikeintrag gibt es **＋ Zusage daraus**. Die Zusage ist dann mit dem Eintrag verknüpft. Unter **Aufgaben und Zusagen** stehen alle Zusagen nach Status (offen, läuft, erledigt), filterbar nach Kind. Wird eine Zusage auf „erledigt“ gesetzt, entsteht in der Chronik automatisch der Eintrag „Zusage erledigt: …“.
+
+## Hilfe
+
+Das **?** in jedem Bereich und an einigen Feldern klappt eine kurze Erklärung auf: Was ist das? Warum eintragen? Beispiel. Ein zweiter Klick schließt sie wieder.
 
 ## Gespräch eintragen
 

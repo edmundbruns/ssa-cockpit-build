@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('..',import.meta.url));
 const read=f=>fs.readFileSync(path.join(root,f),'utf8').replace(/\r\n/g,'\n');
-const VERSION='0.13.0';
+const VERSION='0.14.0';
 
 test('Versionsnummer ist überall gleich',()=>{
  assert.equal(JSON.parse(read('package.json')).version,VERSION);
@@ -30,7 +30,7 @@ test('Tresorbefehle laufen asynchron und blockieren das Fenster nicht',()=>{
 test('Keine Funktion ist in den Oberflächenskripten doppelt deklariert',()=>{
  const html=read('src/index.html');
  const inline=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).join('\n');
- const sources={inline,'dossier-core.js':read('src/dossier-core.js'),'dossier-ui.js':read('src/dossier-ui.js'),'docx-export.js':read('src/docx-export.js'),'gespraechsbogen.js':read('src/gespraechsbogen.js'),'gespraechsbogen-ui.js':read('src/gespraechsbogen-ui.js')};
+ const sources={inline,'dossier-core.js':read('src/dossier-core.js'),'dossier-ui.js':read('src/dossier-ui.js'),'docx-export.js':read('src/docx-export.js'),'gespraechsbogen.js':read('src/gespraechsbogen.js'),'gespraechsbogen-ui.js':read('src/gespraechsbogen-ui.js'),'erweiterungen.js':read('src/erweiterungen.js')};
  const seen=new Map(),doubles=[];
  for(const [file,code] of Object.entries(sources))for(const m of code.matchAll(/(?:^|[;}\n])\s*(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/g)){
   if(file==='dossier-core.js'||file==='docx-export.js'||file==='gespraechsbogen.js')continue; // gekapselte Module
@@ -41,7 +41,7 @@ test('Keine Funktion ist in den Oberflächenskripten doppelt deklariert',()=>{
 test('Der Installer enthält nur Programmdateien aus src/ und keine Schul- oder Tresordaten',()=>{
  const conf=JSON.parse(read('src-tauri/tauri.conf.json'));
  assert.equal(conf.build.frontendDist,'../src');
- const erlaubt=['index.html','dossier-core.js','dossier-ui.js','docx-export.js','gespraechsbogen.js','gespraechsbogen-ui.js','gespraechsprotokoll-original.pdf'];
+ const erlaubt=['index.html','dossier-core.js','dossier-ui.js','erweiterungen.js','docx-export.js','gespraechsbogen.js','gespraechsbogen-ui.js','gespraechsprotokoll-original.pdf'];
  const vorhanden=fs.readdirSync(path.join(root,'src'));
  assert.deepEqual(vorhanden.filter(f=>!erlaubt.includes(f)),[],'unerwartete Dateien würden in den Installer gepackt');
  const verboten=/\.(ssa-vault\.json|ssa-backup\.json|ssa-anfrage\.json|db|db-wal|db-shm|csv|xlsx|xls)$/i;
@@ -59,4 +59,14 @@ test('0.13: Schutzhinweis nur bei echtem Stichwort, Verneinungen werden erkannt'
  assert.ok(D.safetyHint('Anna sagt, sie wolle nicht mehr leben.'));
  assert.ok(D.safetyHint('Er sagt nicht, dass er sich umbringen will.'),'Selbstgefährdung wird trotz Verneinung angezeigt');
  assert.ok(D.safetyHint('Kind hat Angst, nach Hause zu gehen.'));
+});
+
+test('0.14: Daten der Vorversion laden unverändert, neue Felder haben Standardwerte',()=>{
+ const g={};new Function('globalThis',read('src/dossier-core.js'))(g);const D=g.Dossier;
+ const alt={students:[{id:'a',first:'Anna',last:'Beispiel',className:'5a',active:true,enrollments:[]}],journal:[{id:'e1',date:'2026-09-01',type:'Schülergespräch / Einzelberatung',title:'Gespräch',content:'Inhalt',participantIds:['a']}],tasks:[{id:'p1',kind:'zusage',title:'Alte Zusage',promisedTo:'Kind',participantIds:['a'],status:'erledigt',done:true,completedAt:'2026-09-02'}],cases:[],settings:{currentSchoolYear:'2026/27'}};
+ const vorher=JSON.stringify(alt.journal[0]);const s=D.normalize(structuredClone(alt));
+ assert.deepEqual(s.schnellnotizen,[]);assert.deepEqual(s.auftraege,[]);
+ assert.equal(s.journal.length,1,'erledigte alte Zusagen erzeugen beim Laden keine neuen Einträge');
+ const e=s.journal[0];for(const k of ['id','date','type','title','content'])assert.equal(e[k],JSON.parse(vorher)[k]);
+ assert.ok(D.timeline(s,'a',[]).some(x=>x.key==='entry:e1'));
 });
