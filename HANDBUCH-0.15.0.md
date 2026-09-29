@@ -1,4 +1,4 @@
-# SSA-Cockpit 0.14.0
+# SSA-Cockpit 0.15.0
 
 ## Alltag
 
@@ -7,6 +7,12 @@ Die Seite **Heute** zeigt offene Schutzfragen und drei Arbeitsblöcke: Überfäl
 ## Schnellnotiz
 
 Oben auf **Heute** steht ein Feld für kurze Notizen. Tippe `@` und die ersten Buchstaben eines Namens; eine Liste schlägt passende Kinder vor (mit Pfeiltasten und Enter oder mit der Maus auswählen, Esc schließt). Mehrere `@` in einer Notiz sind möglich – die Notiz erscheint dann einmal gemeinsam in jeder betroffenen Chronik. Findet das Programm keinen passenden Namen, fragt es „Meintest du …?“ oder bietet an, eine neue Akte nur mit Name und Klasse anzulegen. Notizen ohne `@` landen unter **Noch nicht zugeordnet** und können später zugeordnet werden. Speichern mit dem Knopf oder mit Strg+Enter.
+
+## Statistik nebenbei
+
+Beim Kurzkontakt, beim Gespräch und beim Gruppengespräch gibt es kleine Auswahlfelder: Thema, Dauer und beim Gespräch zusätzlich Art (Beratung oder Krise), Beteiligte und Ergebnis. Ein Klick genügt; ein zweiter Klick nimmt eine freiwillige Auswahl wieder weg. Einmal pro Kind und Schuljahr fragt das Programm, wie der Kontakt zustande kam (Zugangsweg). Das „?“ neben jedem Feld erklärt es kurz.
+
+Für Arbeit ohne einzelnes Kind (Konferenz, Elternabend, Projekt, Pausenpräsenz …) gibt es auf „Heute“ unter der Schnellnotiz den Knopf **＋ Tätigkeit ohne Fall**. Ein Klassenprojekt markiert die Klasse unter „Klassen“.
 
 ## Gespräch vorbereiten
 

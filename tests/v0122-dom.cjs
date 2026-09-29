@@ -39,6 +39,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
    {id:'s2',first:'Bert',last:'Beispiel',className:'5a',schoolYear:'2026/27',active:true},
    {id:'s3',first:'Cem',last:'Muster',className:'6b',schoolYear:'2026/27',active:true}],
    teachers:[],cases:[],contacts:[],tasks:[],journal:[],settings:{...seed.settings,currentSchoolYear:'2026/27',dossierVersion:1}});
+   for(const sid of ['s1','s2','s3'])Dossier.zugangswegSetzen(data,sid,'schueler_selbst',today());
    vaultReady=true;document.getElementById('authGate').classList.add('hidden');renderAll();`);
  assert.equal(run('typeof pendingYearChange'),'object','pendingYearChange ist deklariert');
  console.log('laden als echte Skriptdateien ok');
@@ -101,7 +102,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  assert(group,'Gruppengespräch gespeichert');assert.match(group.content,/Anna möchte nächste Woche nachfassen/);
  run(`closeModal('studentModal')`);
  // Kurzkontakt
- run(`openQuickContact('s3')`);const q=w.document.getElementById('quickContactForm');q.querySelector('input[name=occasion]').checked=true;q.requestSubmit();await sleep(30);
+ run(`openQuickContact('s3')`);const q=w.document.getElementById('quickContactForm');q.querySelector('input[name=thema]').checked=true;q.requestSubmit();await sleep(30);
  assert(!isOpen('quickContactModal'));await waitSaved();assert(saved().journal.some(e=>e.type==='Kurzkontakt'&&e.participantIds[0]==='s3'));
  console.log('speichern ohne blockieren ok');
 
@@ -177,11 +178,11 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  assert.equal(run('data.cases.length'),cases13,'Gruppengespräch legt keine Fallakte an');
  // Auftragsklärung
  run(`closeModal('studentModal');selectedStudentId='s3';showStudent('s3')`);assert(/Auftrag klären/.test(w.document.getElementById('studentDetailBody').textContent));
- run(`dossierAuftrag()`);const af=w.document.getElementById('dossierEditForm');af.elements.requester.value='Klassenleitung';af.elements.childNeed.value='In Ruhe lernen';af.elements.assignedOrder.value='Konflikt in der Klasse begleiten';af.requestSubmit();await sleep(30);await waitSaved();
+ run(`dossierAuftrag()`);const af=w.document.getElementById('dossierEditForm');af.querySelector('input[name=requesterId][value=lehrkraft]').checked=true;af.elements.childNeed.value='In Ruhe lernen';af.elements.assignedOrder.value='Konflikt in der Klasse begleiten';af.requestSubmit();await sleep(30);await waitSaved();
  assert(/Auftrag:\s*Konflikt in der Klasse begleiten/.test(w.document.getElementById('studentDetailBody').textContent),'Auftrag oben in der Akte');
  assert.equal(saved().auftraege.length,1,'Auftrag gespeichert');
  // Kurzkontakt: kein stilles „anonym“
- run(`closeModal('studentModal');openQuickContact('')`);const qk=w.document.getElementById('quickContactForm');qk.querySelector('input[name=occasion]').checked=true;const jb=run('data.journal.length');qk.requestSubmit();await sleep(30);
+ run(`closeModal('studentModal');openQuickContact('')`);const qk=w.document.getElementById('quickContactForm');qk.querySelector('input[name=thema]').checked=true;const jb=run('data.journal.length');qk.requestSubmit();await sleep(30);
  assert.equal(run('data.journal.length'),jb,'ohne Kind oder „Anonym“ wird nichts gespeichert');run(`document.querySelectorAll('.modal.open:not([id])').forEach(m=>m.remove())`);
  run(`kurzkontaktSuche('Muster, Cem · 6b')`);assert.equal(qk.elements.studentId.value,'s3','Suche wählt das Kind');qk.requestSubmit();await sleep(30);assert.equal(run('data.journal.length'),jb+1);assert(!isOpen('quickContactModal'));
  // Zusage ohne Termin ist nicht gelb
@@ -270,6 +271,55 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  const texte=run('HILFE_TEXTE');for(const [k,h] of Object.entries(texte)){assert(h.was&&h.warum&&h.beispiel,'Aufbau '+k);const saetze=(h.was+' '+h.warum+' '+h.beispiel).replace(/z\. B\./g,'zB').split(/(?<=[.!?“])\s+(?=[A-ZÄÖÜ„])/).length;assert(saetze<=4,'höchstens vier Sätze: '+k+' ('+saetze+')');}
  for(const seite of w.document.querySelectorAll('.page'))if(seite.querySelector('.sectionhead'))assert(texte[seite.id],'Hilfetext für Bereich '+seite.id);
  console.log('0.14 hilfe ok');
+
+ {
+ const gleich=(a,b)=>assert.equal(JSON.stringify(a),JSON.stringify(b));
+ // 11. Version 0.15: Merkmale beim Erfassen, Zugangsweg einmal je Kind und Schuljahr, Tätigkeit ohne Fall
+ run(`document.querySelectorAll('.modal.open').forEach(m=>{if(m.id&&!['vorbereitungModal','neueAkteModal','taetigkeitModal'].includes(m.id))closeModal(m.id);else m.remove()});go('dashboard')`);
+ const s4=run(`Dossier.addStudent(data,{first:'Emil',last:'Fantasie',className:'7b'}).id`);
+ run(`openQuickContact('${s4}')`);const qk4=w.document.getElementById('quickContactForm');
+ assert(!w.document.getElementById('qkZugang').hidden&&qk4.querySelector('#qkZugang [data-pflicht]'),'Zugangsweg wird beim ersten Kontakt gefragt');
+ assert.equal(qk4.querySelector('input[name=dauer_min]:checked')?.value,'5','Dauer im Kurzkontakt vorausgewählt');
+ qk4.querySelector('input[name=thema][value=konflikt_mobbing]').checked=true;const jq=run('data.journal.length');qk4.requestSubmit();await sleep(20);
+ assert.equal(run('data.journal.length'),jq,'ohne Zugangsweg nicht gespeichert');run(`document.querySelectorAll('.modal.open:not([id])').forEach(m=>m.remove())`);
+ qk4.querySelector('input[name=zugangsweg][value=lehrkraft]').checked=true;qk4.requestSubmit();await sleep(20);
+ const kk=run('data.journal.at(-1)');assert.equal(kk.type,'Kurzkontakt');assert.equal(kk.stat.kontaktart,'kurzkontakt');gleich(kk.stat.themen,['konflikt_mobbing']);assert.equal(kk.stat.dauer_min,5);assert.equal(kk.stat.klassen[s4].stufe,7);assert.equal(kk.stat.klassen[s4].zweig,'OBS');
+ assert.equal(run(`Dossier.zugangswegFuer(data,'${s4}',today()).zugangsweg`),'lehrkraft');
+ run(`openQuickContact('${s4}')`);assert(w.document.getElementById('qkZugang').hidden,'Zugangsweg nur einmal je Schuljahr');run(`closeModal('quickContactModal')`);
+ assert.equal(run(`Dossier.zugangswegFuer(data,'${s4}','2027-09-01')`),null,'im neuen Schuljahr wird wieder gefragt');
+ // Gespräch: Chips, keine Zugangsweg-Frage mehr, Dauer wird gemerkt
+ run(`selectedStudentId='${s4}';showStudent('${s4}');dossierEntry('event')`);let gf=w.document.getElementById('dossierEditForm');
+ assert(!gf.querySelector('[data-merkmal=zugangsweg]'),'kein zweites Mal Zugangsweg');assert(gf.querySelector('input[name=beteiligte][value=schueler]').checked,'Vorauswahl Schüler:in');
+ assert(!gf.querySelector('input[name=dauer_min]:checked'),'Dauer im Gespräch ohne feste Vorauswahl');
+ gf.elements.content.value='Emil berichtet von Streit zu Hause.';gf.querySelector('input[name=kontaktart_wahl][value=krisengespraech]').checked=true;gf.querySelector('input[name=thema][value=familie]').checked=true;gf.querySelector('input[name=beteiligte][value=eltern]').checked=true;gf.querySelector('input[name=dauer_min][value="45"]').checked=true;gf.querySelector('input[name=ergebnis][value=weiter_begleitet]').checked=true;
+ gf.requestSubmit();await sleep(30);const ge=run('data.journal.at(-1)');
+ assert.equal(ge.stat.kontaktart,'krisengespraech');gleich(ge.stat.themen,['familie']);gleich(ge.stat.beteiligte.sort(),['eltern','schueler']);assert.equal(ge.stat.dauer_min,45);assert.equal(ge.duration,45);assert.equal(ge.stat.ergebnis,'weiter_begleitet');assert.equal(ge.stat.quelle,'erfasst');
+ run(`dossierEntry('event')`);gf=w.document.getElementById('dossierEditForm');assert.equal(gf.querySelector('input[name=dauer_min]:checked')?.value,'45','zuletzt gewählte Dauer angeboten');run(`closeModal('dossierEditModal')`);
+ // Neues Kind im Gesprächsformular: Zugangsweg ist Pflicht
+ const s5=run(`Dossier.addStudent(data,{first:'Frida',last:'Fantasie',className:'3a'}).id`);run(`selectedStudentId='${s5}';showStudent('${s5}');dossierEntry('event')`);gf=w.document.getElementById('dossierEditForm');
+ assert(gf.querySelector('[data-merkmal=zugangsweg][data-pflicht]'));gf.elements.content.value='Erstes Gespräch.';const jg=run('data.journal.length');await gf.onsubmit({preventDefault(){},target:gf});await sleep(20);assert.equal(run('data.journal.length'),jg,'ohne Zugangsweg kein Eintrag');run(`document.querySelectorAll('.modal.open:not([id])').forEach(m=>m.remove())`);
+ gf.querySelector('input[name=zugangsweg][value=eltern]').checked=true;gf.requestSubmit();await sleep(30);assert.equal(run(`Dossier.zugangswegFuer(data,'${s5}',today()).zugangsweg`),'eltern');assert.equal(run('data.journal.at(-1).stat.klassen')[s5].zweig,'GS');
+ // Gruppengespräch
+ run(`closeModal('studentModal');openGroupTalk()`);const g5=w.document.getElementById('groupTalkForm');g5.querySelectorAll('input[name=participantIds]').forEach(o=>o.checked=['s1','s2'].includes(o.value));g5.elements.note.value='Streit geklärt.';g5.querySelector('input[name=thema][value=konflikt_mobbing]').checked=true;g5.querySelector('input[name=dauer_min][value="30"]').checked=true;g5.requestSubmit();await sleep(30);
+ const gg=run('data.journal.at(-1)');assert.equal(gg.stat.kontaktart,'gruppe');assert.equal(gg.stat.teilnehmende,2);assert.equal(gg.stat.dauer_min,30);
+ // Tätigkeit ohne Fall färbt die Klassenkachel
+ run(`go('classes')`);const kachel=()=>[...w.document.querySelectorAll('#classGrid article')].find(a=>/Klasse 6b/.test(a.textContent));assert(!kachel().classList.contains('hasactivity'),'vorher keine Markierung');
+ run(`go('dashboard');taetigkeitOhneFall()`);const tm=w.document.getElementById('taetigkeitModal');const tfo=tm.querySelector('form');
+ const t0=run('data.taetigkeiten.length');tfo.requestSubmit();await sleep(20);assert.equal(run('data.taetigkeiten.length'),t0,'Tätigkeit ist Pflicht');run(`document.querySelectorAll('.modal.open:not([id])').forEach(m=>m.remove())`);
+ tfo.querySelector('input[name=taetigkeit][value=klassenprojekt_praevention]').checked=true;tfo.querySelector('input[name=dauer_min][value="90"]').checked=true;tfo.elements.klasse.value='6b';tfo.elements.teilnehmende.value='24';tfo.requestSubmit();await sleep(30);
+ const tto=run('data.taetigkeiten.at(-1)');assert.equal(tto.taetigkeit,'klassenprojekt_praevention');assert.equal(tto.dauer_min,90);assert.equal(tto.teilnehmende,24);assert.equal(tto.stufe,6);
+ run(`go('classes')`);assert(kachel().classList.contains('hasactivity'),'Klassenkachel markiert');
+ // Alte Einträge: nichts verändert, Eindeutiges übernommen, Rest „nicht erfasst“
+ const alt=run(`(()=>{const e={id:'alt1',date:'2025-10-01',type:'Kurzkontakt',occasions:['Streit','kurz reden'],duration:10,participantIds:['s1']};return Dossier.statMerkmale(data,e)})()`);
+ assert.equal(alt.quelle,'uebernommen');gleich(alt.themen,['konflikt_mobbing']);assert.equal(alt.dauer_min,10);assert.equal(run(`Dossier.katLabel('ergebnis','')`),'nicht erfasst');
+ assert.equal(run(`Dossier.statMerkmale(data,{type:'Kurznotiz',participantIds:['s1']})`),null,'Schnellnotiz zählt nicht als Kontakt');
+ // Auftragsklärung setzt den Zugangsweg, wenn noch keiner da ist
+ const s6=run(`Dossier.addStudent(data,{first:'Gregor',last:'Fantasie',className:'9c'}).id`);run(`selectedStudentId='${s6}';showStudent('${s6}');dossierAuftrag()`);const a6=w.document.getElementById('dossierEditForm');
+ a6.querySelector('input[name=requesterId][value=schulleitung]').checked=true;a6.elements.assignedOrder.value='Begleitung';a6.elements.noChildNeed.checked=true;a6.requestSubmit();await sleep(30);
+ assert.equal(run(`Dossier.zugangswegFuer(data,'${s6}',today()).zugangsweg`),'schulleitung');run(`closeModal('studentModal')`);
+ await waitSaved();assert(saved().zugangswege.length>=6&&saved().taetigkeiten.length>=1,'gespeichert');
+ }
+ console.log('0.15 erfassung ok');
 
  console.log('errors',errors);
  if(errors.length)process.exitCode=1;
