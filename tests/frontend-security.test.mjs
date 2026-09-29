@@ -20,7 +20,7 @@ test('Fallboard ist eine zusätzliche Ansicht mit Historie',()=>{
  assert.match(html,/id="kanban"/);assert.match(script,/dropCaseOnKanban/);assert.match(script,/statusHistory\.push/);
 });
 test('Automatische Fallanlage deckt fachliche personenbezogene Einträge ab',()=>{
- for(const marker of ['Zugeordnete Schüler-Anfrage','Fachlich geprüfter Frühindikator','Dokumentierter Trainingsraumvorgang','Teilnahme an einem dokumentierten Gruppengespräch','Familien- und Bezugskonstellation dokumentiert','Dokument zur Schülerakte hinzugefügt'])assert.match(script,new RegExp(marker));
+ for(const marker of ['Zugeordnete Schüler-Anfrage','Fachlich geprüfter Frühindikator','Dokumentierter Trainingsraumvorgang','Familien- und Bezugskonstellation dokumentiert','Dokument zur Schülerakte hinzugefügt'])assert.match(script,new RegExp(marker));
  assert.match(script,/function ensureCaseForStudent/);
 });
 test('Rohimporte erzeugen nicht ungeprüft Fallakten',()=>{

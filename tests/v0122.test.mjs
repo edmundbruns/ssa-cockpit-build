@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('..',import.meta.url));
 const read=f=>fs.readFileSync(path.join(root,f),'utf8').replace(/\r\n/g,'\n');
-const VERSION='0.12.3';
+const VERSION='0.13.0';
 
 test('Versionsnummer ist überall gleich',()=>{
  assert.equal(JSON.parse(read('package.json')).version,VERSION);
@@ -49,4 +49,14 @@ test('Der Installer enthält nur Programmdateien aus src/ und keine Schul- oder 
  const walk=d=>{for(const e of fs.readdirSync(d,{withFileTypes:true})){if(['node_modules','target','.git'].includes(e.name))continue;const p=path.join(d,e.name);if(e.isDirectory())walk(p);else if(verboten.test(e.name))funde.push(path.relative(root,p));}};
  walk(root);
  assert.deepEqual(funde,[],'Datendateien im Projekt');
+});
+
+test('0.13: Schutzhinweis nur bei echtem Stichwort, Verneinungen werden erkannt',async()=>{
+ const g={};const code=read('src/dossier-core.js');new Function('globalThis',code.replace(/\}\)\(globalThis\);\s*$/,'})(globalThis);'))(g);
+ const D=g.Dossier;
+ assert.equal(D.safetyHint('Anna hat keine Angst mehr vor der Klassenarbeit.'),null);
+ assert.equal(D.safetyHint('Mutter sagt, das Kindeswohl sei nicht gefährdet.'),null);
+ assert.ok(D.safetyHint('Anna sagt, sie wolle nicht mehr leben.'));
+ assert.ok(D.safetyHint('Er sagt nicht, dass er sich umbringen will.'),'Selbstgefährdung wird trotz Verneinung angezeigt');
+ assert.ok(D.safetyHint('Kind hat Angst, nach Hause zu gehen.'));
 });
