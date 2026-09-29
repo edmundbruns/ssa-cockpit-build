@@ -49,4 +49,4 @@ Eine einheitliche Ereignisquelle (Chronik plus Tätigkeiten ohne Fall), Anonymis
 ## Schritte
 1. **0.15.0 – Kategorien und Erfassung** (erledigt): Kategorienliste, Chips in Kurzkontakt, Gespräch und Gruppengespräch, Zugangsweg einmal je Kind und Schuljahr (auch aus Auftragsklärung und Anfrageportal), Tätigkeit ohne Fall, Ableitung alter Werte, „?“ an jedem Merkmal.
 2. **0.16.0 – Statistikseite** mit Datenqualität und „Jetzt nachtragen“ (erledigt).
-3. **Standardberichte, Anonymisierung, Export und Protokoll.**
+3. **0.17.0 – Standardberichte, Anonymisierung, Export und Protokoll** (erledigt).

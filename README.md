@@ -1,6 +1,6 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Version 0.16.1. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
+Version 0.17.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
 
 Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
@@ -11,7 +11,7 @@ Unter „Gesprächsbogen drucken“ stehen vier fachlich unterschiedliche DIN-A4
 
 ## Aktueller Arbeitsablauf
 
-Das Handbuch steht in `HANDBUCH-0.16.1.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
+Das Handbuch steht in `HANDBUCH-0.17.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
 
 
 ## Neu in 0.12.2: Dialoge und Speichern
@@ -117,3 +117,12 @@ Abnahme (automatisch geprüft):
 ## Neu in 0.16.1
 
 - Unter „Weitere Aktionen“ an jeder Chronik-Kachel steht jetzt als erster Punkt „✎ Kachel bearbeiten“: eigene Einträge und Aufgaben öffnen direkt das Bearbeitungsformular (Änderungen landen in der Änderungshistorie), die Auftragsklärung öffnet „Auftrag bearbeiten“, die Ampel „Einschätzung aktualisieren“. Übernommene Kacheln (Import, Altdaten) bleiben im Original unverändert; dort öffnet „Ergänzung / Korrektur eintragen“ einen verknüpften Eintrag.
+
+## Neu in 0.17.0 – Statistik, Schritt 3: Weitergabe; SSA-Team vereinheitlicht
+
+- **SSA-Team:** feste Team-Liste (Standard: Bruns, Edmund · Thien, Sabine · Anerkennungspraktikantin Laura Geiger), änderbar unter „Daten und Einstellungen“. „Dokumentiert von“, „Verantwortlich“, „Geprüft von“ und „Durchgeführt von“ bieten nur noch das Team an; „SSA-Team“ als Auswahl entfällt. Der früher automatisch angelegte Personeneintrag „SSA-Team“ wird auf inaktiv gesetzt, nicht gelöscht.
+- **Frühere Schreibweisen:** Beim Auswerten werden alte Angaben automatisch einer Person zugeordnet, wenn alle Namensteile eindeutig passen („Edmund“ → Bruns, Edmund; „Sabine“, „Sabine Thien“ → Thien, Sabine). „SSA-Team“ ist keiner Person zugeordnet, bis du es in der Tabelle „Frühere Schreibweisen“ festlegst. Gespeicherte Einträge werden nicht verändert; die Zuordnung liegt in `settings.mitarbeitendZuordnung`.
+- **Berichte zur Weitergabe** (Auswertung): Jahresbericht, Halbjahresüberblick, Arbeitszeitverteilung, Prävention je Klassenstufe, Vorjahresvergleich. Kleinzahlregel („< 3“, Kreuztabellen „< 5“), Folgeschutz wiederholt bis stabil (Summen mitgeprüft, „•“), automatische Vergröberung Klassenstufe → Schulzweig mit Hinweis, Kinderschutz/Krise/Sucht nur als Jahresgesamtzahl, keine Mitarbeitenden.
+- **Vorschau** mit „Diese Tabelle verlässt das Cockpit. Bitte prüfen.“, Empfänger als Pflichtfeld, Zweck optional; **CSV** (Semikolon, UTF-8 mit BOM, Formelschutz) oder **Druck**; jedes Mal ein Eintrag im Protokoll **Weitergaben** (`weitergaben`).
+- Die alten Knöpfe „Jahresbericht / PDF“ und „Word-Datei“ in der bisherigen Auswertung sind entfallen, damit es keinen zweiten, nicht protokollierten Weg nach außen gibt. „Interne Rohdaten als CSV“ bleibt für die eigene Ablage.
+- Tests: `tests/weitergabe.test.mjs` (Anonymisierung inkl. 300 Zufallstabellen, Berichte, CSV, Protokoll, Mitarbeitende) und Abschnitt 14 in `tests/v0122-dom.cjs`.
