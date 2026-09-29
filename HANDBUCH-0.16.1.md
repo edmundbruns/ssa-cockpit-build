@@ -1,4 +1,4 @@
-# SSA-Cockpit 0.15.0
+# SSA-Cockpit 0.16.1
 
 ## Alltag
 
@@ -8,11 +8,19 @@ Die Seite **Heute** zeigt offene Schutzfragen und drei Arbeitsblöcke: Überfäl
 
 Oben auf **Heute** steht ein Feld für kurze Notizen. Tippe `@` und die ersten Buchstaben eines Namens; eine Liste schlägt passende Kinder vor (mit Pfeiltasten und Enter oder mit der Maus auswählen, Esc schließt). Mehrere `@` in einer Notiz sind möglich – die Notiz erscheint dann einmal gemeinsam in jeder betroffenen Chronik. Findet das Programm keinen passenden Namen, fragt es „Meintest du …?“ oder bietet an, eine neue Akte nur mit Name und Klasse anzulegen. Notizen ohne `@` landen unter **Noch nicht zugeordnet** und können später zugeordnet werden. Speichern mit dem Knopf oder mit Strg+Enter.
 
+## Kachel nachträglich bearbeiten
+
+Jede Chronik-Kachel hat unter **Weitere Aktionen** den Punkt **✎ Kachel bearbeiten**. Änderungen werden mit Datum und Person in der Änderungshistorie der Kachel festgehalten. Kacheln aus Importen oder älteren Versionen bleiben unverändert; dort trägst du über **Ergänzung / Korrektur eintragen** einen verknüpften Eintrag ein.
+
 ## Statistik nebenbei
 
 Beim Kurzkontakt, beim Gespräch und beim Gruppengespräch gibt es kleine Auswahlfelder: Thema, Dauer und beim Gespräch zusätzlich Art (Beratung oder Krise), Beteiligte und Ergebnis. Ein Klick genügt; ein zweiter Klick nimmt eine freiwillige Auswahl wieder weg. Einmal pro Kind und Schuljahr fragt das Programm, wie der Kontakt zustande kam (Zugangsweg). Das „?“ neben jedem Feld erklärt es kurz.
 
 Für Arbeit ohne einzelnes Kind (Konferenz, Elternabend, Projekt, Pausenpräsenz …) gibt es auf „Heute“ unter der Schnellnotiz den Knopf **＋ Tätigkeit ohne Fall**. Ein Klassenprojekt markiert die Klasse unter „Klassen“.
+
+## Statistik
+
+Unter **Auswertung** steht die interne Statistik. Oben zeigt „Datenqualität“, wo Angaben fehlen; **Jetzt nachtragen** führt dich Eintrag für Eintrag durch die Lücken. Darunter stehen fünf Kennzahlen, die Filter und für jedes Merkmal ein Balkendiagramm mit derselben Tabelle. In der **Kreuztabelle** stellst du zwei Merkmale gegeneinander, zum Beispiel Thema und Klassenstufe. Diese Seite zeigt exakte Zahlen und ist nur für dich und dein Team gedacht – Berichte für Schulleitung und RLSB kommen als anonymisierte Standardberichte.
 
 ## Gespräch vorbereiten
 

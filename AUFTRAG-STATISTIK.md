@@ -47,6 +47,6 @@ Datenqualitäts-Hinweis mit „Jetzt nachtragen“ · Kennzahlen · Filter (Zeit
 Eine einheitliche Ereignisquelle (Chronik plus Tätigkeiten ohne Fall), Anonymisierung als eigene getestete Funktion, schnell auch bei mehreren tausend Einträgen.
 
 ## Schritte
-1. **0.15.0 – Kategorien und Erfassung** (dieser Schritt): Kategorienliste, Chips in Kurzkontakt, Gespräch und Gruppengespräch, Zugangsweg einmal je Kind und Schuljahr (auch aus Auftragsklärung und Anfrageportal), Tätigkeit ohne Fall, Ableitung alter Werte, „?“ an jedem Merkmal.
-2. **Statistikseite** mit Datenqualität und „Jetzt nachtragen“.
+1. **0.15.0 – Kategorien und Erfassung** (erledigt): Kategorienliste, Chips in Kurzkontakt, Gespräch und Gruppengespräch, Zugangsweg einmal je Kind und Schuljahr (auch aus Auftragsklärung und Anfrageportal), Tätigkeit ohne Fall, Ableitung alter Werte, „?“ an jedem Merkmal.
+2. **0.16.0 – Statistikseite** mit Datenqualität und „Jetzt nachtragen“ (erledigt).
 3. **Standardberichte, Anonymisierung, Export und Protokoll.**

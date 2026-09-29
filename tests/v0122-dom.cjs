@@ -321,6 +321,45 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  }
  console.log('0.15 erfassung ok');
 
+ // 12. Version 0.16: Statistikseite, Filter bleiben erhalten, „Jetzt nachtragen“
+ {
+ run(`document.querySelectorAll('.modal.open').forEach(m=>{if(m.id&&!['vorbereitungModal','neueAkteModal','taetigkeitModal','nachtragModal'].includes(m.id))closeModal(m.id);else m.remove()});go('statistics')`);
+ const neu=w.document.getElementById('statNeu');assert(/Intern – nicht weitergeben/.test(neu.textContent),'als intern gekennzeichnet');
+ for(const t of ['Erreichte Schüler:innen','Einzelfälle','Kontakte','Stunden','Erreichte Personen'])assert(neu.textContent.includes(t),'Kennzahl '+t);
+ assert.equal(neu.querySelectorAll('.stat-kpi .hilfe-q').length,5,'„?“ an jeder Kennzahl');
+ assert(neu.querySelectorAll('.stat-karte svg rect').length>3,'Balken als SVG');assert(neu.querySelector('.stat-kreuz table tfoot'),'Kreuztabelle mit Summen');
+ const k0=run(`Dossier.kennzahlen(Dossier.filterEreignisse(Dossier.ereignisse(data),statFilterObjekt(),Dossier.zugangKarte(data)),statFilterObjekt())`);
+ assert(neu.querySelector('.stat-kpis').textContent.includes(String(k0.kontakte)),'Kennzahl wird angezeigt');
+ run(`statF.thema='konflikt_mobbing';renderStatistikNeu();go('dashboard');go('statistics')`);
+ assert.equal(run('statF.thema'),'konflikt_mobbing','Filter bleiben beim Seitenwechsel erhalten');assert(/1 Filter aktiv/.test(w.document.getElementById('statNeu').textContent));
+ run('statFilterZuruecksetzen()');assert.equal(run('statF.thema'),'');
+ const q0=run(`Dossier.datenqualitaet(Dossier.filterEreignisse(Dossier.ereignisse(data),{von:statFilterObjekt().von,bis:statFilterObjekt().bis},Dossier.zugangKarte(data)),Dossier.zugangKarte(data))`);
+ assert(q0.nachtragbar.length>0,'es gibt etwas nachzutragen');
+ run('statNachtragenStarten()');let nm=w.document.getElementById('nachtragModal');assert(nm&&/1 von/.test(nm.textContent));
+ const erste=run('statNachtragListe[0]');const f1=nm.querySelector('form');
+ if(erste.typ==='eintrag'){const t=f1.querySelector('input[name=thema]');if(t)t.checked=true;const d=f1.querySelector('input[name=dauer_min]');if(d)d.checked=true;}else f1.querySelector('input[name=zugangsweg]').checked=true;
+ f1.requestSubmit();await sleep(20);nm=w.document.getElementById('nachtragModal');assert(!nm||/2 von/.test(nm.textContent),'Speichern springt zum nächsten');
+ if(erste.typ==='eintrag')assert.equal(run(`data.journal.find(e=>e.id==='${erste.entryId}').stat.quelle`),'erfasst','nachgetragen');
+ run(`document.getElementById('nachtragModal')?.querySelector('[data-ende]')?.click()`);
+ const q1=run(`Dossier.datenqualitaet(Dossier.filterEreignisse(Dossier.ereignisse(data),{von:statFilterObjekt().von,bis:statFilterObjekt().bis},Dossier.zugangKarte(data)),Dossier.zugangKarte(data))`);
+ assert(q1.ohneThema+q1.ohneDauer+q1.ohneZugang<q0.ohneThema+q0.ohneDauer+q0.ohneZugang,'Datenqualität zählt weniger Lücken');
+ await waitSaved();console.log('0.16 statistik ok');
+ }
+
+ // 13. „Kachel bearbeiten“ unter „Weitere Aktionen“
+ {
+ run(`document.querySelectorAll('.modal.open').forEach(m=>{if(m.id&&!['nachtragModal'].includes(m.id))closeModal(m.id);else m.remove()});selectedStudentId='s1';showStudent('s1')`);
+ const eid=run(`data.journal.find(e=>e.participantIds.includes('s1')&&e.type!=='Kurznotiz'&&!e.deletedAt).id`);
+ const card=w.document.getElementById('ds-entry:'+eid);const knopf=[...card.querySelectorAll('.dossier-card-actions button')].find(b=>/Kachel bearbeiten/.test(b.textContent));
+ assert(knopf,'„Kachel bearbeiten“ in „Weitere Aktionen“');knopf.click();
+ const ef=w.document.getElementById('dossierEditForm');assert(w.document.getElementById('dossierEditModal').classList.contains('open'));assert.equal(ef.elements.content.value,run(`data.journal.find(e=>e.id==='${eid}').content`),'Formular mit dem Eintrag');
+ ef.elements.content.value=ef.elements.content.value+' (nachträglich ergänzt)';ef.requestSubmit();await sleep(30);
+ assert.match(run(`data.journal.find(e=>e.id==='${eid}').content`),/nachträglich ergänzt/);assert(run(`data.journal.find(e=>e.id==='${eid}').revisions.length`)>=1,'Änderung mit Historie');
+ const auftragKarte=w.document.querySelector('[id^="ds-auftrag:"]');if(auftragKarte)assert([...auftragKarte.querySelectorAll('.dossier-card-actions button')].some(b=>/Auftrag bearbeiten/.test(b.textContent)));
+ const aufgabe=w.document.querySelector('[id^="ds-task:"]');if(aufgabe)assert([...aufgabe.querySelectorAll('.dossier-card-actions button')].some(b=>/Kachel bearbeiten/.test(b.textContent)));
+ await waitSaved();console.log('kachel bearbeiten ok');
+ }
+
  console.log('errors',errors);
  if(errors.length)process.exitCode=1;
  w.close();

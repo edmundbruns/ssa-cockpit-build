@@ -37,6 +37,14 @@ const HILFE_TEXTE={
  gruppengespraech:{titel:'Gruppengespräch',was:'Ein Gespräch mit mehreren Kindern, einmal eingetragen.',warum:'Der Eintrag erscheint in der Chronik jedes beteiligten Kindes, ohne Kopien.',beispiel:'Streitschlichtung zwischen Bert und Cem.'},
  fruehindikatoren:{titel:'Frühindikatoren',was:'Hinweise, wenn Fehlzeiten einen eingestellten Schwellenwert überschreiten.',warum:'Du kannst früh nachfragen, bevor sich Fehlzeiten verfestigen.',beispiel:'Mehr als zehn unentschuldigte Stunden in einem Monat.'},
  ampel:{titel:'Fachliche Ampel',was:'Deine eigene Einschätzung, wie dringend ein Fall gerade ist, mit Begründung und Datum.',warum:'Du und deine Vertretung sehen schnell, wo Handlungsbedarf besteht.',beispiel:'Gelb: „Situation angespannt, Rückmeldung der Eltern steht aus.“'},
+ erreichteSchueler:{titel:'Erreichte Schüler:innen',was:'Alle Kinder mit mindestens einem Kontakt im Zeitraum, auch kurz oder in einer Gruppe. Jedes Kind zählt pro Schuljahr nur einmal.',warum:'Zeigt, wie viele verschiedene Kinder du erreichst.',beispiel:'Anna mit fünf Gesprächen zählt einmal.'},
+ einzelfaelle:{titel:'Einzelfälle',was:'Kinder mit mindestens einem Beratungs- oder Krisengespräch, je Schuljahr einmal gezählt.',warum:'Trennt echte Einzelfallarbeit von kurzen Kontakten und Gruppen.',beispiel:'Ein Kind nur mit Kurzkontakten ist erreicht, aber kein Einzelfall.'},
+ kontakte:{titel:'Kontakte',was:'Jeder einzelne Eintrag zählt: Gespräch, Kurzkontakt, Gruppengespräch, Klassenmaßnahme.',warum:'Zeigt die Menge deiner direkten Arbeit.',beispiel:'Drei Gespräche mit Anna sind drei Kontakte.'},
+ stunden:{titel:'Stunden',was:'Summe aller eingetragenen Dauern geteilt durch 60, auf eine Nachkommastelle, einschließlich Tätigkeiten ohne Fall.',warum:'So wird deine Arbeitszeit sichtbar. Einträge ohne Dauer fehlen darin und werden angezeigt.',beispiel:'30 + 45 Minuten ergeben 1,3 Stunden.'},
+ erreichtePersonen:{titel:'Erreichte Personen',was:'Einzelkontakt zählt 1, Gruppe oder Klasse zählt die Teilnehmenden, dazu Teilnehmende bei Tätigkeiten ohne Fall.',warum:'Zeigt die Reichweite, auch von Projekten und Gruppen.',beispiel:'Ein Projekt mit 24 Kindern zählt 24.'},
+ datenqualitaet:{titel:'Datenqualität',was:'Zeigt, wo Angaben für die Statistik fehlen.',warum:'Fehlende Angaben machen die Zahlen ungenau. Mit „Jetzt nachtragen“ ergänzt du sie Schritt für Schritt.',beispiel:'Ein Gespräch ohne Dauer fehlt sonst bei den Stunden.'},
+ statFilter:{titel:'Filter',was:'Zeitraum und Merkmale lassen sich beliebig kombinieren; die Auswahl bleibt beim Seitenwechsel erhalten.',warum:'So beantwortest du Fragen wie „Wie viele Konflikte gab es in Klasse 7?“.',beispiel:'Zeitraum „1. Halbjahr“ und Thema „Konflikt / Mobbing“.'},
+ kreuztabelle:{titel:'Kreuztabelle',was:'Zwei Merkmale gegeneinander, mit Zeilen- und Spaltensummen.',warum:'Zeigt Zusammenhänge, zum Beispiel welche Themen in welcher Klassenstufe vorkommen.',beispiel:'Zeilen „Thema“, Spalten „Klassenstufe“.'},
  kontaktart:{titel:'Art des Kontakts',was:'Ob es ein Beratungsgespräch oder ein Krisengespräch war. Kurzkontakt, Gruppe und Klasse erkennt das Programm selbst.',warum:'So lässt sich später zeigen, wie viel Krisenarbeit anfällt.',beispiel:'Ein Kind kommt aufgelöst nach einem Streit zu Hause: Krisengespräch.'},
  zugangsweg:{titel:'Zugangsweg',was:'Wie der Kontakt zu diesem Kind in diesem Schuljahr zustande kam. Du wirst nur einmal pro Kind und Schuljahr gefragt.',warum:'Die Statistik zeigt, ob Kinder von selbst kommen oder vermittelt werden.',beispiel:'Die Klassenleitung hat das Kind geschickt: „Lehrkraft“.'},
  beteiligte:{titel:'Beteiligte',was:'Wer beim Gespräch dabei war. „Schüler:in“ ist vorausgewählt.',warum:'So wird sichtbar, wie oft du mit Eltern, Lehrkräften oder Fachstellen zusammenarbeitest.',beispiel:'Gespräch mit Kind und Mutter: „Schüler:in“ und „Eltern“.'},
@@ -350,6 +358,97 @@ function taetigkeitOhneFall(){
  wrap.querySelector('form').onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target);
   try{const t=Dossier.addTaetigkeit(data,{taetigkeit:fd.get('taetigkeit'),dauer_min:fd.get('dauer_min'),date:fd.get('date'),klasse:fd.get('klasse'),teilnehmende:fd.get('teilnehmende'),notiz:fd.get('notiz')});save();wrap.remove();toast(Dossier.katLabel('taetigkeit',t.taetigkeit)+' gespeichert.'+(t.taetigkeit==='klassenprojekt_praevention'&&t.klasse?' Die Klasse '+t.klasse+' ist jetzt markiert.':''));}
   catch(err){appAlert(err.message||String(err));}};
+}
+
+/* ================================================================
+   6. STATISTIKSEITE (0.16) – intern, nicht zur Weitergabe
+   Rechnet ausschließlich mit Dossier.ereignisse(); Filter bleiben beim Seitenwechsel erhalten.
+   ================================================================ */
+let statF={zeitraum:'schuljahr',von:'',bis:'',stufe:'',zweig:'',thema:'',zugangsweg:'',kontaktart:'',ergebnis:'',taetigkeit:'',mitarbeitend:''};
+let statKreuz={a:'thema',b:'stufe',einheit:'kontakte'};
+const STAT_MERKMALE={kontaktart:'Art des Kontakts',thema:'Thema',zugangsweg:'Zugangsweg',beteiligte:'Beteiligte',ergebnis:'Ergebnis',stufe:'Klassenstufe',zweig:'Schulzweig',monat:'Monat',mitarbeitend:'Mitarbeitende',taetigkeit:'Tätigkeit ohne Fall',arbeitsbereich:'Arbeitsbereich'};
+function statSchuljahrGrenzen(sj){const y=Number(String(sj||data.settings.currentSchoolYear||'').slice(0,4))||new Date().getFullYear();return {y,von:y+'-08-01',bis:(y+1)+'-07-31'};}
+function statZeitraumGrenzen(){
+ const {y,von,bis}=statSchuljahrGrenzen(),h=today();
+ switch(statF.zeitraum){case 'hj1':return {von,bis:(y+1)+'-01-31',text:'1. Halbjahr '+y+'/'+String(y+1).slice(2)};case 'hj2':return {von:(y+1)+'-02-01',bis,text:'2. Halbjahr '+y+'/'+String(y+1).slice(2)};
+  case 'monat':{const m=h.slice(0,7),[jj,mm]=m.split('-').map(Number),letzter=new Date(jj,mm,0).getDate();return {von:m+'-01',bis:m+'-'+String(letzter).padStart(2,'0'),text:new Intl.DateTimeFormat('de-DE',{month:'long',year:'numeric'}).format(new Date(m+'-15T12:00:00'))};}
+  case 'vorjahr':return {von:(y-1)+'-08-01',bis:y+'-07-31',text:'Schuljahr '+(y-1)+'/'+String(y).slice(2)};
+  case 'frei':return {von:statF.von||'0000-01-01',bis:statF.bis||'9999-12-31',text:'Frei gewählt: '+(statF.von?fmt(statF.von):'Anfang')+' bis '+(statF.bis?fmt(statF.bis):'heute')};
+  case 'alles':return {von:'',bis:'',text:'Gesamter Datenbestand'};
+  default:return {von,bis,text:'Schuljahr '+y+'/'+String(y+1).slice(2)};}
+}
+function statFilterObjekt(){const z=statZeitraumGrenzen();const f={von:z.von,bis:z.bis};for(const k of ['stufe','zweig','thema','zugangsweg','kontaktart','ergebnis','taetigkeit','mitarbeitend'])if(statF[k])f[k]=statF[k];return f;}
+function statWertText(merkmal,id){if(id===Dossier.NICHT_ERFASST)return 'nicht erfasst';if(merkmal==='stufe')return 'Klasse '+id;if(merkmal==='zweig')return id==='GS'?'Grundschule':id==='OBS'?'Oberschule':id;if(merkmal==='monat'){const d=new Date(id+'-15T12:00:00');return isNaN(d)?id:new Intl.DateTimeFormat('de-DE',{month:'short',year:'2-digit'}).format(d);}if(merkmal==='mitarbeitend')return id;if(merkmal==='arbeitsbereich')return {einzelfall:'Einzelfall',gruppen_klassen:'Gruppen und Klassen',kooperation:'Kooperation',verwaltung:'Verwaltung',fortbildung:'Fortbildung'}[id]||id;return Dossier.katLabel(merkmal,id);}
+function statSelect(k,titel,optionen){return `<label class="stat-filter"><span>${DE(titel)}</span><select class="field" onchange="statF['${k}']=this.value;renderStatistikNeu()"><option value="">alle</option>${optionen.map(([v,l])=>`<option value="${DE(v)}" ${String(statF[k])===String(v)?'selected':''}>${DE(l)}</option>`).join('')}</select></label>`;}
+// Balken als eigenes SVG, darunter/daneben dieselben Zahlen als Tabelle
+function statBalkenTabelle(titel,merkmal,rows,einheit,hilfe){
+ const max=Math.max(1,...rows.map(r=>r.wert)),summe=rows.reduce((a,r)=>a+r.wert,0);
+ const einheitText={kontakte:'Kontakte',stunden:'Stunden',kinder:'Kinder',personen:'Personen',anzahl:'Anzahl'}[einheit]||einheit;
+ return `<section class="card stat-karte"><div class="cardhead"><h3>${DE(titel)} ${hilfe?hilfeKnopf(hilfe):''}</h3><span class="tag gray">Einheit: ${DE(einheitText)}</span></div>${rows.length?`<table class="stat-tabelle"><thead><tr><th>${DE(STAT_MERKMALE[merkmal]||titel)}</th><th class="stat-balken-kopf" aria-hidden="true"></th><th class="zahl">${DE(einheitText)}</th></tr></thead><tbody>${rows.map(r=>`<tr class="${r.id===Dossier.NICHT_ERFASST?'nicht-erfasst':''}"><td>${DE(statWertText(merkmal,r.id))}</td><td class="stat-balken"><svg viewBox="0 0 100 10" preserveAspectRatio="none" role="img" aria-label="${DE(statWertText(merkmal,r.id))}: ${r.wert}"><rect x="0" y="1" height="8" rx="1.5" width="${(r.wert/max*100).toFixed(2)}"></rect></svg></td><td class="zahl">${String(r.wert).replace('.',',')}</td></tr>`).join('')}</tbody>${['thema','beteiligte'].includes(merkmal)?`<tfoot><tr><td colspan="3" class="subtle">Mehrfachauswahl: Ein Kontakt kann mehrfach vorkommen, die Summe ist deshalb größer als die Zahl der Kontakte.</td></tr></tfoot>`:`<tfoot><tr><td>Summe</td><td></td><td class="zahl">${String(einheit==='stunden'?Math.round(summe*10)/10:summe).replace('.',',')}</td></tr></tfoot>`}</table>`:'<p class="subtle">Im gewählten Zeitraum und Filter gibt es dazu keine Einträge.</p>'}</section>`;
+}
+function renderStatistikNeu(){
+ const box=document.getElementById('statNeu');if(!box)return;
+ const f=statFilterObjekt(),z=statZeitraumGrenzen(),zk=Dossier.zugangKarte(data),alle=Dossier.ereignisse(data),evs=Dossier.filterEreignisse(alle,f,zk),k=Dossier.kennzahlen(evs,f);
+ const qEvs=Dossier.filterEreignisse(alle,{von:f.von,bis:f.bis},zk),q=Dossier.datenqualitaet(qEvs,zk);
+ const stufen=[...new Set(alle.flatMap(e=>e.kinder.length?e.kinder.map(x=>x.stufe):[e.stufeAnonym]).filter(x=>x!=null&&x!==''))].sort((a,b)=>a-b);
+ const mitarbeitende=[...new Set(alle.map(e=>e.mitarbeitend).filter(Boolean))].sort();
+ const kat=m=>Dossier.katListe(m).map(x=>[x.id,x.label]);
+ const aktiv=Object.entries(statF).filter(([key,v])=>v&&!['zeitraum','von','bis'].includes(key)).length;
+ const kachel=(titel,wert,einheit,hilfe,zusatz='')=>`<div class="card kpi stat-kpi"><div class="label">${DE(titel)} ${hilfeKnopf(hilfe)}</div><div class="value">${String(wert).replace('.',',')}</div><div class="trend">${DE(einheit)}${zusatz}</div></div>`;
+ const offen=q.ohneThema+q.ohneDauer+q.ohneZugang;
+ box.innerHTML=`<div class="notice warning stat-intern"><strong>Intern – nicht weitergeben.</strong> Diese Ansicht zeigt exakte Zahlen, auch sehr kleine. Für Schulleitung und RLSB folgen anonymisierte Standardberichte.</div>
+ <section class="card stat-qualitaet ${offen?'':'ok'}"><div class="cardhead"><h3>Datenqualität ${hilfeKnopf('datenqualitaet')}</h3>${offen&&q.nachtragbar.length+q.kinderOhneZugang.length?`<button class="btn primary kleiner" onclick="statNachtragenStarten()">Jetzt nachtragen</button>`:''}</div><p>${offen?`Im gewählten Zeitraum: <strong>${q.ohneThema}</strong> Kontakte ohne Thema, <strong>${q.ohneDauer}</strong> ohne Dauer, <strong>${q.ohneZugang}</strong> Kinder ohne Zugangsweg.`:'Alle Kontakte im Zeitraum haben Thema, Dauer und Zugangsweg.'}${q.uebernommen?` <span class="subtle">${q.uebernommen} Kontakte stammen aus der Zeit vor 0.15 („übernommen“).</span>`:''}</p></section>
+ <section class="card stat-filterleiste"><div class="cardhead"><h3>Filter ${hilfeKnopf('statFilter')}</h3>${aktiv||statF.zeitraum!=='schuljahr'?'<button class="btn kleiner" onclick="statFilterZuruecksetzen()">Filter zurücksetzen</button>':''}</div>
+ <div class="stat-filter-reihe"><label class="stat-filter"><span>Zeitraum</span><select class="field" onchange="statF.zeitraum=this.value;renderStatistikNeu()">${[['schuljahr','Aktuelles Schuljahr'],['hj1','1. Halbjahr'],['hj2','2. Halbjahr'],['monat','Aktueller Monat'],['vorjahr','Vorjahr'],['frei','Frei wählen'],['alles','Gesamter Bestand']].map(([v,l])=>`<option value="${v}" ${statF.zeitraum===v?'selected':''}>${l}</option>`).join('')}</select></label>
+ ${statF.zeitraum==='frei'?`<label class="stat-filter"><span>von</span><input class="field" type="date" value="${DE(statF.von)}" onchange="statF.von=this.value;renderStatistikNeu()"></label><label class="stat-filter"><span>bis</span><input class="field" type="date" value="${DE(statF.bis)}" onchange="statF.bis=this.value;renderStatistikNeu()"></label>`:''}
+ ${statSelect('stufe','Klassenstufe',stufen.map(s=>[String(s),'Klasse '+s]))}${statSelect('zweig','Schulzweig',[['GS','Grundschule'],['OBS','Oberschule']])}${statSelect('thema','Thema',[...kat('thema'),[Dossier.NICHT_ERFASST,'nicht erfasst']])}${statSelect('zugangsweg','Zugangsweg',[...kat('zugangsweg'),[Dossier.NICHT_ERFASST,'nicht erfasst']])}${statSelect('kontaktart','Art',kat('kontaktart'))}${statSelect('ergebnis','Ergebnis',[...kat('ergebnis'),[Dossier.NICHT_ERFASST,'nicht erfasst']])}${statSelect('taetigkeit','Tätigkeit',kat('taetigkeit'))}${statSelect('mitarbeitend','Mitarbeitende',mitarbeitende.map(m=>[m,m]))}</div>
+ <p class="subtle stat-zeitraum">Ausgewertet: ${DE(z.text)}${aktiv?' · '+aktiv+' Filter aktiv':''}. Alle Zahlen darunter beziehen sich auf diese Auswahl.</p></section>
+ <div class="grid kpis stat-kpis">${kachel('Erreichte Schüler:innen',k.erreichteSchueler,'Kinder, je Schuljahr einmal','erreichteSchueler',k.anonymeKurzkontakte?` · dazu ${k.anonymeKurzkontakte} anonyme Kurzkontakte`:'')}${kachel('Einzelfälle',k.einzelfaelle,'Kinder mit Beratungs- oder Krisengespräch','einzelfaelle')}${kachel('Kontakte',k.kontakte,'Einträge','kontakte')}${kachel('Stunden',k.stunden,'Summe der Dauer ÷ 60','stunden',k.ohneDauer?` · ${k.ohneDauer} ohne Dauer`:'')}${kachel('Erreichte Personen',k.erreichtePersonen,'Einzelkontakt 1, Gruppe/Klasse Teilnehmende','erreichtePersonen')}</div>
+ <div class="stat-raster">
+ ${statBalkenTabelle('Art des Kontakts','kontaktart',Dossier.aufschluesselung(evs,'kontaktart','kontakte',f,zk),'kontakte','kontaktart')}
+ ${statBalkenTabelle('Themen','thema',Dossier.aufschluesselung(evs,'thema','kontakte',f,zk),'kontakte','thema')}
+ ${statBalkenTabelle('Zugangsweg','zugangsweg',Dossier.aufschluesselung(evs,'zugangsweg','kinder',f,zk),'kinder','zugangsweg')}
+ ${statBalkenTabelle('Beteiligte','beteiligte',Dossier.aufschluesselung(evs,'beteiligte','kontakte',f,zk),'kontakte','beteiligte')}
+ ${statBalkenTabelle('Ergebnis der Gespräche','ergebnis',Dossier.aufschluesselung(evs,'ergebnis','kontakte',f,zk),'kontakte','ergebnis')}
+ ${statBalkenTabelle('Klassenstufe','stufe',Dossier.aufschluesselung(evs,'stufe','kinder',f,zk).sort((a,b)=>(a.id===Dossier.NICHT_ERFASST)-(b.id===Dossier.NICHT_ERFASST)||Number(a.id)-Number(b.id)),'kinder','')}
+ ${statBalkenTabelle('Schulzweig','zweig',Dossier.aufschluesselung(evs,'zweig','kinder',f,zk),'kinder','')}
+ ${statBalkenTabelle('Kontakte im Verlauf','monat',Dossier.aufschluesselung(evs.filter(e=>e.art==='kontakt'),'monat','kontakte',f,zk).sort((a,b)=>a.id.localeCompare(b.id)),'kontakte','')}
+ ${statBalkenTabelle('Arbeitszeit nach Bereich','arbeitsbereich',Dossier.aufschluesselung(evs,'arbeitsbereich','stunden',f,zk),'stunden','stunden')}
+ ${statBalkenTabelle('Tätigkeiten ohne Fall','taetigkeit',Dossier.aufschluesselung(evs,'taetigkeit','stunden',f,zk),'stunden','taetigkeit')}
+ ${statBalkenTabelle('Kontakte nach Mitarbeitenden','mitarbeitend',Dossier.aufschluesselung(evs.filter(e=>e.art==='kontakt'),'mitarbeitend','kontakte',f,zk),'kontakte','')}
+ </div>
+ <section class="card stat-kreuz" id="statKreuzBereich">${statKreuzHtml(evs,f,zk)}</section>`;
+}
+function statKreuzHtml(evs,f,zk){
+ const opt=sel=>Object.entries(STAT_MERKMALE).filter(([m])=>m!=='arbeitsbereich').map(([m,l])=>`<option value="${m}" ${sel===m?'selected':''}>${DE(l)}</option>`).join('');
+ const kt=Dossier.kreuztabelle(evs,statKreuz.a,statKreuz.b,statKreuz.einheit,f,zk),z=v=>String(v).replace('.',',');
+ return `<div class="cardhead"><h3>Kreuztabelle ${hilfeKnopf('kreuztabelle')}</h3><span class="tag gray">Einheit: ${statKreuz.einheit==='stunden'?'Stunden':'Kontakte'}</span></div>
+ <div class="stat-filter-reihe"><label class="stat-filter"><span>Zeilen</span><select class="field" onchange="statKreuz.a=this.value;renderStatistikNeu()">${opt(statKreuz.a)}</select></label><label class="stat-filter"><span>Spalten</span><select class="field" onchange="statKreuz.b=this.value;renderStatistikNeu()">${opt(statKreuz.b)}</select></label><label class="stat-filter"><span>Zählen</span><select class="field" onchange="statKreuz.einheit=this.value;renderStatistikNeu()"><option value="kontakte" ${statKreuz.einheit==='kontakte'?'selected':''}>Kontakte</option><option value="stunden" ${statKreuz.einheit==='stunden'?'selected':''}>Stunden</option></select></label></div>
+ ${kt.zeilen.length?`<div class="stat-kreuz-rahmen"><table class="stat-tabelle kreuz"><thead><tr><th>${DE(STAT_MERKMALE[statKreuz.a])} \\ ${DE(STAT_MERKMALE[statKreuz.b])}</th>${kt.spalten.map(s=>`<th class="zahl">${DE(statWertText(statKreuz.b,s))}</th>`).join('')}<th class="zahl summe">Summe</th></tr></thead><tbody>${kt.zeilen.map((r,i)=>`<tr><th>${DE(statWertText(statKreuz.a,r))}</th>${kt.tabelle[i].map(v=>`<td class="zahl">${v?z(v):'<span class="null">0</span>'}</td>`).join('')}<td class="zahl summe">${z(kt.zeilenSummen[i])}</td></tr>`).join('')}</tbody><tfoot><tr><th>Summe</th>${kt.spaltenSummen.map(v=>`<td class="zahl summe">${z(v)}</td>`).join('')}<td class="zahl summe">${z(kt.gesamt)}</td></tr></tfoot></table></div>${['thema','beteiligte','stufe','zweig','zugangsweg'].some(m=>m===statKreuz.a||m===statKreuz.b)?'<p class="subtle">Hinweis: Hat ein Kontakt mehrere Werte (z. B. zwei Themen oder Kinder aus zwei Klassenstufen), zählt er in jeder passenden Zelle.</p>':''}`:'<p class="subtle">Für diese Kombination gibt es im gewählten Zeitraum keine Einträge.</p>'}`;
+}
+function statFilterZuruecksetzen(){statF={zeitraum:'schuljahr',von:'',bis:'',stufe:'',zweig:'',thema:'',zugangsweg:'',kontaktart:'',ergebnis:'',taetigkeit:'',mitarbeitend:''};renderStatistikNeu();}
+// „Jetzt nachtragen“: betroffene Einträge nacheinander, nur mit den fehlenden Chips
+let statNachtragListe=[],statNachtragPos=0;
+function statNachtragenStarten(){
+ const f=statFilterObjekt(),zk=Dossier.zugangKarte(data),q=Dossier.datenqualitaet(Dossier.filterEreignisse(Dossier.ereignisse(data),{von:f.von,bis:f.bis},zk),zk);
+ statNachtragListe=[...q.nachtragbar.map(x=>({typ:'eintrag',...x})),...q.kinderOhneZugang.map(x=>({typ:'zugang',...x}))];statNachtragPos=0;statNachtragZeigen();
+}
+function statNachtragZeigen(){
+ document.getElementById('nachtragModal')?.remove();
+ if(statNachtragPos>=statNachtragListe.length){toast(statNachtragListe.length?'Fertig – alle Einträge sind durchgesehen.':'Es gibt nichts nachzutragen.');renderStatistikNeu();return;}
+ const x=statNachtragListe[statNachtragPos],wrap=document.createElement('div');wrap.className='modal open';wrap.id='nachtragModal';wrap.style.zIndex='57';
+ let inhalt='';
+ if(x.typ==='eintrag'){const e=data.journal.find(j=>j.id===x.entryId);if(!e){statNachtragPos++;statNachtragZeigen();return;}const namen=(e.participantIds||[]).map(id=>data.students.find(s=>s.id===id)).filter(Boolean).map(s=>s.first+' '+s.last).join(', ');
+  inhalt=`<p class="subtle" style="margin-top:0">${DE(fmt(e.date))} · ${DE(e.type||'')} · ${DE(namen)}</p><div class="notice"><strong>${DE(e.title||'')}</strong><br>${DE(String(e.content||'').slice(0,240))}${String(e.content||'').length>240?' …':''}</div>${x.fehlt.thema?chipsHtml('thema','thema',{multi:true,datum:e.date}):''}${x.fehlt.dauer?chipsHtml(e.type==='Kurzkontakt'?'dauer_kurz':'dauer','dauer_min',{datum:e.date,hilfe:'dauer'}):''}`;}
+ else{const s=data.students.find(y=>y.id===x.sid);inhalt=`<p class="subtle" style="margin-top:0">Schuljahr ${DE(x.schoolYear)} · erster Kontakt am ${DE(fmt(x.date))}</p><div class="notice"><strong>${DE(s?s.first+' '+s.last+' · '+(s.className||''):'Kind')}</strong></div>${chipsHtml('zugangsweg','zugangsweg',{datum:x.date})}`;}
+ wrap.innerHTML=`<div class="dialog"><form><div class="dialoghead"><h2>Nachtragen · ${statNachtragPos+1} von ${statNachtragListe.length}</h2><button type="button" class="close" data-ende>×</button></div><div class="dialogbody kein-querscroll">${inhalt}</div><div class="dialogfoot"><button type="button" class="btn" data-ende>Beenden</button><button type="button" class="btn" data-weiter>Überspringen</button><button type="submit" class="btn primary">Speichern und weiter</button></div></form></div>`;
+ document.body.appendChild(wrap);
+ wrap.querySelectorAll('[data-ende]').forEach(b=>b.onclick=()=>{wrap.remove();renderStatistikNeu();});
+ wrap.querySelector('[data-weiter]').onclick=()=>{statNachtragPos++;statNachtragZeigen();};
+ wrap.querySelector('form').onsubmit=ev=>{ev.preventDefault();const fd=new FormData(ev.target);
+  try{if(x.typ==='eintrag'){const themen=fd.getAll('thema'),dauer=fd.get('dauer_min');if(!themen.length&&!dauer){appAlert('Bitte mindestens eine Angabe wählen oder „Überspringen“.');return;}Dossier.statNachtragen(data,x.entryId,{themen,dauer_min:dauer});}
+   else{const z=fd.get('zugangsweg');if(!z){appAlert('Bitte einen Zugangsweg wählen oder „Überspringen“.');return;}Dossier.zugangswegSetzen(data,x.sid,z,x.date,'nachgetragen');}
+   save();statNachtragPos++;statNachtragZeigen();}catch(err){appAlert(err.message||String(err));}};
 }
 
 /* ================================================================

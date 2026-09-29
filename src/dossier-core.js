@@ -251,6 +251,108 @@ function statMerkmale(state,e){
  const themen=[...new Set((e.occasions||[]).map(o=>ALTE_ANLAESSE[o]).filter(Boolean))];
  return {version:'',quelle:'uebernommen',kontaktart,themen,beteiligte:[],dauer_min:Number(e.duration)>0?Number(e.duration):null,ergebnis:ALTE_ENTSCHEIDUNG[e.decision]||'',mitarbeitend:e.responsible||'',klassen:klassenSnapshot(state,e.participantIds,e.date),teilnehmende:kontaktart==='gruppe'||kontaktart==='klasse'?n:null};
 }
+/* ===== 0.16: Einheitliche Ereignisquelle und Auswertung (Statistik Schritt 2) =====
+   Alle Zahlen entstehen aus ereignisse(): Chronik-Einträge, anonyme Kurzkontakte, alte Fallverlaufs-Kontakte,
+   alte Gruppengespräche, Klassenmaßnahmen und Tätigkeiten ohne Fall. Keine zweite Datenhaltung. */
+const NICHT_ERFASST='nicht_erfasst';
+function zugangKarte(state){const m=new Map();for(const z of state.zugangswege||[])if(!m.has(z.studentId+'|'+z.schoolYear))m.set(z.studentId+'|'+z.schoolYear,z.zugangsweg);return m;}
+function kindAus(state,sid,date,snap){const s=snap&&snap[sid];if(s&&s.stufe!=null)return {sid,stufe:s.stufe,zweig:s.zweig};const c=context(state,sid,date).className||'';return {sid,...stufeZweig(c)};}
+function ereignisse(state){
+ const out=[],d=r=>String(r||'').slice(0,10);
+ const push=(ev)=>{if(!iso(ev.date))return;ev.schoolYear=schoolYear(ev.date);ev.monat=ev.date.slice(0,7);out.push(ev);};
+ for(const e of state.journal||[]){if(e.deletedAt)continue;const st=statMerkmale(state,e);if(!st)continue;
+  const kinder=(e.participantIds||[]).map(sid=>kindAus(state,sid,e.date,st.klassen));
+  push({id:'entry:'+e.id,art:'kontakt',quelle:st.quelle,date:d(e.date),kontaktart:st.kontaktart||'',themen:st.themen||[],beteiligte:st.beteiligte||[],dauer_min:st.dauer_min||null,ergebnis:st.ergebnis||'',mitarbeitend:st.mitarbeitend||e.responsible||'',kinder,anonym:false,teilnehmende:st.teilnehmende||null,entryId:e.id});}
+ for(const q of state.quickContacts||[]){if(!q.anonymous)continue;const sz=stufeZweig(q.grade||q.className);const erfasst=!!q.kategorieVersion;
+  push({id:'quick:'+q.id,art:'kontakt',quelle:erfasst?'erfasst':'uebernommen',date:d(q.date),kontaktart:'kurzkontakt',themen:erfasst?(q.themen||[]):[...new Set((q.occasions||[]).map(o=>ALTE_ANLAESSE[o]).filter(Boolean))],beteiligte:['schueler'],dauer_min:Number(q.duration)||null,ergebnis:'',mitarbeitend:q.mitarbeitend||'',kinder:[],anonym:true,stufeAnonym:sz.stufe,zweigAnonym:sz.zweig,teilnehmende:null});}
+ for(const c of state.contacts||[]){const sid=ids(state,c)[0];if(!sid)continue;
+  push({id:'contact:'+c.id,art:'kontakt',quelle:'uebernommen',date:d(c.date),kontaktart:'beratungsgespraech',themen:[],beteiligte:[],dauer_min:Number(c.duration)||null,ergebnis:'',mitarbeitend:c.responsible||'',kinder:[kindAus(state,sid,c.date)],anonym:false,teilnehmende:null});}
+ for(const g of state.groupTalks||[]){const p=g.participantIds||[];if(!p.length)continue;
+  push({id:'group:'+g.id,art:'kontakt',quelle:'uebernommen',date:d(g.date),kontaktart:'gruppe',themen:[],beteiligte:[],dauer_min:Number(g.duration)||null,ergebnis:'',mitarbeitend:g.responsible||'',kinder:p.map(sid=>kindAus(state,sid,g.date)),anonym:false,teilnehmende:p.length});}
+ for(const a of state.classActivities||[]){const sz=stufeZweig(a.className);
+  push({id:'class:'+a.id,art:'kontakt',quelle:'uebernommen',date:d(a.date),kontaktart:'klasse',themen:[],beteiligte:[],dauer_min:Number(a.duration)||null,ergebnis:'',mitarbeitend:a.facilitator||'',kinder:[],anonym:true,stufeAnonym:sz.stufe,zweigAnonym:sz.zweig,teilnehmende:(a.participantIds||[]).length||Number(a.participants)||null});}
+ for(const t of state.taetigkeiten||[])push({id:'taetigkeit:'+t.id,art:'taetigkeit',quelle:'erfasst',date:d(t.date),taetigkeit:t.taetigkeit,dauer_min:t.dauer_min||null,mitarbeitend:t.mitarbeitend||'',kinder:[],anonym:true,stufeAnonym:t.stufe??null,zweigAnonym:t.zweig||'',teilnehmende:t.teilnehmende||null,themen:[],beteiligte:[],kontaktart:'',ergebnis:''});
+ return out;
+}
+const KONTAKT_FILTER=['thema','zugangsweg','kontaktart','ergebnis'];
+// Kinder eines Ereignisses, die zum Stufen-/Zweigfilter passen
+function kinderImFilter(ev,f){return ev.kinder.filter(k=>(f.stufe==null||f.stufe===''||String(k.stufe)===String(f.stufe))&&(!f.zweig||k.zweig===f.zweig));}
+function passtStufe(ev,f){if((f.stufe==null||f.stufe==='')&&!f.zweig)return true;if(ev.kinder.length)return kinderImFilter(ev,f).length>0;return (f.stufe==null||f.stufe===''||String(ev.stufeAnonym)===String(f.stufe))&&(!f.zweig||ev.zweigAnonym===f.zweig);}
+function filterEreignisse(evs,f={},zk=new Map()){
+ return evs.filter(ev=>{
+  if(f.von&&ev.date<f.von)return false;if(f.bis&&ev.date>f.bis)return false;
+  if(KONTAKT_FILTER.some(k=>f[k])&&ev.art!=='kontakt')return false;
+  if(f.taetigkeit&&(ev.art!=='taetigkeit'||ev.taetigkeit!==f.taetigkeit))return false;
+  if(f.mitarbeitend&&ev.mitarbeitend!==f.mitarbeitend)return false;
+  if(!passtStufe(ev,f))return false;
+  if(f.kontaktart&&(ev.kontaktart||NICHT_ERFASST)!==f.kontaktart)return false;
+  if(f.thema&&!(ev.themen.length?ev.themen:[NICHT_ERFASST]).includes(f.thema))return false;
+  if(f.ergebnis&&(ev.ergebnis||NICHT_ERFASST)!==f.ergebnis)return false;
+  if(f.zugangsweg&&!kinderImFilter(ev,f).some(k=>(zk.get(k.sid+'|'+ev.schoolYear)||NICHT_ERFASST)===f.zugangsweg))return false;
+  return true;});
+}
+function runde1(x){return Math.round(x*10)/10;}
+function personenVon(ev,f={}){if(ev.art==='taetigkeit')return ev.teilnehmende||0;if(ev.kontaktart==='gruppe'||ev.kontaktart==='klasse')return ev.kinder.length?kinderImFilter(ev,f).length:(ev.teilnehmende||0);return 1;}
+function kennzahlen(evs,f={}){
+ const kontakte=evs.filter(e=>e.art==='kontakt'),kinder=new Set(),faelle=new Set();let minuten=0,ohneDauer=0,personen=0,anonym=0;
+ for(const ev of evs){if(ev.dauer_min)minuten+=ev.dauer_min;else ohneDauer++;personen+=personenVon(ev,f);}
+ for(const ev of kontakte){if(ev.anonym&&ev.kontaktart==='kurzkontakt')anonym++;for(const k of kinderImFilter(ev,f)){kinder.add(k.sid+'|'+ev.schoolYear);if(['beratungsgespraech','krisengespraech'].includes(ev.kontaktart))faelle.add(k.sid+'|'+ev.schoolYear);}}
+ return {erreichteSchueler:kinder.size,anonymeKurzkontakte:anonym,einzelfaelle:faelle.size,kontakte:kontakte.length,stunden:runde1(minuten/60),minuten,ohneDauer,erreichtePersonen:personen,taetigkeiten:evs.length-kontakte.length};
+}
+// Werte eines Ereignisses für ein Merkmal (Mehrfachwerte möglich); [] = trifft nicht zu
+function werteVon(ev,merkmal,f={},zk=new Map()){
+ const kinder=kinderImFilter(ev,f);
+ switch(merkmal){
+  case 'kontaktart':return ev.art==='kontakt'?[ev.kontaktart||NICHT_ERFASST]:[];
+  case 'thema':return ev.art==='kontakt'?(ev.themen.length?[...new Set(ev.themen)]:[NICHT_ERFASST]):[];
+  case 'beteiligte':return ev.art==='kontakt'?(ev.beteiligte.length?[...new Set(ev.beteiligte)]:[NICHT_ERFASST]):[];
+  case 'ergebnis':return ev.art==='kontakt'&&['beratungsgespraech','krisengespraech'].includes(ev.kontaktart)?[ev.ergebnis||NICHT_ERFASST]:[];
+  case 'zugangsweg':return ev.art==='kontakt'&&!ev.anonym?[...new Set(kinder.map(k=>zk.get(k.sid+'|'+ev.schoolYear)||NICHT_ERFASST))]:[];
+  case 'stufe':{const v=ev.kinder.length?kinder.map(k=>k.stufe):[ev.stufeAnonym];return [...new Set(v.map(x=>x==null||x===''?NICHT_ERFASST:String(x)))];}
+  case 'zweig':{const v=ev.kinder.length?kinder.map(k=>k.zweig):[ev.zweigAnonym];return [...new Set(v.map(x=>x||NICHT_ERFASST))];}
+  case 'monat':return [ev.monat];
+  case 'mitarbeitend':return [ev.mitarbeitend||NICHT_ERFASST];
+  case 'taetigkeit':return ev.art==='taetigkeit'?[ev.taetigkeit]:[];
+  case 'arbeitsbereich':return [ev.art==='taetigkeit'?(['konferenz','netzwerk','lehrkraefteberatung','kollegiale_beratung','elternabend'].includes(ev.taetigkeit)?'kooperation':ev.taetigkeit==='verwaltung'?'verwaltung':ev.taetigkeit==='fortbildung'?'fortbildung':'gruppen_klassen'):['gruppe','klasse'].includes(ev.kontaktart)?'gruppen_klassen':'einzelfall'];
+  default:return [];
+ }
+}
+// Kinder, die hinter einem Wert stehen (für die Einheit „Kinder“)
+function kinderSchluessel(ev,merkmal,wert,f,zk){return kinderImFilter(ev,f).filter(k=>merkmal==='zugangsweg'?(zk.get(k.sid+'|'+ev.schoolYear)||NICHT_ERFASST)===wert:merkmal==='stufe'?String(k.stufe??NICHT_ERFASST)===wert:merkmal==='zweig'?(k.zweig||NICHT_ERFASST)===wert:true).map(k=>k.sid+'|'+ev.schoolYear);}
+function aufschluesselung(evs,merkmal,einheit='kontakte',f={},zk=new Map()){
+ const m=new Map(),kinderSets=new Map();
+ for(const ev of evs)for(const w of werteVon(ev,merkmal,f,zk)){
+  if(einheit==='kinder'){if(!kinderSets.has(w))kinderSets.set(w,new Set());kinderSchluessel(ev,merkmal,w,f,zk).forEach(k=>kinderSets.get(w).add(k));continue;}
+  m.set(w,(m.get(w)||0)+(einheit==='stunden'?(ev.dauer_min||0)/60:einheit==='personen'?personenVon(ev,f):1));
+ }
+ if(einheit==='kinder')for(const [w,s] of kinderSets)m.set(w,s.size);
+ return [...m.entries()].filter(([,wert])=>wert>0).map(([id,wert])=>({id,wert:einheit==='stunden'?runde1(wert):wert})).sort((a,b)=>(a.id===NICHT_ERFASST)-(b.id===NICHT_ERFASST)||b.wert-a.wert||String(a.id).localeCompare(String(b.id)));
+}
+function kreuztabelle(evs,zeilenMerkmal,spaltenMerkmal,einheit='kontakte',f={},zk=new Map()){
+ const zellen=new Map(),zeilen=new Set(),spalten=new Set();
+ for(const ev of evs){const a=werteVon(ev,zeilenMerkmal,f,zk),b=werteVon(ev,spaltenMerkmal,f,zk);if(!a.length||!b.length)continue;
+  for(const x of a)for(const y of b){zeilen.add(x);spalten.add(y);const k=x+'\u0000'+y;zellen.set(k,(zellen.get(k)||0)+(einheit==='stunden'?(ev.dauer_min||0)/60:1));}}
+ const sort=arr=>[...arr].sort((a,b)=>(a===NICHT_ERFASST)-(b===NICHT_ERFASST)||String(a).localeCompare(String(b),'de',{numeric:true}));
+ const Z=sort(zeilen),S=sort(spalten),wert=(x,y)=>{const v=zellen.get(x+'\u0000'+y)||0;return einheit==='stunden'?runde1(v):v;};
+ const tabelle=Z.map(x=>S.map(y=>wert(x,y)));
+ const zeilenSummen=tabelle.map(r=>einheit==='stunden'?runde1(r.reduce((a,b)=>a+b,0)):r.reduce((a,b)=>a+b,0));
+ const spaltenSummen=S.map((_,j)=>einheit==='stunden'?runde1(tabelle.reduce((a,r)=>a+r[j],0)):tabelle.reduce((a,r)=>a+r[j],0));
+ return {zeilen:Z,spalten:S,tabelle,zeilenSummen,spaltenSummen,gesamt:einheit==='stunden'?runde1(zeilenSummen.reduce((a,b)=>a+b,0)):zeilenSummen.reduce((a,b)=>a+b,0)};
+}
+// Datenqualität: was fehlt bei Kontakten im Zeitraum (nur Kontakte, die nachgetragen werden können, zählen als offen)
+function datenqualitaet(evs,zk=new Map()){
+ const k=evs.filter(e=>e.art==='kontakt'),ohneThema=k.filter(e=>!e.themen.length),ohneDauer=k.filter(e=>!e.dauer_min),kinder=new Map();
+ for(const e of k)if(!e.anonym)for(const x of e.kinder){const key=x.sid+'|'+e.schoolYear;if(!zk.has(key)&&!kinder.has(key))kinder.set(key,{sid:x.sid,schoolYear:e.schoolYear,date:e.date});}
+ return {ohneThema:ohneThema.length,ohneDauer:ohneDauer.length,ohneZugang:kinder.size,uebernommen:k.filter(e=>e.quelle==='uebernommen').length,
+  nachtragbar:k.filter(e=>e.entryId&&(!e.themen.length||!e.dauer_min)).map(e=>({entryId:e.entryId,fehlt:{thema:!e.themen.length,dauer:!e.dauer_min}})),kinderOhneZugang:[...kinder.values()]};
+}
+// Nachtragen: fehlende Merkmale an einem Chronikeintrag ergänzen (nur auf ausdrücklichen Wunsch)
+function statNachtragen(state,entryId,werte){
+ const e=state.journal.find(x=>x.id===entryId);if(!e)throw Error('Eintrag nicht gefunden.');const basis=statMerkmale(state,e);if(!basis)throw Error('Dieser Eintrag ist kein Kontakt.');
+ const themen=werte.themen&&werte.themen.length?[...new Set(werte.themen)]:basis.themen,dauer=Number(werte.dauer_min)||basis.dauer_min||null;
+ e.stat={...basis,version:kategorien(e.date).version,quelle:'erfasst',nachgetragen:new Date().toISOString(),themen,dauer_min:dauer,klassen:basis.klassen||klassenSnapshot(state,e.participantIds,e.date)};
+ if(dauer&&!Number(e.duration))e.duration=dauer;return e.stat;
+}
 function suggestionResponsible(taskType){
  const map={
   'Schutzweg':'Schulleitung und zuständige Fachkraft',
@@ -510,5 +612,5 @@ function journalStats(state,year='',className='all'){
  return state.journal.filter(e=>!e.generalInfo&&!e.planned&&e.type!=='zusätzliche Information'&&e.type!=='Kurznotiz'&&e.type!=='Zusage erledigt'&&(!year||e.schoolYear===year)&& (className==='all'||e.participantIds.some(sid=>{const cl=recordContext(state,e,sid).className;return className.startsWith('jg:')?cl.match(/^\d+/)?.[0]===className.slice(3):cl===className}))).map(e=>({...e,duration:e.duration*Math.max(1,(e.facilitators||[]).length)}));
 }
 function restore(raw,sanitize){const state=sanitize(raw);for(const [i,e]of (state.journal||[]).entries()){const original=raw.journal?.[i];if(!original)continue;for(const key of ['content','childView','otherView','observation','assessment','agreement','goal','result','source','people'])if(typeof original[key]==='string')e[key]=original[key];if(original.individualNotes&&typeof original.individualNotes==='object')for(const key of Object.keys(e.individualNotes||{}))if(typeof original.individualNotes[key]==='string')e.individualNotes[key]=original.individualNotes[key];}return state;}
-root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,safetyHint,KATEGORIEN_VERSIONEN,kategorien,katListe,katLabel,stufeZweig,statErfassen,statMerkmale,zugangswegFuer,zugangswegSetzen,addTaetigkeit,addStudent,similarStudents,zusageErledigtEintragen,SAFETY_NOTICE};
+root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,safetyHint,KATEGORIEN_VERSIONEN,kategorien,katListe,katLabel,stufeZweig,statErfassen,statMerkmale,zugangswegFuer,zugangswegSetzen,addTaetigkeit,ereignisse,zugangKarte,filterEreignisse,kennzahlen,aufschluesselung,kreuztabelle,datenqualitaet,statNachtragen,werteVon,NICHT_ERFASST,addStudent,similarStudents,zusageErledigtEintragen,SAFETY_NOTICE};
 })(globalThis);
