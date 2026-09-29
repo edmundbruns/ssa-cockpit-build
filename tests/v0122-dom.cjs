@@ -91,8 +91,8 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  const edited=saved().journal.find(e=>e.id===entry.id);assert.match(edited.content,/Nachtrag/);assert(edited.revisions.length>=1,'Bearbeitung mit Historie');
  run(`closeModal('studentModal')`);
  // Gruppengespräch mit individuellem Hinweis (war in 0.12.1 blockiert)
- run(`openModal('groupTalkModal')`);
- const g=w.document.getElementById('groupTalkForm');[...g.elements.participantIds.options].forEach(o=>o.selected=['s1','s2'].includes(o.value));
+ run(`openGroupTalk()`);
+ const g=w.document.getElementById('groupTalkForm');g.querySelectorAll('input[name=participantIds]').forEach(o=>o.checked=['s1','s2'].includes(o.value));
  g.elements.note.value='Konfliktklärung zwischen Anna und Bert nach dem Sportunterricht.';g.elements.individualNotes.value='Anna möchte nächste Woche nachfassen.';
  if(g.elements.type&&!g.elements.type.value)g.elements.type.value=g.elements.type.options[1]?.value||'Konfliktklärung';
  assert.equal(g.elements.date.value,run('today()'),'Ereignisdatum ist mit heute vorbelegt');
@@ -147,6 +147,50 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  await run(`dossierMoveCard('${order[0]}',-1)`);assert.equal(run(`data.settings.timelineOrder['s1'][0]`),order[0],'Kachel per Knopf verschoben');
  await waitSaved();assert.equal(saved().settings.timelineOrder.s1[0],order[0],'Reihenfolge gespeichert');
  console.log('chronik verschieben ok');
+
+ // 6. Version 0.13: Gesprächsformular mit wenigen Pflichtfeldern, Titel aus der ersten Zeile
+ run(`closeModal('studentModal');selectedStudentId='s3';showStudent('s3');dossierEntry('event')`);
+ const nf=w.document.getElementById('dossierEditForm');
+ assert(!nf.querySelector('.dossier-mehr [required]'),'keine Pflichtfelder im eingeklappten Bereich');
+ assert.equal(nf.elements.title.required,false,'Titel ist freiwillig');
+ assert(/Warum wird das angezeigt/.test(nf.textContent),'kompakter Schutzhinweis');
+ assert(w.document.getElementById('dossierSafetyLive').hidden,'kein deutlicher Hinweis ohne Stichwort');
+ nf.elements.content.value='Cem hat keine Angst mehr vor der Klassenarbeit.\nWir üben weiter.';nf.elements.content.dispatchEvent(new w.Event('input'));await sleep(300);
+ assert(w.document.getElementById('dossierSafetyLive').hidden,'Verneinung löst keinen Schutzhinweis aus');
+ nf.elements.content.value='Cem sagt, er wolle nicht mehr leben.';nf.elements.content.dispatchEvent(new w.Event('input'));await sleep(300);
+ assert(!w.document.getElementById('dossierSafetyLive').hidden,'Schutzstichwort zeigt deutlichen Hinweis');
+ nf.elements.content.value='Cem berichtet über den Streit in der Pause. Beide wollen sich vertragen.';
+ const casesBefore13=run('data.cases.length');
+ nf.requestSubmit();await sleep(30);assert(!isOpen('dossierEditModal'),'Dialog schließt sofort');
+ const auto=run(`data.journal.at(-1)`);assert.equal(auto.title,'Cem berichtet über den Streit in der Pause','Titel aus erster Zeile');
+ assert(['Schülergespräch / Einzelberatung'].includes(auto.type));await waitSaved();
+ // Vorlage setzt nur Art/Titel, Leitfragen als Platzhalter
+ run(`dossierEntry('event');dossierApplyTemplate('eltern')`);const tf=w.document.getElementById('dossierEditForm');
+ assert.equal(tf.elements.type.value,'Elterngespräch / Elternkontakt');assert.equal(tf.elements.content.value,'','kein vorausgefüllter Text');assert(tf.elements.content.placeholder.length>10);
+ run(`closeModal('dossierEditModal')`);
+ // Gruppengespräch: keine doppelten Auswahlwerte, keine neue Fallakte
+ const html=require('fs').readFileSync(file,'utf8');for(const m of html.matchAll(/<select[^>]*>((?:<option[^>]*>[^<]*<\/option>)+)<\/select>/g)){const o=[...m[1].matchAll(/<option[^>]*>[^<]*<\/option>/g)].map(x=>x[0]);assert.equal(new Set(o).size,o.length,'doppelte Auswahlwerte: '+o.join(''));}
+ run(`data.cases=data.cases.filter(c=>c.studentId!=='s2')`);const cases13=run('data.cases.length');
+ run(`openGroupTalk()`);const g2=w.document.getElementById('groupTalkForm');g2.querySelectorAll('input[name=participantIds]').forEach(o=>o.checked=['s2','s3'].includes(o.value));
+ assert(g2.querySelector('details.weitere-angaben [name=due]'),'Wiedervorlage unter „Weitere Angaben“');
+ g2.elements.note.value='Konfliktklärung Bert und Cem.';g2.elements.type.value='Konfliktklärung';g2.requestSubmit();await sleep(30);await waitSaved();
+ assert.equal(run('data.cases.length'),cases13,'Gruppengespräch legt keine Fallakte an');
+ // Auftragsklärung
+ run(`closeModal('studentModal');selectedStudentId='s3';showStudent('s3')`);assert(/Auftrag klären/.test(w.document.getElementById('studentDetailBody').textContent));
+ run(`dossierAuftrag()`);const af=w.document.getElementById('dossierEditForm');af.elements.requester.value='Klassenleitung';af.elements.childNeed.value='In Ruhe lernen';af.elements.assignedOrder.value='Konflikt in der Klasse begleiten';af.requestSubmit();await sleep(30);await waitSaved();
+ assert(/Auftrag:\s*Konflikt in der Klasse begleiten/.test(w.document.getElementById('studentDetailBody').textContent),'Auftrag oben in der Akte');
+ assert.equal(saved().auftraege.length,1,'Auftrag gespeichert');
+ // Kurzkontakt: kein stilles „anonym“
+ run(`closeModal('studentModal');openQuickContact('')`);const qk=w.document.getElementById('quickContactForm');qk.querySelector('input[name=occasion]').checked=true;const jb=run('data.journal.length');qk.requestSubmit();await sleep(30);
+ assert.equal(run('data.journal.length'),jb,'ohne Kind oder „Anonym“ wird nichts gespeichert');run(`document.querySelectorAll('.modal.open:not([id])').forEach(m=>m.remove())`);
+ run(`kurzkontaktSuche('Muster, Cem · 6b')`);assert.equal(qk.elements.studentId.value,'s3','Suche wählt das Kind');qk.requestSubmit();await sleep(30);assert.equal(run('data.journal.length'),jb+1);assert(!isOpen('quickContactModal'));
+ // Zusage ohne Termin ist nicht gelb
+ assert.equal(run(`ampelAufgabe({kind:'zusage',due:'',done:false}).stufe`),'gruen');
+ // Speichern zeichnet nur die sichtbare Seite neu
+ run(`go('dashboard')`);let statsCalls=0;w.__origStats=run('renderStats');run('renderStats=function(){window.__statsCalls=(window.__statsCalls||0)+1;return window.__origStats.apply(this,arguments)}');
+ run('save()');assert.equal(run('window.__statsCalls||0'),0,'Statistik wird beim Speichern nicht neu berechnet');run(`go('statistics')`);assert.equal(run('window.__statsCalls'),1,'Statistik beim Öffnen aktualisiert');
+ await waitSaved();
+ console.log('0.13 formulare, auftrag, kurzkontakt ok');
 
  console.log('errors',errors);
  if(errors.length)process.exitCode=1;
