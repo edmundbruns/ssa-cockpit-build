@@ -257,14 +257,15 @@ impl Vault {
         std::fs::create_dir_all(&dir)?;
         let target = dir.join(&safe);
         std::fs::write(&target, text.as_bytes())?;
-        let mut list = self.backup_list();
-        while list.len() > 12 {
-            if let Some(old) = list.pop() {
-                if let Some(name) = old["name"].as_str() {
-                    let _ = std::fs::remove_file(dir.join(name));
-                }
-            }
+        let list = self.backup_list();
+        let entries: Vec<(String, u64)> = list.iter()
+            .filter_map(|b| Some((b["name"].as_str()?.to_string(), b["modified"].as_u64().unwrap_or(0))))
+            .collect();
+        let now = std::time::SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
+        for name in backups_to_delete(&entries, now) {
+            let _ = std::fs::remove_file(dir.join(name));
         }
+        let list = self.backup_list();
         Ok(json!({
             "path": target.to_string_lossy(),
             "backupDir": dir.to_string_lossy(),
@@ -313,8 +314,42 @@ impl Vault {
 
 fn now()->u64{SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_secs()}
 
+/// Gestaffelte Aufbewahrung der automatischen Sicherungen:
+/// die 10 neuesten, die 3 neuesten „Vor-…“-Sicherungen (vor Wiederherstellung, Schuljahreswechsel, Update),
+/// je eine pro Woche der letzten 8 Wochen und je eine pro Monat der letzten 12 Monate.
+pub fn backups_to_delete(entries: &[(String, u64)], now: u64) -> Vec<String> {
+    let mut sorted: Vec<&(String, u64)> = entries.iter().collect();
+    sorted.sort_by(|a, b| b.1.cmp(&a.1));
+    let mut keep = std::collections::HashSet::new();
+    for e in sorted.iter().take(10) { keep.insert(e.0.clone()); }
+    for e in sorted.iter().filter(|e| e.0.to_lowercase().contains("-vor")).take(3) { keep.insert(e.0.clone()); }
+    let day = 86_400u64;
+    let mut weeks = std::collections::HashSet::new();
+    let mut months = std::collections::HashSet::new();
+    for e in &sorted {
+        let age = now.saturating_sub(e.1);
+        let week = age / (7 * day);
+        if week < 8 && weeks.insert(week) { keep.insert(e.0.clone()); }
+        let month = age / (30 * day);
+        if month < 12 && months.insert(month) { keep.insert(e.0.clone()); }
+    }
+    sorted.iter().filter(|e| !keep.contains(&e.0)).map(|e| e.0.clone()).collect()
+}
+
 #[cfg(test)]
 mod tests {
+    #[test] fn gestaffelte_sicherungen(){
+        let day=86_400u64;let now=400*day;
+        // 60 tägliche Sicherungen plus eine alte Vor-Sicherung
+        let mut e:Vec<(String,u64)>=(0..60).map(|i|(format!("SSA-Cockpit-{i}-automatisch.ssa-vault.json"),now-i*day)).collect();
+        e.push(("SSA-Cockpit-alt-vorWiederherst.ssa-vault.json".into(),now-200*day));
+        let del=backups_to_delete(&e,now);
+        let kept:Vec<_>=e.iter().filter(|x|!del.contains(&x.0)).collect();
+        assert!(kept.iter().any(|x|x.0.contains("vorWiederherst")),"Vor-Sicherung bleibt");
+        for i in 0..10{assert!(!del.contains(&format!("SSA-Cockpit-{i}-automatisch.ssa-vault.json")))}
+        assert!(kept.len()<25&&kept.len()>=10,"{}",kept.len());
+        assert!(kept.iter().any(|x|now-x.1>=49*day),"ältere Wochen-/Monatsstände bleiben");
+    }
     use super::*;
     #[test] fn encryption_roundtrip(){let key=[7u8;32];let(n,c)=Vault::encrypt(&key,b"geheim").unwrap();assert_eq!(Vault::decrypt(&key,&n,&c).unwrap(),b"geheim");}
     #[test] fn password_policy(){assert!(Vault::validate_password("zu-kurz").is_err());assert!(Vault::validate_password("Mindestens-12").is_ok());}
