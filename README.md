@@ -1,6 +1,6 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Version 0.16.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
+Version 0.16.1. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
 
 Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
@@ -11,7 +11,7 @@ Unter „Gesprächsbogen drucken“ stehen vier fachlich unterschiedliche DIN-A4
 
 ## Aktueller Arbeitsablauf
 
-Das Handbuch steht in `HANDBUCH-0.16.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
+Das Handbuch steht in `HANDBUCH-0.16.1.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
 
 
 ## Neu in 0.12.2: Dialoge und Speichern
@@ -113,3 +113,7 @@ Abnahme (automatisch geprüft):
 - Alte Einträge bleiben unverändert.
 - Mehr als 6000 Einträge werden in deutlich unter einer Sekunde ausgewertet.
 - In den neuen Ansichten und im Nachtragen-Dialog gibt es bei 1440 und 820 Pixel Breite keinen waagerechten Scrollbalken.
+
+## Neu in 0.16.1
+
+- Unter „Weitere Aktionen“ an jeder Chronik-Kachel steht jetzt als erster Punkt „✎ Kachel bearbeiten“: eigene Einträge und Aufgaben öffnen direkt das Bearbeitungsformular (Änderungen landen in der Änderungshistorie), die Auftragsklärung öffnet „Auftrag bearbeiten“, die Ampel „Einschätzung aktualisieren“. Übernommene Kacheln (Import, Altdaten) bleiben im Original unverändert; dort öffnet „Ergänzung / Korrektur eintragen“ einen verknüpften Eintrag.
