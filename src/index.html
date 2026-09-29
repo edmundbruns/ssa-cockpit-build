@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#164e63">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230f766e'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='Arial' font-size='25' font-weight='700' fill='white'%3ESSA%3C/text%3E%3C/svg%3E">
-  <title>SSA-Cockpit Ludgerusschule · Desktop 0.15.0</title>
+  <title>SSA-Cockpit Ludgerusschule · Desktop 0.16.0</title>
   <style>
     :root{--navy:#123047;--teal:#0f766e;--cyan:#0891b2;--cream:#f7f5ef;--paper:#fff;--ink:#183042;--muted:#64748b;--line:#dce4e8;--amber:#f59e0b;--red:#dc2626;--green:#16a34a;--shadow:0 12px 34px rgba(15,45,61,.10);--radius:18px}
     *{box-sizing:border-box} body{margin:0;background:var(--cream);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif} button,input,select,textarea{font:inherit} button{cursor:pointer}
@@ -235,6 +235,15 @@
     .chip-merkmal .chiprow{display:flex;flex-wrap:wrap;gap:6px}.chip-merkmal .chip{position:relative;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer;background:#fff;user-select:none;max-width:100%}.chip-merkmal .chip input{position:absolute;opacity:0;width:1px;height:1px}.chip-merkmal .chip:has(input:checked){background:#0f6b73;border-color:#0f6b73;color:#fff}.chip-merkmal .chip:has(input:focus-visible){outline:2px solid #f0b400}
     .stat-block{border:1px solid var(--line);border-radius:10px;padding:8px 12px}.stat-block>summary{cursor:pointer;font-weight:600;color:#0f6b73;padding:4px 0 8px}
     .klein-aktionen{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:-6px 0 16px}
+    /* 0.16: Statistikseite */
+    .stat-intern{margin-bottom:14px}.stat-qualitaet{margin-bottom:14px;border-left:4px solid #d9a400}.stat-qualitaet.ok{border-left-color:#5c8a6e}.stat-qualitaet p{margin:4px 0 0}
+    .stat-filterleiste{margin-bottom:14px}.stat-filter-reihe{display:flex;flex-wrap:wrap;gap:8px 12px}.stat-filter{display:flex;flex-direction:column;gap:3px;font-size:12px;color:#4d626d;flex:1 1 150px;min-width:0;max-width:230px}.stat-filter .field{width:100%}.stat-zeitraum{margin:10px 0 0}
+    .stat-kpis{margin-bottom:14px}.stat-kpi .label{display:flex;gap:6px;align-items:center}
+    .stat-raster{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-bottom:14px}.stat-karte{min-width:0}
+    .stat-tabelle{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed}.stat-tabelle thead th{font-size:12px;hyphens:auto;overflow-wrap:normal}.stat-tabelle th,.stat-tabelle td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left;overflow-wrap:anywhere;vertical-align:middle}.stat-tabelle .zahl{text-align:right;width:92px;font-variant-numeric:tabular-nums}.stat-tabelle tfoot td{font-weight:600}
+    .stat-balken{width:40%}.stat-balken svg{width:100%;height:12px;display:block}.stat-balken rect{fill:#0f766e}.nicht-erfasst td{color:#7a8a93;font-style:italic}.nicht-erfasst .stat-balken rect{fill:#b8c4ca}
+    .stat-kreuz-rahmen{max-width:100%}.stat-tabelle.kreuz{table-layout:fixed;font-size:13px}.stat-tabelle.kreuz th:first-child{width:22%}.stat-tabelle.kreuz .zahl{width:auto}.stat-tabelle.kreuz th,.stat-tabelle.kreuz td{white-space:normal}.stat-tabelle.kreuz .summe{background:#f1f6f9;font-weight:600}.stat-tabelle .null{color:#b0bcc2}
+    .alt-statistik{margin-top:18px}.alt-statistik>summary{cursor:pointer;padding:4px 0}
     .dossier-safety-live{margin:0 0 12px;font-size:14px}
     .dossier-quicktemplates{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:#5b6b76}.dossier-quicktemplates .dossier-template-settings{margin-left:auto}
     .btn.kleiner{padding:5px 10px;font-size:13px}
@@ -286,7 +295,7 @@
         </div>
       </div>
     </nav>
-    <div class="sidefoot"><span class="statusdot"></span><span><span id="saveStatus" data-state="gespeichert" aria-live="polite">Alles gespeichert</span> · offline<br>Desktopversion 0.15.0</span></div>
+    <div class="sidefoot"><span class="statusdot"></span><span><span id="saveStatus" data-state="gespeichert" aria-live="polite">Alles gespeichert</span> · offline<br>Desktopversion 0.16.0</span></div>
   </aside>
   <main>
 <div id="saveErrorBar" class="save-error-bar" role="alert" hidden><strong>Nicht gespeichert.</strong> <span data-detail></span> <button class="btn" type="button" onclick="speichernErneut()">Erneut speichern</button></div>
@@ -415,7 +424,10 @@
         <div class="card"><div class="list" id="taskList"></div></div>
       </section>
       <section class="page" id="statistics">
-        <div class="sectionhead"><div><h2>Interne Statistik 2026/27</h2><div class="subtle">Arbeitsübersicht für SSA-Team</div></div><div class="actions"><button class="btn" onclick="druckDateiSpeichern()">Bericht als Datei speichern</button><button class="btn primary" onclick="printAnnualReport()">Jahresbericht / PDF</button><button class="btn" onclick="downloadAnnualReportDoc()">Word-Datei</button><button class="btn" onclick="exportCSV()">CSV exportieren</button></div></div>
+        <div class="sectionhead"><div><h2>Statistik</h2><div class="subtle">Intern · entsteht nebenbei beim Erfassen</div></div></div>
+        <div id="statNeu"></div>
+        <details class="alt-statistik card"><summary><strong>Bisherige Auswertung und Jahresbericht</strong> <span class="subtle">(wird mit Schritt 3 durch anonymisierte Standardberichte ersetzt)</span></summary>
+        <div class="sectionhead"><div></div><div class="actions"><button class="btn" onclick="druckDateiSpeichern()">Bericht als Datei speichern</button><button class="btn primary" onclick="printAnnualReport()">Jahresbericht / PDF</button><button class="btn" onclick="downloadAnnualReportDoc()">Word-Datei</button><button class="btn" onclick="exportCSV()">CSV exportieren</button></div></div>
         <div class="card" style="margin-bottom:15px"><div class="filters">
          <select class="field" id="statZeitraum" onchange="statZeitraumUmschalten()">
           <option value="schuljahr" selected>Laufendes Schuljahr</option>
@@ -449,6 +461,7 @@
         <div class="sectionhead" style="margin-top:14px"><div><h3>Fehlzeiten</h3><div class="subtle">Aus den importierten WebUntis-Auswertungen.</div></div></div>
         <div class="grid two"><div class="card" id="statAbsenceTrend"></div></div>
         <p class="hint">Alle Diagramme zeigen ausschließlich Zahlen. Namen, Beratungsinhalte und Vermutungen erscheinen nirgends. Für den Jahresbericht nutze oben „Jahresbericht / PDF“ oder die Word-Datei.</p>
+      </details>
       </section>
       <section class="page" id="settings">
         <div class="sectionhead"><div><h2>Daten und Sicherung</h2><div class="subtle">Verschlüsselter lokaler Datentresor</div></div></div>
@@ -872,7 +885,7 @@ window.addEventListener('beforeunload',e=>{if(persistLauf||persistOffen){e.preve
 /* Speichern 0.13: erst sichern, dann nur die sichtbare Seite neu zeichnen. Andere Seiten werden beim Öffnen aktualisiert,
    die Zwischensicherung wird danach im Hintergrund geprüft. */
 function save(){Dossier.normalize(data);persistState().catch(zeigeSpeicherfehler);renderSichtbar();setTimeout(sicherungNachSpeichern,0)}
-const SEITEN_RENDER={dashboard:()=>{renderDashboardStart();renderToday()},requests:()=>renderRequests(),cases:()=>renderCases(),kanban:()=>renderKanban(),students:()=>renderStudents(),classes:()=>renderClasses(),trainingroom:()=>renderTrainingRoom(),signals:()=>renderSignals(),workflows:()=>{renderWorkflows();renderVerfahrenLaeufe();renderVerfahrenVorschlaege()},teachers:()=>renderTeachers(),projects:()=>renderProjects(),network:()=>{renderNetzwerkBereiche();renderNetwork()},tasks:()=>renderTasks(),statistics:()=>renderStats(),settings:()=>renderSicherungsKarte()};
+const SEITEN_RENDER={dashboard:()=>{renderDashboardStart();renderToday()},requests:()=>renderRequests(),cases:()=>renderCases(),kanban:()=>renderKanban(),students:()=>renderStudents(),classes:()=>renderClasses(),trainingroom:()=>renderTrainingRoom(),signals:()=>renderSignals(),workflows:()=>{renderWorkflows();renderVerfahrenLaeufe();renderVerfahrenVorschlaege()},teachers:()=>renderTeachers(),projects:()=>renderProjects(),network:()=>{renderNetzwerkBereiche();renderNetwork()},tasks:()=>renderTasks(),statistics:()=>{renderStats();if(typeof renderStatistikNeu==='function')renderStatistikNeu()},settings:()=>renderSicherungsKarte()};
 const seitenVeraltet=new Set();
 function seiteRendern(id){if(!seitenVeraltet.has(id))return;seitenVeraltet.delete(id);try{SEITEN_RENDER[id]?.()}catch(err){console.error('Anzeige '+id,err)}}
 function renderSichtbar(){familienPflegen();personenAuswahlFuellen();renderSelects();for(const id of Object.keys(SEITEN_RENDER))seitenVeraltet.add(id);seiteRendern(document.querySelector('.page.active')?.id||'dashboard');hilfeSchaltflaechenSetzen()}
@@ -892,7 +905,7 @@ function kurzkontaktAnonym(an){const g=document.getElementById('quickContactGrad
 function kurzkontaktZuletzt(){const ids=[];for(const e of [...data.journal].filter(e=>!e.deletedAt&&e.participantIds?.length===1).sort((a,b)=>String(b.createdAt||b.date).localeCompare(String(a.createdAt||a.date)))){const id=e.participantIds[0];if(!ids.includes(id)&&data.students.some(s=>s.id===id&&s.active!==false))ids.push(id);if(ids.length>=6)break}return ids}
 function renderQuickContactStudents(selected=''){const dl=document.getElementById('quickContactList');if(!dl)return;dl.innerHTML=data.students.filter(s=>s.active!==false).sort((a,b)=>a.last.localeCompare(b.last)).map(s=>`<option value="${DE(kurzkontaktName(s))}"></option>`).join('');document.getElementById('quickContactRecent').innerHTML=kurzkontaktZuletzt().map(id=>{const s=data.students.find(x=>x.id===id);return `<button type="button" class="chip" onclick="kurzkontaktWaehlen('${DE(id)}')">${DE(s.first+' '+s.last[0]+'. · '+(s.className||''))}</button>`}).join('');kurzkontaktAnonym(false);document.getElementById('quickContactSearch').value='';document.getElementById('quickContactStudent').value='';document.getElementById('quickContactHit').textContent='';if(selected)kurzkontaktWaehlen(selected)}
 function openPromise(studentId='',opt={}){const f=document.getElementById('promiseForm');if(!f)return;f.reset();f.elements.sourceEntryKey.value=opt.sourceEntryKey||'';const bezug=document.getElementById('promiseBezug');bezug.hidden=!opt.bezugText;bezug.textContent=opt.bezugText||'';const el=document.getElementById('promiseStudent');el.innerHTML='<option value="">Ohne Personenbezug</option>'+data.students.filter(s=>s.active!==false).sort((a,b)=>a.last.localeCompare(b.last)).map(s=>`<option value="${DE(s.id)}" ${s.id===studentId?'selected':''}>${DE(s.last+', '+s.first+' · '+s.className)}</option>`).join('');openModal('promiseModal');f.elements.title.focus()}
-function renderAll(){seitenVeraltet.clear();familienPflegen();hilfeSchaltflaechenSetzen();personenAuswahlFuellen();renderSicherungsKarte();renderNetzwerkBereiche();renderSelects();renderDashboardStart();renderToday();renderRequests();renderCases();renderKanban();renderStudents();renderClasses();renderTrainingRoom();renderSignals();renderWorkflows();renderVerfahrenLaeufe();renderVerfahrenVorschlaege();renderTeachers();renderProjects();renderNetwork();renderTasks();renderStats()}
+function renderAll(){seitenVeraltet.clear();familienPflegen();hilfeSchaltflaechenSetzen();personenAuswahlFuellen();renderSicherungsKarte();renderNetzwerkBereiche();renderSelects();renderDashboardStart();renderToday();renderRequests();renderCases();renderKanban();renderStudents();renderClasses();renderTrainingRoom();renderSignals();renderWorkflows();renderVerfahrenLaeufe();renderVerfahrenVorschlaege();renderTeachers();renderProjects();renderNetwork();renderTasks();renderStats();if(typeof renderStatistikNeu==='function')renderStatistikNeu()}
 function renderSelects(){
  ['taskCase'].forEach((id,i0)=>{const i=1;const el=document.getElementById(id);const first=i?' <option value="">Ohne Fallbezug</option>':'<option value="">Anonymer Kontakt</option>';const caseOpts=data.cases.filter(c=>c.status!=='Abgeschlossen').map(c=>`<option value="${c.id}">${cname(c.id)} · ${classOf(c)}</option>`).join('');let studentOpts='';if(!i){const openStudents=data.students.filter(s=>s.active&&!data.cases.some(c=>c.studentId===s.id&&c.status!=='Abgeschlossen')).sort((a,b)=>a.className.localeCompare(b.className)||a.last.localeCompare(b.last));if(openStudents.length)studentOpts='<optgroup label="Schüler:in ohne Fallakte – legt automatisch eine Fallakte an">'+openStudents.map(s=>`<option value="student:${s.id}">${s.last}, ${s.first} · ${s.className}</option>`).join('')+'</optgroup>';}el.innerHTML=first+(caseOpts?'<optgroup label="Bestehende Fallakten">'+caseOpts+'</optgroup>':'')+studentOpts});
  document.getElementById('caseStudent').innerHTML='<option value="">Bitte auswählen</option>'+data.students.filter(s=>s.active&&!data.cases.some(c=>c.studentId===s.id&&c.status!=='Abgeschlossen')).sort((a,b)=>a.className.localeCompare(b.className)||a.last.localeCompare(b.last)).map(s=>`<option value="${s.id}">${s.last}, ${s.first} · ${s.className}</option>`).join('');
