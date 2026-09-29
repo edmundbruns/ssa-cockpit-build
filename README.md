@@ -1,6 +1,6 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Version 0.15.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
+Version 0.16.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
 
 Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
@@ -11,7 +11,7 @@ Unter „Gesprächsbogen drucken“ stehen vier fachlich unterschiedliche DIN-A4
 
 ## Aktueller Arbeitsablauf
 
-Das Handbuch steht in `HANDBUCH-0.15.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
+Das Handbuch steht in `HANDBUCH-0.16.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
 
 
 ## Neu in 0.12.2: Dialoge und Speichern
@@ -84,3 +84,32 @@ Abnahme (automatisch geprüft):
 | ergebnis | weiter_begleitet, abgeschlossen, weitervermittelt, massnahme_vereinbart |
 | taetigkeit | klassenprojekt_praevention, konferenz, elternabend, lehrkraefteberatung, kollegiale_beratung, netzwerk, fortbildung, pausenpraesenz, verwaltung, sonstiges |
 | dauer_min | Kurzkontakt 5, 10, 15, 30 · Gespräch 15, 30, 45, 60, 90 · Tätigkeit zusätzlich 120, 180 |
+
+## Neu in 0.16.0 – Statistik, Schritt 2: Statistikseite
+
+- **Eine Ereignisquelle** (`Dossier.ereignisse`): Chronik, anonyme Kurzkontakte, alte Fallverlaufs-Kontakte, alte Gruppengespräche, Klassenmaßnahmen und Tätigkeiten ohne Fall. Alle Zahlen der Seite werden daraus berechnet, es gibt keine zweite Datenhaltung. Schnellnotizen, „Zusage erledigt“, Informationen, Mitteilungen und Trainingsraum zählen nicht.
+- **Seitenaufbau**, deutlich markiert „Intern – nicht weitergeben“:
+  - Datenqualität: Kontakte ohne Thema oder Dauer, Kinder ohne Zugangsweg, mit **„Jetzt nachtragen“**. Die Einträge erscheinen nacheinander nur mit den fehlenden Chips; „Speichern und weiter“ springt zum nächsten.
+  - Fünf Kennzahlen, jeweils mit Einheit und „?“:
+    - Erreichte Schüler:innen (je Schuljahr einmal, anonyme Kurzkontakte getrennt).
+    - Einzelfälle (mindestens ein Beratungs- oder Krisengespräch).
+    - Kontakte.
+    - Stunden (Summe der Dauer ÷ 60, eine Nachkommastelle).
+    - Erreichte Personen.
+  - Filter, beliebig kombinierbar: Zeitraum (Schuljahr, Halbjahre, Monat, Vorjahr, frei, gesamt), Klassenstufe, Schulzweig, Thema, Zugangsweg, Art, Ergebnis, Tätigkeit und Mitarbeitende. Die Filter bleiben beim Seitenwechsel erhalten und lassen sich zurücksetzen.
+  - Balken (eigenes SVG) mit derselben Tabelle darunter:
+    - Art, Themen, Zugangsweg (Kinder), Beteiligte, Ergebnis.
+    - Klassenstufe und Schulzweig (Kinder), Verlauf nach Monat.
+    - Arbeitszeit nach Bereich (Einzelfall, Gruppen und Klassen, Kooperation, Verwaltung, Fortbildung), Tätigkeiten ohne Fall, Kontakte nach Mitarbeitenden.
+    - „Nicht erfasst“ steht jeweils getrennt und grau.
+  - Kreuztabelle mit zwei frei wählbaren Merkmalen, Kontakte oder Stunden, mit Zeilen- und Spaltensummen.
+- Die bisherige Auswertung mit Jahresbericht steht eingeklappt darunter, bis Schritt 3 sie ersetzt.
+- **Testdatensatz** mit Fantasienamen: `tests/testdaten-statistik.json`. Die Werte unter „erwartet“ sind von Hand nachgezählt; `tests/statistik.test.mjs` prüft sie.
+
+Abnahme (automatisch geprüft):
+- Die Kennzahlen stimmen mit der Handnachzählung; ein Kind wird je Schuljahr nur einmal gezählt.
+- Filterkombinationen und Kreuztabelle liefern korrekte Summen.
+- Die Datenqualität zählt richtig, und „Jetzt nachtragen“ ergänzt nur fehlende Angaben.
+- Alte Einträge bleiben unverändert.
+- Mehr als 6000 Einträge werden in deutlich unter einer Sekunde ausgewertet.
+- In den neuen Ansichten und im Nachtragen-Dialog gibt es bei 1440 und 820 Pixel Breite keinen waagerechten Scrollbalken.
