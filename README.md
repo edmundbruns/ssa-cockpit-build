@@ -1,6 +1,6 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Version 0.13.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
+Version 0.14.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
 
 Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
@@ -11,7 +11,7 @@ Unter „Gesprächsbogen drucken“ stehen vier fachlich unterschiedliche DIN-A4
 
 ## Aktueller Arbeitsablauf
 
-Das Handbuch steht in `HANDBUCH-0.13.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
+Das Handbuch steht in `HANDBUCH-0.14.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
 
 
 ## Neu in 0.12.2: Dialoge und Speichern
@@ -42,3 +42,11 @@ Das Handbuch steht in `HANDBUCH-0.13.0.md` und im Programm unter „Handbuch“.
 - Übersicht: Akte mit fünf Hauptknöpfen und „Mehr …“, eine Filterleiste bei Aufgaben (Arbeitskorb und doppelte Aufgabenansicht entfernt), Heute ohne abgeschnittene Titel, scrollbare Seitenleiste. Statistik blendet Diagramme ohne auswertbare Angaben aus, Beschriftungen werden umbrochen, Kennzahlen beziehen sich auf die Chronik.
 - Wiederherstellung fragt das Kennwort im Programm ab. Erstimport: „Alle als Neuaufnahme übernehmen“ für Namen ohne passende Akte.
 - Sicherungsordner: gestaffelte Aufbewahrung (10 neueste, 3 „Vor-…“-Sicherungen, eine pro Woche für 8 Wochen, eine pro Monat für 12 Monate).
+
+## Neu in 0.14.0
+
+- **Schnellnotiz** oben auf „Heute“: kurz notieren, mit `@` ein oder mehrere Kinder zuordnen (Auswahlliste mit Maus oder Pfeiltasten, Enter, Esc). Eine Notiz mit mehreren Kindern ist ein einziger Chronikeintrag („Kurznotiz“ mit Datum und Uhrzeit), der in jeder betroffenen Akte erscheint. Unbekannter Name: „Meintest du …?“ und „Neue Akte anlegen“ mit nur Name und Klasse; bei ähnlichen Namen ist eine ausdrückliche Bestätigung nötig. Notizen ohne `@` stehen unter „Noch nicht zugeordnet“ und lassen sich später zuordnen. Speichern mit Knopf oder Strg+Enter. Diktat über den lokalen Dienst; läuft er nicht, erscheint nur ein kurzer Hinweis.
+- **Gespräch vorbereiten** in der Akte: Auftrag, letzte drei Chronikeinträge, offene Zusagen (überfällige rot), laufende Maßnahmen und Fachverfahren sowie ein Feld „Was will ich klären?“. Jeder Punkt springt zum Originaleintrag und hebt ihn hervor. Leere Abschnitte zeigen „Noch nichts eingetragen“. Drucken als einseitige Übersicht; „Gespräch jetzt dokumentieren“ übernimmt den Freitext. Die Auftragsklärung erscheint jetzt auch als Eintrag in der Chronik.
+- **Zusage aus der Chronik**: „＋ Zusage daraus“ an jedem Eintrag. Zusage und Eintrag verweisen aufeinander. Felder: Was, Wer hat zugesagt (Ich, Sabine, Schüler:in, Eltern, Lehrkraft, Andere), Wem gegenüber, Bis wann (optional). Status offen · läuft · erledigt; „erledigt“ erzeugt automatisch den Chronikeintrag „Zusage erledigt: …“ (einmalig). „Heute“ zeigt fällige und überfällige Zusagen, „Aufgaben und Zusagen“ die vollständige Liste nach Status, filterbar nach Kind.
+- **Kontexthilfe**: „?“ in jedem Bereichskopf und an erklärungsbedürftigen Feldern (Auftrag, Fachverfahren, Maßnahmen, Zusagen, Frühindikatoren, Ampel, Schutzfrage, Kurzkontakt, Gruppengespräch). Die Hilfe klappt direkt darunter auf: Was ist das? Warum eintragen? Beispiel. Alle Texte stehen zentral in `src/erweiterungen.js` (`HILFE_TEXTE`).
+- Abnahme (automatisch geprüft, `npm test` und `npm run test:ui`): Schnellnotiz mit einem, mehreren und ohne `@`; Tippfehler erzeugt ohne Rückfrage keine neue Akte; Diktat ohne Dienst ohne Fehler; alle Links der Gesprächsvorbereitung treffen den richtigen Eintrag; Zusage beidseitig verknüpft, „erledigt“ erzeugt genau einen Eintrag; Daten der Vorversion laden unverändert; kein waagerechtes Scrollen in den neuen Ansichten (geprüft bei 1440 und 820 Pixel Breite).
