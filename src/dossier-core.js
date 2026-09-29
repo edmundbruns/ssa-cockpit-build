@@ -58,7 +58,7 @@ function journalCase(state,sid,entry,reopen=false){
  state.statusHistory.push(stamp(state,{id:uid('sh'),caseId,studentId:sid,date:entry.date,status:'Klärungsphase',fromStatus:'',responsible:entry.responsible||'SSA',reason:'Fallakte aus personenbezogenem Chronikeintrag angelegt'}));
 }
 function normalize(state){
- state.settings=state.settings||{};state.auftraege=Array.isArray(state.auftraege)?state.auftraege:[];state.schnellnotizen=Array.isArray(state.schnellnotizen)?state.schnellnotizen:[];state.students=state.students||[];state.cases=state.cases||[];state.tasks=state.tasks||[];
+ state.settings=state.settings||{};state.auftraege=Array.isArray(state.auftraege)?state.auftraege:[];state.schnellnotizen=Array.isArray(state.schnellnotizen)?state.schnellnotizen:[];state.zugangswege=Array.isArray(state.zugangswege)?state.zugangswege:[];state.taetigkeiten=Array.isArray(state.taetigkeiten)?state.taetigkeiten:[];state.students=state.students||[];state.cases=state.cases||[];state.tasks=state.tasks||[];
  for(const k of collections)state[k]=state[k]||[];
  state.importLinks=state.importLinks||{};state.classLeadHistory=state.classLeadHistory||{};
  for(const c of state.cases){const student=state.students.find(s=>s.id===c.studentId);if(!c.lastContact&&/^\d{4}-\d{2}-\d{2}$/.test(String(c.last||''))){c.lastContact=c.last;c.last=student?.last||'';}if(!c.lastContact)c.lastContact=c.last||'';}
@@ -201,6 +201,56 @@ function schutzTreffer(entry,fachverfahren){
 }
 // Live-Hinweis im Formular: nur wenn ein Schutzstichwort tatsächlich vorkommt.
 function safetyHint(text){const fachverfahren=fachverfahren_match({content:String(text||'')},{});const hits=schutzTreffer({content:String(text||'')},fachverfahren);return hits.length?{hits,topics:[...new Set(fachverfahren.filter(v=>SCHUTZ_VERFAHREN.includes(v.id)).map(v=>v.topic))]}:null;}
+
+/* ===== 0.15: Kategorien für die Statistik – feste IDs, Anzeigetexte getrennt, Version je Schuljahr (ab 1.8.) =====
+   Änderungen an den Listen nur zum Schuljahreswechsel: neue Version mit neuem gueltigAb anlegen, alte stehen lassen. */
+const KATEGORIEN_VERSIONEN=[{version:'2026/27',gueltigAb:'2026-08-01',merkmale:{
+ kontaktart:[['kurzkontakt','Kurzkontakt'],['beratungsgespraech','Beratungsgespräch'],['krisengespraech','Krisengespräch'],['gruppe','Gruppe'],['klasse','Klasse']],
+ zugangsweg:[['schueler_selbst','Kind selbst'],['lehrkraft','Lehrkraft'],['eltern','Eltern'],['schulleitung','Schulleitung'],['mitschueler','Mitschüler:in'],['anfrageportal','Anfrageportal'],['extern','Extern']],
+ beteiligte:[['schueler','Schüler:in'],['eltern','Eltern'],['lehrkraft','Lehrkraft'],['schulleitung','Schulleitung'],['jugendamt','Jugendamt'],['fachstelle_andere','Andere Fachstelle']],
+ thema:[['konflikt_mobbing','Konflikt / Mobbing','4.3 Gewalt- und Konfliktprävention'],['familie','Familie','4.2 Beratung'],['fehlzeiten_schulangst','Fehlzeiten / Schulangst','4.3 Schulverweigerung/Absentismus'],['emotionen_krise','Gefühle / Krise','4.2 Beratung'],['lernen_motivation','Lernen / Motivation','4.2 Beratung'],['verhalten_unterricht','Verhalten im Unterricht','4.3 Gewalt- und Konfliktprävention'],['medien','Medien','4.3 Gesundheitsförderung'],['sucht','Sucht','4.3 Gesundheitsförderung'],['gesundheit','Gesundheit','4.3 Gesundheitsförderung'],['berufsorientierung','Berufsorientierung','4.4 Berufsorientierung'],['kinderschutz','Kinderschutz','4.2 Beratung'],['sonstiges','Sonstiges','']],
+ ergebnis:[['weiter_begleitet','Weiter begleitet'],['abgeschlossen','Abgeschlossen'],['weitervermittelt','Weitervermittelt'],['massnahme_vereinbart','Maßnahme vereinbart']],
+ taetigkeit:[['klassenprojekt_praevention','Klassenprojekt / Prävention','4.3 Prävention'],['konferenz','Konferenz','4.2 Kooperation'],['elternabend','Elternabend','4.2 Beratung Erziehungsberechtigte'],['lehrkraefteberatung','Beratung von Lehrkräften','4.2 Beratung Lehrkräfte'],['kollegiale_beratung','Kollegiale Beratung','Qualitätssicherung'],['netzwerk','Netzwerkarbeit','4.2 Netzwerkarbeit'],['fortbildung','Fortbildung','Qualitätssicherung'],['pausenpraesenz','Pausenpräsenz','4.3 Prävention'],['verwaltung','Verwaltung','Verwaltung'],['sonstiges','Sonstiges','']],
+ dauer_kurz:[[5,'5 Min.'],[10,'10 Min.'],[15,'15 Min.'],[30,'30 Min.']],
+ dauer:[[15,'15 Min.'],[30,'30 Min.'],[45,'45 Min.'],[60,'60 Min.'],[90,'90 Min.']]
+}}];
+function kategorien(date){const d=String(date||day()).slice(0,10);return KATEGORIEN_VERSIONEN.filter(v=>v.gueltigAb<=d).at(-1)||KATEGORIEN_VERSIONEN[0];}
+function katListe(merkmal,date){return (kategorien(date).merkmale[merkmal]||[]).map(([id,label,feld])=>({id,label,feld:feld||''}));}
+function katLabel(merkmal,id){if(id==null||id==='')return 'nicht erfasst';for(const v of KATEGORIEN_VERSIONEN){const x=(v.merkmale[merkmal]||[]).find(e=>String(e[0])===String(id));if(x)return x[1];}return String(id);}
+function stufeZweig(className){const m=String(className||'').match(/^\s*(\d{1,2})/);const stufe=m?Number(m[1]):null;return {stufe,zweig:stufe==null?'':stufe<=4?'GS':stufe<=10?'OBS':''};}
+function klassenSnapshot(state,participantIds,date){const out={};for(const sid of participantIds||[]){const c=context(state,sid,date).className||'';out[sid]={klasse:c,...stufeZweig(c)};}return out;}
+function statErfassen(state,input,participantIds,date){
+ const k=kategorien(date),ok=(m,v)=>(k.merkmale[m]||[]).some(e=>String(e[0])===String(v));
+ const stat={version:k.version,quelle:'erfasst',kontaktart:ok('kontaktart',input.kontaktart)?input.kontaktart:'',themen:[...new Set((input.themen||[]).filter(v=>ok('thema',v)))],beteiligte:[...new Set((input.beteiligte||[]).filter(v=>ok('beteiligte',v)))],dauer_min:Math.max(0,Number(input.dauer_min)||0)||null,ergebnis:ok('ergebnis',input.ergebnis)?input.ergebnis:'',mitarbeitend:String(input.mitarbeitend||state.settings?.activeUser||'SSA-Team'),klassen:klassenSnapshot(state,participantIds,date)};
+ if(input.teilnehmende)stat.teilnehmende=Math.max(0,Number(input.teilnehmende)||0);return stat;
+}
+// Zugangsweg: genau einmal je Kind und Schuljahr
+function zugangswegFuer(state,sid,date){const sy=schoolYear(String(date||day()));return (state.zugangswege||[]).find(z=>z.studentId===sid&&z.schoolYear===sy)||null;}
+function zugangswegSetzen(state,sid,zugangsweg,date,quelle='erfasst'){
+ if(!zugangsweg)return null;if(!katListe('zugangsweg',date).some(e=>e.id===zugangsweg))throw Error('Zugangsweg unbekannt.');
+ const vorhanden=zugangswegFuer(state,sid,date);if(vorhanden)return vorhanden;
+ const z={id:uid('zugang'),studentId:sid,schoolYear:schoolYear(String(date||day())),zugangsweg,date:String(date||day()).slice(0,10),quelle,createdAt:new Date().toISOString()};state.zugangswege.push(z);return z;
+}
+// Tätigkeit ohne Fall
+function addTaetigkeit(state,input){
+ const date=input.date||day();if(!iso(date))throw Error('Datum prüfen.');
+ if(!katListe('taetigkeit',date).some(e=>e.id===input.taetigkeit))throw Error('Bitte eine Tätigkeit auswählen.');
+ const t=stamp(state,{id:uid('taetigkeit'),date,schoolYear:schoolYear(date),kategorieVersion:kategorien(date).version,taetigkeit:input.taetigkeit,dauer_min:Math.max(0,Number(input.dauer_min)||0)||null,klasse:String(input.klasse||'').trim(),...stufeZweig(input.klasse),teilnehmende:Math.max(0,Number(input.teilnehmende)||0)||null,notiz:String(input.notiz||'').trim(),mitarbeitend:String(input.mitarbeitend||state.settings?.activeUser||'SSA-Team'),createdAt:new Date().toISOString()});
+ state.taetigkeiten.push(t);return t;
+}
+// Merkmale eines Eintrags für die Auswertung. Gespeicherte Werte gelten; bei alten Einträgen wird nur Eindeutiges übernommen
+// („übernommen“), alles andere ist „nicht erfasst“. Gespeicherte Daten werden dabei nicht verändert.
+const ALTE_ANLAESSE={'Streit':'konflikt_mobbing','Familie':'familie','Sorgen':'emotionen_krise','Schule/Lernen':'lernen_motivation'};
+const ALTE_ENTSCHEIDUNG={'fortführen':'weiter_begleitet','abschließen':'abgeschlossen'};
+const KEIN_KONTAKT=['Kurznotiz','Zusage erledigt','zusätzliche Information','Mitteilung an Kollegium'];
+function statMerkmale(state,e){
+ if(!e||KEIN_KONTAKT.includes(e.type)||e.generalInfo||e.planned)return null;
+ if(e.stat&&e.stat.quelle==='erfasst')return e.stat;
+ const typ=String(e.type||''),n=(e.participantIds||[]).length;
+ const kontaktart=typ==='Kurzkontakt'?'kurzkontakt':/sozialtraining|klassen/iu.test(typ)?'klasse':/gruppe|mediation|konfliktkl/iu.test(typ)&&n>1||n>2?'gruppe':n?'beratungsgespraech':'';
+ const themen=[...new Set((e.occasions||[]).map(o=>ALTE_ANLAESSE[o]).filter(Boolean))];
+ return {version:'',quelle:'uebernommen',kontaktart,themen,beteiligte:[],dauer_min:Number(e.duration)>0?Number(e.duration):null,ergebnis:ALTE_ENTSCHEIDUNG[e.decision]||'',mitarbeitend:e.responsible||'',klassen:klassenSnapshot(state,e.participantIds,e.date),teilnehmende:kontaktart==='gruppe'||kontaktart==='klasse'?n:null};
+}
 function suggestionResponsible(taskType){
  const map={
   'Schutzweg':'Schulleitung und zuständige Fachkraft',
@@ -347,13 +397,14 @@ function addEntry(state,input){
 }
 function quickContact(state,input){
  const date=input.date||day();if(!iso(date))throw Error('Datum prüfen.');
- const duration=[5,10,15,20].includes(Number(input.duration))?Number(input.duration):5;
- const occasions=[...new Set((input.occasions||input.occasion||[]).filter(Boolean).map(String))];if(!occasions.length)throw Error('Mindestens einen Anlass auswählen.');
- const row={id:uid('quick'),date,occasions,duration,className:String(input.className||''),grade:String(input.grade||''),anonymous:!!input.anonymous,note:String(input.note||'').trim(),createdAt:new Date().toISOString()};
+ const duration=Math.max(1,Math.min(240,Number(input.duration)||5));
+ const occasions=[...new Set((input.occasions||input.occasion||[]).filter(Boolean).map(String))];const themen=[...new Set((input.themen||[]).map(String))];
+ const row={id:uid('quick'),date,occasions,themen,kategorieVersion:kategorien(date).version,mitarbeitend:String(state.settings?.activeUser||'SSA-Team'),duration,className:String(input.className||''),grade:String(input.grade||''),anonymous:!!input.anonymous,note:String(input.note||'').trim(),createdAt:new Date().toISOString()};
  if(!row.anonymous){
   if(!input.studentId||!state.students.some(s=>s.id===input.studentId))throw Error('Kind auswählen.');
   row.studentId=input.studentId;row.participantIds=[input.studentId];
-  const entry=stamp(state,{id:uid('entry'),date,type:'Kurzkontakt',title:occasions.join(' · '),content:row.note||'Kurzkontakt dokumentiert.',participantIds:[input.studentId],occasions,duration,createdAt:row.createdAt,actionSuggestions:[],suggestionVersion:5,revisions:[],pinnedFor:[]});
+  const titel=themen.length?themen.map(t=>katLabel('thema',t)).join(' · '):occasions.length?occasions.join(' · '):'Kurzkontakt';
+  const entry=stamp(state,{id:uid('entry'),date,type:'Kurzkontakt',title:titel,stat:statErfassen(state,{kontaktart:'kurzkontakt',themen,beteiligte:['schueler'],dauer_min:duration},[input.studentId],date),content:row.note||'Kurzkontakt dokumentiert.',participantIds:[input.studentId],occasions,duration,createdAt:row.createdAt,actionSuggestions:[],suggestionVersion:5,revisions:[],pinnedFor:[]});
   state.journal.push(entry);return entry;
  }
  state.quickContacts.push(row);return row;
@@ -393,7 +444,7 @@ function ideasForEntry(state,entryId){
 function markNoFurtherStep(state,entryId){
  const e=state.journal.find(x=>x.id===entryId);if(!e)throw Error('Chronikeintrag fehlt.');if(e.safetyStatus||(e.fachverfahren||[]).some(v=>['selbstgefaehrdung','gewalt-bedrohung','kinderschutz'].includes(v.id)))throw Error('Bei einer Schutzfrage ist eine fachliche Prüfung erforderlich.');e.noFurtherStep=true;e.noFurtherStepAt=new Date().toISOString();e.noFurtherStepText='Bewusst kein weiterer Schritt, Tür bleibt offen';return e;
 }
-function editEntry(state,e,changes,author){if(changes.date&&!iso(changes.date))throw Error('Datum prüfen.');if(e.generalInfo&&changes.type&&changes.type!==e.type)throw Error('Art einer allgemeinen Mitteilung nicht nachträglich ändern.');e.revisions=e.revisions||[];const before=structuredClone(e);delete before.revisions;e.revisions.push({at:new Date().toISOString(),author,before});for(const k of ['content','title','type','date','time','channel','people','source','childView','otherView','observation','assessment','agreement','goal','result','decision','planned','plannedDate','individualNotes','workflowId','oberThemen','fachverfahren','actionSuggestions','kiAnalysis'])if(k in changes)e[k]=changes[k];if(changes.date&&changes.date!==before.date){e.schoolYear=schoolYear(e.date);e.studentContexts={};e.className='';stamp(state,e);}}
+function editEntry(state,e,changes,author){if(changes.date&&!iso(changes.date))throw Error('Datum prüfen.');if(e.generalInfo&&changes.type&&changes.type!==e.type)throw Error('Art einer allgemeinen Mitteilung nicht nachträglich ändern.');e.revisions=e.revisions||[];const before=structuredClone(e);delete before.revisions;e.revisions.push({at:new Date().toISOString(),author,before});for(const k of ['content','title','type','date','time','channel','people','source','childView','otherView','observation','assessment','agreement','goal','result','decision','planned','plannedDate','individualNotes','workflowId','oberThemen','fachverfahren','actionSuggestions','kiAnalysis','stat','duration'])if(k in changes)e[k]=changes[k];if(changes.date&&changes.date!==before.date){e.schoolYear=schoolYear(e.date);e.studentContexts={};e.className='';stamp(state,e);}}
 function addTask(state,input){
  if(!String(input.title||'').trim()||!String(input.assignedTo||'').trim())throw Error('Aufgabe und Zuständigkeit angeben.');
  if(input.due&&!iso(input.due))throw Error('Termin prüfen.');
@@ -459,5 +510,5 @@ function journalStats(state,year='',className='all'){
  return state.journal.filter(e=>!e.generalInfo&&!e.planned&&e.type!=='zusätzliche Information'&&e.type!=='Kurznotiz'&&e.type!=='Zusage erledigt'&&(!year||e.schoolYear===year)&& (className==='all'||e.participantIds.some(sid=>{const cl=recordContext(state,e,sid).className;return className.startsWith('jg:')?cl.match(/^\d+/)?.[0]===className.slice(3):cl===className}))).map(e=>({...e,duration:e.duration*Math.max(1,(e.facilitators||[]).length)}));
 }
 function restore(raw,sanitize){const state=sanitize(raw);for(const [i,e]of (state.journal||[]).entries()){const original=raw.journal?.[i];if(!original)continue;for(const key of ['content','childView','otherView','observation','assessment','agreement','goal','result','source','people'])if(typeof original[key]==='string')e[key]=original[key];if(original.individualNotes&&typeof original.individualNotes==='object')for(const key of Object.keys(e.individualNotes||{}))if(typeof original.individualNotes[key]==='string')e.individualNotes[key]=original.individualNotes[key];}return state;}
-root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,safetyHint,addStudent,similarStudents,zusageErledigtEintragen,SAFETY_NOTICE};
+root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,safetyHint,KATEGORIEN_VERSIONEN,kategorien,katListe,katLabel,stufeZweig,statErfassen,statMerkmale,zugangswegFuer,zugangswegSetzen,addTaetigkeit,addStudent,similarStudents,zusageErledigtEintragen,SAFETY_NOTICE};
 })(globalThis);
