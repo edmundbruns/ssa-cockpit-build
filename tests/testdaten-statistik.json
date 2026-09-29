@@ -1,0 +1,48 @@
+{
+ "hinweis": "Testdatensatz mit Fantasienamen für die Statistik (0.16). Die Werte unter 'erwartet' sind von Hand nachgezählt; tests/statistik.test.mjs prüft sie automatisch.",
+ "zustand": {
+  "settings": {"currentSchoolYear": "2026/27", "activeUser": "Eddy"},
+  "students": [
+   {"id": "m1", "first": "Mira", "last": "Sonnenberg", "className": "5a", "schoolYear": "2026/27", "active": true, "enrollments": [{"schoolYear": "2026/27", "className": "5a", "validFrom": "2026-08-01", "validTo": ""}]},
+   {"id": "m2", "first": "Jonas", "last": "Wolkenstein", "className": "5a", "schoolYear": "2026/27", "active": true, "enrollments": [{"schoolYear": "2026/27", "className": "5a", "validFrom": "2026-08-01", "validTo": ""}]},
+   {"id": "m3", "first": "Lea", "last": "Birkenhain", "className": "7b", "schoolYear": "2026/27", "active": true, "enrollments": [{"schoolYear": "2026/27", "className": "7b", "validFrom": "2026-08-01", "validTo": ""}]},
+   {"id": "m4", "first": "Tim", "last": "Kieselbach", "className": "3c", "schoolYear": "2026/27", "active": true, "enrollments": [{"schoolYear": "2026/27", "className": "3c", "validFrom": "2026-08-01", "validTo": ""}]},
+   {"id": "m5", "first": "Ida", "last": "Moorwald", "className": "9a", "schoolYear": "2026/27", "active": true, "enrollments": [{"schoolYear": "2026/27", "className": "9a", "validFrom": "2026-08-01", "validTo": ""}]}
+  ],
+  "zugangswege": [
+   {"id": "z1", "studentId": "m1", "schoolYear": "2026/27", "zugangsweg": "schueler_selbst", "date": "2026-09-10"},
+   {"id": "z2", "studentId": "m2", "schoolYear": "2026/27", "zugangsweg": "lehrkraft", "date": "2026-09-18"},
+   {"id": "z3", "studentId": "m3", "schoolYear": "2026/27", "zugangsweg": "eltern", "date": "2026-10-01"}
+  ],
+  "journal": [
+   {"id": "j1", "date": "2026-09-10", "type": "Schülergespräch / Einzelberatung", "title": "Streit", "content": "Text", "participantIds": ["m1"], "stat": {"quelle": "erfasst", "version": "2026/27", "kontaktart": "beratungsgespraech", "themen": ["konflikt_mobbing"], "beteiligte": ["schueler"], "dauer_min": 30, "ergebnis": "weiter_begleitet", "mitarbeitend": "Eddy", "klassen": {"m1": {"klasse": "5a", "stufe": 5, "zweig": "OBS"}}}},
+   {"id": "j2", "date": "2026-09-17", "type": "Schülergespräch / Einzelberatung", "title": "Krise", "content": "Text", "participantIds": ["m1"], "stat": {"quelle": "erfasst", "version": "2026/27", "kontaktart": "krisengespraech", "themen": ["familie", "emotionen_krise"], "beteiligte": ["schueler", "eltern"], "dauer_min": 45, "ergebnis": "weitervermittelt", "mitarbeitend": "Eddy", "klassen": {"m1": {"klasse": "5a", "stufe": 5, "zweig": "OBS"}}}},
+   {"id": "j3", "date": "2026-09-18", "type": "Kurzkontakt", "title": "Kurz", "content": "Text", "participantIds": ["m2"], "stat": {"quelle": "erfasst", "version": "2026/27", "kontaktart": "kurzkontakt", "themen": ["konflikt_mobbing"], "beteiligte": ["schueler"], "dauer_min": 5, "ergebnis": "", "mitarbeitend": "Sabine", "klassen": {"m2": {"klasse": "5a", "stufe": 5, "zweig": "OBS"}}}},
+   {"id": "j4", "date": "2026-10-01", "type": "Gruppengespräch", "title": "Gruppe", "content": "Text", "participantIds": ["m1", "m2", "m3"], "stat": {"quelle": "erfasst", "version": "2026/27", "kontaktart": "gruppe", "themen": ["konflikt_mobbing"], "beteiligte": ["schueler"], "dauer_min": 60, "ergebnis": "", "mitarbeitend": "Eddy", "teilnehmende": 3, "klassen": {"m1": {"klasse": "5a", "stufe": 5, "zweig": "OBS"}, "m2": {"klasse": "5a", "stufe": 5, "zweig": "OBS"}, "m3": {"klasse": "7b", "stufe": 7, "zweig": "OBS"}}}},
+   {"id": "j5", "date": "2026-10-05", "type": "Schülergespräch / Einzelberatung", "title": "Ohne Angaben", "content": "Text", "participantIds": ["m3"], "stat": {"quelle": "erfasst", "version": "2026/27", "kontaktart": "beratungsgespraech", "themen": [], "beteiligte": ["schueler"], "dauer_min": null, "ergebnis": "", "mitarbeitend": "Sabine", "klassen": {"m3": {"klasse": "7b", "stufe": 7, "zweig": "OBS"}}}},
+   {"id": "j6", "date": "2027-02-10", "type": "Schülergespräch / Einzelberatung", "title": "Lernen", "content": "Text", "participantIds": ["m4"], "stat": {"quelle": "erfasst", "version": "2026/27", "kontaktart": "beratungsgespraech", "themen": ["lernen_motivation"], "beteiligte": ["schueler"], "dauer_min": 30, "ergebnis": "abgeschlossen", "mitarbeitend": "Eddy", "klassen": {"m4": {"klasse": "3c", "stufe": 3, "zweig": "GS"}}}},
+   {"id": "j7", "date": "2026-09-20", "type": "Kurznotiz", "title": "Notiz", "content": "zählt nicht", "participantIds": ["m5"]},
+   {"id": "j8", "date": "2026-08-20", "type": "Schülergespräch / Einzelberatung", "title": "Alter Eintrag ohne Merkmale", "content": "Text", "participantIds": ["m5"], "duration": 20, "decision": "fortführen", "responsible": "Eddy"},
+   {"id": "j9", "date": "2026-06-10", "type": "Schülergespräch / Einzelberatung", "title": "Vorjahr", "content": "Text", "participantIds": ["m1"], "stat": {"quelle": "erfasst", "version": "2026/27", "kontaktart": "beratungsgespraech", "themen": ["familie"], "beteiligte": ["schueler"], "dauer_min": 30, "ergebnis": "", "mitarbeitend": "Eddy", "klassen": {"m1": {"klasse": "4a", "stufe": 4, "zweig": "GS"}}}}
+  ],
+  "quickContacts": [
+   {"id": "q1", "date": "2026-09-25", "themen": ["medien"], "occasions": [], "duration": 10, "grade": "7", "anonymous": true, "kategorieVersion": "2026/27", "mitarbeitend": "Eddy"}
+  ],
+  "taetigkeiten": [
+   {"id": "t1", "date": "2026-09-30", "schoolYear": "2026/27", "taetigkeit": "klassenprojekt_praevention", "dauer_min": 90, "klasse": "5a", "stufe": 5, "zweig": "OBS", "teilnehmende": 24, "mitarbeitend": "Eddy"},
+   {"id": "t2", "date": "2026-10-02", "schoolYear": "2026/27", "taetigkeit": "konferenz", "dauer_min": 120, "klasse": "", "stufe": null, "zweig": "", "teilnehmende": null, "mitarbeitend": "Eddy"}
+  ],
+  "tasks": [], "cases": [], "contacts": [], "groupTalks": [], "classActivities": []
+ },
+ "erwartet": {
+  "schuljahr_2026_27": {"kontakte": 8, "erreichteSchueler": 5, "anonymeKurzkontakte": 1, "einzelfaelle": 4, "stunden": 6.8, "ohneDauer": 1, "erreichtePersonen": 34, "taetigkeiten": 2},
+  "themen": {"konflikt_mobbing": 3, "familie": 1, "emotionen_krise": 1, "lernen_motivation": 1, "medien": 1, "nicht_erfasst": 2},
+  "zugangsweg_kinder": {"schueler_selbst": 1, "lehrkraft": 1, "eltern": 1, "nicht_erfasst": 2},
+  "stufe_5": {"kontakte": 4, "erreichteSchueler": 2, "einzelfaelle": 1, "stunden": 3.8, "erreichtePersonen": 29},
+  "thema_konflikt_und_stufe_7": {"kontakte": 1, "erreichteSchueler": 1},
+  "mitarbeitend_sabine": {"kontakte": 2},
+  "kreuz_thema_x_stufe": {"gesamt": 10, "spaltenSummen": {"3": 1, "5": 5, "7": 3, "9": 1}, "konflikt_mobbing": {"5": 3, "7": 1}},
+  "datenqualitaet": {"ohneThema": 2, "ohneDauer": 1, "ohneZugang": 2, "uebernommen": 1},
+  "gesamter_bestand_erreichteSchueler": 6
+ }
+}
