@@ -192,7 +192,86 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  await waitSaved();
  console.log('0.13 formulare, auftrag, kurzkontakt ok');
 
+ // 7. Version 0.14: Schnellnotiz mit @-Erwähnung
+ run(`document.querySelectorAll('.modal.open').forEach(m=>{if(m.id)closeModal(m.id);else m.remove()});go('dashboard')`);
+ const sn=w.document.getElementById('snText');assert(sn,'Schnellnotiz auf Heute');
+ const tippe=(text)=>{sn.focus();sn.value=text;sn.setSelectionRange(text.length,text.length);sn.dispatchEvent(new w.Event('input'));};
+ const taste=(key,extra={})=>sn.dispatchEvent(new w.KeyboardEvent('keydown',{key,bubbles:true,cancelable:true,...extra}));
+ tippe('@Ann');const liste=w.document.getElementById('snListe');assert(!liste.hidden,'Auswahlliste öffnet bei @');assert(/Beispiel, Anna/.test(liste.textContent));
+ taste('Enter');assert(sn.value.startsWith('@Anna Beispiel '),'Enter übernimmt den Namen');
+ tippe(sn.value+'und @Ber');liste.querySelector('.sn-option').dispatchEvent(new w.MouseEvent('mousedown',{bubbles:true,cancelable:true}));
+ assert(/@Bert Beispiel/.test(sn.value),'Mausauswahl übernimmt den Namen');
+ tippe(sn.value+'haben sich in der Pause gestritten.');const j0=run('data.journal.length');
+ taste('Enter',{ctrlKey:true});await sleep(20);
+ assert.equal(run('data.journal.length'),j0+1,'genau ein Eintrag, keine Kopien');const kn=run('data.journal.at(-1)');
+ assert.equal(kn.type,'Kurznotiz');assert.deepEqual([...kn.participantIds].sort(),['s1','s2']);assert(kn.time&&kn.date,'Datum und Uhrzeit');
+ assert.equal(sn.value,'','Feld wird geleert');
+ assert.equal(run(`Dossier.timeline(data,'s1',[]).filter(e=>e.id==='${kn.id}').length`),1);assert.equal(run(`Dossier.timeline(data,'s2',[]).filter(e=>e.id==='${kn.id}').length`),1);
+ // Ohne @: noch nicht zugeordnet, später zuordnen
+ tippe('Elternabend in der 5a war gut besucht.');run('schnellnotizSpeichern()');await sleep(20);
+ assert.equal(run('data.schnellnotizen.length'),1);assert(/Noch nicht zugeordnet/.test(w.document.getElementById('todayWorkspace').textContent),'Sammelliste auf Heute');
+ run(`notizZuordnen(data.schnellnotizen[0].id)`);const zf=w.document.getElementById('dossierEditForm');zf.querySelector('input[name=participantIds][value=s3]').checked=true;zf.requestSubmit();await sleep(30);
+ assert.equal(run('data.schnellnotizen.length'),0);assert.equal(run('data.journal.at(-1).participantIds[0]'),'s3','nachträglich zugeordnet');
+ // Tippfehler: keine doppelte Akte ohne Rückfrage
+ const schueler0=run('data.students.length');tippe('@Ana Beispil');
+ assert(/Meintest du/.test(liste.textContent),'Ähnlichkeitsvorschlag');assert(/Beispiel, Anna/.test(liste.textContent));
+ const neuIdx=[...liste.querySelectorAll('.sn-option')].findIndex(o=>o.classList.contains('neu'));assert(neuIdx>=0,'Option „Neue Akte“');
+ liste.querySelectorAll('.sn-option')[neuIdx].dispatchEvent(new w.MouseEvent('mousedown',{bubbles:true,cancelable:true}));
+ const na=w.document.getElementById('neueAkteModal');assert(na&&/Meintest du/.test(na.textContent),'Rückfrage vor Neuanlage');
+ na.querySelector('[name=klasse]').value='5a';na.querySelector('form').requestSubmit();await sleep(20);
+ assert.equal(run('data.students.length'),schueler0,'ohne Bestätigung keine neue Akte');run(`document.querySelectorAll('.modal.open:not([id])').forEach(m=>m.remove())`);
+ na.querySelector('[data-kind="s1"]').click();assert(sn.value.startsWith('@Anna Beispiel'),'Vorschlag übernommen statt Neuanlage');
+ // Unbekannter Name, bewusst neu angelegt
+ tippe(sn.value+'und @Dora Neu');const opts=[...liste.querySelectorAll('.sn-option')];opts.find(o=>o.classList.contains('neu')).dispatchEvent(new w.MouseEvent('mousedown',{bubbles:true,cancelable:true}));
+ const na2=w.document.getElementById('neueAkteModal');na2.querySelector('[name=klasse]').value='7c';const cbNeu=na2.querySelector('[name=trotzdem]');if(cbNeu)cbNeu.checked=true;na2.querySelector('form').requestSubmit();await sleep(20);
+ assert.equal(run('data.students.length'),schueler0+1,'neue Akte nach Bestätigung');assert(/@Dora Neu/.test(sn.value));
+ // Offene @-Angabe wird nicht still gespeichert
+ tippe(sn.value+' @Xaver');const j1=run('data.journal.length');run('schnellnotizSpeichern()');assert.equal(run('data.journal.length'),j1,'unzugeordnetes @ blockiert');
+ tippe('');run('snErwaehnungen=[]');
+ // Diktat ohne Dienst: kein Fehler, nur Hinweis
+ await run(`schnellnotizDiktat(document.getElementById('snDiktat'))`);assert(!run('document.querySelector(".modal.open:not([id])")'),'kein Fehlerdialog beim Diktat');
+ await waitSaved();console.log('0.14 schnellnotiz ok');
+
+ // 8. Gespräch vorbereiten
+ run(`data.auftraege=[];Dossier.saveAuftrag(data,'s1',{requester:'Kind selbst',childNeed:'Ruhe in der Pause',assignedOrder:'Pausen begleiten',date:today()})`);
+ const zid=run(`(()=>{const t=Dossier.addPromise(data,{title:'Klassenleitung ansprechen',promisedTo:'Kind',participantIds:['s1'],due:'2020-01-01'});return t.id})()`);
+ run(`save();selectedStudentId='s1';showStudent('s1');gespraechVorbereiten()`);const vb=w.document.getElementById('vorbereitungModal');
+ assert(/Pausen begleiten/.test(vb.textContent),'Auftrag');assert(/Klassenleitung ansprechen/.test(vb.textContent)&&vb.querySelector('.vb-ueberfaellig'),'überfällige Zusage markiert');
+ assert.equal(vb.querySelectorAll('.vb-abschnitt')[1].querySelectorAll('.vb-punkt').length,3,'letzte drei Einträge');
+ for(const b of [...vb.querySelectorAll('.vb-punkt')]){const key=b.getAttribute('onclick').match(/vorbereitungSprung\('([^']+)'\)/)[1];run(`gespraechVorbereiten()`);run(`vorbereitungSprung('${key}')`);await sleep(90);
+  const t=key.startsWith('task:')?run(`data.tasks.find(x=>'task:'+x.id==='${key}')?.sourceEntryKey`):'';const el=w.document.getElementById('ds-'+key)||(t&&w.document.getElementById('ds-'+t));assert(el,'Sprungziel vorhanden: '+key);assert(el.classList.contains('dossier-hervorgehoben'),'Originaleintrag hervorgehoben: '+key);}
+ run(`gespraechVorbereiten()`);const fr=w.document.getElementById('vbFrage');fr.value='Wie läuft es mit Bert?';fr.dispatchEvent(new w.Event('input'));
+ run('vorbereitungDokumentieren()');assert(/Klären wollte ich: Wie läuft es mit Bert\?/.test(w.document.getElementById('dossierEditForm').elements.content.value),'Freitext übernommen');run(`closeModal('dossierEditModal')`);
+ assert.equal(run(`data.settings.gespraechsvorbereitung.s1`),'Wie läuft es mit Bert?','Vorbereitung gespeichert');
+ run(`selectedStudentId='s3';showStudent('s3');data.auftraege=data.auftraege.filter(a=>a.studentId!=='s3');gespraechVorbereiten()`);const vb3=w.document.getElementById('vorbereitungModal');
+ assert(/Auftrag noch nicht geklärt/.test(vb3.textContent));assert(vb3.querySelectorAll('.vb-leer').length>=2,'leere Abschnitte bleiben sichtbar');run('vorbereitungSchliessen()');
+ console.log('0.14 vorbereitung ok');
+
+ // 9. Zusage aus der Chronik, beidseitig verknüpft; erledigt erzeugt Chronikeintrag
+ run(`selectedStudentId='s1';showStudent('s1')`);const quelle=run(`'entry:'+data.journal.find(e=>e.participantIds.includes('s1')&&e.type==='Kurznotiz').id`);
+ assert(w.document.querySelector(`#ds-${quelle.replace(':','\\:')} [onclick*="zusageAusEintrag"]`),'Knopf an der Kachel');
+ run(`zusageAusEintrag('${quelle}')`);const zf2=w.document.getElementById('promiseForm');assert.equal(zf2.elements.sourceEntryKey.value,quelle);assert.equal(zf2.elements.studentId.value,'s1');
+ zf2.elements.title.value='Mit Bert sprechen';zf2.elements.zugesagtVon.value='Sabine';zf2.requestSubmit();await sleep(20);
+ const neu=run(`data.tasks.find(t=>t.title==='Mit Bert sprechen')`);assert.equal(neu.sourceEntryKey,quelle,'Zusage verweist auf Eintrag');assert.equal(neu.zugesagtVon,'Sabine');
+ run('dossierRefresh()');assert(/Mit Bert sprechen/.test(w.document.getElementById('ds-'+quelle).textContent),'Eintrag zeigt die Zusage');
+ run(`go('tasks')`);assert(/Mit Bert sprechen/.test(w.document.getElementById('zusagenListe').textContent),'Zusagenliste');assert(w.document.querySelector('#zusagenListe .zusage-zeile.ueberfaellig'),'überfällig farbig');
+ run(`zusageStatusSetzen('${neu.id}','in Bearbeitung')`);assert(/Läuft \(1\)/.test(w.document.getElementById('zusagenListe').textContent));
+ const jz=run('data.journal.length');run(`zusageStatusSetzen('${neu.id}','erledigt')`);assert.equal(run('data.journal.length'),jz+1);
+ const ez=run('data.journal.at(-1)');assert.equal(ez.title,'Zusage erledigt: Mit Bert sprechen');assert.equal(ez.sourceEntryKey,'task:'+neu.id);assert.equal(run(`data.tasks.find(t=>t.id==='${neu.id}').doneEntryId`),ez.id,'beidseitig');
+ run(`zusageStatusSetzen('${neu.id}','offen');zusageStatusSetzen('${neu.id}','erledigt')`);assert.equal(run('data.journal.length'),jz+1,'kein doppelter Eintrag');
+ // „eingehalten“ auf Heute erzeugt ebenfalls den Eintrag
+ run(`openTaskComplete('${zid}')`);const tf2=w.document.getElementById('dossierEditForm');tf2.elements.status.value='erledigt';tf2.elements.result.value='Gespräch geführt';tf2.requestSubmit();await sleep(30);await sleep(20);assert.equal(run('data.journal.at(-1).title'),'Zusage erledigt: Klassenleitung ansprechen');
+ run(`Dossier.addPromise(data,{title:'Cem Rückmeldung geben',promisedTo:'Kind',participantIds:['s3']});zusagenFilterKind='s3';renderZusagen()`);assert(/Cem Rückmeldung geben/.test(w.document.getElementById('zusagenListe').textContent));assert(!/Mit Bert sprechen/.test(w.document.getElementById('zusagenListe').textContent),'Filter nach Kind');run(`zusagenFilterKind='';renderZusagen()`);
+ await waitSaved();console.log('0.14 zusagen ok');
+
+ // 10. Kontexthilfe: aufklappen und schließen, Texte vollständig und kurz
+ const hk=w.document.querySelector('#tasks .sectionhead .hilfeknopf');assert(hk,'? im Bereichskopf');hk.click();
+ assert(w.document.querySelector('#tasks .hilfe-inline'),'Hilfe klappt direkt darunter auf');hk.click();assert(!w.document.querySelector('#tasks .hilfe-inline'),'erneuter Klick schließt');
+ const texte=run('HILFE_TEXTE');for(const [k,h] of Object.entries(texte)){assert(h.was&&h.warum&&h.beispiel,'Aufbau '+k);const saetze=(h.was+' '+h.warum+' '+h.beispiel).replace(/z\. B\./g,'zB').split(/(?<=[.!?“])\s+(?=[A-ZÄÖÜ„])/).length;assert(saetze<=4,'höchstens vier Sätze: '+k+' ('+saetze+')');}
+ for(const seite of w.document.querySelectorAll('.page'))if(seite.querySelector('.sectionhead'))assert(texte[seite.id],'Hilfetext für Bereich '+seite.id);
+ console.log('0.14 hilfe ok');
+
  console.log('errors',errors);
  if(errors.length)process.exitCode=1;
  w.close();
-})().catch(err=>{console.error(err);process.exitCode=1;});
+})().catch(err=>{console.error(err);process.exitCode=1;setTimeout(()=>process.exit(1),100);});
