@@ -1,7 +1,7 @@
 {
  "hinweis": "Testdatensatz mit Fantasienamen für die Statistik (0.16). Die Werte unter 'erwartet' sind von Hand nachgezählt; tests/statistik.test.mjs prüft sie automatisch.",
  "zustand": {
-  "settings": {"currentSchoolYear": "2026/27", "activeUser": "Eddy"},
+  "settings": {"currentSchoolYear": "2026/27", "activeUser": "Eddy", "ssaTeam": ["Eddy", "Sabine"]},
   "students": [
    {"id": "m1", "first": "Mira", "last": "Sonnenberg", "className": "5a", "schoolYear": "2026/27", "active": true, "enrollments": [{"schoolYear": "2026/27", "className": "5a", "validFrom": "2026-08-01", "validTo": ""}]},
    {"id": "m2", "first": "Jonas", "last": "Wolkenstein", "className": "5a", "schoolYear": "2026/27", "active": true, "enrollments": [{"schoolYear": "2026/27", "className": "5a", "validFrom": "2026-08-01", "validTo": ""}]},

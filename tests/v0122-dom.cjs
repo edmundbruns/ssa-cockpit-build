@@ -360,6 +360,34 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  await waitSaved();console.log('kachel bearbeiten ok');
  }
 
+ // 14. Version 0.17: SSA-Team vereinheitlicht, Berichte zur Weitergabe mit Vorschau und Protokoll
+ {
+ run(`document.querySelectorAll('.modal.open').forEach(m=>{if(m.id&&!['nachtragModal','berichtModal'].includes(m.id))closeModal(m.id);else m.remove()})`);
+ run(`['Edmund','SSA-Team','Sabine Thien','Thien, Sabine','Sabine'].forEach((r,i)=>data.journal.push({id:'mt'+i,date:today(),type:'Kurzkontakt',title:'Test',content:'Test',participantIds:['s1'],responsible:r}));save()`);
+ run(`go('settings')`);const tk=w.document.getElementById('teamKarte');
+ assert.deepEqual(JSON.parse(run(`JSON.stringify([...document.getElementById('aktivePersonFeld').options].map(o=>o.value))`)),['Bruns, Edmund','Thien, Sabine','Anerkennungspraktikantin Laura Geiger'],'Aktive Person nur aus dem Team');
+ assert(/Frühere Schreibweisen/.test(tk.textContent)&&/Bruns, Edmund \(automatisch\)/.test(tk.textContent),'Schreibweisen werden automatisch zugeordnet');
+ const mit=()=>JSON.parse(run(`JSON.stringify(Dossier.aufschluesselung(Dossier.ereignisse(data),'mitarbeitend','kontakte'))`)).map(r=>r.id);
+ for(const alt of ['Edmund','SSA-Team','Sabine Thien','Sabine'])assert(!mit().includes(alt),'nicht mehr getrennt: '+alt);assert(mit().includes('Thien, Sabine')&&mit().includes('Bruns, Edmund'));
+ const sel=[...tk.querySelectorAll('select[data-roh]')].find(x=>x.dataset.roh==='SSA-Team');assert(sel,'SSA-Team kann zugeordnet werden');
+ sel.value='Bruns, Edmund';sel.dispatchEvent(new w.Event('change',{bubbles:true}));await sleep(20);
+ assert.equal(run(`Dossier.mitarbeitendKanonisch(data,'SSA-Team')`),'Bruns, Edmund','Zuordnung gespeichert');
+ assert.equal(run(`data.journal.find(e=>e.id==='mt1').responsible`),'SSA-Team','alter Eintrag bleibt unverändert');
+ run(`openModal('groupTalkModal')`);const gv=JSON.parse(run(`JSON.stringify([...document.querySelector('#groupTalkModal select[name=responsible]').options].map(o=>o.value))`));
+ assert(!gv.includes('SSA-Team')&&gv.includes('Thien, Sabine')&&gv.includes('Anerkennungspraktikantin Laura Geiger'),'Verantwortlich: nur Team, kein „SSA-Team“');run(`closeModal('groupTalkModal')`);
+ run(`selectedStudentId='s1';showStudent('s1');dossierEntry('new')`);const df=w.document.getElementById('dossierEditForm');
+ assert.equal(df.elements.responsible.tagName,'SELECT','Dokumentiert von ist eine Auswahl');assert.equal(df.elements.responsible.value,run('aktivePerson()'));run(`closeModal('dossierEditModal');closeModal('studentModal')`);
+ run(`window.__dl=[];download=(n,t)=>__dl.push({n,t});go('statistics')`);
+ assert(w.document.getElementById('statBerichte'),'Berichte zur Weitergabe');run(`berichtWahl.art='halbjahr';berichtVorschau()`);
+ let bm=w.document.getElementById('berichtModal');assert(/Diese Tabelle verlässt das Cockpit\. Bitte prüfen\./.test(bm.textContent),'Vorschau mit Warnung');
+ const vorher=run('(data.weitergaben||[]).length');run(`berichtWeitergeben('CSV')`);assert.equal(run('(data.weitergaben||[]).length'),vorher,'ohne Empfänger keine Weitergabe');assert.equal(run('__dl.length'),0);
+ bm.querySelector('input[name=empfaenger]').value='Schulleitung';run(`berichtWeitergeben('CSV')`);
+ assert.equal(run('data.weitergaben.length'),vorher+1,'protokolliert');const csv=run('__dl[0].t');assert(csv.startsWith('﻿')&&csv.includes(';'),'CSV mit BOM und Semikolon');
+ for(const verboten of ['Bruns','Thien','Geiger',run(`data.students.find(s=>s.id==='s1').last`)])assert(!csv.includes(verboten),'nicht im Bericht: '+verboten);
+ assert(/Schulleitung/.test(w.document.getElementById('statWeitergaben').textContent),'Protokoll „Weitergaben“');
+ await waitSaved();assert(saved().weitergaben.length===vorher+1,'Protokoll gespeichert');console.log('0.17 team und weitergabe ok');
+ }
+
  console.log('errors',errors);
  if(errors.length)process.exitCode=1;
  w.close();
