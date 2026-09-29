@@ -39,7 +39,7 @@ function stamp(state,r){
  if(!r.className&&people.length===1)r.className=r.studentContexts[people[0]].className;
  return r;
 }
-function isGroupEntry(entry){const n=(entry.participantIds||[]).length;return n>=3||(n>1&&/gruppe|sozialtraining|klassen|mediation|konfliktkl/iu.test(String(entry.type||'')));}
+function isGroupEntry(entry){const n=(entry.participantIds||[]).length;if(['Kurznotiz','Zusage erledigt'].includes(entry.type))return true;return n>=3||(n>1&&/gruppe|sozialtraining|klassen|mediation|konfliktkl/iu.test(String(entry.type||'')));}
 function journalCase(state,sid,entry,reopen=false){
  const student=state.students.find(s=>s.id===sid);if(!student)return;
  const existing=state.cases.find(c=>c.studentId===sid);
@@ -58,7 +58,7 @@ function journalCase(state,sid,entry,reopen=false){
  state.statusHistory.push(stamp(state,{id:uid('sh'),caseId,studentId:sid,date:entry.date,status:'Klärungsphase',fromStatus:'',responsible:entry.responsible||'SSA',reason:'Fallakte aus personenbezogenem Chronikeintrag angelegt'}));
 }
 function normalize(state){
- state.settings=state.settings||{};state.auftraege=Array.isArray(state.auftraege)?state.auftraege:[];state.students=state.students||[];state.cases=state.cases||[];state.tasks=state.tasks||[];
+ state.settings=state.settings||{};state.auftraege=Array.isArray(state.auftraege)?state.auftraege:[];state.schnellnotizen=Array.isArray(state.schnellnotizen)?state.schnellnotizen:[];state.students=state.students||[];state.cases=state.cases||[];state.tasks=state.tasks||[];
  for(const k of collections)state[k]=state[k]||[];
  state.importLinks=state.importLinks||{};state.classLeadHistory=state.classLeadHistory||{};
  for(const c of state.cases){const student=state.students.find(s=>s.id===c.studentId);if(!c.lastContact&&/^\d{4}-\d{2}-\d{2}$/.test(String(c.last||''))){c.lastContact=c.last;c.last=student?.last||'';}if(!c.lastContact)c.lastContact=c.last||'';}
@@ -400,7 +400,7 @@ function addTask(state,input){
  const t=stamp(state,{...input,id:uid('task'),status:'offen',done:false,createdAt:new Date().toISOString(),history:[]});state.tasks.push(t);return t;
 }
 function setTask(state,t,changes,author){
- const status=changes.status||t.status;
+ const status=changes.status||t.status,warOffen=!t.done;
  if(!['offen','in Bearbeitung','wartet auf Rückmeldung','erledigt','entfällt'].includes(status))throw Error('Status prüfen.');
  if(changes.due&&!iso(changes.due))throw Error('Termin prüfen.');
  if(['erledigt','entfällt'].includes(status)&&!String(changes.result||t.result||'').trim())throw Error('Ergebnis beziehungsweise Grund kurz eintragen.');
@@ -408,7 +408,32 @@ function setTask(state,t,changes,author){
  Object.assign(t,changes,{status,done:['erledigt','entfällt'].includes(status)});
  if(t.done){t.completedAt=changes.completedAt||day();t.completedBy=author;}
  else {t.completedAt='';}
+ if(warOffen&&status==='erledigt')zusageErledigtEintragen(state,t,author);
  return t;
+}
+// 0.14: Wird eine Zusage erledigt, entsteht genau ein Chronikeintrag „Zusage erledigt: …“ mit Verweis auf die Zusage.
+function zusageErledigtEintragen(state,t,author){
+ if(t.kind!=='zusage'||t.doneEntryId)return null;
+ const participantIds=ids(state,t).filter(sid=>state.students.some(s=>s.id===sid));if(!participantIds.length)return null;
+ const e=addEntry(state,{date:iso(t.completedAt)?String(t.completedAt).slice(0,10):day(),time:new Date().toTimeString().slice(0,5),type:'Zusage erledigt',title:'Zusage erledigt: '+t.title,content:'Zusage erledigt: '+t.title+(t.result&&t.result!=='Zusage eingehalten.'?'\nErgebnis: '+t.result:''),participantIds,responsible:author||t.completedBy||'SSA',sourceEntryKey:'task:'+t.id});
+ e.actionSuggestions=[];t.doneEntryId=e.id;return e;
+}
+// 0.14: Neue Schülerakte mit nur Name und Klasse (z. B. aus der Schnellnotiz)
+function addStudent(state,input){
+ const first=String(input.first||'').trim(),last=String(input.last||'').trim(),className=String(input.className||'').trim();
+ if(!first||!last)throw Error('Vor- und Nachname angeben.');if(!className)throw Error('Klasse angeben.');
+ const s={id:uid('pupil'),first,last,active:true,enrollments:[],createdAt:new Date().toISOString(),createdFrom:input.createdFrom||'Schnellnotiz'};state.students.push(s);
+ changeEnrollment(state,s,{className,schoolYear:state.settings?.currentSchoolYear||schoolYear(day())},day(),input.reason||'Neue Akte aus Schnellnotiz');return s;
+}
+// 0.14: Ähnliche Namen finden („Meintest du …?“) – Tippfehler sollen keine doppelte Akte erzeugen
+function nameNorm(t){return String(t||'').toLocaleLowerCase('de-DE').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ß/g,'ss').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();}
+function editDistance(a,b){if(a===b)return 0;const m=a.length,n=b.length;if(!m||!n)return m||n;let prev=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){const cur=[i];for(let j=1;j<=n;j++)cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));prev=cur;}return prev[n];}
+function similarStudents(state,name,limit=5){
+ const q=nameNorm(name);if(q.length<2)return [];
+ const rows=[];for(const s of state.students){if(s.active===false)continue;const a=nameNorm(s.first+' '+s.last),b=nameNorm(s.last+' '+s.first),f=nameNorm(s.first),l=nameNorm(s.last);
+  const d=Math.min(editDistance(q,a),editDistance(q,b),q.includes(' ')?99:Math.min(editDistance(q,f),editDistance(q,l)));const tol=q.length<=4?1:2;
+  const starts=a.startsWith(q)||b.startsWith(q)||f.startsWith(q)||l.startsWith(q);if(starts||d<=tol)rows.push({s,d:starts?0:d});}
+ return rows.sort((x,y)=>x.d-y.d||x.s.last.localeCompare(y.s.last)).slice(0,limit).map(r=>r.s);
 }
 function assess(state,sid,input){
  if(!['gruen','gelb','rot','grau'].includes(input.color)||!input.reason?.trim()||!input.author?.trim()||!iso(input.date))throw Error('Farbe, Begründung, Datum und bewertende Person angeben.');
@@ -424,14 +449,15 @@ function timeline(state,sid,legacy=[]){
  for(const e of state.assessments.filter(e=>e.studentId===sid))items.push({...e,key:'assessment:'+e.id,eventKind:'Fachliche Ampelbewertung',title:e.color,content:e.reason,responsible:e.author,context:recordContext(state,e,sid)});
  for(const e of state.yearTransitions.filter(e=>e.studentId===sid))items.push({...e,key:'year:'+e.id,eventKind:'Schuljahresverlauf',content:e.reason,context:recordContext(state,e,sid)});
  for(const e of state.relatedPersons||[])if(e.studentId===sid)items.push({...e,key:'related:'+e.id,date:recordDate(e)||'',eventKind:'Bezugsperson / Netzwerk',title:e.name||'Kontakt',content:[e.role,e.agreements,e.informationScope].filter(Boolean).join(' · '),context:recordContext(state,e,sid)});
+ for(const a of state.auftraege||[])if(a.studentId===sid)items.push({...a,key:'auftrag:'+a.id,eventKind:'Auftragsklärung',title:'Auftrag: '+a.assignedOrder,content:['Auftrag von: '+a.requester,a.childNeed?'Anliegen des Kindes: '+a.childNeed:'',a.requesterNeed?'Anliegen der auftraggebenden Person: '+a.requesterNeed:''].filter(Boolean).join('\n'),context:recordContext(state,a,sid)});
  for(const t of work(state,sid))items.push({...t,key:'task:'+t.id,task:true,date:t.due||'',eventKind:'Nächster Schritt',content:t.result||t.expectedResult||'',planned:!t.done,context:recordContext(state,t,sid)});
  for(const k of ['portalRequests','events','verfahrenLaeufe'])for(const e of state[k]||[])if(ids(state,e).includes(sid)&&!items.some(x=>x.id===e.id))items.push({...e,key:'legacy:'+e.id,date:recordDate(e),eventKind:k==='portalRequests'?'Schüleranfrage':k==='verfahrenLaeufe'?'Fachverfahren':'Termin',title:e.title||e.topic||e.workflowId||'Weiterer Eintrag',content:e.message||e.note||'',legacy:true,context:recordContext(state,e,sid)});
  for(const e of state.journal.filter(e=>!e.deletedAt&&e.participantIds.includes(sid)&&e.planned&&e.plannedDate))items.push({key:'appointment:'+e.id,id:e.id,date:e.plannedDate,eventKind:'Geplanter Termin',title:e.title,content:'Durchführung noch nicht bestätigt.',planned:true,sourceEntryKey:'entry:'+e.id,context:context(state,sid,e.plannedDate)});
  return items.sort((a,b)=>String(a.date||'9999').localeCompare(String(b.date||'9999'))||String(a.time||'').localeCompare(String(b.time||''))||String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
 }
 function journalStats(state,year='',className='all'){
- return state.journal.filter(e=>!e.generalInfo&&!e.planned&&e.type!=='zusätzliche Information'&&(!year||e.schoolYear===year)&& (className==='all'||e.participantIds.some(sid=>{const cl=recordContext(state,e,sid).className;return className.startsWith('jg:')?cl.match(/^\d+/)?.[0]===className.slice(3):cl===className}))).map(e=>({...e,duration:e.duration*Math.max(1,(e.facilitators||[]).length)}));
+ return state.journal.filter(e=>!e.generalInfo&&!e.planned&&e.type!=='zusätzliche Information'&&e.type!=='Kurznotiz'&&e.type!=='Zusage erledigt'&&(!year||e.schoolYear===year)&& (className==='all'||e.participantIds.some(sid=>{const cl=recordContext(state,e,sid).className;return className.startsWith('jg:')?cl.match(/^\d+/)?.[0]===className.slice(3):cl===className}))).map(e=>({...e,duration:e.duration*Math.max(1,(e.facilitators||[]).length)}));
 }
 function restore(raw,sanitize){const state=sanitize(raw);for(const [i,e]of (state.journal||[]).entries()){const original=raw.journal?.[i];if(!original)continue;for(const key of ['content','childView','otherView','observation','assessment','agreement','goal','result','source','people'])if(typeof original[key]==='string')e[key]=original[key];if(original.individualNotes&&typeof original.individualNotes==='object')for(const key of Object.keys(e.individualNotes||{}))if(typeof original.individualNotes[key]==='string')e.individualNotes[key]=original.individualNotes[key];}return state;}
-root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,safetyHint,SAFETY_NOTICE};
+root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,safetyHint,addStudent,similarStudents,zusageErledigtEintragen,SAFETY_NOTICE};
 })(globalThis);
