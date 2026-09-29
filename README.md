@@ -1,6 +1,6 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Version 0.14.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
+Version 0.15.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
 
 Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
@@ -11,7 +11,7 @@ Unter „Gesprächsbogen drucken“ stehen vier fachlich unterschiedliche DIN-A4
 
 ## Aktueller Arbeitsablauf
 
-Das Handbuch steht in `HANDBUCH-0.14.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
+Das Handbuch steht in `HANDBUCH-0.15.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
 
 
 ## Neu in 0.12.2: Dialoge und Speichern
@@ -50,3 +50,37 @@ Das Handbuch steht in `HANDBUCH-0.14.0.md` und im Programm unter „Handbuch“.
 - **Zusage aus der Chronik**: „＋ Zusage daraus“ an jedem Eintrag. Zusage und Eintrag verweisen aufeinander. Felder: Was, Wer hat zugesagt (Ich, Sabine, Schüler:in, Eltern, Lehrkraft, Andere), Wem gegenüber, Bis wann (optional). Status offen · läuft · erledigt; „erledigt“ erzeugt automatisch den Chronikeintrag „Zusage erledigt: …“ (einmalig). „Heute“ zeigt fällige und überfällige Zusagen, „Aufgaben und Zusagen“ die vollständige Liste nach Status, filterbar nach Kind.
 - **Kontexthilfe**: „?“ in jedem Bereichskopf und an erklärungsbedürftigen Feldern (Auftrag, Fachverfahren, Maßnahmen, Zusagen, Frühindikatoren, Ampel, Schutzfrage, Kurzkontakt, Gruppengespräch). Die Hilfe klappt direkt darunter auf: Was ist das? Warum eintragen? Beispiel. Alle Texte stehen zentral in `src/erweiterungen.js` (`HILFE_TEXTE`).
 - Abnahme (automatisch geprüft, `npm test` und `npm run test:ui`): Schnellnotiz mit einem, mehreren und ohne `@`; Tippfehler erzeugt ohne Rückfrage keine neue Akte; Diktat ohne Dienst ohne Fehler; alle Links der Gesprächsvorbereitung treffen den richtigen Eintrag; Zusage beidseitig verknüpft, „erledigt“ erzeugt genau einen Eintrag; Daten der Vorversion laden unverändert; kein waagerechtes Scrollen in den neuen Ansichten (geprüft bei 1440 und 820 Pixel Breite).
+
+## Neu in 0.15.0 – Statistik, Schritt 1: Kategorien und Erfassung
+
+Grundlage ist `AUFTRAG-STATISTIK.md` (überarbeiteter Auftrag). Die neue Statistikseite (Schritt 2) und die anonyme Weitergabe (Schritt 3) folgen.
+
+- **Zentrale Kategorien** mit festen IDs und Version je Schuljahr (`KATEGORIEN_VERSIONEN` in `src/dossier-core.js`, gültig ab 1.8.). Anzeigetexte stehen getrennt von den IDs, Themen und Tätigkeiten sind den Handlungsfeldern des Erlasses zugeordnet.
+- **Erfassung mit Chips**:
+  - Kurzkontakt: Thema, Dauer (5 · 10 · 15 · 30, Vorauswahl 5). Ersetzt die bisherigen Anlässe.
+  - Gespräch: Art (Beratung/Krise), Thema, Beteiligte (Vorauswahl Schüler:in), Dauer (15–90, ohne feste Vorauswahl, zuletzt gewählte Dauer wird angeboten), Ergebnis (freiwillig). Ersetzt „Entscheidung zur Unterstützung“ und das Zahlenfeld „Dauer“.
+  - Gruppengespräch: Thema, Dauer; Teilnehmende automatisch.
+  - Klassenstufe und Schulzweig (1–4 GS, 5–10 OBS) werden je Kind beim Speichern festgehalten.
+- **Zugangsweg** genau einmal je Kind und Schuljahr (Pflicht, ein Klick), im Kurzkontakt oder Gespräch. Die Auftragsklärung nutzt dieselben Werte und setzt den Zugangsweg mit; eine zugeordnete Schüler-Anfrage setzt „Anfrageportal“.
+- **Tätigkeit ohne Fall**: kleiner Knopf unter der Schnellnotiz. Tätigkeit ist Pflicht; Dauer, Datum, Klasse, Teilnehmende und Notiz sind optional. „Klassenprojekt / Prävention“ markiert die Klassen-Kachel.
+- **Alte Einträge** werden nicht verändert. Für die Auswertung (`Dossier.statMerkmale`) wird Eindeutiges als „übernommen“ gelesen (z. B. Anlass „Streit“ → Konflikt/Mobbing, Dauer, Entscheidung fortführen/abschließen); alles andere ist „nicht erfasst“. Schnellnotiz, „Zusage erledigt“, Informationen und Mitteilungen zählen nicht als Kontakt.
+- **„?“** an jedem Merkmal (Art, Zugangsweg, Beteiligte, Thema, Dauer, Ergebnis, Tätigkeit, Teilnehmende).
+
+Abnahme (automatisch geprüft):
+- Kurzkontakt mit Vorauswahl in wenigen Klicks gespeichert.
+- Zugangsweg einmal je Kind und Schuljahr, im neuen Schuljahr wieder.
+- Tätigkeit ohne Fall speichert und markiert die Klasse.
+- Alte Einträge bleiben unverändert und werden als „übernommen“ oder „nicht erfasst“ gelesen.
+- Kein waagerechtes Scrollen in den Formularen (1440 und 820 Pixel Breite).
+
+### Merkmale und IDs (Version 2026/27)
+
+| Merkmal | IDs |
+|---|---|
+| kontaktart | kurzkontakt, beratungsgespraech, krisengespraech, gruppe, klasse |
+| zugangsweg | schueler_selbst, lehrkraft, eltern, schulleitung, mitschueler, anfrageportal, extern |
+| beteiligte | schueler, eltern, lehrkraft, schulleitung, jugendamt, fachstelle_andere |
+| thema | konflikt_mobbing, familie, fehlzeiten_schulangst, emotionen_krise, lernen_motivation, verhalten_unterricht, medien, sucht, gesundheit, berufsorientierung, kinderschutz, sonstiges |
+| ergebnis | weiter_begleitet, abgeschlossen, weitervermittelt, massnahme_vereinbart |
+| taetigkeit | klassenprojekt_praevention, konferenz, elternabend, lehrkraefteberatung, kollegiale_beratung, netzwerk, fortbildung, pausenpraesenz, verwaltung, sonstiges |
+| dauer_min | Kurzkontakt 5, 10, 15, 30 · Gespräch 15, 30, 45, 60, 90 · Tätigkeit zusätzlich 120, 180 |
