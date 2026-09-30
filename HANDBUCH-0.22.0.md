@@ -1,4 +1,4 @@
-# SSA-Cockpit 0.21.0
+# SSA-Cockpit 0.22.0
 
 ## Alltag
 
@@ -21,6 +21,10 @@ Für Arbeit ohne einzelnes Kind (Konferenz, Elternabend, Projekt, Pausenpräsenz
 ## Statistik
 
 Unter **Auswertung** steht die interne Statistik. Oben zeigt „Datenqualität“, wo Angaben fehlen; **Jetzt nachtragen** führt dich Eintrag für Eintrag durch die Lücken. Darunter stehen fünf Kennzahlen, die Filter und für jedes Merkmal ein Balkendiagramm mit derselben Tabelle. In der **Kreuztabelle** stellst du zwei Merkmale gegeneinander, zum Beispiel Thema und Klassenstufe. Diese Seite zeigt exakte Zahlen und ist nur für dich und dein Team gedacht.
+
+## Trainingsraum
+
+„Trainingsraumbesuch dokumentieren“ (in der Akte unter „Mehr …“ oder auf der Seite Trainingsraum) arbeitet mit Auswahlknöpfen: Stunde, **Anlass** (Pflicht), Dauer, Reflexion, Rückkehrvereinbarung (mehrere möglich), Ergebnis und Eltern. Unter dem Anlass steht ein kurzes, freiwilliges Feld „Was ist passiert?“. Begleitet von, Folgemaßnahme und Wiedervorlage findest du unter **Mehr**. Der Besuch erscheint sofort in der Chronik des Kindes.
 
 ## Familie und Bezugspersonen
 
