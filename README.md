@@ -1,6 +1,6 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Version 0.18.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
+Version 0.19.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
 
 Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
@@ -11,7 +11,7 @@ Unter „Gesprächsbogen drucken“ stehen vier fachlich unterschiedliche DIN-A4
 
 ## Aktueller Arbeitsablauf
 
-Das Handbuch steht in `HANDBUCH-0.18.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
+Das Handbuch steht in `HANDBUCH-0.19.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
 
 
 ## Neu in 0.12.2: Dialoge und Speichern
@@ -134,3 +134,11 @@ Abnahme (automatisch geprüft):
 - **Themenvorschlag per Stichwort** (`Dossier.themenVorschlag`, Stichworte am Wortanfang): hebt passende Themen-Chips in Gespräch, Kurzkontakt, Gruppengespräch und „Jetzt nachtragen“ hervor, kreuzt aber nie selbst an.
 - **Zusatz pro Kind im Gruppengespräch**: ersetzt das frühere unzugeordnete Feld „Individuelle Hinweise“; wird als `individualNotes[sid]` gespeichert und erscheint nur in der Chronik dieses Kindes. Statistik unverändert (ein Kontakt, n erreichte Kinder).
 - Tests: `tests/alltag.test.mjs` und Abschnitt 15 in `tests/v0122-dom.cjs`.
+
+## Neu in 0.19.0
+
+- **Gespräch planen** (`geplanteGespraeche`): Termin an der Akte, oben in der Akte und am Tag (sowie danach, bis dokumentiert) auf „Heute“. „Dokumentieren“ öffnet das Gesprächsformular vorausgefüllt; nicht abgehakte Punkte werden Zusagen (`Dossier.gespraechErledigt`). Verschieben mit Verlauf, Absagen ohne Löschen.
+- **Schuljahreswechsel für ganze Klassen** (`Dossier.jahrKlassen`, `klasseUebernehmen`, `alleKlassenUebernehmen`, `klasseAbgang`): nur noch nicht geprüfte Zeilen mit sicherer Zuordnung; Einzelprüfungen bleiben; Abschlussklassen nur über „Alle als Schulabgang“ oder einzeln. Filter „Nur ungeprüfte Zeilen zeigen“.
+- **Fehler behoben:** Die Prüfung „Abschlussjahrgang“ blockierte bisher auch die reguläre Versetzung 9 → 10. Sie greift jetzt nur bei Kindern, die schon in Klasse 10 sind, oder bei einer offenen Abschluss-Kennzeichnung.
+- **Zugangsweg:** zusätzlich „PM“ (pädagogische Mitarbeiter:in) und „SSA“ (Schulsozialarbeit ist selbst auf das Kind zugegangen).
+- Tests: `tests/planung.test.mjs` und Abschnitt 16 in `tests/v0122-dom.cjs`.
