@@ -1,6 +1,6 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Version 0.20.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
+Version 0.21.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
 
 Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
@@ -11,7 +11,7 @@ Unter „Gesprächsbogen drucken“ stehen vier fachlich unterschiedliche DIN-A4
 
 ## Aktueller Arbeitsablauf
 
-Das Handbuch steht in `HANDBUCH-0.20.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
+Das Handbuch steht in `HANDBUCH-0.21.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
 
 
 ## Neu in 0.12.2: Dialoge und Speichern
@@ -153,3 +153,10 @@ Abnahme (automatisch geprüft):
 - Einstellungen: Spracherkennung und automatische Fallanlage unter „Erweitert“.
 - Schüler-Anfragen: Die Seite ist nicht mehr erreichbar; vorhandene Anfragen bleiben gespeichert.
 - Kleinere Korrekturen: Zuständig im Aufgabendialog ist mit der aktiven Person vorbelegt; Leitfäden-Raster bricht bei schmalem Fenster um.
+
+## Neu in 0.21.0 – schlanker (Schritt 2) und Korrekturen
+
+- **Sofort sichtbar:** Nach jedem Speichern wird eine geöffnete Akte neu gezeichnet (`akteAktualisieren` in `renderSichtbar`), die Scrollposition bleibt. Bisher zeichnete das Speichern seit 0.13 nur die sichtbare Seite neu; die Akte als Dialog blieb auf altem Stand.
+- **Familie und Bezugspersonen wieder erreichbar:** Seit der Chronik-Akte waren „Familie“ und „Bezugsperson“ nicht mehr aufrufbar. Jetzt ein Bereich in der Akte mit beiden Dialogen; Bezugspersonen sind bearbeitbar (mit Verlauf).
+- **Suche** (`Dossier.schuelerSuche`, `suchPasst`): Wörter in beliebiger Reihenfolge, Komma egal, unsichtbare Zeichen (weiches Trennzeichen, geschütztes Leerzeichen) werden ignoriert; exakte Treffer zuerst; Hinweis bei mehr als 12 Treffern. Gilt für die Kopfsuche, die Schülerliste, Kurzkontakt und Teilnehmerlisten.
+- **Gruppengespräch** nur noch über das Gruppenformular (in der Akte unter „Mehr …“ und als Link im Gesprächsformular); die Art „Gruppengespräch“ erscheint im Einzelformular nur noch bei älteren Einträgen.

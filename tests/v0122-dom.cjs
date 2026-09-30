@@ -465,6 +465,34 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  await waitSaved();console.log('0.20 schlank ok');
  }
 
+ // 18. Version 0.21: Akte zeigt Gespeichertes sofort · Familie und Bezugspersonen · robuste Suche · Gruppengespräch
+ {
+ run(`document.querySelectorAll('.modal.open').forEach(m=>m.id?closeModal(m.id):m.remove());go('dashboard');selectedStudentId='s1';showStudent('s1')`);
+ const vorher=w.document.querySelectorAll('#studentDetailBody [id^="ds-"]').length;
+ run(`openQuickContact('s1')`);const qf=w.document.getElementById('quickContactForm');const th=qf.querySelector('input[name=thema]');if(th)th.checked=true;const zw=qf.querySelector('input[name=zugangsweg]');if(zw)zw.checked=true;
+ qf.requestSubmit();await sleep(40);
+ assert(w.document.getElementById('studentModal').classList.contains('open'),'Akte bleibt offen');
+ assert(w.document.querySelectorAll('#studentDetailBody [id^="ds-"]').length>vorher,'neuer Eintrag sofort in der offenen Akte sichtbar');
+ const fam=w.document.querySelector('#studentDetailBody details.akte-familie');assert(fam&&/Familie \/ Sorgerecht bearbeiten/.test(fam.textContent)&&/Bezugsperson/.test(fam.textContent),'Familie und Bezugspersonen erreichbar');
+ [...fam.querySelectorAll('button')].find(b=>/Bezugsperson/.test(b.textContent)).click();await sleep(10);
+ const rf=w.document.getElementById('relatedPersonForm');assert(w.document.getElementById('relatedPersonModal').classList.contains('open'));
+ rf.elements.name.value='Herr Testvater';rf.elements.role.value='Getrenntlebender Elternteil';rf.elements.mayContact.value='Nein';rf.requestSubmit();await sleep(30);
+ assert(!w.document.getElementById('akteSperre').hidden&&/Herr Testvater/.test(w.document.getElementById('akteSperre').textContent),'Sperre sofort oben in der Akte');
+ const rpId=run(`data.relatedPersons.find(r=>r.name==='Herr Testvater').id`);run(`openRelatedPerson('${rpId}')`);const rf2=w.document.getElementById('relatedPersonForm');assert.equal(rf2.elements.name.value,'Herr Testvater','Bearbeiten füllt das Formular');
+ rf2.elements.mayContact.value='Ja';rf2.requestSubmit();await sleep(30);assert.equal(run(`data.relatedPersons.filter(r=>r.name==='Herr Testvater').length`),1,'keine Kopie');
+ assert(!/Herr Testvater/.test(w.document.getElementById('akteSperre').textContent),'Sperre aufgehoben');assert.equal(run(`data.relatedPersons.find(r=>r.name==='Herr Testvater').verlauf.length`),1,'Änderung mit Verlauf');
+ run(`closeModal('studentModal')`);
+ // Suche mit Komma und vertauschter Reihenfolge
+ const st=run(`(()=>{const s=data.students.find(x=>x.id==='s2');return {l:s.last,f:s.first}})()`);
+ for(const q of [st.l+', '+st.f,st.f+' '+st.l]){run(`document.getElementById('globalSearch').value=${JSON.stringify(q)};globalSearchTippen()`);assert(/globalSearchOeffnen\('s2'\)/.test(w.document.getElementById('globalSearchResults').innerHTML),'Suche findet: '+q);}
+ run(`document.getElementById('globalSearch').value='';globalSearchTippen()`);
+ // Gruppengespräch nicht mehr als Art im Einzelformular, aber als Link
+ run(`selectedStudentId='s1';showStudent('s1');dossierEntry('event')`);const ef=w.document.getElementById('dossierEditForm');
+ assert(![...ef.elements.type.options].some(o=>o.value==='Gruppengespräch'),'Art „Gruppengespräch“ nur noch über das Gruppenformular');assert(/Gruppengespräch/.test(ef.querySelector('.dossier-gruppe-hinweis').textContent));
+ run(`closeModal('dossierEditModal');closeModal('studentModal')`);
+ await waitSaved();console.log('0.21 sofort sichtbar ok');
+ }
+
  console.log('errors',errors);
  if(errors.length)process.exitCode=1;
  w.close();

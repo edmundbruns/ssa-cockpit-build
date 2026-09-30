@@ -1,4 +1,4 @@
-# SSA-Cockpit 0.20.0
+# SSA-Cockpit 0.21.0
 
 ## Alltag
 
@@ -21,6 +21,14 @@ Für Arbeit ohne einzelnes Kind (Konferenz, Elternabend, Projekt, Pausenpräsenz
 ## Statistik
 
 Unter **Auswertung** steht die interne Statistik. Oben zeigt „Datenqualität“, wo Angaben fehlen; **Jetzt nachtragen** führt dich Eintrag für Eintrag durch die Lücken. Darunter stehen fünf Kennzahlen, die Filter und für jedes Merkmal ein Balkendiagramm mit derselben Tabelle. In der **Kreuztabelle** stellst du zwei Merkmale gegeneinander, zum Beispiel Thema und Klassenstufe. Diese Seite zeigt exakte Zahlen und ist nur für dich und dein Team gedacht.
+
+## Familie und Bezugspersonen
+
+In der Akte steht unter den Knöpfen **Familie und Bezugspersonen**. Dort trägst du über **Familie / Sorgerecht bearbeiten** Sorgerechtsstand, Kontakt- und Auskunftslage und Haushalte ein, über **＋ Bezugsperson** Eltern, getrenntlebende Elternteile, Jugendamt oder Therapie – jeweils mit „Darf kontaktiert werden?“. Mit **Bearbeiten** änderst du eine Bezugsperson; die vorige Fassung bleibt im Verlauf. Eine Sperre erscheint sofort rot oben in der Akte.
+
+## Suchen
+
+Die Suche oben findet Kinder unabhängig von Reihenfolge und Komma („Ossevorth, Ben“, „Ben Ossevorth“) sowie über Klasse und Klassenleitung. Bei vielen Treffern hilft Nachname und Vorname.
 
 ## Schlanker seit 0.20
 
