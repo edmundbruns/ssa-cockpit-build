@@ -447,6 +447,7 @@ function statNachtragZeigen(){
  else{const s=data.students.find(y=>y.id===x.sid);inhalt=`<p class="subtle" style="margin-top:0">Schuljahr ${DE(x.schoolYear)} · erster Kontakt am ${DE(fmt(x.date))}</p><div class="notice"><strong>${DE(s?s.first+' '+s.last+' · '+(s.className||''):'Kind')}</strong></div>${chipsHtml('zugangsweg','zugangsweg',{datum:x.date})}`;}
  wrap.innerHTML=`<div class="dialog"><form><div class="dialoghead"><h2>Nachtragen · ${statNachtragPos+1} von ${statNachtragListe.length}</h2><button type="button" class="close" data-ende>×</button></div><div class="dialogbody kein-querscroll">${inhalt}</div><div class="dialogfoot"><button type="button" class="btn" data-ende>Beenden</button><button type="button" class="btn" data-weiter>Überspringen</button><button type="submit" class="btn primary">Speichern und weiter</button></div></form></div>`;
  document.body.appendChild(wrap);
+ if(x.typ==='eintrag'){const je=data.journal.find(j=>j.id===x.entryId),fm=wrap.querySelector('form');if(je&&fm){fm.dataset.vorschlagText=(je.title||'')+' '+(je.content||'');themenHervorheben(fm);}}
  wrap.querySelectorAll('[data-ende]').forEach(b=>b.onclick=()=>{wrap.remove();renderStatistikNeu();});
  wrap.querySelector('[data-weiter]').onclick=()=>{statNachtragPos++;statNachtragZeigen();};
  wrap.querySelector('form').onsubmit=ev=>{ev.preventDefault();const fd=new FormData(ev.target);
@@ -535,6 +536,50 @@ function berichtWeitergeben(format){
  else printDocument(b.titel+' '+b.zeitraum,berichtDokumentHtml(b));
  renderStatistikNeu();
 }
+
+/* ================================================================
+   9. ALLTAG (0.18): Wer arbeitet gerade? · Sperrhinweis in der Akte ·
+      Themenvorschlag per Stichwort · Zusatzzeile pro Kind im Gruppengespräch
+   ================================================================ */
+function werArbeitetFragen(immer=false){
+ const team=Dossier.ssaTeam(data);if(team.length<2&&!immer)return;
+ document.getElementById('werArbeitetModal')?.remove();
+ const aktiv=aktivePerson(),wrap=document.createElement('div');wrap.className='modal open';wrap.id='werArbeitetModal';wrap.style.zIndex='60';
+ wrap.innerHTML=`<div class="dialog wer-arbeitet" role="dialog" aria-modal="true" aria-labelledby="werArbeitetTitel"><div class="dialoghead"><h2 id="werArbeitetTitel">Wer arbeitet gerade?</h2><button type="button" class="close" data-schliessen aria-label="Schließen">×</button></div><div class="dialogbody"><p class="subtle">Neue Einträge werden auf diese Person gebucht. Wechseln kannst du jederzeit unten links in der Navigation.</p><div class="wer-arbeitet-liste">${team.map(n=>`<button type="button" class="btn ${n===aktiv?'primary':''}" data-person="${DE(n)}">${DE(n)}${n===aktiv?' <small>(bisher)</small>':''}</button>`).join('')}</div></div></div>`;
+ document.body.appendChild(wrap);
+ wrap.querySelectorAll('[data-person]').forEach(b=>b.onclick=()=>{wrap.remove();if(b.dataset.person!==aktivePerson())aktivePersonSetzen(b.dataset.person);else toast('Weiter als '+b.dataset.person+'.');if(typeof renderTeamKarte==='function')renderTeamKarte();});
+ wrap.querySelector('[data-schliessen]').onclick=()=>wrap.remove();
+ wrap.querySelector('[data-person].primary, [data-person]')?.focus();
+}
+function akteSperreZeigen(sid){
+ const box=document.getElementById('akteSperre');if(!box)return;
+ const h=sid?Dossier.sperrHinweise(data,sid):[];
+ box.hidden=!h.length;box.className='akte-sperre'+(h.some(x=>x.stufe==='rot')?' rot':' gelb');
+ box.innerHTML=h.length?`<strong>${h.some(x=>x.stufe==='rot')?'⛔ Achtung':'⚠ Bitte beachten'}</strong><ul>${h.map(x=>`<li class="${x.stufe}">${DE(x.text)} <small>(${DE(x.quelle)})</small></li>`).join('')}</ul>`:'';
+}
+// Themen-Chips hervorheben, wenn der Text passende Stichworte enthält. Nur Vorschlag, nie automatisch angekreuzt.
+let themenTimer=null;
+function themenHervorheben(form){
+ if(!form||!form.querySelector('input[name=thema]'))return;
+ const text=[form.dataset.vorschlagText||'',...[...form.querySelectorAll('textarea, input[type=text], input:not([type])')].filter(x=>x.name!=='thema'&&x.type!=='search').map(x=>x.value)].join(' ');
+ const vor=new Map(Dossier.themenVorschlag(text).map(v=>[v.id,v.treffer]));let n=0;
+ form.querySelectorAll('input[name=thema]').forEach(cb=>{const l=cb.closest('label');if(!l)return;const an=vor.has(cb.value)&&!cb.checked;l.classList.toggle('chip-vorschlag',an);if(an){n++;l.title='Vorschlag wegen „'+vor.get(cb.value).join('“, „')+'“ – zum Übernehmen anklicken';}else if(l.title.startsWith('Vorschlag wegen'))l.title='';});
+ const box=form.querySelector('.chip-merkmal[data-merkmal="thema"]');if(!box)return;
+ let hinweis=box.querySelector('.chip-vorschlag-hinweis');
+ if(n&&!hinweis){hinweis=document.createElement('div');hinweis.className='chip-vorschlag-hinweis';hinweis.textContent='Hervorgehoben: passt zu deinem Text. Nur ein Vorschlag – übernehmen per Klick.';box.appendChild(hinweis);}
+ if(!n&&hinweis)hinweis.remove();
+}
+document.addEventListener('input',e=>{const f=e.target?.closest?.('form');if(!f||!f.querySelector('input[name=thema]'))return;clearTimeout(themenTimer);themenTimer=setTimeout(()=>themenHervorheben(f),200);});
+document.addEventListener('change',e=>{if(e.target?.name==='thema')themenHervorheben(e.target.closest('form'));});
+// Gruppengespräch: optionale Zusatzzeile pro ausgewähltem Kind
+function gtKindNotizenFuellen(){
+ const box=document.getElementById('gtKindNotizen');if(!box)return;
+ const alt=Object.fromEntries([...box.querySelectorAll('input[data-sid]')].map(i=>[i.dataset.sid,i.value]));
+ const ids=[...document.querySelectorAll('#groupParticipants input:checked')].map(x=>x.value);
+ box.hidden=ids.length<2;
+ box.innerHTML=ids.length<2?'':`<details ${Object.values(alt).some(Boolean)?'open':''}><summary>Zusatz pro Kind (freiwillig)</summary><p class="subtle">Nur, wenn für ein Kind etwas Eigenes festzuhalten ist, z. B. „heute sehr zurückhaltend“. Erscheint nur in der Chronik dieses Kindes.</p>${ids.map(sid=>{const st=data.students.find(x=>x.id===sid);return `<label class="gt-kindnotiz"><span>${DE(st?st.first+' '+st.last:sid)}</span><input class="field" name="kindNotiz" data-sid="${DE(sid)}" value="${DE(alt[sid]||'')}" maxlength="300" placeholder="optional"></label>`;}).join('')}</details>`;
+}
+function gtKindNotizenLesen(form,participantIds){const out={};form.querySelectorAll('input[name=kindNotiz][data-sid]').forEach(i=>{const v=i.value.trim();if(v&&participantIds.includes(i.dataset.sid))out[i.dataset.sid]=v;});return out;}
 
 /* ================================================================
    Start: Schnellnotiz einbauen, sobald die Oberfläche steht

@@ -94,12 +94,12 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  // Gruppengespräch mit individuellem Hinweis (war in 0.12.1 blockiert)
  run(`openGroupTalk()`);
  const g=w.document.getElementById('groupTalkForm');g.querySelectorAll('input[name=participantIds]').forEach(o=>o.checked=['s1','s2'].includes(o.value));
- g.elements.note.value='Konfliktklärung zwischen Anna und Bert nach dem Sportunterricht.';g.elements.individualNotes.value='Anna möchte nächste Woche nachfassen.';
+ g.elements.note.value='Konfliktklärung zwischen Anna und Bert nach dem Sportunterricht.';run('groupTeilnehmerZaehlen()');const gkn=g.querySelector('input[name=kindNotiz][data-sid=s1]');assert(gkn,'Zusatzzeile pro Kind');gkn.value='Anna möchte nächste Woche nachfassen.';
  if(g.elements.type&&!g.elements.type.value)g.elements.type.value=g.elements.type.options[1]?.value||'Konfliktklärung';
  assert.equal(g.elements.date.value,run('today()'),'Ereignisdatum ist mit heute vorbelegt');
  g.requestSubmit();await sleep(30);assert(!isOpen('groupTalkModal'),'Gruppengespräch schließt');await waitSaved();
  const group=saved().journal.find(e=>e.participantIds.length===2&&/Konfliktklärung zwischen/.test(e.content));
- assert(group,'Gruppengespräch gespeichert');assert.match(group.content,/Anna möchte nächste Woche nachfassen/);
+ assert(group,'Gruppengespräch gespeichert');assert.equal(group.individualNotes.s1,'Anna möchte nächste Woche nachfassen.','Zusatz nur für Anna');assert(!group.individualNotes.s2&&!/nachfassen/.test(group.content),'nicht im gemeinsamen Text');
  run(`closeModal('studentModal')`);
  // Kurzkontakt
  run(`openQuickContact('s3')`);const q=w.document.getElementById('quickContactForm');q.querySelector('input[name=thema]').checked=true;q.requestSubmit();await sleep(30);
@@ -386,6 +386,36 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  for(const verboten of ['Bruns','Thien','Geiger',run(`data.students.find(s=>s.id==='s1').last`)])assert(!csv.includes(verboten),'nicht im Bericht: '+verboten);
  assert(/Schulleitung/.test(w.document.getElementById('statWeitergaben').textContent),'Protokoll „Weitergaben“');
  await waitSaved();assert(saved().weitergaben.length===vorher+1,'Protokoll gespeichert');console.log('0.17 team und weitergabe ok');
+ }
+
+ // 15. Version 0.18: Wer arbeitet gerade? · Sperrhinweis · Themenvorschlag · Zusatz pro Kind
+ {
+ run(`document.querySelectorAll('.modal.open').forEach(m=>{if(m.id&&!['berichtModal','nachtragModal','werArbeitetModal'].includes(m.id))closeModal(m.id);else m.remove()})`);
+ run('werArbeitetFragen()');let wm=w.document.getElementById('werArbeitetModal');assert(wm,'Frage „Wer arbeitet gerade?“');
+ assert.equal(wm.querySelectorAll('[data-person]').length,3,'drei Personen zur Wahl');
+ [...wm.querySelectorAll('[data-person]')].find(b=>b.dataset.person==='Thien, Sabine').click();await sleep(20);
+ assert.equal(run('data.settings.activeUser'),'Thien, Sabine');assert(!w.document.getElementById('werArbeitetModal'));
+ assert.match(w.document.getElementById('aktivePersonAnzeige').textContent,/Thien, Sabine/,'aktive Person unten links sichtbar');
+ run(`aktivePersonSetzen('Bruns, Edmund')`);
+ // Sperrhinweis
+ run(`data.relatedPersons.push({id:'rpX',studentId:'s2',name:'Herr Fantasie',role:'Getrenntlebender Elternteil',mayContact:'Nein'});selectedStudentId='s2';showStudent('s2')`);
+ const sp=w.document.getElementById('akteSperre');assert(!sp.hidden&&sp.classList.contains('rot'),'roter Hinweis im Kopf der Akte');assert.match(sp.textContent,/Keine Auskunft \/ kein Kontakt: Herr Fantasie/);
+ run(`closeModal('studentModal');selectedStudentId='s3';showStudent('s3')`);assert(w.document.getElementById('akteSperre').hidden,'ohne Sperre kein Hinweis');run(`closeModal('studentModal')`);
+ // Themenvorschlag im Gesprächsformular
+ run(`selectedStudentId='s1';showStudent('s1');dossierEntry('new')`);const ef=w.document.getElementById('dossierEditForm');
+ ef.elements.content.value='Anna hatte Streit im Klassenchat.';ef.elements.content.dispatchEvent(new w.Event('input',{bubbles:true}));await sleep(260);
+ const vor=[...ef.querySelectorAll('label.chip-vorschlag input[name=thema]')].map(x=>x.value);
+ assert(vor.includes('konflikt_mobbing')&&vor.includes('medien'),'passende Themen hervorgehoben');
+ assert(![...ef.querySelectorAll('input[name=thema]')].some(x=>x.checked),'nichts automatisch angekreuzt');
+ const k=ef.querySelector('input[name=thema][value=konflikt_mobbing]');k.checked=true;k.dispatchEvent(new w.Event('change',{bubbles:true}));
+ assert(!k.closest('label').classList.contains('chip-vorschlag'),'übernommen: Hervorhebung weg');
+ run(`closeModal('dossierEditModal');closeModal('studentModal')`);
+ // Zusatz pro Kind erscheint nur in der Chronik des betreffenden Kindes
+ run(`selectedStudentId='s1';showStudent('s1')`);
+ const gid=run(`data.journal.find(e=>e.type==='Gruppengespräch'&&e.individualNotes&&e.individualNotes.s1).id`);
+ assert(/Zu Anna/.test(w.document.getElementById('ds-entry:'+gid)?.textContent||''),'Zusatz in Annas Chronik');run(`closeModal('studentModal');selectedStudentId='s2';showStudent('s2')`);
+ assert(!/nachfassen/.test(w.document.getElementById('ds-entry:'+gid)?.textContent||''),'nicht bei Bert');run(`closeModal('studentModal')`);
+ await waitSaved();console.log('0.18 alltag ok');
  }
 
  console.log('errors',errors);

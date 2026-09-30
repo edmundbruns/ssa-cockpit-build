@@ -651,6 +651,48 @@ function journalStats(state,year='',className='all'){
  return state.journal.filter(e=>!e.generalInfo&&!e.planned&&e.type!=='zusätzliche Information'&&e.type!=='Kurznotiz'&&e.type!=='Zusage erledigt'&&(!year||e.schoolYear===year)&& (className==='all'||e.participantIds.some(sid=>{const cl=recordContext(state,e,sid).className;return className.startsWith('jg:')?cl.match(/^\d+/)?.[0]===className.slice(3):cl===className}))).map(e=>({...e,duration:e.duration*Math.max(1,(e.facilitators||[]).length)}));
 }
 function restore(raw,sanitize){const state=sanitize(raw);for(const [i,e]of (state.journal||[]).entries()){const original=raw.journal?.[i];if(!original)continue;for(const key of ['content','childView','otherView','observation','assessment','agreement','goal','result','source','people'])if(typeof original[key]==='string')e[key]=original[key];if(original.individualNotes&&typeof original.individualNotes==='object')for(const key of Object.keys(e.individualNotes||{}))if(typeof original.individualNotes[key]==='string')e.individualNotes[key]=original.individualNotes[key];}return state;}
+/* Themenvorschlag per Stichwort (0.18): nur Vorschlag, nie automatisch angekreuzt.
+   Stichworte passen am Wortanfang („streit“ trifft „Streitigkeiten“, nicht „bestreiten“). */
+const THEMEN_STICHWORTE={
+ konflikt_mobbing:['streit','gestritten','mobb','gemobbt','ausgegrenzt','ausgelacht','gehänselt','beleidig','prügel','schlägerei','konflikt','geärgert','ärgern','bedroh','lästern','gelästert'],
+ familie:['mutter','vater','mama','papa','eltern','trennung','scheidung','zuhause','zu hause','geschwister','bruder','schwester','familie','oma','opa','pflegefamilie','stiefvater','stiefmutter'],
+ fehlzeiten_schulangst:['fehlt','gefehlt','fehlstunden','fehlzeit','fehltag','krank','krankgemeldet','schwänz','geschwänzt','schulangst','angst vor der schule','nicht zur schule','verspät','unentschuldigt'],
+ emotionen_krise:['traurig','weint','geweint','weinen','wütend','wut','panik','verzweifelt','überfordert','krise','nicht mehr leben','ritz','suizid','hoffnungslos','einsam'],
+ lernen_motivation:['noten','schlechte note','lernen','hausaufgaben','motivation','keine lust','klassenarbeit','versetzung','sitzenbleib','nachhilfe','konzentration'],
+ verhalten_unterricht:['stört','gestört','störung','unterrichtsstörung','trainingsraum','provozier','respektlos','verweis','ordnungsmaßnahme','regelverstoß'],
+ medien:['handy','smartphone','instagram','tiktok','whatsapp','snapchat','klassenchat','gruppenchat','zocken','gaming','social media','fotos verschickt','videos','internet'],
+ sucht:['alkohol','betrunken','kiffen','gekifft','cannabis','drogen','vape','vapen','e-zigarette','rauchen','raucht','zigarette'],
+ gesundheit:['arzt','ärztin','schlaf','müde','kopfschmerz','bauchschmerz','isst nicht','medikament','therapie','klinik','verletzt'],
+ berufsorientierung:['praktikum','bewerbung','beruf','ausbildung','berufsberatung','schulabschluss','agentur für arbeit'],
+ kinderschutz:['kindeswohl','blaue flecken','geschlagen worden','schlägt mich','schlägt ihn','schlägt sie','gewalt zu hause','gewalt zuhause','missbrauch','übergriff','vernachlässig','hat angst nach hause']
+};
+function themenVorschlag(text){
+ const t=' '+String(text||'').toLocaleLowerCase('de-DE').replace(/\s+/g,' ');
+ const out=[];for(const [id,woerter] of Object.entries(THEMEN_STICHWORTE)){
+  const treffer=woerter.filter(w=>{const i=t.indexOf(w);if(i<0)return false;let pos=i;while(pos>=0){if(!/[a-zäöüß]/.test(t[pos-1]||' '))return true;pos=t.indexOf(w,pos+1);}return false;});
+  if(treffer.length)out.push({id,treffer});
+ }
+ return out;
+}
+/* Sperr- und Vorsichtshinweise für den Kopf der Akte (0.18) */
+function sperrHinweise(state,sid){
+ const s=(state.students||[]).find(x=>x.id===sid);if(!s)return [];
+ const f=s.family||{},out=[];
+ const kp=String(f.contactPermission||'');
+ if(kp==='Kontakt untersagt')out.push({stufe:'rot',text:'Kontakt untersagt',quelle:'Familie: Kontakt- und Auskunftslage'});
+ else if(kp==='Kontakt eingeschränkt')out.push({stufe:'rot',text:'Kontakt eingeschränkt',quelle:'Familie: Kontakt- und Auskunftslage'});
+ else if(kp==='Nur nach Rücksprache')out.push({stufe:'gelb',text:'Kontakt und Auskunft nur nach Rücksprache',quelle:'Familie: Kontakt- und Auskunftslage'});
+ else if(kp==='Ungeklärt')out.push({stufe:'gelb',text:'Kontakt- und Auskunftslage ungeklärt',quelle:'Familie'});
+ if(String(f.custodyStatus||'')==='Ungeklärt')out.push({stufe:'gelb',text:'Sorgerecht ungeklärt',quelle:'Familie: Sorgerechtsstand'});
+ for(const r of state.relatedPersons||[]){
+  if(r.studentId!==sid||r.deletedAt||r.archived)continue;
+  const wer=[r.name,r.role].filter(Boolean).join(' · ');
+  if(r.mayContact==='Nein')out.push({stufe:'rot',text:'Keine Auskunft / kein Kontakt: '+wer,quelle:'Bezugsperson'});
+  else if(r.mayContact==='Ja, eingeschränkt')out.push({stufe:'gelb',text:'Nur eingeschränkt Kontakt: '+wer,quelle:'Bezugsperson'});
+  if(r.custodyUnclear==='Ja')out.push({stufe:'gelb',text:'Sorgerecht ungeklärt: '+wer,quelle:'Bezugsperson'});
+ }
+ return out.sort((a,b)=>(a.stufe==='rot'?0:1)-(b.stufe==='rot'?0:1));
+}
 /* ================================================================
    WEITERGABE (0.17): Standardberichte mit Anonymisierung
    Nur diese Berichte verlassen das Cockpit. Kleinste Einheiten: Halbjahr und Klassenstufe.
@@ -792,5 +834,5 @@ function weitergabeProtokollieren(state,{bericht,zeitraum,empfaenger,zweck='',fo
  const w={id:uid('weitergabe'),am:new Date().toISOString(),bericht:String(bericht||''),zeitraum:String(zeitraum||''),empfaenger:e,zweck:String(zweck||'').trim(),format,von:aktiveMitarbeitende(state)};
  state.weitergaben.push(w);return w;
 }
-root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,safetyHint,KATEGORIEN_VERSIONEN,kategorien,katListe,katLabel,stufeZweig,statErfassen,statMerkmale,zugangswegFuer,zugangswegSetzen,addTaetigkeit,ereignisse,zugangKarte,filterEreignisse,kennzahlen,aufschluesselung,kreuztabelle,datenqualitaet,statNachtragen,werteVon,NICHT_ERFASST,addStudent,similarStudents,GESCHUETZTE_THEMEN,BERICHTE,wertLabel,anonymMatrix,kennzahlAnzeige,standardbericht,berichtCsv,weitergabeProtokollieren,SSA_TEAM_STANDARD,ssaTeam,mitarbeitendKanonisch,mitarbeitendSchreibweisen,mitarbeitendZuordnen,aktiveMitarbeitende,zusageErledigtEintragen,SAFETY_NOTICE};
+root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,safetyHint,KATEGORIEN_VERSIONEN,kategorien,katListe,katLabel,stufeZweig,statErfassen,statMerkmale,zugangswegFuer,zugangswegSetzen,addTaetigkeit,ereignisse,zugangKarte,filterEreignisse,kennzahlen,aufschluesselung,kreuztabelle,datenqualitaet,statNachtragen,werteVon,NICHT_ERFASST,addStudent,similarStudents,THEMEN_STICHWORTE,themenVorschlag,sperrHinweise,GESCHUETZTE_THEMEN,BERICHTE,wertLabel,anonymMatrix,kennzahlAnzeige,standardbericht,berichtCsv,weitergabeProtokollieren,SSA_TEAM_STANDARD,ssaTeam,mitarbeitendKanonisch,mitarbeitendSchreibweisen,mitarbeitendZuordnen,aktiveMitarbeitende,zusageErledigtEintragen,SAFETY_NOTICE};
 })(globalThis);

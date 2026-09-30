@@ -1,4 +1,4 @@
-# SSA-Cockpit 0.17.0
+# SSA-Cockpit 0.18.0
 
 ## Alltag
 
@@ -21,6 +21,22 @@ Für Arbeit ohne einzelnes Kind (Konferenz, Elternabend, Projekt, Pausenpräsenz
 ## Statistik
 
 Unter **Auswertung** steht die interne Statistik. Oben zeigt „Datenqualität“, wo Angaben fehlen; **Jetzt nachtragen** führt dich Eintrag für Eintrag durch die Lücken. Darunter stehen fünf Kennzahlen, die Filter und für jedes Merkmal ein Balkendiagramm mit derselben Tabelle. In der **Kreuztabelle** stellst du zwei Merkmale gegeneinander, zum Beispiel Thema und Klassenstufe. Diese Seite zeigt exakte Zahlen und ist nur für dich und dein Team gedacht.
+
+## Wer arbeitet gerade?
+
+Nach dem Entsperren fragt das Cockpit, wer am Rechner sitzt. Neue Einträge werden auf diese Person gebucht. Unten links in der Navigation steht die aktive Person; ein Klick darauf wechselt sie.
+
+## Sperrhinweis in der Akte
+
+Ist bei einer Bezugsperson „Darf kontaktiert werden?“ auf **Nein – keine Auskunft, kein Kontakt** gesetzt oder in den Familienangaben „Kontakt untersagt“ oder „Kontakt eingeschränkt“ eingetragen, steht oben in der Akte ein roter Hinweis. Er bleibt beim Scrollen sichtbar. Gelb erscheinen Hinweise wie „Sorgerecht ungeklärt“ oder „nur nach Rücksprache“.
+
+## Themenvorschlag
+
+Beim Schreiben eines Gesprächs oder Kurzkontakts hebt das Cockpit Themen hervor, die zu Wörtern im Text passen (zum Beispiel „Streit“ → Konflikt / Mobbing, „fehlt“ → Fehlzeiten). Angekreuzt wird nichts automatisch; ein Klick übernimmt den Vorschlag.
+
+## Zusatz pro Kind im Gruppengespräch
+
+Im Gruppengespräch gibt es unter dem gemeinsamen Text „Zusatz pro Kind (freiwillig)“. Eine Zeile wie „heute sehr zurückhaltend“ erscheint nur in der Chronik dieses Kindes. Der Eintrag selbst bleibt einer: Er zählt als ein Kontakt mit so vielen erreichten Kindern, wie teilgenommen haben.
 
 ## Berichte zur Weitergabe
 
