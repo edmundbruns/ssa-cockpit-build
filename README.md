@@ -1,6 +1,6 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Version 0.19.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
+Version 0.20.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
 
 Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
@@ -11,7 +11,7 @@ Unter „Gesprächsbogen drucken“ stehen vier fachlich unterschiedliche DIN-A4
 
 ## Aktueller Arbeitsablauf
 
-Das Handbuch steht in `HANDBUCH-0.19.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
+Das Handbuch steht in `HANDBUCH-0.20.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
 
 
 ## Neu in 0.12.2: Dialoge und Speichern
@@ -142,3 +142,14 @@ Abnahme (automatisch geprüft):
 - **Fehler behoben:** Die Prüfung „Abschlussjahrgang“ blockierte bisher auch die reguläre Versetzung 9 → 10. Sie greift jetzt nur bei Kindern, die schon in Klasse 10 sind, oder bei einer offenen Abschluss-Kennzeichnung.
 - **Zugangsweg:** zusätzlich „PM“ (pädagogische Mitarbeiter:in) und „SSA“ (Schulsozialarbeit ist selbst auf das Kind zugegangen).
 - Tests: `tests/planung.test.mjs` und Abschnitt 16 in `tests/v0122-dom.cjs`.
+
+## Neu in 0.20.0 – schlanker (Schritt 1 von 3)
+
+- Navigation: Hauptpunkte Heute, Schüler:innen, Fallarbeit (Liste und Board bleiben), Aufgaben und Zusagen, Auswertung; „Weitere Bereiche“ startet zugeklappt.
+- Akte: fünf Knöpfe sichtbar, Rest unter „Mehr …“; „Ideen aus diesem Eintrag“ zugeklappt; Fachverfahren-Kasten an der Kachel entfällt, Überthema als Schild.
+- Gesprächsformular: selten genutzte Felder nur noch bei vorhandenen Werten (keine Datenänderung); Titel unter „Mehr erfassen“; „Sachlich formulieren“ als Link.
+- „Wiedervorlage anlegen“ → schlanker Dialog „Aufgabe anlegen“ (Aufgabe, Termin, Zuständig, Fallbezug). Bestehende Wiedervorlagen sind unverändert Aufgaben.
+- Fachverfahren → „Leitfäden“ zum Nachlesen; Start-Knöpfe ausgeblendet, laufende Abläufe bleiben sichtbar.
+- Einstellungen: Spracherkennung und automatische Fallanlage unter „Erweitert“.
+- Schüler-Anfragen: Die Seite ist nicht mehr erreichbar; vorhandene Anfragen bleiben gespeichert.
+- Kleinere Korrekturen: Zuständig im Aufgabendialog ist mit der aktiven Person vorbelegt; Leitfäden-Raster bricht bei schmalem Fenster um.
