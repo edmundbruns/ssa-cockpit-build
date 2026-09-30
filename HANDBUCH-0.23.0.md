@@ -1,4 +1,4 @@
-# SSA-Cockpit 0.22.0
+# SSA-Cockpit 0.23.0
 
 ## Alltag
 
@@ -50,7 +50,7 @@ In der Akte steht neben „Gespräch vorbereiten“ der Knopf **Gespräch planen
 
 ## Gesprächsbogen zum Ausdrucken
 
-In der Akte unter **Mehr …** → **Gesprächsbogen drucken**. Dort wählst du die Gesprächsart (vier Varianten), optional ein Ausgangsereignis und Beteiligte. Über denselben Dialog lässt sich auch der unveränderte Originalbogen als PDF öffnen.
+In der Akte unter **Mehr …** → **Gesprächsbogen drucken**. Du wählst eine der vier Gesprächsarten (Schülergespräch, Elterngespräch, Konfliktklärung, Helferrunde), auf Wunsch ein Ausgangsereignis und die Beteiligten. Der Bogen folgt dem Formular „Gespräch eintragen“: Abschnitt 1 ist der Haupttext, 2 bis 4 gehören unter „Mehr erfassen“ (Sicht des Kindes, Fachliche Einschätzung, Vereinbarungen), 5 wird zur Zusage oder zum geplanten Gespräch. Unten stehen Ankreuzfelder für die Statistik mit genau den Kategorien aus dem Cockpit. Über denselben Dialog lässt sich auch der unveränderte Originalbogen als PDF öffnen.
 
 ## Schuljahreswechsel für ganze Klassen
 

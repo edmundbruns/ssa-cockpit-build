@@ -1,4 +1,10 @@
 /* Vier Druckvarianten des bereitgestellten DIN-A4-Gesprächsprotokolls. */
+// 0.23: Ankreuzfelder mit denselben Kategorien wie im Formular – ändern sich die Kategorien, ändert sich der Bogen mit
+function gespraechsbogenStatistik(datum){
+ const k=m=>Dossier.katListe(m,datum||today()).map(x=>x.label);
+ const art=Dossier.katListe('kontaktart',datum||today()).filter(x=>['beratungsgespraech','krisengespraech'].includes(x.id)).map(x=>x.label);
+ return [['Art',art],['Thema',k('thema')],['Wer war dabei?',k('beteiligte')],['Dauer (Min.)',['15','30','45','60','90']],['Ergebnis',k('ergebnis')],['Zugangsweg (erster Kontakt im Schuljahr)',k('zugangsweg')]];
+}
 function dossierPrintTemplate(){
  const student=data.students.find(s=>s.id===selectedStudentId);
  if(!student)return;
@@ -11,7 +17,7 @@ function dossierPrintTemplate(){
  <p class="full">Vier unterschiedliche Gesprächsbögen nach deiner DIN-A4-Vorlage. Nur bewusst ausgewählte Inhalte werden übernommen.</p>
  <a class="btn full" href="gespraechsprotokoll-original.pdf" target="_blank" rel="noopener">Deinen unveränderten Originalbogen (PDF) öffnen / drucken</a></div>`,async fd=>{
   const kind=fd.get('kind'),incident=events.find(e=>e.key===fd.get('incident'));
-  const body=Gespraechsbogen.build({kind,student:student.first+' '+student.last,className:student.className,schoolYear:student.schoolYear,date:fmt(fd.get('date')),people:fd.get('people')||incident?.people||'',subject:fd.get('subject')||incident?.title||'',incident:incident&&{date:fmt(incident.date),kind:incident.eventKind,content:incident.content},showFacts:fd.has('showFacts')});
+  const body=Gespraechsbogen.build({kind,student:student.first+' '+student.last,className:student.className,schoolYear:student.schoolYear,date:fmt(fd.get('date')),people:fd.get('people')||incident?.people||'',subject:fd.get('subject')||incident?.title||'',incident:incident&&{date:fmt(incident.date),kind:incident.eventKind,content:incident.content},showFacts:fd.has('showFacts'),author:Dossier.aktiveMitarbeitende(data),statistik:gespraechsbogenStatistik(fd.get('date'))});
   closeModal('dossierEditModal');printDocument(kind+' · Gesprächsbogen',body);
  });
  document.querySelector('#dossierEditModal [type=submit]').textContent='Bogen drucken';
