@@ -443,6 +443,28 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  await waitSaved();console.log('0.19 planen und schuljahr ok');
  }
 
+ // 17. Version 0.20: schlanker – Navigation, Akte, Gesprächsformular, Aufgabe statt Wiedervorlage, Leitfäden, Erweitert
+ {
+ run(`document.querySelectorAll('.modal.open').forEach(m=>m.id?closeModal(m.id):m.remove())`);
+ const haupt=[...w.document.querySelectorAll('.nav > button .label')].map(x=>x.textContent);
+ assert.deepEqual(haupt,['Heute','Schüler:innen','Fallarbeit','Aufgaben und Zusagen','Auswertung'],'Hauptnavigation');
+ assert(w.document.querySelector('.navgroup').classList.contains('collapsed'),'Weitere Bereiche zugeklappt');
+ assert(/Leitfäden/.test(w.document.querySelector('.navgroup').textContent)&&!/Fachverfahren/.test(w.document.querySelector('.navgroup').textContent));
+ run(`selectedStudentId='s1';showStudent('s1')`);
+ const leiste=w.document.querySelector('#studentDetailBody .dossier-toolbar');const sichtbar=[...leiste.children].filter(x=>x.tagName==='BUTTON').map(b=>b.textContent.trim());
+ assert.equal(sichtbar.length,5,'fünf Knöpfe in der Akte: '+sichtbar.join(', '));assert(/Gespräch vorbereiten/.test(leiste.querySelector('.dossier-more-menu').textContent),'Rest unter „Mehr …“');
+ run(`dossierEntry('event')`);const ef=w.document.getElementById('dossierEditForm');
+ for(const weg of ['otherView','observation','goal','result','people','facilitators','referenceDate','since','planned','channel'])assert(!ef.elements[weg],'Feld entfällt: '+weg);
+ for(const bleibt of ['agreement','childView','assessment','workflowId','responsible','title'])assert(ef.elements[bleibt],'Feld bleibt: '+bleibt);
+ run(`closeModal('dossierEditModal');closeModal('studentModal');go('tasks');openModal('taskModal')`);
+ assert.match(w.document.querySelector('#taskModal h2').textContent,/Aufgabe anlegen/);const tf=w.document.getElementById('taskForm');
+ assert(!tf.elements.priority&&!tf.elements.taskType,'schlanke Aufgabe');tf.elements.title.value='Rückruf Klassenleitung 7a';tf.elements.due.value=run('today()');const na=run('data.tasks.length');tf.requestSubmit();await sleep(20);
+ assert.equal(run('data.tasks.length'),na+1);assert.equal(run('data.tasks.at(-1).status'),'offen');
+ run(`go('workflows')`);assert.match(w.document.querySelector('#workflows h2').textContent,/Leitfäden/);
+ run(`go('settings')`);assert(w.document.querySelector('#settings details.erweitert'),'Einstellungen: Erweitert');
+ await waitSaved();console.log('0.20 schlank ok');
+ }
+
  console.log('errors',errors);
  if(errors.length)process.exitCode=1;
  w.close();

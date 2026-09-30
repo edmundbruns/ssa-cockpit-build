@@ -1,4 +1,4 @@
-# SSA-Cockpit 0.19.0
+# SSA-Cockpit 0.20.0
 
 ## Alltag
 
@@ -21,6 +21,16 @@ Für Arbeit ohne einzelnes Kind (Konferenz, Elternabend, Projekt, Pausenpräsenz
 ## Statistik
 
 Unter **Auswertung** steht die interne Statistik. Oben zeigt „Datenqualität“, wo Angaben fehlen; **Jetzt nachtragen** führt dich Eintrag für Eintrag durch die Lücken. Darunter stehen fünf Kennzahlen, die Filter und für jedes Merkmal ein Balkendiagramm mit derselben Tabelle. In der **Kreuztabelle** stellst du zwei Merkmale gegeneinander, zum Beispiel Thema und Klassenstufe. Diese Seite zeigt exakte Zahlen und ist nur für dich und dein Team gedacht.
+
+## Schlanker seit 0.20
+
+Links stehen nur noch **Heute, Schüler:innen, Fallarbeit, Aufgaben und Zusagen** und **Auswertung**. Klassen, Personen, Trainingsraum, Zusammenarbeit mit der Schule, Projekte, Gruppen & Netzwerk, Leitfäden und Einstellungen findest du unter **Weitere Bereiche** (ein Klick klappt auf).
+
+In der Akte stehen fünf Knöpfe: Gespräch eintragen, Gespräch planen, Kurzkontakt, Zusage merken, Ampel. Gespräch vorbereiten, Dokumente, Trainingsraum, Drucken, Gesprächsbogen, Übergabeblatt und KI-Arbeitsprompt stehen unter **Mehr …**. „Ideen aus diesem Eintrag“ sind an jeder Kachel zugeklappt; das Überthema steht als kleines Schild im Kopf der Kachel.
+
+Im Gesprächsformular enthält **Mehr erfassen** nur noch: Kurzer Titel, Dokumentiert von, Uhrzeit, Vereinbarungen, Sicht des Kindes, Fachliche Einschätzung, Überthema und Dokumente. Felder aus älteren Einträgen (etwa Eigene Beobachtung oder Ziele) erscheinen beim Bearbeiten weiter, wenn sie ausgefüllt sind.
+
+**Leitfäden** (früher Fachverfahren) sind zum Nachlesen da. Laufende Abläufe aus früheren Versionen bleiben sichtbar, bis sie abgeschlossen sind; neue werden nicht mehr gestartet.
 
 ## Gespräch planen
 
