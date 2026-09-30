@@ -493,6 +493,24 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  await waitSaved();console.log('0.21 sofort sichtbar ok');
  }
 
+ // 19. Version 0.22: Trainingsraum mit Schnellauswahl, ein Anlass-Feld
+ {
+ run(`document.querySelectorAll('.modal.open').forEach(m=>m.id?closeModal(m.id):m.remove());selectedStudentId='s1';showStudent('s1');openTrainingRoom('s1')`);
+ const tf=w.document.getElementById('trainingRoomForm');
+ assert(!/Sachliche Situationsbeschreibung/.test(tf.textContent),'keine doppelte Situationsbeschreibung mehr');
+ tf.elements.referringTeacher.value='Frau Muster';
+ const klick=(name,wert)=>{const x=tf.querySelector(`input[name="${name}"][value="${wert}"]`);x.checked=true;x.dispatchEvent(new w.Event('change',{bubbles:true}));};
+ klick('reason','Konflikt');klick('lesson','3. Stunde');klick('duration','30');
+ klick('tr_reflection','Schüler:in erkennt eigene Anteile teilweise.');klick('tr_agreement','Entschuldigung und klärendes Gespräch werden vereinbart.');klick('tr_agreement','Ein Elterngespräch wird vereinbart.');
+ tf.elements.note.value='Streit in der Gruppenarbeit.';const n0=run('data.trainingRoom.length');tf.requestSubmit();await sleep(40);
+ assert.equal(run('data.trainingRoom.length'),n0+1,'gespeichert');const tr=run('data.trainingRoom.at(-1)');
+ assert.equal(tr.reason,'Konflikt');assert.equal(tr.lesson,'3. Stunde');assert.equal(tr.duration,30);assert.match(tr.agreement,/Entschuldigung.*Elterngespräch/);assert.match(tr.reflection,/Anteile teilweise/);
+ assert(!Object.keys(tr).some(k=>k.startsWith('tr_')),'keine Hilfsfelder gespeichert');
+ assert(/Streit in der Gruppenarbeit/.test(run(`data.journal.find(e=>e.id==='${tr.journalEntryId}').content`)),'Beschreibung in der Chronik');
+ assert([...w.document.querySelectorAll('#studentDetailBody [id^="ds-"]')].some(k=>/Trainingsraum/.test(k.textContent)&&/Konflikt/.test(k.textContent)),'sofort in der offenen Akte');
+ run(`closeModal('studentModal')`);await waitSaved();console.log('0.22 trainingsraum ok');
+ }
+
  console.log('errors',errors);
  if(errors.length)process.exitCode=1;
  w.close();
