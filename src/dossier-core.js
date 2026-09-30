@@ -58,7 +58,7 @@ function journalCase(state,sid,entry,reopen=false){
  state.statusHistory.push(stamp(state,{id:uid('sh'),caseId,studentId:sid,date:entry.date,status:'Klärungsphase',fromStatus:'',responsible:entry.responsible||'SSA',reason:'Fallakte aus personenbezogenem Chronikeintrag angelegt'}));
 }
 function normalize(state){
- state.settings=state.settings||{};state.auftraege=Array.isArray(state.auftraege)?state.auftraege:[];state.schnellnotizen=Array.isArray(state.schnellnotizen)?state.schnellnotizen:[];state.zugangswege=Array.isArray(state.zugangswege)?state.zugangswege:[];state.taetigkeiten=Array.isArray(state.taetigkeiten)?state.taetigkeiten:[];state.weitergaben=Array.isArray(state.weitergaben)?state.weitergaben:[];state.students=state.students||[];state.cases=state.cases||[];state.tasks=state.tasks||[];
+ state.settings=state.settings||{};state.auftraege=Array.isArray(state.auftraege)?state.auftraege:[];state.schnellnotizen=Array.isArray(state.schnellnotizen)?state.schnellnotizen:[];state.zugangswege=Array.isArray(state.zugangswege)?state.zugangswege:[];state.taetigkeiten=Array.isArray(state.taetigkeiten)?state.taetigkeiten:[];state.weitergaben=Array.isArray(state.weitergaben)?state.weitergaben:[];state.geplanteGespraeche=Array.isArray(state.geplanteGespraeche)?state.geplanteGespraeche:[];state.students=state.students||[];state.cases=state.cases||[];state.tasks=state.tasks||[];
  for(const k of collections)state[k]=state[k]||[];
  state.importLinks=state.importLinks||{};state.classLeadHistory=state.classLeadHistory||{};
  for(const c of state.cases){const student=state.students.find(s=>s.id===c.studentId);if(!c.lastContact&&/^\d{4}-\d{2}-\d{2}$/.test(String(c.last||''))){c.lastContact=c.last;c.last=student?.last||'';}if(!c.lastContact)c.lastContact=c.last||'';}
@@ -91,6 +91,32 @@ function preview(state,pupils,{source='Schülerliste',year=state.settings.curren
  for(const s of state.students)if(s.active!==false&&!present.has(s.id))rows.push({studentId:s.id,pupil:null,action:'keep',confirmed:true,missing:true});
  return {source,schoolYear:year,effectiveDate,classLeads,rows};
 }
+/* Schuljahreswechsel für ganze Klassen (0.19). Nur Zeilen mit eindeutig bestätigter Identität (action 'update')
+   und noch nicht geprüfte Zeilen werden angefasst; einzeln geprüfte Zeilen (z. B. Wiederholer) bleiben, wie sie sind. */
+function jahrKlassen(state,plan){
+ const m=new Map();
+ (plan?.rows||[]).forEach((r,i)=>{if(!r.pupil||!r.studentId)return;const alt=state.students.find(x=>x.id===r.studentId)?.className||'';if(!m.has(alt))m.set(alt,{alt,ziel:nextClass(alt)||'',idx:[]});m.get(alt).idx.push(i);});
+ return [...m.values()].map(k=>{const rows=k.idx.map(i=>plan.rows[i]);return {...k,n:k.idx.length,offen:rows.filter(r=>!r.confirmed).length,moeglich:rows.filter(r=>!r.confirmed&&r.action==='update').length,abschluss:!k.ziel};}).sort((a,b)=>String(a.alt).localeCompare(String(b.alt),'de',{numeric:true}));
+}
+function klasseUebernehmen(state,plan,alt,neu){
+ const k=jahrKlassen(state,plan).find(x=>x.alt===alt);if(!k)throw Error('Klasse nicht gefunden.');
+ const ziel=neu==null?'':String(neu).trim();
+ if(ziel&&!classValid(ziel))throw Error('Neue Klasse prüfen.');
+ if(k.abschluss&&!ziel)throw Error('Abschlussklasse '+alt+': bitte als Schulabgang bestätigen oder eine neue Klasse eintragen.');
+ let n=0,uebersprungen=0;
+ for(const i of k.idx){const r=plan.rows[i];if(r.confirmed)continue;if(r.action!=='update'){uebersprungen++;continue;}
+  if(ziel){r.pupil.className=ziel;r.reason=ziel===k.ziel?'Reguläre Versetzung':k.abschluss?'Wiederholung':'Geprüfte Klassenzuordnung';r.graduating=false;}
+  if(r.graduating)continue;
+  r.confirmed=true;n++;}
+ return {n,uebersprungen};
+}
+function alleKlassenUebernehmen(state,plan){let n=0,uebersprungen=0;const abschluss=[];for(const k of jahrKlassen(state,plan)){if(k.abschluss){if(k.offen)abschluss.push(k.alt);continue;}const x=klasseUebernehmen(state,plan,k.alt);n+=x.n;uebersprungen+=x.uebersprungen;}return {n,uebersprungen,abschluss};}
+function klasseAbgang(state,plan,alt,art='leave'){
+ if(!['leave','transfer'].includes(art))throw Error('Unbekannte Art.');
+ const k=jahrKlassen(state,plan).find(x=>x.alt===alt);if(!k)throw Error('Klasse nicht gefunden.');
+ let n=0;for(const i of k.idx){const r=plan.rows[i];if(r.confirmed||r.action!=='update')continue;r.action=art;r.confirmed=true;n++;}
+ return {n};
+}
 function validate(state,plan){
  const errors=[],used=new Set(),external=new Set();
  if(!validYear(plan.schoolYear))errors.push('Schuljahr im Format 2027/28 angeben.');
@@ -103,7 +129,7 @@ function validate(state,plan){
   if(r.studentId){if(!state.students.some(s=>s.id===r.studentId))errors.push('Unbekannte Schüler-ID.');if(used.has(r.studentId))errors.push('Ein Kind ist mehrfach zugeordnet.');used.add(r.studentId);}
   if(['leave','transfer'].includes(r.action)){if(!r.studentId)errors.push('Abgang ohne Schüler-ID.');continue;}
   const p=r.pupil;if(!p||!classValid(p.className)||!p.last||!p.first)errors.push('Zeile '+(i+1)+': Name oder Klasse prüfen.');
-  if(r.action==='update'&&/^10(?:[a-z])?$/i.test(String(p?.className||''))&&!['Wiederholung','Überspringen'].includes(r.reason))errors.push('Zeile '+(i+1)+': Abschlussjahrgang bitte als Schulabgang, Schulwechsel, Wiederholung oder Überspringen kennzeichnen.');
+  if(r.action==='update'&&(r.reason==='Abschlussjahrgang – Abgang / Wechsel prüfen'||(/^10(?:[a-z])?$/i.test(String(state.students.find(x=>x.id===r.studentId)?.className||''))&&/^10(?:[a-z])?$/i.test(String(p?.className||''))&&!['Wiederholung','Überspringen'].includes(r.reason))))errors.push('Zeile '+(i+1)+': Abschlussjahrgang bitte als Schulabgang, Schulwechsel, Wiederholung oder Überspringen kennzeichnen.');
   if(p&&p.schoolYear!==plan.schoolYear)errors.push('Die Liste enthält unterschiedliche Schuljahre.');
   if(r.action==='update'&&!r.studentId)errors.push('Bestehende Akte auswählen.');
   if(r.action==='new'&&r.studentId)errors.push('Neuaufnahme ist bereits zugeordnet.');
@@ -207,7 +233,7 @@ function safetyHint(text){const fachverfahren=fachverfahren_match({content:Strin
    Änderungen an den Listen nur zum Schuljahreswechsel: neue Version mit neuem gueltigAb anlegen, alte stehen lassen. */
 const KATEGORIEN_VERSIONEN=[{version:'2026/27',gueltigAb:'2026-08-01',merkmale:{
  kontaktart:[['kurzkontakt','Kurzkontakt'],['beratungsgespraech','Beratungsgespräch'],['krisengespraech','Krisengespräch'],['gruppe','Gruppe'],['klasse','Klasse']],
- zugangsweg:[['schueler_selbst','Kind selbst'],['lehrkraft','Lehrkraft'],['eltern','Eltern'],['schulleitung','Schulleitung'],['mitschueler','Mitschüler:in'],['anfrageportal','Anfrageportal'],['extern','Extern']],
+ zugangsweg:[['schueler_selbst','Kind selbst'],['lehrkraft','Lehrkraft'],['pm','PM'],['eltern','Eltern'],['schulleitung','Schulleitung'],['mitschueler','Mitschüler:in'],['ssa','SSA'],['anfrageportal','Anfrageportal'],['extern','Extern']],
  beteiligte:[['schueler','Schüler:in'],['eltern','Eltern'],['lehrkraft','Lehrkraft'],['schulleitung','Schulleitung'],['jugendamt','Jugendamt'],['fachstelle_andere','Andere Fachstelle']],
  thema:[['konflikt_mobbing','Konflikt / Mobbing','4.3 Gewalt- und Konfliktprävention'],['familie','Familie','4.2 Beratung'],['fehlzeiten_schulangst','Fehlzeiten / Schulangst','4.3 Schulverweigerung/Absentismus'],['emotionen_krise','Gefühle / Krise','4.2 Beratung'],['lernen_motivation','Lernen / Motivation','4.2 Beratung'],['verhalten_unterricht','Verhalten im Unterricht','4.3 Gewalt- und Konfliktprävention'],['medien','Medien','4.3 Gesundheitsförderung'],['sucht','Sucht','4.3 Gesundheitsförderung'],['gesundheit','Gesundheit','4.3 Gesundheitsförderung'],['berufsorientierung','Berufsorientierung','4.4 Berufsorientierung'],['kinderschutz','Kinderschutz','4.2 Beratung'],['sonstiges','Sonstiges','']],
  ergebnis:[['weiter_begleitet','Weiter begleitet'],['abgeschlossen','Abgeschlossen'],['weitervermittelt','Weitervermittelt'],['massnahme_vereinbart','Maßnahme vereinbart']],
@@ -651,6 +677,29 @@ function journalStats(state,year='',className='all'){
  return state.journal.filter(e=>!e.generalInfo&&!e.planned&&e.type!=='zusätzliche Information'&&e.type!=='Kurznotiz'&&e.type!=='Zusage erledigt'&&(!year||e.schoolYear===year)&& (className==='all'||e.participantIds.some(sid=>{const cl=recordContext(state,e,sid).className;return className.startsWith('jg:')?cl.match(/^\d+/)?.[0]===className.slice(3):cl===className}))).map(e=>({...e,duration:e.duration*Math.max(1,(e.facilitators||[]).length)}));
 }
 function restore(raw,sanitize){const state=sanitize(raw);for(const [i,e]of (state.journal||[]).entries()){const original=raw.journal?.[i];if(!original)continue;for(const key of ['content','childView','otherView','observation','assessment','agreement','goal','result','source','people'])if(typeof original[key]==='string')e[key]=original[key];if(original.individualNotes&&typeof original.individualNotes==='object')for(const key of Object.keys(e.individualNotes||{}))if(typeof original.individualNotes[key]==='string')e.individualNotes[key]=original.individualNotes[key];}return state;}
+/* Geplante Gespräche (0.19): kein Kalender, sondern ein Termin an der Akte, der auf „Heute“ erscheint. */
+function planeGespraech(state,input){
+ const date=String(input.date||'');if(!iso(date))throw Error('Bitte ein Datum angeben.');
+ const participantIds=[...new Set(input.participantIds||[])];
+ if(!participantIds.length||participantIds.some(sid=>!state.students.some(s=>s.id===sid)))throw Error('Bitte mindestens ein Kind auswählen.');
+ const punkte=(Array.isArray(input.punkte)?input.punkte:String(input.punkte||'').split(/\n/)).map(x=>String(x).replace(/^[-•*\s]+/,'').trim()).filter(Boolean).slice(0,12);
+ state.geplanteGespraeche=Array.isArray(state.geplanteGespraeche)?state.geplanteGespraeche:[];
+ const g={id:uid('plan'),date,time:/^\d\d:\d\d$/.test(String(input.time||''))?input.time:'',type:String(input.type||'Gespräch').trim()||'Gespräch',anlass:String(input.anlass||'').trim(),people:String(input.people||'').trim(),participantIds,punkte,status:'geplant',von:aktiveMitarbeitende(state),createdAt:new Date().toISOString()};
+ state.geplanteGespraeche.push(g);return g;
+}
+function geplanteGespraeche(state,{sid='',bis=''}={}){
+ return (state.geplanteGespraeche||[]).filter(g=>g.status==='geplant'&&(!sid||g.participantIds.includes(sid))&&(!bis||g.date<=bis)).sort((a,b)=>(a.date+(a.time||'99:99')).localeCompare(b.date+(b.time||'99:99')));
+}
+function planFinden(state,id){const g=(state.geplanteGespraeche||[]).find(x=>x.id===id);if(!g)throw Error('Geplantes Gespräch nicht gefunden.');return g;}
+function gespraechVerschieben(state,id,date,time){const g=planFinden(state,id);if(!iso(date))throw Error('Bitte ein Datum angeben.');g.verlauf=g.verlauf||[];g.verlauf.push({am:new Date().toISOString(),von:g.date+(g.time?' '+g.time:''),art:'verschoben'});g.date=date;if(time!==undefined)g.time=/^\d\d:\d\d$/.test(String(time||''))?time:'';return g;}
+function gespraechAbsagen(state,id,grund=''){const g=planFinden(state,id);g.status='abgesagt';g.abgesagtAm=new Date().toISOString();g.grund=String(grund||'').trim();return g;}
+// Nach dem Dokumentieren: nicht geklärte Punkte werden Zusagen, der Plan ist erledigt
+function gespraechErledigt(state,id,{entryId='',offen=[],zusageAn='Kind',participantIds}={}){
+ const g=planFinden(state,id);const ids=participantIds&&participantIds.length?participantIds:g.participantIds;
+ const zusagen=offen.map(x=>String(x||'').trim()).filter(Boolean).map(title=>addPromise(state,{title,promisedTo:String(zusageAn||'Kind'),participantIds:ids,due:'',sourceEntryKey:entryId?'entry:'+entryId:'',zugesagtVon:'Ich'}));
+ g.status='erledigt';g.erledigtAm=new Date().toISOString();g.entryId=entryId;g.zusagen=zusagen.map(z=>z.id);
+ return zusagen;
+}
 /* Themenvorschlag per Stichwort (0.18): nur Vorschlag, nie automatisch angekreuzt.
    Stichworte passen am Wortanfang („streit“ trifft „Streitigkeiten“, nicht „bestreiten“). */
 const THEMEN_STICHWORTE={
@@ -834,5 +883,5 @@ function weitergabeProtokollieren(state,{bericht,zeitraum,empfaenger,zweck='',fo
  const w={id:uid('weitergabe'),am:new Date().toISOString(),bericht:String(bericht||''),zeitraum:String(zeitraum||''),empfaenger:e,zweck:String(zweck||'').trim(),format,von:aktiveMitarbeitende(state)};
  state.weitergaben.push(w);return w;
 }
-root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,safetyHint,KATEGORIEN_VERSIONEN,kategorien,katListe,katLabel,stufeZweig,statErfassen,statMerkmale,zugangswegFuer,zugangswegSetzen,addTaetigkeit,ereignisse,zugangKarte,filterEreignisse,kennzahlen,aufschluesselung,kreuztabelle,datenqualitaet,statNachtragen,werteVon,NICHT_ERFASST,addStudent,similarStudents,THEMEN_STICHWORTE,themenVorschlag,sperrHinweise,GESCHUETZTE_THEMEN,BERICHTE,wertLabel,anonymMatrix,kennzahlAnzeige,standardbericht,berichtCsv,weitergabeProtokollieren,SSA_TEAM_STANDARD,ssaTeam,mitarbeitendKanonisch,mitarbeitendSchreibweisen,mitarbeitendZuordnen,aktiveMitarbeitende,zusageErledigtEintragen,SAFETY_NOTICE};
+root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,safetyHint,KATEGORIEN_VERSIONEN,kategorien,katListe,katLabel,stufeZweig,statErfassen,statMerkmale,zugangswegFuer,zugangswegSetzen,addTaetigkeit,ereignisse,zugangKarte,filterEreignisse,kennzahlen,aufschluesselung,kreuztabelle,datenqualitaet,statNachtragen,werteVon,NICHT_ERFASST,addStudent,similarStudents,jahrKlassen,klasseUebernehmen,alleKlassenUebernehmen,klasseAbgang,planeGespraech,geplanteGespraeche,gespraechVerschieben,gespraechAbsagen,gespraechErledigt,THEMEN_STICHWORTE,themenVorschlag,sperrHinweise,GESCHUETZTE_THEMEN,BERICHTE,wertLabel,anonymMatrix,kennzahlAnzeige,standardbericht,berichtCsv,weitergabeProtokollieren,SSA_TEAM_STANDARD,ssaTeam,mitarbeitendKanonisch,mitarbeitendSchreibweisen,mitarbeitendZuordnen,aktiveMitarbeitende,zusageErledigtEintragen,SAFETY_NOTICE};
 })(globalThis);

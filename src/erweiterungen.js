@@ -49,7 +49,7 @@ const HILFE_TEXTE={
  weitergaben:{titel:'Weitergaben',was:'Protokoll, welcher Bericht wann an wen gegangen ist.',warum:'So kannst du jederzeit nachweisen, welche Zahlen die Schulsozialarbeit verlassen haben.',beispiel:'Jahresbericht 2026/27, als CSV an die Schulleitung.'},
  kreuztabelle:{titel:'Kreuztabelle',was:'Zwei Merkmale gegeneinander, mit Zeilen- und Spaltensummen.',warum:'Zeigt Zusammenhänge, zum Beispiel welche Themen in welcher Klassenstufe vorkommen.',beispiel:'Zeilen „Thema“, Spalten „Klassenstufe“.'},
  kontaktart:{titel:'Art des Kontakts',was:'Ob es ein Beratungsgespräch oder ein Krisengespräch war. Kurzkontakt, Gruppe und Klasse erkennt das Programm selbst.',warum:'So lässt sich später zeigen, wie viel Krisenarbeit anfällt.',beispiel:'Ein Kind kommt aufgelöst nach einem Streit zu Hause: Krisengespräch.'},
- zugangsweg:{titel:'Zugangsweg',was:'Wie der Kontakt zu diesem Kind in diesem Schuljahr zustande kam. Du wirst nur einmal pro Kind und Schuljahr gefragt.',warum:'Die Statistik zeigt, ob Kinder von selbst kommen oder vermittelt werden.',beispiel:'Die Klassenleitung hat das Kind geschickt: „Lehrkraft“.'},
+ zugangsweg:{titel:'Zugangsweg',was:'Wie der Kontakt zu diesem Kind in diesem Schuljahr zustande kam (PM = pädagogische Mitarbeiter:in, SSA = die Schulsozialarbeit ist selbst auf das Kind zugegangen). Du wirst nur einmal pro Kind und Schuljahr gefragt.',warum:'Die Statistik zeigt, ob Kinder von selbst kommen oder vermittelt werden.',beispiel:'Die Klassenleitung hat das Kind geschickt: „Lehrkraft“.'},
  beteiligte:{titel:'Beteiligte',was:'Wer beim Gespräch dabei war. „Schüler:in“ ist vorausgewählt.',warum:'So wird sichtbar, wie oft du mit Eltern, Lehrkräften oder Fachstellen zusammenarbeitest.',beispiel:'Gespräch mit Kind und Mutter: „Schüler:in“ und „Eltern“.'},
  thema:{titel:'Thema',was:'Worum es ging – mehrere Themen sind möglich.',warum:'Die Statistik zeigt, welche Themen an der Schule häufig sind. Mindestens ein Thema ist hilfreich, aber keine Pflicht.',beispiel:'Streit in der Pause: „Konflikt / Mobbing“.'},
  dauer:{titel:'Dauer',was:'Wie lange der Kontakt ungefähr gedauert hat.',warum:'Aus der Dauer entstehen die Arbeitsstunden im Jahresbericht. Bitte ehrlich schätzen.',beispiel:'Ein Gespräch von 35 Minuten: „30 Min.“ oder „45 Min.“ wählen.'},
@@ -580,6 +580,63 @@ function gtKindNotizenFuellen(){
  box.innerHTML=ids.length<2?'':`<details ${Object.values(alt).some(Boolean)?'open':''}><summary>Zusatz pro Kind (freiwillig)</summary><p class="subtle">Nur, wenn für ein Kind etwas Eigenes festzuhalten ist, z. B. „heute sehr zurückhaltend“. Erscheint nur in der Chronik dieses Kindes.</p>${ids.map(sid=>{const st=data.students.find(x=>x.id===sid);return `<label class="gt-kindnotiz"><span>${DE(st?st.first+' '+st.last:sid)}</span><input class="field" name="kindNotiz" data-sid="${DE(sid)}" value="${DE(alt[sid]||'')}" maxlength="300" placeholder="optional"></label>`;}).join('')}</details>`;
 }
 function gtKindNotizenLesen(form,participantIds){const out={};form.querySelectorAll('input[name=kindNotiz][data-sid]').forEach(i=>{const v=i.value.trim();if(v&&participantIds.includes(i.dataset.sid))out[i.dataset.sid]=v;});return out;}
+
+/* ================================================================
+   10. GESPRÄCH PLANEN (0.19) – kein Kalender: Termin an der Akte, erscheint auf „Heute“
+   ================================================================ */
+function planKinderText(g){return g.participantIds.map(id=>data.students.find(s=>s.id===id)).filter(Boolean).map(s=>s.first+' '+s.last).join(', ');}
+function planZeit(g){return fmt(g.date)+(g.time?' · '+g.time+' Uhr':'');}
+function gespraechPlanen(sid){
+ const st=data.students.find(s=>s.id===sid);if(!st){appAlert('Bitte zuerst eine Akte öffnen.');return;}
+ const morgen=(()=>{const d=new Date(today()+'T12:00:00');d.setDate(d.getDate()+1);return d.toISOString().slice(0,10);})();
+ dossierPopup('Gespräch planen',`<p class="subtle">Der Termin erscheint an diesem Tag auf „Heute“. Ein Klick darauf öffnet „Gespräch eintragen“ mit den Kindern und deinen Punkten.</p><div class="dossier-grid">
+ ${dossierField('date','Datum',morgen,'date',true)}${dossierField('time','Uhrzeit (optional)','','time')}
+ <label>Art<select class="field" name="type">${dossierTypeOptions('Schülergespräch / Einzelberatung')}</select></label>${dossierField('people','Weitere Beteiligte (optional)','')}
+ <div class="full dossier-kinder"><strong>Kinder:</strong> ${DE(st.first+' '+st.last)} <details><summary>weitere Kinder dazunehmen</summary>${dossierParticipantList([sid])}</details></div>
+ ${dossierField('anlass','Anlass (optional)','')}
+ <label class="full">Was will ich klären? <small>(ein Punkt pro Zeile – was im Gespräch offen bleibt, wird danach als Zusage gemerkt)</small><textarea class="field" name="punkte" rows="4" placeholder="z. B. Sitzplatz in der Klasse&#10;Rückmeldung an die Mutter"></textarea></label></div>`,async fd=>{
+  const ids=fd.getAll('participantIds');const g=Dossier.planeGespraech(data,{date:fd.get('date'),time:fd.get('time'),type:fd.get('type'),people:fd.get('people'),anlass:fd.get('anlass'),punkte:fd.get('punkte'),participantIds:ids.length?ids:[sid]});
+  closeModal('dossierEditModal');save();akteGeplantZeigen(selectedStudentId);toast('Gespräch am '+planZeit(g)+' geplant. Es erscheint an dem Tag auf „Heute“.');
+ });
+ document.querySelector('#dossierEditModal [type=submit]').textContent='Planen';
+}
+function planDokumentieren(id){
+ const g=(data.geplanteGespraeche||[]).find(x=>x.id===id&&x.status==='geplant');if(!g){toast('Dieses Gespräch ist nicht mehr offen.');return;}
+ const sid=g.participantIds.find(x=>data.students.some(s=>s.id===x));if(!sid){appAlert('Die Akte zu diesem Termin fehlt.');return;}
+ selectedStudentId=sid;if(!document.getElementById('studentModal')?.classList.contains('open'))showStudent(sid);
+ dossierPlanKontext=g;dossierEntry('event','',g.participantIds);
+}
+async function planVerschieben(id){
+ const g=(data.geplanteGespraeche||[]).find(x=>x.id===id);if(!g)return;
+ const d=await appPrompt('Verschieben','Neues Datum für das Gespräch mit '+planKinderText(g),{type:'date',value:g.date,jaText:'Verschieben'});
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return;
+ try{Dossier.gespraechVerschieben(data,id,d);}catch(err){appAlert(err.message);return;}
+ save();akteGeplantZeigen(selectedStudentId);toast('Verschoben auf '+fmt(d)+'.');
+}
+async function planAbsagen(id){
+ const g=(data.geplanteGespraeche||[]).find(x=>x.id===id);if(!g)return;
+ if(!await appConfirm('Geplantes Gespräch am '+planZeit(g)+' mit '+planKinderText(g)+' absagen?\n\nEs wird nicht gelöscht, sondern als abgesagt vermerkt.'))return;
+ Dossier.gespraechAbsagen(data,id);save();akteGeplantZeigen(selectedStudentId);toast('Gespräch abgesagt.');
+}
+function planZeileHtml(g,{mitKind=true}={}){
+ const heute=today(),ueber=g.date<heute;
+ return `<div class="today-row plan-zeile"><div class="grow">${mitKind?`<button class="linkbutton" onclick="showStudent('${DE(g.participantIds[0])}')">${DE(planKinderText(g))}</button><br>`:''}<strong>${DE(g.type)}</strong>${g.anlass?' · '+DE(g.anlass):''}<span class="subtle"> · ${DE(planZeit(g))}${ueber?' <span class="tag red">noch nicht dokumentiert</span>':''}${g.punkte?.length?' · '+g.punkte.length+' Punkt'+(g.punkte.length===1?'':'e'):''}</span></div><button class="btn kleiner primary" onclick="planDokumentieren('${DE(g.id)}')">Dokumentieren</button><button class="btn kleiner" onclick="planVerschieben('${DE(g.id)}')">verschieben</button><button class="btn kleiner" onclick="planAbsagen('${DE(g.id)}')">absagen</button></div>`;
+}
+function geplanteHeuteHtml(){
+ const heute=today(),faellig=Dossier.geplanteGespraeche(data,{bis:heute});
+ if(!faellig.length)return '';
+ return `<section class="card today-plan"><div class="cardhead"><h2>Geplante Gespräche</h2><span class="tag">${faellig.length}</span></div>${faellig.map(g=>planZeileHtml(g)).join('')}</section>`;
+}
+function akteGeplantZeigen(sid){
+ const box=document.getElementById('aktePlan');if(!box)return;
+ const liste=sid?Dossier.geplanteGespraeche(data,{sid}):[];
+ box.hidden=!liste.length;
+ box.innerHTML=liste.length?`<strong>Geplant:</strong>${liste.map(g=>planZeileHtml(g,{mitKind:false})).join('')}`:'';
+}
+function planBlockHtml(g){
+ const art=/Eltern/.test(g.type)?'Eltern':/Schulintern|Kollegium|Rückmeldung/.test(g.type)?'Lehrkraft':'Kind';
+ return `<div class="full plan-block"><strong>Aus der Planung vom ${DE(fmt(g.createdAt?.slice(0,10)||g.date))}</strong>${g.anlass?`<p>Anlass: ${DE(g.anlass)}</p>`:''}${g.punkte?.length?`<p class="subtle">Hake ab, was geklärt ist. Alles andere wird als Zusage gemerkt.</p>${g.punkte.map((pt,i)=>`<label class="plan-punkt"><input type="checkbox" name="planPunktGeklaert" value="${i}"> ${DE(pt)}</label>`).join('')}<label class="plan-zusage-an">Offene Punkte als Zusage an <select class="field" name="planZusageAn">${['Kind','Eltern','Lehrkraft','Klassenleitung','Team'].map(x=>`<option ${x===art?'selected':''}>${x}</option>`).join('')}</select></label>`:''}</div>`;
+}
 
 /* ================================================================
    Start: Schnellnotiz einbauen, sobald die Oberfläche steht
