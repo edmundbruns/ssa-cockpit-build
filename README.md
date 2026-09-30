@@ -1,6 +1,6 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Version 0.17.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
+Version 0.18.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
 
 Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
@@ -11,7 +11,7 @@ Unter „Gesprächsbogen drucken“ stehen vier fachlich unterschiedliche DIN-A4
 
 ## Aktueller Arbeitsablauf
 
-Das Handbuch steht in `HANDBUCH-0.17.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
+Das Handbuch steht in `HANDBUCH-0.18.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
 
 
 ## Neu in 0.12.2: Dialoge und Speichern
@@ -126,3 +126,11 @@ Abnahme (automatisch geprüft):
 - **Vorschau** mit „Diese Tabelle verlässt das Cockpit. Bitte prüfen.“, Empfänger als Pflichtfeld, Zweck optional; **CSV** (Semikolon, UTF-8 mit BOM, Formelschutz) oder **Druck**; jedes Mal ein Eintrag im Protokoll **Weitergaben** (`weitergaben`).
 - Die alten Knöpfe „Jahresbericht / PDF“ und „Word-Datei“ in der bisherigen Auswertung sind entfallen, damit es keinen zweiten, nicht protokollierten Weg nach außen gibt. „Interne Rohdaten als CSV“ bleibt für die eigene Ablage.
 - Tests: `tests/weitergabe.test.mjs` (Anonymisierung inkl. 300 Zufallstabellen, Berichte, CSV, Protokoll, Mitarbeitende) und Abschnitt 14 in `tests/v0122-dom.cjs`.
+
+## Neu in 0.18.0 – Alltag
+
+- **Wer arbeitet gerade?** Nach dem Entsperren eine Auswahl aus der Team-Liste; die aktive Person steht unten links in der Navigation und lässt sich per Klick wechseln (`werArbeitetFragen`).
+- **Sperrhinweis im Kopf der Akte** (`Dossier.sperrHinweise`): rot bei „Kontakt untersagt/eingeschränkt“ (Familienangaben) oder bei einer Bezugsperson mit „Nein – keine Auskunft, kein Kontakt“; gelb bei „nur nach Rücksprache“, ungeklärter Auskunftslage, ungeklärtem Sorgerecht oder eingeschränktem Kontakt. Der Hinweis sitzt außerhalb des scrollenden Bereichs.
+- **Themenvorschlag per Stichwort** (`Dossier.themenVorschlag`, Stichworte am Wortanfang): hebt passende Themen-Chips in Gespräch, Kurzkontakt, Gruppengespräch und „Jetzt nachtragen“ hervor, kreuzt aber nie selbst an.
+- **Zusatz pro Kind im Gruppengespräch**: ersetzt das frühere unzugeordnete Feld „Individuelle Hinweise“; wird als `individualNotes[sid]` gespeichert und erscheint nur in der Chronik dieses Kindes. Statistik unverändert (ein Kontakt, n erreichte Kinder).
+- Tests: `tests/alltag.test.mjs` und Abschnitt 15 in `tests/v0122-dom.cjs`.
