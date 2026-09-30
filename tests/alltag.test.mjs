@@ -27,3 +27,12 @@ test('Sperrhinweise: rote Sperre vor gelben Hinweisen',()=>{
  assert.deepEqual(D.sperrHinweise(s,'b'),[],'unbekanntes Kind: nichts');
  assert.equal(D.sperrHinweise({students:[{id:'c',family:{contactPermission:'Kontakt untersagt'}}]},'c')[0].stufe,'rot');
 });
+test('Namenssuche: Reihenfolge, Komma, unsichtbare Zeichen und Umlaute egal',()=>{
+ const s={settings:{classLeads:{'7b':'Frau Lehrkraft'}},students:[{id:'x1',first:'Ben',last:'Osse­vorth',className:'7b'},{id:'x2',first:'Benjamin',last:'Müller',className:'5a'},{id:'x3',first:'Jörg',last:'Bengsch',className:'8a',active:false}]};
+ const ids=q=>D.schuelerSuche(s,q).map(x=>x.id);
+ for(const q of ['Ossevorth','ossevorth, ben','Ben Ossevorth','Ossevorth Ben','ben 7b'])assert.deepEqual(ids(q),['x1'],q);
+ assert.deepEqual(ids('mueller').length,0,'ue ist nicht ü');assert.deepEqual(ids('müller'),['x2']);
+ assert.deepEqual(ids('ben'),['x1','x2','x3'],'Treffer am Wortanfang zuerst, Archivierte zuletzt');
+ assert.deepEqual(ids('lehrkraft'),['x1'],'Klassenleitung findet die Klasse');
+ assert.deepEqual(D.schuelerSuche(s,'ben',{nurAktiv:true}).map(x=>x.id),['x1','x2']);
+});
