@@ -1,6 +1,6 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Version 0.22.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
+Version 0.23.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
 
 Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
@@ -11,7 +11,7 @@ Unter „Gesprächsbogen drucken“ stehen vier fachlich unterschiedliche DIN-A4
 
 ## Aktueller Arbeitsablauf
 
-Das Handbuch steht in `HANDBUCH-0.22.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
+Das Handbuch steht in `HANDBUCH-0.23.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
 
 
 ## Neu in 0.12.2: Dialoge und Speichern
@@ -167,3 +167,8 @@ Abnahme (automatisch geprüft):
 - „Anlass“ und „Sachliche Situationsbeschreibung“ zusammengelegt: Anlass-Knopf (Pflicht) plus freiwilliges Feld „Was ist passiert?“ (`note`, jetzt optional und in der Chronik sichtbar). Das Feld „Ergänzung zum Anlass“ entfällt; alte Werte bleiben.
 - Begleitet von (nur SSA-Team), Folgemaßnahme und Wiedervorlage unter „Mehr“.
 - Schülersuche im Formular nutzt die robuste Suche aus 0.21.
+
+## Neu in 0.23.0 – Gesprächsbogen passend zum Formular
+
+- Abschnittstitel an „Gespräch eintragen“ angeglichen, je mit Hinweis auf das Zielfeld im Cockpit; Kopf mit Uhrzeit, „Dokumentiert von“ und „Überthema“.
+- Ankreuzkasten „Für die Statistik“ (Art, Thema, Beteiligte, Dauer, Ergebnis, Zugangsweg) aus `Dossier.katListe` – ändern sich die Kategorien, ändert sich der Bogen mit. Passt weiterhin auf eine DIN-A4-Seite.
