@@ -1,4 +1,4 @@
-# SSA-Cockpit 0.18.0
+# SSA-Cockpit 0.19.0
 
 ## Alltag
 
@@ -21,6 +21,18 @@ Für Arbeit ohne einzelnes Kind (Konferenz, Elternabend, Projekt, Pausenpräsenz
 ## Statistik
 
 Unter **Auswertung** steht die interne Statistik. Oben zeigt „Datenqualität“, wo Angaben fehlen; **Jetzt nachtragen** führt dich Eintrag für Eintrag durch die Lücken. Darunter stehen fünf Kennzahlen, die Filter und für jedes Merkmal ein Balkendiagramm mit derselben Tabelle. In der **Kreuztabelle** stellst du zwei Merkmale gegeneinander, zum Beispiel Thema und Klassenstufe. Diese Seite zeigt exakte Zahlen und ist nur für dich und dein Team gedacht.
+
+## Gespräch planen
+
+In der Akte steht neben „Gespräch vorbereiten“ der Knopf **Gespräch planen**. Du trägst Datum, auf Wunsch Uhrzeit, Art, Anlass und „Was will ich klären?“ ein (ein Punkt pro Zeile). Der Termin steht dann oben in der Akte und erscheint am Tag – und solange er nicht dokumentiert ist – auf **Heute**. **Dokumentieren** öffnet „Gespräch eintragen“ mit den Kindern und deinen Punkten: Was geklärt ist, hakst du ab; alles andere wird als Zusage gemerkt. **verschieben** und **absagen** gibt es direkt am Termin; abgesagte Termine bleiben vermerkt.
+
+## Gesprächsbogen zum Ausdrucken
+
+In der Akte unter **Mehr …** → **Gesprächsbogen drucken**. Dort wählst du die Gesprächsart (vier Varianten), optional ein Ausgangsereignis und Beteiligte. Über denselben Dialog lässt sich auch der unveränderte Originalbogen als PDF öffnen.
+
+## Schuljahreswechsel für ganze Klassen
+
+Im Dialog „Schuljahreswechsel prüfen“ steht oben **Ganze Klassen verschieben**. **Alle Klassen regulär versetzen** übernimmt alle noch nicht geprüften Kinder in ihre nächste Klasse; pro Klasse kannst du die neue Klasse ändern und **Klasse übernehmen** klicken. Einzeln geprüfte Zeilen (etwa Wiederholer) bleiben unverändert, unsichere Zuordnungen bleiben zur Einzelprüfung stehen. Abschlussklassen werden nicht mitversetzt; dort gibt es **Alle als Schulabgang**. Mit „Nur ungeprüfte Zeilen zeigen“ siehst du, was noch fehlt. Gespeichert wird erst mit „Geprüfte Änderungen übernehmen“ – vorher entsteht automatisch eine Sicherung.
 
 ## Wer arbeitet gerade?
 

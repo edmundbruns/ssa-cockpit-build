@@ -418,6 +418,31 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  await waitSaved();console.log('0.18 alltag ok');
  }
 
+ // 16. Version 0.19: Gespräch planen · ganze Klassen beim Schuljahreswechsel · PM und SSA
+ {
+ run(`document.querySelectorAll('.modal.open').forEach(m=>{if(m.id&&!['werArbeitetModal'].includes(m.id))closeModal(m.id);else m.remove()});selectedStudentId='s1';showStudent('s1')`);
+ const planKnopf=[...w.document.querySelectorAll('#studentDetailBody button')].find(b=>/Gespräch planen/.test(b.textContent));assert(planKnopf,'Knopf „Gespräch planen“ in der Akte');planKnopf.click();
+ const pf=w.document.getElementById('dossierEditForm');pf.elements.date.value=run('today()');pf.elements.time.value='09:30';pf.elements.anlass.value='Sitzplatz';pf.elements.punkte.value='Sitzplatz klären\nRückmeldung an Mutter';pf.requestSubmit();await sleep(30);
+ assert.equal(run(`Dossier.geplanteGespraeche(data,{sid:'s1'}).length`),1,'geplant');assert(!w.document.getElementById('aktePlan').hidden,'in der Akte sichtbar');
+ run(`closeModal('studentModal');go('dashboard');renderToday()`);const heute=w.document.querySelector('.today-plan');assert(heute&&/Sitzplatz/.test(heute.textContent),'erscheint auf „Heute“');
+ [...heute.querySelectorAll('button')].find(b=>/Dokumentieren/.test(b.textContent)).click();await sleep(20);
+ const ef=w.document.getElementById('dossierEditForm');assert(ef.querySelector('.plan-block'),'Punkte aus der Planung im Formular');
+ assert.deepEqual(ef.querySelectorAll('input[name=participantIds]:checked').length?[...ef.querySelectorAll('input[name=participantIds]:checked')].map(x=>x.value):['s1'],['s1'],'Kind vorausgefüllt');
+ ef.querySelector('input[name=planPunktGeklaert][value="0"]').checked=true;ef.elements.content.value='Sitzplatz besprochen, Wechsel nach vorne vereinbart.';
+ const zv=run(`data.tasks.filter(t=>t.kind==='zusage').length`);ef.requestSubmit();await sleep(40);
+ assert.equal(run(`data.tasks.filter(t=>t.kind==='zusage').length`),zv+1,'offener Punkt wurde Zusage');assert.equal(run(`data.geplanteGespraeche[0].status`),'erledigt');
+ run(`document.querySelectorAll('.modal.open').forEach(m=>m.id?closeModal(m.id):m.remove())`);
+ // Schuljahreswechsel: ganze Klasse
+ run('dossierManualYear()');const kb=w.document.getElementById('yearKlassenBar');assert(kb&&/Ganze Klassen verschieben/.test(kb.textContent),'Leiste für ganze Klassen');
+ const offen0=run('pendingYearChange.rows.filter(r=>!r.confirmed).length');
+ const knopf=[...kb.querySelectorAll('button')].find(b=>/Klasse übernehmen/.test(b.textContent));assert(knopf);knopf.click();await sleep(10);
+ assert(run('pendingYearChange.rows.filter(r=>!r.confirmed).length')<offen0,'Klasse übernommen');
+ run('cancelYearChange()');
+ // PM und SSA beim Zugangsweg
+ const chips=run(`chipsHtml('zugangsweg','zugangsweg')`);assert(/> PM</.test(chips)&&/> SSA</.test(chips),'PM und SSA wählbar');
+ await waitSaved();console.log('0.19 planen und schuljahr ok');
+ }
+
  console.log('errors',errors);
  if(errors.length)process.exitCode=1;
  w.close();
