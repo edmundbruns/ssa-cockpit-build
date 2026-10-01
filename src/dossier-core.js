@@ -210,6 +210,16 @@ const FACHVERFAHREN_KATALOG=[
 ];
 // Selbstgefährdung wird auch bei Verneinung angezeigt: „sagt nicht, dass …“ muss trotzdem geprüft werden.
 const SCHUTZ_OHNE_VERNEINUNG=new Set(['selbstgefaehrdung']);
+// 0.24: Vernachlässigung zeigt sich selten in einem Wort – daher kleine Satzmuster
+const VERNACHLAESSIGUNG_MUSTER=[
+ [/(?:^|[^\p{L}])ohne\s+(?:frühstück|essen|pausenbrot|mittagessen|jacke|winterjacke)/iu,'ohne Frühstück/Essen/Jacke'],
+ [/(?:^|[^\p{L}])(?:hungrig|(?:hat|habe|hatte|hätte|hab)\s+(?:oft\s+|immer\s+|großen\s+|so\s+)?hunger|hunger\s+(?:hat|hatte|habe))(?![\p{L}])/iu,'Hunger'],
+ [/(?:^|[^\p{L}])(?:zu\s+dünne?\p{L}*\s+(?:kleidung|angezogen|jacke|sachen)|dünne\s+kleidung|keine\s+(?:winter)?jacke)/iu,'unpassende Kleidung'],
+ [/(?:^|[^\p{L}])allein(?:e)?\s+(?:zu\s*hause|daheim)/iu,'allein zu Hause'],
+ [/(?:^|[^\p{L}])(?:auf|um)\s+(?:meinen|meine|seinen|seine|ihren|ihre|den|die|das)?\s*(?:kleinen?\s+)?(?:bruder|schwester|geschwister|baby)\s+(?:aufpassen|kümmern)/iu,'muss auf Geschwister aufpassen'],
+ [/(?:^|[^\p{L}])(?:ungepflegt|verwahrlos|ungewaschen)/iu,'Pflege/Hygiene'],
+ [/(?:^|[^\p{L}])(?:mama|mutter|papa|vater)\s+(?:ist\s+|sei\s+|liegt\s+)?(?:viel|oft|immer|den\s+ganzen\s+tag|nur)\s+(?:im\s+bett|am\s+schlafen|betrunken)/iu,'Eltern oft nicht ansprechbar']
+];
 const SCHUTZ_VERFAHREN=['selbstgefaehrdung','gewalt-bedrohung','kinderschutz'];
 function fachverfahren_match(entry,state){
  const hay=[entry.type,entry.title,entry.content,entry.observation,entry.assessment,entry.agreement,entry.goal,entry.result].filter(Boolean).join(' ').normalize('NFC');
@@ -224,6 +234,9 @@ function fachverfahren_match(entry,state){
 function schutzTreffer(entry,fachverfahren){
  const hits=fachverfahren.filter(v=>SCHUTZ_VERFAHREN.includes(v.id)).flatMap(v=>v.matchedKeywords||[]);
  if(/(?:angst|fürchte|furcht).{0,35}(?:nach\s+hause|zu\s+hause)/iu.test([entry.title,entry.content,entry.observation,entry.assessment].filter(Boolean).join(' ')))hits.push('Angst vor Zuhause');
+ // 0.24: leise Hinweise auf Vernachlässigung – „ohne“ ist hier kein Verneinungswort
+ const text=[entry.title,entry.content,entry.observation,entry.assessment].filter(Boolean).join(' ');
+ for(const [re,label] of VERNACHLAESSIGUNG_MUSTER)if(re.test(text))hits.push(label);
  return [...new Set(hits)];
 }
 // Live-Hinweis im Formular: nur wenn ein Schutzstichwort tatsächlich vorkommt.
@@ -723,7 +736,7 @@ const THEMEN_STICHWORTE={
  sucht:['alkohol','betrunken','kiffen','gekifft','cannabis','drogen','vape','vapen','e-zigarette','rauchen','raucht','zigarette'],
  gesundheit:['arzt','ärztin','schlaf','müde','kopfschmerz','bauchschmerz','isst nicht','medikament','therapie','klinik','verletzt'],
  berufsorientierung:['praktikum','bewerbung','beruf','ausbildung','berufsberatung','schulabschluss','agentur für arbeit'],
- kinderschutz:['kindeswohl','blaue flecken','geschlagen worden','schlägt mich','schlägt ihn','schlägt sie','gewalt zu hause','gewalt zuhause','missbrauch','übergriff','vernachlässig','hat angst nach hause']
+ kinderschutz:['kindeswohl','blaue flecken','geschlagen worden','schlägt mich','schlägt ihn','schlägt sie','gewalt zu hause','gewalt zuhause','missbrauch','übergriff','vernachlässig','hat angst nach hause','ohne frühstück','hungrig','allein zu hause','alleine zu hause','verwahrlos','ungepflegt']
 };
 function themenVorschlag(text){
  const t=' '+String(text||'').toLocaleLowerCase('de-DE').replace(/\s+/g,' ');
@@ -734,7 +747,9 @@ function themenVorschlag(text){
  return out;
 }
 /* Sperr- und Vorsichtshinweise für den Kopf der Akte (0.18) */
-function sperrHinweise(state,sid){
+function datumDE(d){const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(d||''));return m?m[3]+'.'+m[2]+'.'+m[1]:String(d||'');}
+function tageZwischen(von,bis){const a=Date.parse(String(von).slice(0,10)+'T12:00:00Z'),b=Date.parse(String(bis).slice(0,10)+'T12:00:00Z');return isNaN(a)||isNaN(b)?null:Math.round((b-a)/86400000);}
+function sperrHinweise(state,sid,heute=day()){
  const s=(state.students||[]).find(x=>x.id===sid);if(!s)return [];
  const f=s.family||{},out=[];
  const kp=String(f.contactPermission||'');
@@ -749,6 +764,20 @@ function sperrHinweise(state,sid){
   if(r.mayContact==='Nein')out.push({stufe:'rot',text:'Keine Auskunft / kein Kontakt: '+wer,quelle:'Bezugsperson'});
   else if(r.mayContact==='Ja, eingeschränkt')out.push({stufe:'gelb',text:'Nur eingeschränkt Kontakt: '+wer,quelle:'Bezugsperson'});
   if(r.custodyUnclear==='Ja')out.push({stufe:'gelb',text:'Sorgerecht ungeklärt: '+wer,quelle:'Bezugsperson'});
+  // 0.24: Schweigepflichtentbindung – nur bei Personen, mit denen Kontakt überhaupt möglich ist
+  if(r.mayContact!=='Nein'){
+   const rs=String(r.releaseStatus||''),bis=String(r.releaseUntil||'');
+   if(rs==='Abgelaufen'||(rs==='Liegt vor'&&iso(bis)&&bis<heute))out.push({stufe:'gelb',text:'Schweigepflichtentbindung abgelaufen'+(iso(bis)?' ('+datumDE(bis)+')':'')+': '+wer,quelle:'Bezugsperson'});
+   else if(rs==='Noch ausstehend')out.push({stufe:'gelb',text:'Schweigepflichtentbindung noch ausstehend: '+wer,quelle:'Bezugsperson'});
+   else if(rs==='Nicht erteilt')out.push({stufe:'gelb',text:'Keine Schweigepflichtentbindung: '+wer,quelle:'Bezugsperson'});
+  }
+ }
+ // 0.24: Familienangaben regelmäßig prüfen
+ const famFelder=['custodyStatus','livingArrangement','contactPermission','custodians','households','supportPersons','restrictions'];
+ if(famFelder.some(k=>String(f[k]||'').trim())){
+  const gep=String(f.verifiedAt||'');
+  if(!iso(gep))out.push({stufe:'gelb',text:'Familienangaben ohne Prüfdatum – bitte prüfen',quelle:'Familie'});
+  else{const t=tageZwischen(gep,heute);if(t!==null&&t>365)out.push({stufe:'gelb',text:'Familienangaben zuletzt geprüft am '+datumDE(gep)+' – bitte prüfen',quelle:'Familie'});}
  }
  return out.sort((a,b)=>(a.stufe==='rot'?0:1)-(b.stufe==='rot'?0:1));
 }
@@ -757,6 +786,94 @@ function sperrHinweise(state,sid){
    Nur diese Berichte verlassen das Cockpit. Kleinste Einheiten: Halbjahr und Klassenstufe.
    Mitarbeitende erscheinen nie. Kinderschutz, Krise und Sucht nur als Gesamtzahl je Schuljahr.
    ================================================================ */
+/* 0.24 Grundsätze: Wertungen erkennen, Gruppentexte prüfen, Auftrag bei Wiederaufnahme.
+   Alles sind nur Hinweise – nichts wird automatisch geändert. */
+const WERTUNGEN=[
+ ['Wertung','Was genau hast du beobachtet oder gehört?',['empfindlich','gemein','faul','frech','zickig','nervig','nervt','unmöglich','dumm','asozial','assi','unverschämt','anstrengend','naiv','desinteressiert','unfähig','überfordert','verwöhnt','unerzogen','lügt','gelogen','verlogen','typisch','aufmüpfig','bockig','renitent','uneinsichtig','unmotiviert','provokant','provokativ','hinterhältig','unzuverlässig','chaotisch','dreist','launisch','hysterisch','theatralisch','primitiv','peinlich','respektlos','kaputt']],
+ ['Unterstellung','Woher weißt du das? Aussage oder Beobachtung kennzeichnen.',['angeblich','schwänzt','geschwänzt','kümmert sich nicht','kümmern sich nicht','simuliert','tut nur so','will nur Aufmerksamkeit','macht das absichtlich','offensichtlich','natürlich wieder','wie immer','wieder mal','mal wieder']],
+ ['Diagnose','Nur wenn fachlich festgestellt – mit Quelle nennen.',['depressiv','depression','adhs','autist','autistin','autistisch','traumatisiert','borderline','magersüchtig','essgestört','süchtig','handysüchtig','mediensüchtig','spielsüchtig','verhaltensgestört','hyperaktiv','psychisch krank','paranoid','zwanghaft','legastheniker','legasthenikerin','lernbehindert','alkoholiker','alkoholikerin','drogenabhängig']],
+ ['Etikett','Beschreibe das Verhalten statt die Person einzuordnen.',['scheidungskind','sozial schwach','bildungsfern','opfer','anführerin','anführer','mitläufer','mitläuferin','außenseiter','außenseiterin','klassenclown','problemkind','problemfamilie','problemschüler','problemschülerin','systemsprenger','systemsprengerin','sozialfall','brennpunktfamilie','hartz','verhaltensauffällig']],
+ ['Umgangssprache','Sachlicher Begriff? (z. B. „ausgerastet“ → „sehr laut geworden, hat … geworfen“)',['ausgerastet','ausgetickt','ausgeflippt','abgedreht','rumgeschrien','abgehauen','keinen bock','null bock','zoff','kids','bullen','geheult','rumgezickt','gechillt']],
+ ['Verstärker','Ohne Verstärker wirkt der Satz sachlicher.',['total','völlig','extrem','absolut','ständig','dauernd','permanent','unglaublich','mega','krass','komplett']]
+];
+const regEsc=w=>String(w).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+// Wörtliche Zitate („…“ oder "…") sind Aussagen und werden nicht als Wertung der Fachkraft gezählt.
+function ohneZitate(text){return String(text||'').normalize('NFC').replace(/„[^“”"]*[“”"]|"[^"]*"|»[^«]*«|‚[^‘’']*[‘’']/g,m=>' '.repeat(m.length));}
+function wertungsHinweise(text){
+ const t=ohneZitate(text),out=[];
+ for(const [art,frage,woerter] of WERTUNGEN)for(const w of woerter){
+  const m=new RegExp('(?:^|[^\\p{L}])('+regEsc(w)+'(?:e|en|er|es|em|n|s|st|t)?)(?![\\p{L}])','iu').exec(t);
+  if(m&&!out.some(o=>o.wort.toLocaleLowerCase('de-DE')===m[1].toLocaleLowerCase('de-DE')))out.push({wort:m[1],art,frage});
+ }
+ return out;
+}
+const PERSOENLICHE_THEMEN=['familie','gesundheit','emotionen_krise','kinderschutz','sucht'];
+function gruppenTextHinweis(state,text,participantIds){
+ const ids=[...new Set(participantIds||[])],t=String(text||'').normalize('NFC');
+ if(ids.length<2||!t.trim())return null;
+ const themen=themenVorschlag(t).filter(v=>PERSOENLICHE_THEMEN.includes(v.id));
+ const schutz=safetyHint(t);
+ const etiketten=wertungsHinweise(t).filter(w=>w.art==='Diagnose'||w.art==='Etikett');
+ if(!themen.length&&!schutz&&!etiketten.length)return null;
+ const kinder=ids.map(id=>(state.students||[]).find(s=>s.id===id)).filter(Boolean).filter(s=>[s.first,s.last].map(n=>String(n||'').trim()).filter(n=>n.length>=2).some(n=>new RegExp('(?:^|[^\\p{L}])'+regEsc(n)+'s?(?![\\p{L}])','iu').test(t)));
+ if(!kinder.length)return null;
+ return {kinder:kinder.map(s=>({id:s.id,name:s.first+' '+s.last})),gruende:[...themen.map(v=>katLabel('thema',v.id)),...(schutz?['mögliche Schutzfrage']:[]),...etiketten.map(e=>e.art+' „'+e.wort+'“')]};
+}
+function auftragPruefen(state,sid){
+ const auf=(state.auftraege||[]).filter(a=>a.studentId===sid).sort((a,b)=>String(a.date).localeCompare(String(b.date))||String(a.createdAt||'').localeCompare(String(b.createdAt||''))).at(-1);
+ if(!auf)return null;
+ const wieder=(state.statusHistory||[]).filter(h=>h.studentId===sid&&h.fromStatus==='Abgeschlossen'&&h.status!=='Abgeschlossen'&&String(h.date||'')>=String(auf.date||'')).sort((a,b)=>String(a.date).localeCompare(String(b.date))).at(-1);
+ if(!wieder)return null;
+ if(wieder.date===auf.date&&String(auf.createdAt||'')>String(wieder.createdAt||''))return null;
+ return {grund:'wiederaufgenommen',seit:wieder.date,auftrag:auf};
+}
+/* 0.24 Aufbewahrung: Akten ehemaliger Schüler:innen nach Ablauf der Frist (Standard 5 Jahre ab Abgang)
+   endgültig löschen – nur einzeln, nach Bestätigung, mit Protokoll ohne Namen. */
+const AUFBEWAHRUNG_STANDARD=5;
+function aufbewahrungJahre(state){const j=Number(state?.settings?.aufbewahrungJahre);return Number.isInteger(j)&&j>=1&&j<=30?j:AUFBEWAHRUNG_STANDARD;}
+function plusJahre(d,j){const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(d||''));if(!m)return '';let y=Number(m[1])+j,mo=m[2],da=m[3];if(mo==='02'&&da==='29')da='28';return y+'-'+mo+'-'+da;}
+function abgangsDatum(state,s){
+ if(iso(s.archivedAt))return {datum:s.archivedAt,quelle:'Abgang'};
+ const bis=(s.enrollments||[]).map(e=>e.validTo).filter(iso).sort().at(-1);if(bis)return {datum:bis,quelle:'Klassenzuordnung'};
+ const letzte=(state.journal||[]).filter(e=>(e.participantIds||[]).includes(s.id)).map(e=>e.date).filter(iso).sort().at(-1);if(letzte)return {datum:letzte,quelle:'letzter Eintrag'};
+ return null;
+}
+function bezieht(o,sid){if(!o||typeof o!=='object')return false;if(o.studentId===sid)return true;for(const k of ['participantIds','studentIds'])if(Array.isArray(o[k])&&o[k].includes(sid))return true;return false;}
+function loeschUmfang(state,sid){
+ let eintraege=0,sonstige=0;
+ for(const [k,v] of Object.entries(state))if(Array.isArray(v)&&k!=='students'&&k!=='loeschprotokoll')for(const o of v)if(bezieht(o,sid)){if(k==='journal')eintraege++;else sonstige++;}
+ return {eintraege,sonstige};
+}
+// Ein Kind aus einem gemeinsamen Eintrag entfernen: ID-Listen und alle Zuordnungen „Kind → Wert“ (Notizen, Kontexte, Statistik)
+function kindAusEintrag(o,sid){
+ for(const f of ['participantIds','studentIds','pinnedFor'])if(Array.isArray(o[f]))o[f]=o[f].filter(x=>x!==sid);
+ for(const v of [o,o.stat])if(v&&typeof v==='object')for(const w of Object.values(v))if(w&&typeof w==='object'&&!Array.isArray(w)&&Object.prototype.hasOwnProperty.call(w,sid))delete w[sid];
+}
+function loeschfaellig(state,{heute=day()}={}){
+ const jahre=aufbewahrungJahre(state);
+ return (state.students||[]).filter(s=>s.active===false).map(s=>{const a=abgangsDatum(state,s);if(!a)return null;const faellig=plusJahre(a.datum,jahre);return faellig&&faellig<=heute?{sid:s.id,name:[s.first,s.last].filter(Boolean).join(' '),klasse:s.className||'',abgang:a.datum,quelle:a.quelle,faellig,...loeschUmfang(state,s.id)}:null;}).filter(Boolean).sort((a,b)=>a.faellig.localeCompare(b.faellig));
+}
+function akteLoeschen(state,sid,{von='',heute=day()}={}){
+ const s=(state.students||[]).find(x=>x.id===sid);if(!s)throw Error('Akte nicht gefunden.');
+ if(s.active!==false)throw Error('Nur archivierte Akten ehemaliger Schüler:innen können gelöscht werden.');
+ const f=loeschfaellig(state,{heute}).find(x=>x.sid===sid);if(!f)throw Error('Die Aufbewahrungsfrist dieser Akte ist noch nicht abgelaufen.');
+ const caseIds=new Set((state.cases||[]).filter(c=>c.studentId===sid).map(c=>c.id));let entfernt=0;
+ for(const [k,v] of Object.entries(state)){
+  if(!Array.isArray(v)||k==='students'||k==='loeschprotokoll')continue;
+  state[k]=v.filter(o=>{
+   if(!o||typeof o!=='object')return true;
+   const viele=['participantIds','studentIds'].find(f=>Array.isArray(o[f])&&o[f].includes(sid)&&o[f].length>1);
+   if(viele&&o.studentId!==sid){kindAusEintrag(o,sid);for(const r of o.revisions||[])if(r?.before&&typeof r.before==='object')kindAusEintrag(r.before,sid);entfernt++;return true;}
+   if(bezieht(o,sid)||(o.caseId&&caseIds.has(o.caseId))){entfernt++;return false;}
+   return true;});
+ }
+ for(const [k,v] of Object.entries(state.importLinks||{}))if(v===sid)delete state.importLinks[k];
+ const tags=state.settings?.timelineTags;if(tags)for(const k of Object.keys(tags))if(k.startsWith(sid+'|'))delete tags[k];
+ state.students=state.students.filter(x=>x.id!==sid);
+ state.loeschprotokoll=Array.isArray(state.loeschprotokoll)?state.loeschprotokoll:[];
+ const p={id:uid('loesch'),am:new Date().toISOString(),von:String(von||aktiveMitarbeitende(state)),frist:aufbewahrungJahre(state),abgang:f.abgang,schuljahrAbgang:schoolYear(f.abgang),klasse:f.klasse,eintraege:f.eintraege,weitere:entfernt-f.eintraege};
+ state.loeschprotokoll.push(p);return p;
+}
 const GESCHUETZTE_THEMEN=['kinderschutz','emotionen_krise','sucht'];
 const BERICHTE={jahresbericht:'Jahresbericht',halbjahr:'Halbjahresüberblick',arbeitszeit:'Arbeitszeitverteilung',praevention:'Prävention je Klassenstufe',vorjahr:'Vorjahresvergleich'};
 const ARBEITSBEREICHE={einzelfall:'Einzelfall',gruppen_klassen:'Gruppen und Klassen',kooperation:'Kooperation',verwaltung:'Verwaltung',fortbildung:'Fortbildung'};
@@ -893,5 +1010,5 @@ function weitergabeProtokollieren(state,{bericht,zeitraum,empfaenger,zweck='',fo
  const w={id:uid('weitergabe'),am:new Date().toISOString(),bericht:String(bericht||''),zeitraum:String(zeitraum||''),empfaenger:e,zweck:String(zweck||'').trim(),format,von:aktiveMitarbeitende(state)};
  state.weitergaben.push(w);return w;
 }
-root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,safetyHint,KATEGORIEN_VERSIONEN,kategorien,katListe,katLabel,stufeZweig,statErfassen,statMerkmale,zugangswegFuer,zugangswegSetzen,addTaetigkeit,ereignisse,zugangKarte,filterEreignisse,kennzahlen,aufschluesselung,kreuztabelle,datenqualitaet,statNachtragen,werteVon,NICHT_ERFASST,addStudent,similarStudents,suchNorm,suchPasst,schuelerSuche,jahrKlassen,klasseUebernehmen,alleKlassenUebernehmen,klasseAbgang,planeGespraech,geplanteGespraeche,gespraechVerschieben,gespraechAbsagen,gespraechErledigt,THEMEN_STICHWORTE,themenVorschlag,sperrHinweise,GESCHUETZTE_THEMEN,BERICHTE,wertLabel,anonymMatrix,kennzahlAnzeige,standardbericht,berichtCsv,weitergabeProtokollieren,SSA_TEAM_STANDARD,ssaTeam,mitarbeitendKanonisch,mitarbeitendSchreibweisen,mitarbeitendZuordnen,aktiveMitarbeitende,zusageErledigtEintragen,SAFETY_NOTICE};
+root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,safetyHint,KATEGORIEN_VERSIONEN,kategorien,katListe,katLabel,stufeZweig,statErfassen,statMerkmale,zugangswegFuer,zugangswegSetzen,addTaetigkeit,ereignisse,zugangKarte,filterEreignisse,kennzahlen,aufschluesselung,kreuztabelle,datenqualitaet,statNachtragen,werteVon,NICHT_ERFASST,addStudent,similarStudents,suchNorm,suchPasst,schuelerSuche,jahrKlassen,klasseUebernehmen,alleKlassenUebernehmen,klasseAbgang,planeGespraech,geplanteGespraeche,gespraechVerschieben,gespraechAbsagen,gespraechErledigt,THEMEN_STICHWORTE,themenVorschlag,sperrHinweise,wertungsHinweise,gruppenTextHinweis,auftragPruefen,AUFBEWAHRUNG_STANDARD,aufbewahrungJahre,abgangsDatum,loeschfaellig,akteLoeschen,GESCHUETZTE_THEMEN,BERICHTE,wertLabel,anonymMatrix,kennzahlAnzeige,standardbericht,berichtCsv,weitergabeProtokollieren,SSA_TEAM_STANDARD,ssaTeam,mitarbeitendKanonisch,mitarbeitendSchreibweisen,mitarbeitendZuordnen,aktiveMitarbeitende,zusageErledigtEintragen,SAFETY_NOTICE};
 })(globalThis);

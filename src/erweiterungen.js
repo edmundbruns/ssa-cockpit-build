@@ -44,6 +44,7 @@ const HILFE_TEXTE={
  erreichtePersonen:{titel:'Erreichte Personen',was:'Einzelkontakt zählt 1, Gruppe oder Klasse zählt die Teilnehmenden, dazu Teilnehmende bei Tätigkeiten ohne Fall.',warum:'Zeigt die Reichweite, auch von Projekten und Gruppen.',beispiel:'Ein Projekt mit 24 Kindern zählt 24.'},
  datenqualitaet:{titel:'Datenqualität',was:'Zeigt, wo Angaben für die Statistik fehlen.',warum:'Fehlende Angaben machen die Zahlen ungenau. Mit „Jetzt nachtragen“ ergänzt du sie Schritt für Schritt.',beispiel:'Ein Gespräch ohne Dauer fehlt sonst bei den Stunden.'},
  statFilter:{titel:'Filter',was:'Zeitraum und Merkmale lassen sich beliebig kombinieren; die Auswahl bleibt beim Seitenwechsel erhalten.',warum:'So beantwortest du Fragen wie „Wie viele Konflikte gab es in Klasse 7?“.',beispiel:'Zeitraum „1. Halbjahr“ und Thema „Konflikt / Mobbing“.'},
+ aufbewahrung:{titel:'Aufbewahrung und Löschung',was:'Akten ehemaliger Schüler:innen werden nach Ablauf der Frist ab dem Abgang endgültig gelöscht.',warum:'Die DSGVO verlangt, Daten nicht länger als nötig zu speichern. Die Frist legt die Schule fest.',beispiel:'Abgang am 15.07.2021, Frist 5 Jahre: zur Löschung fällig ab 15.07.2026.'},
  ssaTeam:{titel:'SSA-Team',was:'Die Personen, die in der Schulsozialarbeit dokumentieren und bei „Dokumentiert von“ zur Auswahl stehen.',warum:'Früher gab es verschiedene Schreibweisen für dieselbe Person. Die Zuordnung darunter fasst sie für die Statistik zusammen, ohne alte Einträge zu verändern.',beispiel:'„Edmund“ und „Bruns, Edmund“ zählen beide für Bruns, Edmund.'},
  berichte:{titel:'Berichte zur Weitergabe',was:'Fertige, anonymisierte Berichte für Schulleitung, Träger oder RLSB.',warum:'Nur diese Berichte verlassen das Cockpit. Kleine Zahlen werden verdeckt, damit niemand auf einzelne Kinder schließen kann.',beispiel:'Der Jahresbericht zeigt „< 3“ statt 1 bei einem seltenen Thema.'},
  weitergaben:{titel:'Weitergaben',was:'Protokoll, welcher Bericht wann an wen gegangen ist.',warum:'So kannst du jederzeit nachweisen, welche Zahlen die Schulsozialarbeit verlassen haben.',beispiel:'Jahresbericht 2026/27, als CSV an die Schulleitung.'},
@@ -636,6 +637,92 @@ function akteGeplantZeigen(sid){
 function planBlockHtml(g){
  const art=/Eltern/.test(g.type)?'Eltern':/Schulintern|Kollegium|Rückmeldung/.test(g.type)?'Lehrkraft':'Kind';
  return `<div class="full plan-block"><strong>Aus der Planung vom ${DE(fmt(g.createdAt?.slice(0,10)||g.date))}</strong>${g.anlass?`<p>Anlass: ${DE(g.anlass)}</p>`:''}${g.punkte?.length?`<p class="subtle">Hake ab, was geklärt ist. Alles andere wird als Zusage gemerkt.</p>${g.punkte.map((pt,i)=>`<label class="plan-punkt"><input type="checkbox" name="planPunktGeklaert" value="${i}"> ${DE(pt)}</label>`).join('')}<label class="plan-zusage-an">Offene Punkte als Zusage an <select class="field" name="planZusageAn">${['Kind','Eltern','Lehrkraft','Klassenleitung','Team'].map(x=>`<option ${x===art?'selected':''}>${x}</option>`).join('')}</select></label>`:''}</div>`;
+}
+
+/* ================================================================
+   11. GRUNDSÄTZE (0.24) – Hinweise, nie Automatik
+   Trainingsraum: Beratungsinhalte erkennen · Gruppengespräch: Persönliches über ein Kind
+   ================================================================ */
+function hinweisBox(feld,klasse){
+ const gruppe=feld.closest('.formgroup')||feld.parentElement;let box=gruppe.querySelector(':scope > .'+klasse);
+ if(!box){box=document.createElement('div');box.className='grundsatz-hinweis '+klasse;box.setAttribute('role','status');gruppe.appendChild(box);}
+ return box;
+}
+const TR_BERATUNGSTHEMEN=['familie','gesundheit','emotionen_krise','kinderschutz','sucht'];
+function trBeratungPruefen(){
+ const form=document.getElementById('trainingRoomForm'),feld=form?.elements.note;if(!feld)return;
+ const text=feld.value||'',themen=Dossier.themenVorschlag(text).filter(v=>TR_BERATUNGSTHEMEN.includes(v.id)),schutz=Dossier.safetyHint(text);
+ const box=hinweisBox(feld,'tr-beratung-hinweis');
+ if(!themen.length&&!schutz){box.hidden=true;box.innerHTML='';return;}
+ const was=[...themen.map(v=>Dossier.katLabel('thema',v.id)),...(schutz?['mögliche Schutzfrage']:[])];
+ box.hidden=false;
+ box.innerHTML=`<strong>Gehört das in ein Beratungsgespräch?</strong> Der Text berührt: ${DE(was.join(', '))}. Das Trainingsraumprotokoll ist ein schulischer Vorgang, den auch Lehrkräfte sehen. Vertrauliches gehört in „Gespräch eintragen“. <button type="button" class="btn kleiner" onclick="trInBeratungUebernehmen()">In ein Beratungsgespräch übernehmen</button>`;
+}
+async function trInBeratungUebernehmen(){
+ const form=document.getElementById('trainingRoomForm'),sid=form?.elements.studentId?.value,text=String(form?.elements.note?.value||'').trim();
+ if(!sid){appAlert('Bitte zuerst die Schülerin oder den Schüler auswählen.');return;}
+ if(!await appConfirm('Den Text aus dem Trainingsraum in ein neues Beratungsgespräch übernehmen?\n\nIm Trainingsraum bleibt nur der schulische Vorgang. Der Trainingsraumdialog bleibt geöffnet und kann danach gespeichert werden.'))return;
+ form.elements.note.value='';trBeratungPruefen();
+ selectedStudentId=sid;showStudent(sid);dossierEntry('event','',[sid]);
+ const ziel=document.querySelector('#dossierEditModal textarea[name=content]');
+ if(ziel){ziel.value=text;ziel.dispatchEvent(new Event('input',{bubbles:true}));ziel.focus();}
+ toast('Text übernommen. Bitte das Beratungsgespräch prüfen und speichern.');
+}
+function gtPersoenlichPruefen(){
+ const form=document.getElementById('groupTalkForm');if(!form)return;
+ const ids=[...document.querySelectorAll('#groupParticipants input:checked')].map(x=>x.value);
+ const text=[form.elements.note?.value,form.elements.result?.value].filter(Boolean).join(' ');
+ const h=Dossier.gruppenTextHinweis(data,text,ids),feld=form.elements.result||form.elements.note;if(!feld)return;
+ const box=hinweisBox(feld,'gt-persoenlich-hinweis');
+ if(!h){box.hidden=true;box.innerHTML='';return;}
+ box.hidden=false;
+ box.innerHTML=`<strong>Dieser Text steht in allen ${ids.length} Akten.</strong> Er nennt ${DE(h.kinder.map(k=>k.name).join(', '))} und enthält Persönliches (${DE(h.gruende.join(', '))}). Persönliches über ein Kind gehört in den <button type="button" class="linkbutton" onclick="gtZusatzOeffnen('${DE(h.kinder[0].id)}')">Zusatz pro Kind</button> oder in ein Einzelgespräch.`;
+}
+function gtZusatzOeffnen(sid){
+ if(typeof gtKindNotizenFuellen==='function')gtKindNotizenFuellen();
+ const det=document.querySelector('#gtKindNotizen details');if(det)det.open=true;
+ const inp=document.querySelector('#gtKindNotizen input[data-sid="'+CSS.escape(sid)+'"]');if(inp){inp.scrollIntoView({block:'center'});inp.focus();}
+}
+let grundsatzTimer=null;
+document.addEventListener('input',e=>{
+ const f=e.target?.closest?.('form');if(!f)return;
+ if(f.id==='trainingRoomForm'&&e.target.name==='note'){clearTimeout(grundsatzTimer);grundsatzTimer=setTimeout(trBeratungPruefen,250);}
+ if(f.id==='groupTalkForm'&&['note','result'].includes(e.target.name)){clearTimeout(grundsatzTimer);grundsatzTimer=setTimeout(gtPersoenlichPruefen,250);}
+});
+document.addEventListener('change',e=>{if(e.target?.closest?.('#groupParticipants'))gtPersoenlichPruefen();});
+document.addEventListener('reset',e=>{if(['trainingRoomForm','groupTalkForm'].includes(e.target?.id))setTimeout(()=>e.target.querySelectorAll('.grundsatz-hinweis').forEach(b=>{b.hidden=true;b.innerHTML='';}),0);},true);
+
+/* ================================================================
+   12. AUFBEWAHRUNG UND LÖSCHUNG (0.24) – Frist ab Abgang, einzeln bestätigt, Protokoll ohne Namen
+   ================================================================ */
+function loeschHinweisHtml(){
+ const n=Dossier.loeschfaellig(data).length;if(!n)return '';
+ return `<div class="alertitem" style="margin-bottom:17px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="grow"><strong>${n} ${n===1?'Akte':'Akten'} ehemaliger Schüler:innen ${n===1?'hat':'haben'} die Aufbewahrungsfrist überschritten.</strong> Bitte prüfen und löschen.</span><button class="btn" onclick="loeschKarteOeffnen()">Ansehen</button></div>`;
+}
+function loeschKarteOeffnen(){go('settings');setTimeout(()=>document.getElementById('loeschKarte')?.scrollIntoView({behavior:'smooth',block:'start'}),60);}
+function renderLoeschKarte(){
+ const box=document.getElementById('loeschKarte');if(!box)return;
+ const jahre=Dossier.aufbewahrungJahre(data),liste=Dossier.loeschfaellig(data),prot=(data.loeschprotokoll||[]).slice().reverse();
+ const ohne=(data.students||[]).filter(s=>s.active===false&&!Dossier.abgangsDatum(data,s)).length;
+ box.innerHTML=`<div class="cardhead"><h3>Aufbewahrung und Löschung ${hilfeKnopf('aufbewahrung')}</h3><span class="tag ${liste.length?'amber':'gray'}">${liste.length} fällig</span></div>
+ <p class="subtle">Akten ehemaliger Schüler:innen werden ${jahre} Jahre nach dem Abgang gelöscht. Jede Löschung bestätigst du einzeln; sie ist endgültig und wird ohne Namen protokolliert.</p>
+ <div class="formgroup"><label for="aufbewahrungFeld">Aufbewahrungsfrist nach Abgang (Jahre)</label><input class="field" id="aufbewahrungFeld" type="number" min="1" max="30" value="${jahre}" onchange="aufbewahrungSetzen(this.value)"><span class="hint">Festgelegt mit Schulleitung und Datenschutz. Standard: ${Dossier.AUFBEWAHRUNG_STANDARD} Jahre.</span></div>
+ ${liste.length?`<div class="team-sw"><table class="stat-tabelle"><thead><tr><th>Name</th><th>Klasse</th><th>Abgang</th><th>fällig seit</th><th class="zahl">Einträge</th><th></th></tr></thead><tbody>${liste.map(x=>`<tr><td>${DE(x.name)}</td><td>${DE(x.klasse)}</td><td>${DE(fmt(x.abgang))}${x.quelle!=='Abgang'?` <small class="subtle">(${DE(x.quelle)})</small>`:''}</td><td>${DE(fmt(x.faellig))}</td><td class="zahl">${x.eintraege}</td><td><button class="btn kleiner danger" onclick="akteEndgueltigLoeschen('${DE(x.sid)}')">Löschen …</button></td></tr>`).join('')}</tbody></table></div>`:'<p class="subtle">Zurzeit ist keine Akte zur Löschung fällig.</p>'}
+ ${ohne?`<p class="subtle">${ohne} archivierte ${ohne===1?'Akte hat':'Akten haben'} kein Abgangsdatum und ${ohne===1?'wird':'werden'} hier nicht berücksichtigt.</p>`:''}
+ <details class="team-bearbeiten"><summary>Löschprotokoll (${prot.length})</summary>${prot.length?`<div class="team-sw"><table class="stat-tabelle"><thead><tr><th>Gelöscht am</th><th>von</th><th>Abgang</th><th>Klasse</th><th class="zahl">Einträge</th><th>Frist</th></tr></thead><tbody>${prot.map(p=>`<tr><td>${DE(fmt(String(p.am).slice(0,10)))}</td><td>${DE(p.von)}</td><td>${DE(p.schuljahrAbgang||fmt(p.abgang))}</td><td>${DE(p.klasse||'')}</td><td class="zahl">${p.eintraege}</td><td>${p.frist} J.</td></tr>`).join('')}</tbody></table></div>`:'<p class="subtle">Noch keine Löschung.</p>'}<p class="subtle">Das Protokoll enthält keine Namen. Es belegt nur, dass und wann fristgerecht gelöscht wurde.</p></details>`;
+}
+function aufbewahrungSetzen(wert){
+ const j=Number(wert);if(!Number.isInteger(j)||j<1||j>30){appAlert('Bitte eine ganze Zahl zwischen 1 und 30 eintragen.');renderLoeschKarte();return;}
+ data.settings.aufbewahrungJahre=j;save();renderLoeschKarte();toast('Aufbewahrungsfrist: '+j+' Jahre nach Abgang.');
+}
+async function akteEndgueltigLoeschen(sid){
+ const x=Dossier.loeschfaellig(data).find(y=>y.sid===sid);if(!x){toast('Diese Akte ist nicht zur Löschung fällig.');renderLoeschKarte();return;}
+ if(!await appConfirm(`Akte von ${x.name} (${x.klasse||'ohne Klasse'}, Abgang ${fmt(x.abgang)}) endgültig löschen?\n\nGelöscht werden Stammdaten, Chronik, Fallakte, Aufgaben, Familie und Bezugspersonen, Trainingsraum und Dokumente. In Gruppengesprächen wird nur dieses Kind entfernt; der Text bleibt für die anderen Kinder.\n\nDas lässt sich nicht rückgängig machen. Ältere Sicherungen enthalten die Akte noch, bis sie automatisch ausgetauscht werden.`))return;
+ try{const anh=await invoke('list_attachments',{studentId:sid});for(const a of anh||[])await invoke('delete_attachment',{id:a.id});}
+ catch(err){appAlert('Die Dokumente der Akte konnten nicht gelöscht werden. Es wurde nichts gelöscht.\n\n'+(err?.message||err));return;}
+ let p;try{p=Dossier.akteLoeschen(data,sid,{von:aktivePerson()});}catch(err){appAlert(err.message||String(err));return;}
+ if(selectedStudentId===sid){selectedStudentId='';closeModal('studentModal');}
+ save();renderLoeschKarte();toast('Akte gelöscht und im Löschprotokoll vermerkt ('+p.eintraege+' Einträge).');
 }
 
 /* ================================================================
