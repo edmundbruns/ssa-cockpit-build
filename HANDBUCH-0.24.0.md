@@ -1,4 +1,17 @@
-# SSA-Cockpit 0.23.0
+# SSA-Cockpit 0.24.0
+
+## Neu in 0.24.0: Grundsätze guter Dokumentation
+
+Die Version setzt Erkenntnisse aus dem Lehrbuch „Gut dokumentieren in der Schulsozialarbeit“ um. Alles sind Hinweise – das Cockpit ändert nichts von selbst.
+
+- **Sachlich formulieren** listet wertende Wörter, Unterstellungen, Diagnosen, Etiketten und Verstärker mit einer Prüffrage auf (z. B. „empfindlich – Was genau hast du beobachtet?“). Umformulieren musst du selbst.
+- **Schutzhinweis** erkennt auch leise Hinweise auf Vernachlässigung (ohne Frühstück, unpassende Kleidung, allein zu Hause, muss auf Geschwister aufpassen, Eltern oft nicht ansprechbar). Der Hinweis sagt ausdrücklich: Die Stichwortsuche erkennt nicht alles.
+- **Trainingsraum:** Klingt die Notiz nach Beratungsinhalt (Familie, Gesundheit, Gefühle, Sucht, Schutzfrage), erscheint ein Hinweis. Mit „In ein Beratungsgespräch übernehmen“ wandert der Text in ein neues Gespräch; im Trainingsraum bleibt der schulische Vorgang.
+- **Gruppengespräch:** Nennt der gemeinsame Text ein Kind und enthält Persönliches, weist das Cockpit darauf hin, dass der Text in allen Akten steht, und öffnet auf Wunsch den Zusatz pro Kind.
+- **Kopf der Akte:** gelbe Hinweise bei abgelaufener, ausstehender oder nicht erteilter Schweigepflichtentbindung einer Bezugsperson und bei Familienangaben, die länger als ein Jahr nicht geprüft wurden.
+- **Auftrag:** Wird ein abgeschlossener Fall wieder aufgenommen, fragt die Akte „Ist der Auftrag noch aktuell?“.
+- **Aufbewahrung und Löschung** (Daten und Einstellungen): Akten ehemaliger Schüler:innen werden 5 Jahre nach dem Abgang zur Löschung angezeigt, auf „Heute“ erscheint ein Hinweis. Die Frist ist einstellbar. Gelöscht wird nur einzeln nach Bestätigung: Stammdaten, Chronik, Fallakte, Aufgaben, Familie, Bezugspersonen, Trainingsraum und Dokumente. In Gruppengesprächen wird nur dieses Kind entfernt. Das Löschprotokoll enthält Datum, Person, Abgangsschuljahr, Klasse und Zahl der Einträge – keine Namen. Ältere Sicherungen enthalten die Akte, bis sie automatisch ausgetauscht werden.
+- **Sachlich formulieren** kennt zusätzlich Umgangssprache (z. B. „ausgerastet“, „keinen Bock“) und weitere Wertungen, Diagnosen und Etiketten. Wörtliche Zitate in Anführungszeichen werden nicht als Wertung gezählt.
 
 ## Alltag
 

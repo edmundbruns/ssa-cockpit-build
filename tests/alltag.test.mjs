@@ -23,7 +23,7 @@ test('Sperrhinweise: rote Sperre vor gelben Hinweisen',()=>{
  const s={students:[{id:'a',first:'A',last:'B',family:{contactPermission:'Nur nach Rücksprache',custodyStatus:'Ungeklärt'}}],relatedPersons:[{studentId:'a',name:'Herr X',role:'Getrenntlebender Elternteil',mayContact:'Nein'},{studentId:'a',name:'Frau Y',role:'Jugendamt',mayContact:'Ja'},{studentId:'b',name:'Z',mayContact:'Nein'}]};
  const h=D.sperrHinweise(s,'a');
  assert.equal(h[0].stufe,'rot');assert.match(h[0].text,/Keine Auskunft \/ kein Kontakt: Herr X · Getrenntlebender Elternteil/);
- assert.equal(h.length,3);assert(!h.some(x=>/Frau Y|Z/.test(x.text)));
+ assert.equal(h.filter(x=>!/Prüfdatum/.test(x.text)).length,3);assert(h.some(x=>/Familienangaben ohne Prüfdatum/.test(x.text)),'0.24: Familie ohne Prüfdatum');assert(!h.some(x=>/Frau Y|Z/.test(x.text)));
  assert.deepEqual(D.sperrHinweise(s,'b'),[],'unbekanntes Kind: nichts');
  assert.equal(D.sperrHinweise({students:[{id:'c',family:{contactPermission:'Kontakt untersagt'}}]},'c')[0].stufe,'rot');
 });

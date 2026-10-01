@@ -1,6 +1,6 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Version 0.23.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
+Version 0.24.0. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
 
 Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
@@ -11,7 +11,7 @@ Unter „Gesprächsbogen drucken“ stehen vier fachlich unterschiedliche DIN-A4
 
 ## Aktueller Arbeitsablauf
 
-Das Handbuch steht in `HANDBUCH-0.23.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
+Das Handbuch steht in `HANDBUCH-0.24.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
 
 
 ## Neu in 0.12.2: Dialoge und Speichern
@@ -167,6 +167,17 @@ Abnahme (automatisch geprüft):
 - „Anlass“ und „Sachliche Situationsbeschreibung“ zusammengelegt: Anlass-Knopf (Pflicht) plus freiwilliges Feld „Was ist passiert?“ (`note`, jetzt optional und in der Chronik sichtbar). Das Feld „Ergänzung zum Anlass“ entfällt; alte Werte bleiben.
 - Begleitet von (nur SSA-Team), Folgemaßnahme und Wiedervorlage unter „Mehr“.
 - Schülersuche im Formular nutzt die robuste Suche aus 0.21.
+
+## Neu in 0.24.0 – Grundsätze guter Dokumentation
+
+- „Sachlich formulieren“ zeigt wertende Wörter, Unterstellungen, Diagnosen, Etiketten und Verstärker mit Prüffrage; keine automatische Umformulierung.
+- Schutzhinweis erkennt zusätzlich Hinweise auf Vernachlässigung und sagt, dass die Stichwortsuche nicht alles erkennt.
+- Trainingsraum: Hinweis bei Beratungsinhalt in der Notiz, Übernahme in ein Beratungsgespräch.
+- Gruppengespräch: Hinweis, wenn der gemeinsame Text Persönliches über ein genanntes Kind enthält.
+- Akte: Hinweise zu Schweigepflichtentbindungen (abgelaufen, ausstehend, nicht erteilt) und zu Familienangaben ohne Prüfung seit über einem Jahr.
+- Auftrag: Nach Wiederaufnahme eines abgeschlossenen Falls fragt die Akte, ob der Auftrag noch aktuell ist.
+- Aufbewahrung und Löschung: Frist 5 Jahre ab Abgang (einstellbar), Hinweis auf „Heute“, einzelne Löschung nach Bestätigung inklusive Dokumente, Löschprotokoll ohne Namen.
+- „Sachlich formulieren“: zusätzliche Begriffe inklusive Umgangssprache; wörtliche Zitate werden ausgenommen.
 
 ## Neu in 0.23.0 – Gesprächsbogen passend zum Formular
 

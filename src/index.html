@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#164e63">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230f766e'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='Arial' font-size='25' font-weight='700' fill='white'%3ESSA%3C/text%3E%3C/svg%3E">
-  <title>SSA-Cockpit Ludgerusschule · Desktop 0.23.0</title>
+  <title>SSA-Cockpit Ludgerusschule · Desktop 0.24.0</title>
   <style>
     :root{--navy:#123047;--teal:#0f766e;--cyan:#0891b2;--cream:#f7f5ef;--paper:#fff;--ink:#183042;--muted:#64748b;--line:#dce4e8;--amber:#f59e0b;--red:#dc2626;--green:#16a34a;--shadow:0 12px 34px rgba(15,45,61,.10);--radius:18px}
     *{box-sizing:border-box} body{margin:0;background:var(--cream);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif} button,input,select,textarea{font:inherit} button{cursor:pointer}
@@ -257,6 +257,11 @@
     .chip.chip-vorschlag{border:2px dashed #0f766e;background:#e6f4f1;box-shadow:0 0 0 2px rgba(15,118,110,.12)}.chip-vorschlag-hinweis{font-size:12px;color:#0f766e;margin-top:4px}
     .gt-kindnotizen details>summary{cursor:pointer;color:#0f766e;font-weight:600}.gt-kindnotiz{display:grid;grid-template-columns:minmax(120px,32%) 1fr;gap:8px;align-items:center;margin:4px 0}.gt-kindnotiz span{font-size:14px;overflow-wrap:anywhere}
     .kind-zusatz{margin-top:4px;color:#35505c}
+    /* 0.24: Grundsätze – Hinweise zu Wertungen, Trainingsraum, Gruppentext */
+    .akte-sperre.rot li.gelb{color:#6b4e00}.akte-sperre.rot li.gelb::marker{color:#b45309}
+    #loeschKarte td,#loeschKarte th{white-space:nowrap}#loeschKarte .field#aufbewahrungFeld{max-width:120px}
+    .grundsatz-hinweis{margin-top:6px;padding:8px 10px;border-radius:8px;background:#fff6e0;border-left:4px solid #b45309;font-size:13px;line-height:1.45}.grundsatz-hinweis .btn{margin-left:6px}
+    .dossier-text-wertungen{margin:6px 0 8px;padding:8px 10px;border-radius:8px;background:#fff6e0;font-size:13px}.dossier-text-wertungen ul{margin:4px 0 0;padding-left:18px}.dossier-text-wertungen mark{background:#fde2b8;border-radius:3px;padding:0 3px}
     /* 0.19: Gespräch planen, Schuljahreswechsel für ganze Klassen */
     .akte-plan{margin:8px 22px 0;padding:8px 12px;border:1px solid #9cc9c1;background:#eef7f5;border-radius:10px;font-size:14px}.akte-plan .today-row{border:0;padding:4px 0}
     .plan-block{border:1px solid #9cc9c1;background:#f3faf8;border-radius:10px;padding:10px 12px}.plan-block p{margin:4px 0}.plan-block .plan-punkt{display:flex;flex-direction:row;gap:8px;align-items:center;justify-content:flex-start;margin:4px 0;font-weight:400}.plan-block .plan-punkt input{width:auto;margin:0;flex:0 0 auto}.plan-block .plan-zusage-an{display:flex;flex-direction:row;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}.plan-block .plan-zusage-an select{width:auto;min-width:160px}
@@ -326,7 +331,7 @@
         </div>
       </div>
     </nav>
-    <div class="sidefoot"><button type="button" class="aktiv-person" id="aktivePersonAnzeige" onclick="werArbeitetFragen(true)" title="Wer arbeitet gerade? Zum Wechseln klicken."></button><span class="statusdot"></span><span><span id="saveStatus" data-state="gespeichert" aria-live="polite">Alles gespeichert</span> · offline<br>Desktopversion 0.23.0</span></div>
+    <div class="sidefoot"><button type="button" class="aktiv-person" id="aktivePersonAnzeige" onclick="werArbeitetFragen(true)" title="Wer arbeitet gerade? Zum Wechseln klicken."></button><span class="statusdot"></span><span><span id="saveStatus" data-state="gespeichert" aria-live="polite">Alles gespeichert</span> · offline<br>Desktopversion 0.24.0</span></div>
   </aside>
   <main>
 <div id="saveErrorBar" class="save-error-bar" role="alert" hidden><strong>Nicht gespeichert.</strong> <span data-detail></span> <button class="btn" type="button" onclick="speichernErneut()">Erneut speichern</button></div>
@@ -501,6 +506,7 @@
           <div class="card"><h3>Kennwort ändern</h3><div class="formgrid"><div class="formgroup"><label>Aktuelles Kennwort</label><input class="field" id="oldPassword" type="password"></div><div class="formgroup"><label>Neues Kennwort</label><input class="field" id="newPassword" type="password" minlength="12"></div></div><button class="btn" style="margin-top:12px" onclick="changeVaultPassword()">Kennwort ändern</button></div>
           <div class="card"><h3>Datenschutzstatus</h3><div class="notice">Daten, Anhänge und Sicherungen werden in der Desktopversion lokal verschlüsselt gespeichert.</div><p class="subtle">Dies ist kein pauschales Versprechen rechtlicher Konformität. Verantwortlichkeit, Berechtigungen, Löschfristen, Sicherungsort, Vertretung und Vorfallverfahren müssen von der verantwortlichen Stelle verbindlich geregelt werden.</p></div>
           <div class="card" id="teamKarte"><h3>SSA-Team</h3></div>
+          <div class="card" id="loeschKarte" style="grid-column:1/-1"><h3>Aufbewahrung und Löschung</h3></div>
           
           <div class="card"><h3>Praxis-Einstellungen</h3><div class="formgrid"><div class="formgroup"><label>Trainingsraum-Hinweis ab Besuchen</label><input class="field" id="trainingThreshold" type="number" min="2" max="10" value="3" onchange="savePracticeSettings()"></div><div class="formgroup"><label>Zeitraum in Tagen</label><input class="field" id="trainingWindow" type="number" min="7" max="180" value="28" onchange="savePracticeSettings()"></div><div class="formgroup"><label>Automatische Sperre nach Minuten</label><input class="field" id="idleMinutes" type="number" min="1" max="120" value="10" onchange="savePracticeSettings()"><span class="hint">Die erneute Eingabe des Kennworts ist erforderlich.</span></div><div class="formgroup full"><label>Grußformel in E-Mail-Entwürfen</label><input class="field" id="emailAbsender" placeholder="SSA-Team" onchange="savePracticeSettings()"><span class="hint">Steht unter jedem erzeugten E-Mail-Entwurf. Ohne Eintrag wird „SSA-Team“ verwendet.</span></div></div></div>
           <div class="card"><h3>Vorgangsdaten zurücksetzen</h3><p class="subtle">Löscht den aktuellen Arbeitsbestand nach vorheriger verschlüsselter Sicherung.</p><button class="btn danger" onclick="resetData()">Arbeitsbestand zurücksetzen</button></div>
@@ -965,7 +971,7 @@ function renderSelects(){
  document.getElementById('grade1StartDate').value=data.settings.grade1StartDate||'2026-08-17';
  document.getElementById('additionalNonSchoolDays').value=(data.settings.additionalNonSchoolDays||[]).join(', ');
  document.getElementById('speechEndpoint').value=data.settings.speechEndpoint||'http://127.0.0.1:8173/transcribe';
- if(typeof renderTeamKarte==='function')renderTeamKarte();
+ if(typeof renderTeamKarte==='function')renderTeamKarte();if(typeof renderLoeschKarte==='function')renderLoeschKarte();
  const backupInfo=document.getElementById('lastBackupInfo');if(backupInfo)backupInfo.textContent=data.settings.lastBackupAt?`Letzte vollständige Sicherung: ${new Intl.DateTimeFormat('de-DE',{dateStyle:'medium',timeStyle:'short'}).format(new Date(data.settings.lastBackupAt))}`:'Noch keine Sicherung in dieser Version erstellt.';
  data.settings.privacyMode=false;document.body.classList.remove('privacy-mode')
 }
@@ -976,7 +982,7 @@ function renderDashboardStart(){const el=document.getElementById('dashboardStart
  } else if(neu>0){
   el.innerHTML=`<div class="alertitem" style="margin-bottom:17px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="grow"><strong>${neu} neue Schüler-Anfrage${neu===1?'':'n'}</strong> im getrennten Eingang. Erst fachlich prüfen, dann zuordnen.</span><button class="btn" onclick="go('requests')">Anfragen öffnen</button></div>`;
  } else { el.innerHTML=''; }
- el.innerHTML=sicherungWarnung()+el.innerHTML;
+ el.innerHTML=sicherungWarnung()+(typeof loeschHinweisHtml==='function'?loeschHinweisHtml():'')+el.innerHTML;
 }
 function renderDashboard(){renderDashboardStart();heuteListe();renderStartKacheln();const active=data.cases.filter(c=>c.status!=='Abgeschlossen'&&!fallArchiviert(c)).length,mins=data.contacts.reduce((a,c)=>a+Number(c.duration),0),open=data.tasks.filter(t=>!t.done&&!aufgabeArchiviert(t)).length;
  document.getElementById('kpis').innerHTML=kpi('Aktive Fälle',active,'davon '+data.cases.filter(c=>c.status==='Beobachtung'&&!fallArchiviert(c)).length+' in Beobachtung')+kpi('Kontakte',data.contacts.length,'im laufenden Schuljahr')+kpi('Beratungszeit',Math.round(mins/60)+' Std.','aus Kurz- und Fallkontakten')+kpi('Offene Aufgaben',open,'nächste 14 Tage');

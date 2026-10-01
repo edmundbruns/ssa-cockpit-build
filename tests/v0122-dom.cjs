@@ -511,6 +511,60 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  run(`closeModal('studentModal')`);await waitSaved();console.log('0.22 trainingsraum ok');
  }
 
+ // 20. Version 0.24: Grundsätze – nur Hinweise, nichts automatisch
+ {
+ const ja=async()=>{await sleep(20);const b=[...w.document.querySelectorAll('.modal.open [data-r="1"]')].at(-1);assert(b,'Bestätigung erwartet');b.click();await sleep(40);};
+ run(`document.querySelectorAll('.modal.open').forEach(m=>m.id?closeModal(m.id):m.remove());selectedStudentId='s1';showStudent('s1');dossierEntry('event')`);
+ const ef=w.document.getElementById('dossierEditForm');const ursprung='Anna ist total empfindlich, die Mutter kümmert sich nicht.';
+ ef.elements.content.value=ursprung;run('dossierTextPreview()');
+ const wl=w.document.querySelector('#dossierTextPreview .dossier-text-wertungen');
+ assert(wl&&!wl.hidden,'Wertungen angezeigt');assert(/empfindlich/.test(wl.textContent)&&/kümmert sich nicht/.test(wl.textContent)&&/Was genau hast du beobachtet/.test(wl.textContent));
+ assert.equal(ef.elements.content.value,ursprung,'Text bleibt unverändert');
+ ef.elements.content.value='Jana kommt ohne Frühstück.';ef.elements.content.dispatchEvent(new w.Event('input',{bubbles:true}));await sleep(320);
+ const live=w.document.getElementById('dossierSafetyLive');assert(!live.hidden&&/ohne Frühstück/.test(live.textContent)&&/erkennt nicht alles/.test(live.textContent),'Vernachlässigung im Live-Hinweis');
+ ef.elements.content.value='Anna berichtet sachlich.';run('dossierTextPreview()');assert(w.document.querySelector('#dossierTextPreview .dossier-text-wertungen').hidden,'sachlicher Text ohne Liste');
+ run(`closeModal('dossierEditModal');closeModal('studentModal')`);
+ // Trainingsraum: Beratungsinhalt erkennen und übernehmen
+ run(`openTrainingRoom('s1')`);const tf=w.document.getElementById('trainingRoomForm');
+ tf.elements.note.value='Hat gestört. Erzählt, dass zu Hause die Eltern sich ständig streiten.';tf.elements.note.dispatchEvent(new w.Event('input',{bubbles:true}));await sleep(320);
+ const th=tf.querySelector('.tr-beratung-hinweis');assert(th&&!th.hidden&&/Beratungsgespräch/.test(th.textContent)&&/Familie/.test(th.textContent),'Hinweis im Trainingsraum');
+ const p=run('trInBeratungUebernehmen()');await ja();await p;
+ assert.equal(tf.elements.note.value,'','Text aus dem Trainingsraum genommen');assert(th.hidden,'Hinweis weg');
+ assert(/Eltern sich ständig streiten/.test(w.document.querySelector('#dossierEditModal textarea[name=content]').value),'Text im Beratungsgespräch');
+ assert(isOpen('trainingRoomModal'),'Trainingsraum bleibt offen');
+ run(`closeModal('dossierEditModal');closeModal('studentModal');closeModal('trainingRoomModal')`);run(`openTrainingRoom('s1')`);assert(!tf.querySelector('.tr-beratung-hinweis')||tf.querySelector('.tr-beratung-hinweis').hidden,'nach Neuöffnen kein alter Hinweis');
+ tf.elements.note.value='Hat dazwischengerufen.';tf.elements.note.dispatchEvent(new w.Event('input',{bubbles:true}));await sleep(320);assert(tf.querySelector('.tr-beratung-hinweis').hidden,'sachlicher Vorgang ohne Hinweis');
+ run(`closeModal('trainingRoomModal')`);
+ // Gruppengespräch: Persönliches über ein genanntes Kind
+ run(`openGroupTalk(['s1','s2'])`);const gf=w.document.getElementById('groupTalkForm');
+ gf.elements.note.value='Streit in der Pause. Bert erzählt, Annas Eltern trennen sich.';gf.elements.note.dispatchEvent(new w.Event('input',{bubbles:true}));await sleep(320);
+ const gh=gf.querySelector('.gt-persoenlich-hinweis');assert(gh&&!gh.hidden&&/allen 2 Akten/.test(gh.textContent)&&/Anna Beispiel/.test(gh.textContent),'Hinweis im Gruppengespräch');
+ gh.querySelector('button').click();await sleep(20);assert(w.document.querySelector('#gtKindNotizen details')?.open,'Zusatz pro Kind geöffnet');
+ gf.elements.note.value='Streit in der Pause, Regel vereinbart.';gf.elements.note.dispatchEvent(new w.Event('input',{bubbles:true}));await sleep(320);assert(gh.hidden,'sachlich: kein Hinweis');
+ run(`closeModal('groupTalkModal')`);
+ // Kopf der Akte: Entbindung, Prüfdatum, Auftrag nach Wiederaufnahme
+ run(`(()=>{const s=data.students.find(x=>x.id==='s3');s.family={custodyStatus:'Gemeinsames Sorgerecht',verifiedAt:'2024-01-10'};data.relatedPersons.push({id:'rp-t24',studentId:'s3',name:'Beratungsstelle',role:'Beratungsstelle',mayContact:'Ja',releaseStatus:'Abgelaufen'});
+  Dossier.saveAuftrag(data,'s3',{requester:'Kind selbst',childNeed:'x',assignedOrder:'Begleitung',date:'2026-01-10'});data.statusHistory.push({id:'sh-t24',studentId:'s3',date:'2026-02-01',fromStatus:'Abgeschlossen',status:'Wiederaufgenommen'});
+  data.journal.push({id:'j-t24',date:'2026-02-01',type:'Schülergespräch / Einzelberatung',title:'x',content:'x',participantIds:['s3']});selectedStudentId='s3';showStudent('s3')})()`);
+ const sp=w.document.getElementById('akteSperre').textContent;assert(/Schweigepflichtentbindung abgelaufen: Beratungsstelle/.test(sp)&&/zuletzt geprüft am 10\.01\.2024/.test(sp),'gelbe Hinweise im Aktenkopf');
+ assert(/wieder aufgenommen\. Ist der Auftrag noch aktuell\?/.test(w.document.getElementById('studentDetailBody').textContent),'Auftrag erneut prüfen');
+ run(`closeModal('studentModal')`);
+ // Aufbewahrung: Frist 5 Jahre, einzeln löschen, Protokoll ohne Namen
+ run(`data.students.push({id:'sAlt',first:'Ehemals',last:'Testkind',className:'10a',schoolYear:'2019/20',active:false,archivedAt:'2020-07-15',enrollments:[]});data.journal.push({id:'jAlt',date:'2020-03-01',type:'Schülergespräch / Einzelberatung',title:'alt',content:'alt',participantIds:['sAlt']});save();go('dashboard')`);
+ assert(/Aufbewahrungsfrist überschritten/.test(w.document.getElementById('dashboardStart').textContent),'Hinweis auf Heute');
+ run(`go('settings')`);const lk=w.document.getElementById('loeschKarte');assert(/Ehemals Testkind/.test(lk.textContent)&&/5 Jahre/.test(lk.textContent),'Löschkarte listet die Akte');
+ const pl=run(`akteEndgueltigLoeschen('sAlt')`);await ja();await pl;await sleep(20);
+ assert(!run(`data.students.some(s=>s.id==='sAlt')`)&&!run(`data.journal.some(e=>e.id==='jAlt')`),'Akte gelöscht');
+ assert.equal(run('data.loeschprotokoll.length'),1);assert(!/Ehemals/.test(JSON.stringify(run('data.loeschprotokoll'))),'Protokoll ohne Namen');
+ assert(!/Ehemals Testkind/.test(w.document.getElementById('loeschKarte').textContent)&&/Löschprotokoll \(1\)/.test(w.document.getElementById('loeschKarte').textContent));
+ // Abgang über die Akte setzt das Abgangsdatum (Grundlage der Frist)
+ run(`selectedStudentId='s3';showStudent('s3');toggleStudentStatus()`);await sleep(20);
+ const af=w.document.getElementById('dossierEditForm');af.elements.date.value='2026-07-31';af.requestSubmit();await sleep(60);
+ assert.equal(run(`data.students.find(s=>s.id==='s3').archivedAt`),'2026-07-31','Abgangsdatum gespeichert');
+ assert(!run(`Dossier.loeschfaellig(data).some(x=>x.sid==='s3')`),'Frist läuft erst ab Abgang');
+ run(`closeModal('studentModal');go('dashboard')`);await waitSaved();console.log('0.24 grundsätze ok');
+ }
+
  console.log('errors',errors);
  if(errors.length)process.exitCode=1;
  w.close();
