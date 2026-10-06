@@ -70,3 +70,25 @@ test('0.14: Daten der Vorversion laden unverändert, neue Felder haben Standardw
  const e=s.journal[0];for(const k of ['id','date','type','title','content'])assert.equal(e[k],JSON.parse(vorher)[k]);
  assert.ok(D.timeline(s,'a',[]).some(x=>x.key==='entry:e1'));
 });
+
+
+test('WebUntis-Import: tab-getrennte Dateien und zweistellige Datumsjahre',()=>{
+ const html=read('src/index.html');
+ const section=(name,nextName)=>{
+  const start=html.indexOf('function '+name+'('),end=html.indexOf('function '+nextName+'(',start);
+  assert(start>=0&&end>start,'Funktion '+name+' vorhanden');
+  return html.slice(start,end);
+ };
+ const api=new Function(
+  section('detectDelimitedSeparator','parseDelimited')+
+  section('parseDelimited','headerKey')+
+  section('parseSignalDate','upsertSchoolSignal')+
+  ';return {parseDelimited,parseSignalDate};'
+ )();
+ const rows=api.parseDelimited('Schüler*innen\\tExterne Id\\tKlasse\\tDatum\\tFehlstd.\\tFehlmin.\\tAbwesenheitsgrund\\tAbwesenheit zählt\\tStatus\\nMuster, Anna\\t123\\t5a\\t14.09.26\\t1\\t45\\tkrank\\ttrue\\tentsch.');
+ assert.equal(rows.length,2);
+ assert.equal(rows[0].length,9);
+ assert.equal(rows[1][0],'Muster, Anna');
+ assert.equal(api.parseSignalDate(rows[1][3]),'2026-09-14');
+ assert.equal(api.parseSignalDate('30.09.2026'),'2026-09-30');
+});
