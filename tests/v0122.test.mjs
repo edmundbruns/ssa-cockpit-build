@@ -85,7 +85,7 @@ test('WebUntis-Import: tab-getrennte Dateien und zweistellige Datumsjahre',()=>{
   section('parseSignalDate','upsertSchoolSignal')+
   ';return {parseDelimited,parseSignalDate};'
  )();
- const rows=api.parseDelimited('Schüler*innen\\tExterne Id\\tKlasse\\tDatum\\tFehlstd.\\tFehlmin.\\tAbwesenheitsgrund\\tAbwesenheit zählt\\tStatus\\nMuster, Anna\\t123\\t5a\\t14.09.26\\t1\\t45\\tkrank\\ttrue\\tentsch.');
+ const tab=String.fromCharCode(9),newline=String.fromCharCode(10);\n const rows=api.parseDelimited(['Schüler*innen','Externe Id','Klasse','Datum','Fehlstd.','Fehlmin.','Abwesenheitsgrund','Abwesenheit zählt','Status'].join(tab)+newline+['Muster, Anna','123','5a','14.09.26','1','45','krank','true','entsch.'].join(tab));
  assert.equal(rows.length,2);
  assert.equal(rows[0].length,9);
  assert.equal(rows[1][0],'Muster, Anna');
