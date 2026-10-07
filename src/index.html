@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#164e63">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230f766e'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='Arial' font-size='25' font-weight='700' fill='white'%3ESSA%3C/text%3E%3C/svg%3E">
-  <title>SSA-Cockpit Ludgerusschule · Desktop 0.24.1</title>
+  <title>SSA-Cockpit Ludgerusschule · Desktop 0.24.2</title>
   <style>
     :root{--navy:#123047;--teal:#0f766e;--cyan:#0891b2;--cream:#f7f5ef;--paper:#fff;--ink:#183042;--muted:#64748b;--line:#dce4e8;--amber:#f59e0b;--red:#dc2626;--green:#16a34a;--shadow:0 12px 34px rgba(15,45,61,.10);--radius:18px}
     *{box-sizing:border-box} body{margin:0;background:var(--cream);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif} button,input,select,textarea{font:inherit} button{cursor:pointer}
@@ -331,7 +331,7 @@
         </div>
       </div>
     </nav>
-    <div class="sidefoot"><button type="button" class="aktiv-person" id="aktivePersonAnzeige" onclick="werArbeitetFragen(true)" title="Wer arbeitet gerade? Zum Wechseln klicken."></button><span class="statusdot"></span><span><span id="saveStatus" data-state="gespeichert" aria-live="polite">Alles gespeichert</span> · offline<br>Desktopversion 0.24.1</span></div>
+    <div class="sidefoot"><button type="button" class="aktiv-person" id="aktivePersonAnzeige" onclick="werArbeitetFragen(true)" title="Wer arbeitet gerade? Zum Wechseln klicken."></button><span class="statusdot"></span><span><span id="saveStatus" data-state="gespeichert" aria-live="polite">Alles gespeichert</span> · offline<br>Desktopversion 0.24.2</span></div>
   </aside>
   <main>
 <div id="saveErrorBar" class="save-error-bar" role="alert" hidden><strong>Nicht gespeichert.</strong> <span data-detail></span> <button class="btn" type="button" onclick="speichernErneut()">Erneut speichern</button></div>
@@ -1133,20 +1133,82 @@ function signalPeriodLabel(key,records=[]){
  if(start&&/^20\d{2}-\d{2}/.test(start))return new Intl.DateTimeFormat('de-DE',{month:'short',year:'2-digit'}).format(new Date(start+'T12:00')).replace('.','');
  return first?.period||key;
 }
-function absencePeriodSummary(period,records){
- const rows=records.filter(r=>signalPeriodKey(r)===period&&!schuelerArchiviert(r.studentId));
+function expectedInstructionDatesForStudent(student,start,end){
+ if(!student||!start||!end)return null;
+ const dates=[],extra=new Set(Array.isArray(data.settings.additionalNonSchoolDays)?data.settings.additionalNonSchoolDays:[]),hasEnrollments=Array.isArray(student.enrollments)&&student.enrollments.length>0;
+ const first=new Date(start+'T12:00'),last=new Date(end+'T12:00');
+ for(let day=new Date(first);day<=last;day.setDate(day.getDate()+1)){
+  const iso=day.toISOString().slice(0,10),weekday=day.getDay();
+  if(weekday===0||weekday===6||NDS_WEEKDAY_HOLIDAYS_2026_27.has(iso)||extra.has(iso)||NDS_FREE_RANGES_2026_27.some(([a,b])=>iso>=a&&iso<=b))continue;
+  const enrollment=Dossier.context(data,student.id,iso),className=enrollment.className||(hasEnrollments?'':student.className||'');
+  if(!className)return null;
+  if(/^1[a-z]?$/i.test(String(className))&&iso<(data.settings.grade1StartDate||'2026-08-17'))continue;
+  dates.push({date:iso,className});
+ }
+ return dates;
+}
+function timetableRowsForRosterStudent(student,start,end){
+ const inRange=data.timetableLessons.filter(x=>x.date>=start&&x.date<=end&&x.status!=='entfällt'&&x.status!=='ausfall'&&x.status!=='unterrichtsfrei');
+ const dates=[...new Set(inRange.map(x=>x.date))],rows=[];
+ for(const date of dates){
+  const dayRows=inRange.filter(x=>x.date===date),personal=dayRows.filter(x=>x.studentId===student.id);
+  if(personal.length){rows.push(...personal);continue}
+  const context=Dossier.context(data,student.id,date),className=context.className||(Array.isArray(student.enrollments)&&student.enrollments.length?'':student.className||'');
+  if(!className)continue;
+  rows.push(...dayRows.filter(x=>!x.studentId&&String(x.className||'').trim().toLocaleLowerCase('de-DE')===String(className).trim().toLocaleLowerCase('de-DE')));
+ }
+ return rows;
+}
+function attendanceScheduleDenominator(students,rowsForStudent,expectedDatesForStudent){
+ const roster=students.filter(s=>s&&s.active!==false);let scheduledMinutes=0,expectedStudentDays=0,coveredStudentDays=0,eligibleStudents=0,unassignedStudents=0;
+ const studentIds=[];
+ for(const student of roster){
+  const expected=expectedDatesForStudent(student);
+  if(expected===null){unassignedStudents++;continue}
+  if(!expected.length)continue;
+  eligibleStudents++;studentIds.push(student.id);
+  const scheduled=rowsForStudent(student),scheduledByDate=new Set(scheduled.filter(x=>Number(x.minutes||0)>0).map(x=>x.date));
+  scheduledMinutes+=scheduled.reduce((n,x)=>n+Number(x.minutes||0),0);
+  expectedStudentDays+=expected.length;
+  coveredStudentDays+=expected.filter(x=>scheduledByDate.has(x.date)).length;
+ }
+ const missingStudentDays=Math.max(0,expectedStudentDays-coveredStudentDays);
+ return {scheduledMinutes,expectedStudentDays,coveredStudentDays,missingStudentDays,eligibleStudents,activeStudents:roster.length,unassignedStudents,studentIds,coveragePercent:expectedStudentDays?coveredStudentDays/expectedStudentDays*100:null,complete:roster.length>0&&eligibleStudents>0&&unassignedStudents===0&&expectedStudentDays>0&&missingStudentDays===0};
+}
+function absenceScopeDenominator(periodRows,scopeClass=''){
+ const ranges=periodRows.map(signalDateRange).filter(([a,b])=>a&&b);
+ if(!ranges.length)return {scheduledMinutes:0,expectedStudentDays:0,coveredStudentDays:0,missingStudentDays:0,eligibleStudents:0,activeStudents:0,unassignedStudents:0,coveragePercent:null,complete:false,studentIds:[]};
+ const start=ranges.map(r=>r[0]).sort()[0],end=ranges.map(r=>r[1]).sort().at(-1);
+ const roster=data.students.filter(s=>!schuelerArchiviert(s.id));
+ const scoped=scopeClass?roster.filter(s=>{const c=Dossier.context(data,s.id,start).className||s.className||'';return String(c).trim().toLocaleLowerCase('de-DE')===String(scopeClass).trim().toLocaleLowerCase('de-DE')}):roster;
+ const result=attendanceScheduleDenominator(scoped,s=>timetableRowsForRosterStudent(s,start,end),s=>{
+  const dates=expectedInstructionDatesForStudent(s,start,end);
+  if(dates===null)return null;
+  return scopeClass?dates.filter(x=>String(x.className).trim().toLocaleLowerCase('de-DE')===String(scopeClass).trim().toLocaleLowerCase('de-DE')):dates;
+ });
+ return {...result,startDate:start,endDate:end};
+}
+function absencePeriodSummary(period,records,scope='records'){
+ const periodRows=records.filter(r=>signalPeriodKey(r)===period&&!schuelerArchiviert(r.studentId));
+ const scopeClass=scope&&typeof scope==='object'?scope.className||'':'';
+ const globalScope=scope==='school'||!!scopeClass;
+ let denominator=null,rows=periodRows;
+ if(globalScope){
+  denominator=absenceScopeDenominator(periodRows,scopeClass);
+  if(denominator.studentIds)rows=periodRows.filter(r=>denominator.studentIds.includes(r.studentId));
+ }else denominator={scheduledMinutes:periodRows.reduce((n,r)=>n+Number(instructionStats(r).scheduledMinutes||0),0),expectedStudentDays:periodRows.reduce((n,r)=>n+Number(schoolDayStats(r).possible||0),0),coveredStudentDays:0,missingStudentDays:0,eligibleStudents:periodRows.length,activeStudents:periodRows.length,unassignedStudents:0,coveragePercent:null,complete:true};
  const sum=(field)=>rows.reduce((n,r)=>n+Number(r[field]||0),0);
- const possibleDays=rows.reduce((n,r)=>n+Number(schoolDayStats(r).possible||0),0);
- const scheduledMinutes=rows.reduce((n,r)=>n+Number(instructionStats(r).scheduledMinutes||0),0);
  const absenceMinutes=sum('absenceMinutes'),unexcusedMinutes=rows.reduce((n,r)=>n+Number(r.unexcusedMinutes||0),0),openMinutes=rows.reduce((n,r)=>n+Number(r.openMinutes||0),0);
- const dayRate=possibleDays?sum('absenceDays')/possibleDays*100:null;
- const rate=scheduledMinutes?absenceMinutes/scheduledMinutes*100:dayRate;
- const rateFor=(minutes,hours)=>scheduledMinutes?(minutes||hours*45)/scheduledMinutes*100:null;
- return {period,rows,students:rows.length,hours:sum('absences'),minutes:absenceMinutes,days:sum('absenceDays'),unexcused:sum('unexcused'),open:sum('openAbsences'),late:sum('late'),possibleDays,scheduledMinutes,dayRate,denominator:scheduledMinutes,rate,rateBasis:scheduledMinutes?'Unterrichtsminuten':'betroffene Schultage',unexcusedRate:rateFor(unexcusedMinutes,sum('unexcused')),openRate:rateFor(openMinutes,sum('openAbsences')),label:signalPeriodLabel(period,records)};
+ const possibleDays=globalScope?denominator.expectedStudentDays:periodRows.reduce((n,r)=>n+Number(schoolDayStats(r).possible||0),0);
+ const scheduledMinutes=denominator.scheduledMinutes,dayRate=possibleDays?sum('absenceDays')/possibleDays*100:null;
+ const complete=globalScope?denominator.complete:true;
+ const rate=scheduledMinutes&&complete?absenceMinutes/scheduledMinutes*100:(!globalScope?(scheduledMinutes?absenceMinutes/scheduledMinutes*100:dayRate):null);
+ const rateFor=(minutes,hours)=>scheduledMinutes&&complete?(minutes||hours*45)/scheduledMinutes*100:null;
+ return {period,rows,students:rows.length,hours:sum('absences'),minutes:absenceMinutes,days:sum('absenceDays'),unexcused:sum('unexcused'),open:sum('openAbsences'),late:sum('late'),possibleDays,scheduledMinutes,dayRate,denominator:scheduledMinutes,rate,rateBasis:scheduledMinutes?'Unterrichtsminuten':'Schüler:innen-Schultage',denominatorComplete:complete,rosterStudents:globalScope?denominator.eligibleStudents:periodRows.length,coveragePercent:globalScope?denominator.coveragePercent:null,expectedStudentDays:denominator.expectedStudentDays,coveredStudentDays:denominator.coveredStudentDays,missingStudentDays:denominator.missingStudentDays,unassignedStudents:denominator.unassignedStudents,denominatorNote:globalScope?(denominator.complete?'Alle aktiven Schüler:innen mit Stundenplan sind für den Zeitraum abgedeckt.':denominator.eligibleStudents===0?'Für den Zeitraum wurden keine aktiven Schüler:innen mit passender Klassenzuordnung gefunden.':(denominator.unassignedStudents?denominator.unassignedStudents+' aktive Schüler:innen haben keine eindeutige Klassenzuordnung. ':'')+denominator.missingStudentDays+' Schüler:innen-Schultage ohne passende Stundenplandaten.'): '',unexcusedRate:rateFor(unexcusedMinutes,sum('unexcused')),openRate:rateFor(openMinutes,sum('open')),label:signalPeriodLabel(period,records)};
 }
 function signalPeriodSummaries(records=data.schoolSignals){
  const periods=[...new Set(records.map(signalPeriodKey))].filter(Boolean).sort();
- return periods.map(p=>absencePeriodSummary(p,records));
+ return periods.map(p=>absencePeriodSummary(p,records,'school'));
 }
 function absenceRateText(value){return value===null||value===undefined?'nicht berechenbar':`${Number(value).toFixed(1).replace('.',',')} %`}
 function absenceDeltaText(current,previous){
@@ -1169,10 +1231,10 @@ function absenceClassComparison(records,current,previous){
  const currentBy=new Map(),previousBy=new Map();
  current.rows.forEach(r=>{const s=data.students.find(x=>x.id===r.studentId),key=s?.className||r.className||'ohne Klasse';if(!currentBy.has(key))currentBy.set(key,[]);currentBy.get(key).push(r)});
  previous?.rows.forEach(r=>{const s=data.students.find(x=>x.id===r.studentId),key=s?.className||r.className||'ohne Klasse';if(!previousBy.has(key))previousBy.set(key,[]);previousBy.get(key).push(r)});
- const rows=[...currentBy.entries()].map(([name,items])=>{const now=absencePeriodSummary(current.period,items);const oldItems=previousBy.get(name)||[];const old=oldItems.length?absencePeriodSummary(previous.period,oldItems):null;return {name,now,old}}).sort((a,b)=>(Number(b.now.rate)||0)-(Number(a.now.rate)||0)).slice(0,8);
+ const rows=[...currentBy.entries()].map(([name,items])=>{const now=absencePeriodSummary(current.period,items,{className:name});const oldItems=previousBy.get(name)||[];const old=oldItems.length?absencePeriodSummary(previous.period,oldItems,{className:name}):null;return {name,now,old}}).sort((a,b)=>(Number(b.now.rate)||0)-(Number(a.now.rate)||0)).slice(0,8);
  const maxRate=Math.max(5,Math.ceil(Math.max(0,...rows.map(x=>Number(x.now.rate)||0))/5)*5);
  const bars=rows.length?`<div class="absence-class-bars" role="img" aria-label="Klassenquoten für ${DE(current.label)}, Skala null bis ${maxRate} Prozent">${rows.map(x=>{const value=x.now.rate,width=value===null?0:Math.min(100,Math.max(0,value/maxRate*100));return `<div style="display:grid;grid-template-columns:minmax(55px,90px) minmax(80px,1fr) 78px;gap:9px;align-items:center;margin:7px 0"><strong>${DE(x.name)}</strong><div aria-hidden="true" style="height:13px;background:var(--line);border-radius:8px;overflow:hidden"><div style="height:100%;width:${width.toFixed(1)}%;background:var(--teal);border-radius:8px"></div></div><span style="text-align:right;font-variant-numeric:tabular-nums">${absenceRateText(value)}</span></div>`}).join('')}<div class="subtle" style="display:flex;justify-content:space-between;margin-left:99px;margin-right:86px;font-size:11px"><span>0 %</span><span>${(maxRate/2).toLocaleString('de-DE')} %</span><span>${maxRate.toLocaleString('de-DE')} %</span></div></div>`:'';
- return `${bars}<div class="tablewrap"><table class="absence-table"><thead><tr><th>Klasse</th><th>Quote ${current.label}</th><th>Unentschuldigt</th><th>Veränderung</th></tr></thead><tbody>${rows.map(x=>`<tr><td><strong>${DE(x.name)}</strong><br><span class="subtle">${x.now.students} Schüler:innen im Import</span></td><td>${absenceRateText(x.now.rate)}</td><td>${compactNumber(x.now.unexcused)} Std.</td><td>${absenceDeltaText(x.now,x.old)}</td></tr>`).join('')}</tbody></table></div>`;
+ return `${bars}<div class="tablewrap"><table class="absence-table"><thead><tr><th>Klasse</th><th>Quote ${current.label}</th><th>Unentschuldigt</th><th>Veränderung</th></tr></thead><tbody>${rows.map(x=>`<tr><td><strong>${DE(x.name)}</strong><br><span class="subtle">${x.now.students} mit Fehlzeiteintrag von ${x.now.rosterStudents} Schüler:innen</span></td><td>${absenceRateText(x.now.rate)}</td><td>${compactNumber(x.now.unexcused)} Std.</td><td>${absenceDeltaText(x.now,x.old)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 function signalAmpelPeriodSummaries(records=data.schoolSignals){
  const periods=[...new Set(records.map(signalPeriodKey))].filter(Boolean).sort();
@@ -1202,7 +1264,7 @@ function renderSignalDevelopment(){
  const summaries=signalPeriodSummaries();
  if(!summaries.length){box.innerHTML='<div class="cardhead"><div><h3 id="signalDevelopmentTitle">Fehlzeitenentwicklung</h3><div class="subtle">Monatsvergleich und Gesamtentwicklung aus den importierten WebUntis-Daten.</div></div></div><div class="empty">Nach dem ersten WebUntis-Import erscheint hier die Auswertung.</div>';return}
  const current=summaries.at(-1),previous=summaries.at(-2);
- box.innerHTML=`<div class="cardhead"><div><h3 id="signalDevelopmentTitle">Fehlzeitenentwicklung</h3><div class="subtle">Normierte Fehlzeitenquote, Monatsvergleich und Gesamtentwicklung. Die Quote bezieht sich auf mögliche Unterrichtszeit, soweit diese berechnet werden kann.</div></div><span class="tag ${previous?'green':'gray'}">${summaries.length} Zeitraum${summaries.length===1?'':'e'}</span></div><div class="absence-development-grid"><section><h4 style="margin:0 0 8px">Gesamtentwicklung</h4>${absenceTrendChart(summaries)}<p class="hint">Absolute Fehlstunden bleiben sichtbar. Für den Vergleich wird vorrangig die Fehlzeitenquote verwendet, damit Monate mit unterschiedlich vielen Schultagen nicht verzerrt werden.</p></section><section><h4 style="margin:0 0 8px">${current.label}${previous?' im Vergleich zu '+previous.label:''}</h4><div class="absence-compare"><div class="detailitem"><span>Fehlzeitenquote</span><strong>${absenceRateText(current.rate)}</strong>${previous?`<br>${absenceDeltaText(current,previous)}`:''}</div><div class="detailitem"><span>Fehlstunden</span><strong>${compactNumber(current.hours)}</strong><br><span class="subtle">${compactNumber(current.days)} Fehltage</span></div><div class="detailitem"><span>Unentschuldigt</span><strong>${compactNumber(current.unexcused)} Std.</strong><br><span class="subtle">${compactNumber(current.late)} Verspätungen</span></div><div class="detailitem"><span>Entschuldigungsstatus offen</span><strong>${compactNumber(current.open)}</strong><br><span class="subtle">Stunden zur Klärung</span></div></div>${current.rate===null?'<div class="notice warning" style="margin-top:12px">Die normierte Quote ist noch nicht berechenbar. Importiere einen passenden Stundenplan oder prüfe die möglichen Schultage.</div>':''}</section></div><section style="margin-top:17px"><div class="cardhead"><div><h4 style="margin:0">Fallzahlen nach Ampelstufe</h4><div class="subtle">Anzahl der grünen, gelben und roten Hinweise je Zeitraum.</div></div></div>${signalAmpelTrendChart(signalAmpelPeriodSummaries())}<p class="hint">Jede Person wird pro Zeitraum einmal gezählt, mit dem zuletzt importierten Datensatz des Monats. Die Ampelstufen werden nach den aktuell eingestellten Schwellenwerten berechnet.</p></section><section style="margin-top:17px"><div class="cardhead"><div><h4 style="margin:0">Klassenvergleich</h4><div class="subtle">Die Klassen mit den höchsten aktuellen Quoten. Keine Rangliste von Schüler:innen.</div></div><span class="tag gray">${current.label}</span></div>${absenceClassComparison(data.schoolSignals,current,previous)}</section>`;
+ box.innerHTML=`<div class="cardhead"><div><h3 id="signalDevelopmentTitle">Fehlzeitenentwicklung</h3><div class="subtle">Schulweite Fehlzeitenquote: Fehlzeitenminuten aller Schüler:innen ÷ geplante Unterrichtsminuten aller aktiven Schüler:innen × 100. Sie erscheint nur bei vollständiger Stundenplanabdeckung.</div></div><span class="tag ${previous?'green':'gray'}">${summaries.length} Zeitraum${summaries.length===1?'':'e'}</span></div><div class="absence-development-grid"><section><h4 style="margin:0 0 8px">Gesamtentwicklung</h4>${absenceTrendChart(summaries)}<p class="hint">Absolute Fehlstunden bleiben sichtbar. Für den Vergleich wird vorrangig die Fehlzeitenquote verwendet, damit Monate mit unterschiedlich vielen Schultagen nicht verzerrt werden.</p></section><section><h4 style="margin:0 0 8px">${current.label}${previous?' im Vergleich zu '+previous.label:''}</h4><div class="absence-compare"><div class="detailitem"><span>Fehlzeitenquote</span><strong>${absenceRateText(current.rate)}</strong>${previous?`<br>${absenceDeltaText(current,previous)}`:''}</div><div class="detailitem"><span>Fehlstunden</span><strong>${compactNumber(current.hours)}</strong><br><span class="subtle">${compactNumber(current.days)} Fehltage</span></div><div class="detailitem"><span>Unentschuldigt</span><strong>${compactNumber(current.unexcused)} Std.</strong><br><span class="subtle">${compactNumber(current.late)} Verspätungen</span></div><div class="detailitem"><span>Entschuldigungsstatus offen</span><strong>${compactNumber(current.open)}</strong><br><span class="subtle">Stunden zur Klärung</span></div></div>${current.rate===null?`<div class="notice warning" style="margin-top:12px">Die Schulquote ist noch nicht berechenbar. ${DE(current.denominatorNote||'Stundenplandaten fehlen oder decken den Zeitraum nicht vollständig ab.')}${current.coveragePercent!==null?` Stundenplanabdeckung: ${absenceRateText(current.coveragePercent)} (${compactNumber(current.coveredStudentDays)} von ${compactNumber(current.expectedStudentDays)} Schüler:innen-Schultagen).`:''}</div>`:`<div class="notice" style="margin-top:12px">Berechnung: ${compactNumber(current.minutes)} Fehlzeitenminuten ÷ ${compactNumber(current.scheduledMinutes)} geplante Unterrichtsminuten aller ${compactNumber(current.rosterStudents)} aktiven Schüler:innen × 100. Stundenplanabdeckung: ${absenceRateText(current.coveragePercent)}.</div>`}</section></div><section style="margin-top:17px"><div class="cardhead"><div><h4 style="margin:0">Fallzahlen nach Ampelstufe</h4><div class="subtle">Anzahl der grünen, gelben und roten Hinweise je Zeitraum.</div></div></div>${signalAmpelTrendChart(signalAmpelPeriodSummaries())}<p class="hint">Jede Person wird pro Zeitraum einmal gezählt, mit dem zuletzt importierten Datensatz des Monats. Die Ampelstufen werden nach den aktuell eingestellten Schwellenwerten berechnet.</p></section><section style="margin-top:17px"><div class="cardhead"><div><h4 style="margin:0">Klassenvergleich</h4><div class="subtle">Die Klassen mit den höchsten aktuellen Quoten. Keine Rangliste von Schüler:innen.</div></div><span class="tag gray">${current.label}</span></div>${absenceClassComparison(data.schoolSignals,current,previous)}</section>`;
 }
 function renderSignals(){renderGrueneListe();renderSignalDevelopment();
  const q=(document.getElementById('signalSearch').value||'').toLocaleLowerCase('de-DE'),classFilter=document.getElementById('signalClassFilter').value,status=document.getElementById('signalStatus').value,records=[...data.schoolSignals].sort((a,b)=>String(b.importedAt||'').localeCompare(String(a.importedAt||''))),latest=new Map();

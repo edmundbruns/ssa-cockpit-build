@@ -709,7 +709,7 @@ dependencies = [
 
 [[package]]
 name = "darling"
-version = "0.24.1"
+version = "0.24.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ed17f5901b6630b993ca003def43f2f8ef4014fc13b047b57aad617ff32bc2ec"
 dependencies = [
@@ -719,7 +719,7 @@ dependencies = [
 
 [[package]]
 name = "darling_core"
-version = "0.24.1"
+version = "0.24.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6837e2cf7485aaae18f86181d2f0e9a7ed297a025e220aeabf63fdebd3a2ddff"
 dependencies = [
@@ -732,7 +732,7 @@ dependencies = [
 
 [[package]]
 name = "darling_macro"
-version = "0.24.1"
+version = "0.24.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2ac7135c3ef02b2f7833bbeb1be5ba7f966dcde8a87c6b87f65a778d71a02785"
 dependencies = [
@@ -3408,7 +3408,7 @@ dependencies = [
 
 [[package]]
 name = "ssa-cockpit-ludgerusschule"
-version = "0.24.1"
+version = "0.24.2"
 dependencies = [
  "aes-gcm",
  "argon2",
