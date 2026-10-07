@@ -106,3 +106,11 @@ test('Klassenvergleich listet alle Klassen und schließt auch Klassen ohne Fehlz
  assert.match(block,/dateRange:currentRange/);
  assert.doesNotMatch(block,/\.slice\(0,8\)/);
 });
+
+test('Nach Zeitraum-Auswertung wird nur der gewählte Zeitraum angezeigt',()=>{
+ assert.match(html,/absenceRangeSelectionActive=true/);
+ assert.match(html,/1 ausgewählter Zeitraum/);
+ assert.match(html,/Alle Kennzahlen und Klassen beziehen sich ausschließlich auf diesen ausgewählten Zeitraum/);
+ assert.match(html,/function showAbsenceImportHistory\(\)/);
+ assert.match(html,/function absenceRangeClassComparison\(records,start,end\)/);
+});
