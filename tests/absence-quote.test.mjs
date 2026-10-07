@@ -101,8 +101,8 @@ test('Klassenvergleich listet alle Klassen und schließt auch Klassen ohne Fehlz
  const start=html.indexOf('function absenceClassComparison('),end=html.indexOf('function signalAmpelPeriodSummaries(',start);
  assert(start>=0&&end>start,'Klassenvergleich vorhanden');
  const block=html.slice(start,end);
- assert.match(block,/Object\\.keys\\(data\\.settings\\.classWeeklyPlans\\|\\|\\{\\}\\)/);
- assert.match(block,/data\\.students\\.filter\\(s=>s\\.active!==false/);
+ assert.match(block,/Object\.keys\(data\.settings\.classWeeklyPlans\|\|\{\}\)/);
+ assert.match(block,/data\.students\.filter\(s=>s\.active!==false/);
  assert.match(block,/dateRange:currentRange/);
- assert.doesNotMatch(block,/\\.slice\\(0,8\\)/);
+ assert.doesNotMatch(block,/\.slice\(0,8\)/);
 });
