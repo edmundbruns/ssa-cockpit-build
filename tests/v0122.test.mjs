@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 
 const root=fileURLToPath(new URL('..',import.meta.url));
 const read=f=>fs.readFileSync(path.join(root,f),'utf8').replace(/\r\n/g,'\n');
-const VERSION='0.24.3';
+const VERSION='0.24.4';
 
 test('Versionsnummer ist überall gleich',()=>{
  assert.equal(JSON.parse(read('package.json')).version,VERSION);

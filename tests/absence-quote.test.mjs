@@ -56,3 +56,43 @@ test('Wochenplan-Eingabe ist mit Wochentag und Klasse in der Auswertungsseite vo
 test('Schulquote zeigt bei fehlender Abdeckung keinen Nullwert im Verlauf',()=>{
  assert.match(html,/const line=field=>[\s\S]*?s\[field\]===null/);
 });
+
+test('Teilzeitraum verwendet tagesgenaue WebUntis-Werte und blockiert alte Summendaten',()=>{
+ const start=html.indexOf('function signalRecordSlice('),end=html.indexOf('function absenceRangeSummary(',start);
+ assert(start>=0&&end>start,'Zeitraumfilter vorhanden');
+ const slice=new Function('signalDateRange','fmt',html.slice(start,end)+';return signalRecordSlice;')((r)=>[r.startDate,r.endDate],(d)=>d);
+ const record={studentId:'a',startDate:'2026-09-01',endDate:'2026-09-03',absences:3,absenceMinutes:135,absenceDays:3,dailyAbsences:[
+  {date:'2026-09-01',absences:1,absenceMinutes:45,absenceDays:1},
+  {date:'2026-09-02',absences:1,absenceMinutes:45,absenceDays:1},
+  {date:'2026-09-03',absences:1,absenceMinutes:45,absenceDays:1}
+ ]};
+ const selected=slice(record,'2026-09-02','2026-09-02');
+ assert.equal(selected.record.absenceMinutes,45);assert.equal(selected.record.absences,1);assert.equal(selected.record.absenceDays,1);assert.equal(selected.record.partialRange,true);
+ const legacy=slice({...record,dailyAbsences:undefined},'2026-09-02','2026-09-02');
+ assert.equal(legacy.record,null);assert.equal(legacy.incomplete,true);
+});
+
+test('WebUntis-Gesamtdatei speichert gezählte Fehlzeiten auch tagesgenau',()=>{
+ const start=html.indexOf('function aggregateWebUntisRows('),end=html.indexOf('function detectDelimitedSeparator(',start);
+ assert(start>=0&&end>start,'WebUntis-Aggregator vorhanden');
+ const headerKey=v=>String(v||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ß/g,'SS').replace(/[^A-Z0-9]/g,'');
+ const aggregate=new Function('headerKey','parseSignalDate','matchSignalStudent','applyWebUntisClass','numberGerman','id','fmt','clean',html.slice(start,end)+';return aggregateWebUntisRows;')(
+  headerKey,
+  v=>{const m=String(v||'').match(/^(\d{1,2})\.(\d{1,2})\.(\d{2}|\d{4})$/);return m?`${m[3].length===2?'20'+m[3]:m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`:''},
+  ()=>({id:'s1',className:'5a'}),()=>false,v=>Number(String(v||'').replace(',','.'))||0,()=> 'sig1',v=>v,v=>String(v||'')
+ );
+ const headers=['Schüler*innen','Externe Id','Klasse','Datum','Fehlstd.','Fehlmin.','Lehrkraft','Fach','Abwesenheitsgrund','ENr','Abwesenheit zählt','Status','Fehltage'];
+ const rows=[headers,
+  ['Kind Beispiel','id1','5a','01.09.2026','2','90','','','Krank','event1','true','entsch.','1'],
+  ['Kind Beispiel','id1','5a','01.09.2026','1','45','LK','Mathe','Krank','event1','true','entsch.','0'],
+  ['Kind Beispiel','id1','5a','01.09.2026','1','45','LK','Deutsch','Krank','event1','true','entsch.','0']
+ ];
+ const result=aggregate(rows,headers.map(headerKey),{name:'test.csv'});
+ assert.equal(result.records[0].absences,2);assert.equal(result.records[0].absenceMinutes,90);assert.equal(result.records[0].dailyAbsences.length,1);assert.equal(result.records[0].dailyAbsences[0].absenceMinutes,90);
+});
+
+test('E-Mail-Auswertung nimmt den gewählten Datumszeitraum als Filter',()=>{
+ assert.match(html,/function classEmailErzeugen\(\)[\s\S]*signalRecordSlice\(r,von,bis\)/);
+ assert.match(html,/function classEmailMailto\(\)[\s\S]*classEmailRangeComplete/);
+ assert.match(html,/id="absenceRangeStart"[\s\S]*id="absenceRangeEnd"/);
+});
