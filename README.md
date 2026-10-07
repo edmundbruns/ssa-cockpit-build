@@ -1,8 +1,6 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Version 0.24.2. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
-
-Die schulweite Fehlzeitenquote setzt Fehlzeitenminuten aller Schüler:innen ins Verhältnis zu den geplanten Unterrichtsminuten aller aktiven Schüler:innen im selben Zeitraum. Schüler:innen ohne Fehlzeiteintrag zählen im Nenner mit. Bei unvollständiger Stundenplanabdeckung weist das Cockpit keine Quote aus.
+Version 0.24.3. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
 
 Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
