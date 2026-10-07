@@ -96,3 +96,13 @@ test('E-Mail-Auswertung nimmt den gewählten Datumszeitraum als Filter',()=>{
  assert.match(html,/function classEmailMailto\(\)[\s\S]*classEmailRangeComplete/);
  assert.match(html,/id="absenceRangeStart"[\s\S]*id="absenceRangeEnd"/);
 });
+
+test('Klassenvergleich listet alle Klassen und schließt auch Klassen ohne Fehlzeiteintrag ein',()=>{
+ const start=html.indexOf('function absenceClassComparison('),end=html.indexOf('function signalAmpelPeriodSummaries(',start);
+ assert(start>=0&&end>start,'Klassenvergleich vorhanden');
+ const block=html.slice(start,end);
+ assert.match(block,/Object\\.keys\\(data\\.settings\\.classWeeklyPlans\\|\\|\\{\\}\\)/);
+ assert.match(block,/data\\.students\\.filter\\(s=>s\\.active!==false/);
+ assert.match(block,/dateRange:currentRange/);
+ assert.doesNotMatch(block,/\\.slice\\(0,8\\)/);
+});

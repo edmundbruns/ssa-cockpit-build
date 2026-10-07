@@ -1230,10 +1230,11 @@ function saveAbsenceRange(){
 function absencePeriodSummary(period,records,scope='records'){
  const periodRows=records.filter(r=>signalPeriodKey(r)===period&&!schuelerArchiviert(r.studentId));
  const scopeClass=scope&&typeof scope==='object'?scope.className||'':'';
+ const scopeDateRange=scope&&typeof scope==='object'?scope.dateRange||null:null;
  const globalScope=scope==='school'||!!scopeClass;
  let denominator=null,rows=periodRows;
  if(globalScope){
-  denominator=absenceScopeDenominator(periodRows,scopeClass);
+  denominator=absenceScopeDenominator(periodRows,scopeClass,scopeDateRange);
   if(denominator.studentIds)rows=periodRows.filter(r=>denominator.studentIds.includes(r.studentId));
  }else denominator={scheduledMinutes:periodRows.reduce((n,r)=>n+Number(instructionStats(r).scheduledMinutes||0),0),expectedStudentDays:periodRows.reduce((n,r)=>n+Number(schoolDayStats(r).possible||0),0),coveredStudentDays:0,missingStudentDays:0,eligibleStudents:periodRows.length,activeStudents:periodRows.length,unassignedStudents:0,coveragePercent:null,complete:true};
  const sum=(field)=>rows.reduce((n,r)=>n+Number(r[field]||0),0);
@@ -1267,10 +1268,26 @@ function absenceTrendChart(summaries){
 }
 function absenceClassComparison(records,current,previous){
  if(!current)return '<div class="empty">Für einen Klassenvergleich fehlt ein Monatsimport.</div>';
- const currentBy=new Map(),previousBy=new Map();
- current.rows.forEach(r=>{const s=data.students.find(x=>x.id===r.studentId),key=s?.className||r.className||'ohne Klasse';if(!currentBy.has(key))currentBy.set(key,[]);currentBy.get(key).push(r)});
- previous?.rows.forEach(r=>{const s=data.students.find(x=>x.id===r.studentId),key=s?.className||r.className||'ohne Klasse';if(!previousBy.has(key))previousBy.set(key,[]);previousBy.get(key).push(r)});
- const rows=[...currentBy.entries()].map(([name,items])=>{const now=absencePeriodSummary(current.period,items,{className:name});const oldItems=previousBy.get(name)||[];const old=oldItems.length?absencePeriodSummary(previous.period,oldItems,{className:name}):null;return {name,now,old}}).sort((a,b)=>(Number(b.now.rate)||0)-(Number(a.now.rate)||0)).slice(0,8);
+ const rangeFor=summary=>{
+  const source=(summary?.rows||[]).map(r=>r.sourceRange||signalDateRange(r)).filter(r=>r?.[0]&&r?.[1]);
+  return source.length?{start:source.map(r=>r[0]).sort()[0],end:source.map(r=>r[1]).sort().at(-1)}:null;
+ };
+ const classes=new Set(Object.keys(data.settings.classWeeklyPlans||{}));
+ const currentRange=rangeFor(current),currentStart=currentRange?.start||'',previousRange=rangeFor(previous);
+ for(const student of data.students.filter(s=>s.active!==false&&!schuelerArchiviert(s.id))){
+  const context=currentStart?Dossier.context(data,student.id,currentStart):{};
+  const name=context.className||student.className;
+  if(name)classes.add(String(name).trim());
+  for(const enrollment of student.enrollments||[])if(enrollment.className)classes.add(String(enrollment.className).trim());
+ }
+ for(const r of [...(current.rows||[]),...(previous?.rows||[])]){const s=data.students.find(x=>x.id===r.studentId),name=s?.className||r.className;if(name)classes.add(String(name).trim())}
+ const rows=[...classes].filter(Boolean).sort((a,b)=>a.localeCompare(b,'de-DE',{numeric:true})).map(name=>{
+  const currentItems=records.filter(r=>signalPeriodKey(r)===current.period&&(data.students.find(s=>s.id===r.studentId)?.className||r.className||'')===name);
+  const previousItems=previous?records.filter(r=>signalPeriodKey(r)===previous.period&&(data.students.find(s=>s.id===r.studentId)?.className||r.className||'')===name):[];
+  const now=absencePeriodSummary(current.period,currentItems,{className:name,dateRange:currentRange});
+  const old=previous?absencePeriodSummary(previous.period,previousItems,{className:name,dateRange:previousRange}):null;
+  return {name,now,old};
+ }).sort((a,b)=>(b.now.rate??-1)-(a.now.rate??-1)||a.name.localeCompare(b.name,'de-DE',{numeric:true}));
  const maxRate=Math.max(5,Math.ceil(Math.max(0,...rows.map(x=>Number(x.now.rate)||0))/5)*5);
  const bars=rows.length?`<div class="absence-class-bars" role="img" aria-label="Klassenquoten für ${DE(current.label)}, Skala null bis ${maxRate} Prozent">${rows.map(x=>{const value=x.now.rate,width=value===null?0:Math.min(100,Math.max(0,value/maxRate*100));return `<div style="display:grid;grid-template-columns:minmax(55px,90px) minmax(80px,1fr) 78px;gap:9px;align-items:center;margin:7px 0"><strong>${DE(x.name)}</strong><div aria-hidden="true" style="height:13px;background:var(--line);border-radius:8px;overflow:hidden"><div style="height:100%;width:${width.toFixed(1)}%;background:var(--teal);border-radius:8px"></div></div><span style="text-align:right;font-variant-numeric:tabular-nums">${absenceRateText(value)}</span></div>`}).join('')}<div class="subtle" style="display:flex;justify-content:space-between;margin-left:99px;margin-right:86px;font-size:11px"><span>0 %</span><span>${(maxRate/2).toLocaleString('de-DE')} %</span><span>${maxRate.toLocaleString('de-DE')} %</span></div></div>`:'';
  return `${bars}<div class="tablewrap"><table class="absence-table"><thead><tr><th>Klasse</th><th>Quote ${current.label}</th><th>Unentschuldigt</th><th>Veränderung</th></tr></thead><tbody>${rows.map(x=>`<tr><td><strong>${DE(x.name)}</strong><br><span class="subtle">${x.now.students} mit Fehlzeiteintrag von ${x.now.rosterStudents} Schüler:innen</span></td><td>${absenceRateText(x.now.rate)}</td><td>${compactNumber(x.now.unexcused)} Std.</td><td>${absenceDeltaText(x.now,x.old)}</td></tr>`).join('')}</tbody></table></div>`;

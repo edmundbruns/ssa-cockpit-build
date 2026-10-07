@@ -1,6 +1,6 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Version 0.24.4. Die Fehlzeitenquote kann für einen frei gewählten Zeitraum berechnet werden. Klassen-Wochenpläne liefern den Unterrichtsminuten-Nenner; der WebUntis-Import speichert Tageswerte und sperrt unvollständige E-Mail-Auswertungen. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
+Version 0.24.5. Die Fehlzeitenquote kann für einen frei gewählten Zeitraum berechnet werden. Der Klassenvergleich zeigt alle Klassen, auch ohne Fehlzeiteintrag. Klassen-Wochenpläne liefern den Unterrichtsminuten-Nenner; der WebUntis-Import speichert Tageswerte und sperrt unvollständige E-Mail-Auswertungen. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
 
 Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
