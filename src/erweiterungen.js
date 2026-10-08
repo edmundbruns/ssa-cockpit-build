@@ -416,7 +416,8 @@ function renderStatistikNeu(){
  ${statBalkenTabelle('Ergebnis der Gespräche','ergebnis',Dossier.aufschluesselung(evs,'ergebnis','kontakte',f,zk),'kontakte','ergebnis')}
  ${statBalkenTabelle('Klassenstufe','stufe',Dossier.aufschluesselung(evs,'stufe','kinder',f,zk).sort((a,b)=>(a.id===Dossier.NICHT_ERFASST)-(b.id===Dossier.NICHT_ERFASST)||Number(a.id)-Number(b.id)),'kinder','')}
  ${statBalkenTabelle('Schulzweig','zweig',Dossier.aufschluesselung(evs,'zweig','kinder',f,zk),'kinder','')}
- ${<h2 style="grid-column:1/-1">Verlauf und Arbeitsbereiche</h2>\n ${statBalkenTabelle('Kontakte im Verlauf','monat',Dossier.aufschluesselung(evs.filter(e=>e.art==='kontakt'),'monat','kontakte',f,zk).sort((a,b)=>a.id.localeCompare(b.id)),'kontakte','')}
+ <h2 style="grid-column:1/-1">Verlauf und Arbeitsbereiche</h2>
+ ${statBalkenTabelle('Kontakte im Verlauf','monat',Dossier.aufschluesselung(evs.filter(e=>e.art==='kontakt'),'monat','kontakte',f,zk).sort((a,b)=>a.id.localeCompare(b.id)),'kontakte','')}
  ${statBalkenTabelle('Arbeitszeit nach Bereich','arbeitsbereich',Dossier.aufschluesselung(evs,'arbeitsbereich','stunden',f,zk),'stunden','stunden')}
  ${statBalkenTabelle('Tätigkeiten ohne Fall','taetigkeit',Dossier.aufschluesselung(evs,'taetigkeit','stunden',f,zk),'stunden','taetigkeit')}
  ${statBalkenTabelle('Kontakte nach Mitarbeitenden','mitarbeitend',Dossier.aufschluesselung(evs.filter(e=>e.art==='kontakt'),'mitarbeitend','kontakte',f,zk),'kontakte','ssaTeam').replace('</section>','<p class="subtle">Frühere Schreibweisen sind zusammengefasst. <button class="linkknopf" onclick="teamZuordnungOeffnen()">Zuordnung ansehen</button></p></section>')}
