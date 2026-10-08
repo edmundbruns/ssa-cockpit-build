@@ -481,7 +481,7 @@ const dossierLocalSuggestions=dossierSuggestionHtml;
 function dossierUnwrapSuggestion(html){return String(html||'').replace(/^<details[^>]*><summary>[\s\S]*?<\/summary>/,'').replace(/<\/details>$/,'');}
 dossierFachverfahrenHtml=function(){return '';};
 dossierWorkflowHtml=function(){return '';};
-dossierSuggestionHtml=function(e){const local=dossierUnwrapSuggestion(dossierLocalSuggestions(e));const topic=dossierUnwrapSuggestion(dossierTopicBlock(e));const parts=[];if(local.trim())parts.push('<details class="dossier-suggestions dossier-local"><summary>Ideen aus diesem Eintrag</summary>'+local+'</details>');return parts.join('');};
+dossierSuggestionHtml=function(){return '';};
 const dossierShowStudentClean=showStudent;
 showStudent=function(sid){dossierShowStudentClean(sid);if(typeof akteSperreZeigen==='function')akteSperreZeigen(sid);if(typeof akteGeplantZeigen==='function')akteGeplantZeigen(sid);requestAnimationFrame(()=>document.querySelectorAll('#studentDetailBody button').forEach(button=>{if(String(button.textContent||'').includes('Qualitätsprüfung'))button.remove();}));};
 
