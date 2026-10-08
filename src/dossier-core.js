@@ -252,7 +252,7 @@ const KATEGORIEN_VERSIONEN=[{version:'2026/27',gueltigAb:'2026-08-01',merkmale:{
  ergebnis:[['weiter_begleitet','Weiter begleitet'],['abgeschlossen','Abgeschlossen'],['weitervermittelt','Weitervermittelt'],['massnahme_vereinbart','Maßnahme vereinbart']],
  taetigkeit:[['klassenprojekt_praevention','Klassenprojekt / Prävention','4.3 Prävention'],['konferenz','Konferenz','4.2 Kooperation'],['elternabend','Elternabend','4.2 Beratung Erziehungsberechtigte'],['lehrkraefteberatung','Beratung von Lehrkräften','4.2 Beratung Lehrkräfte'],['kollegiale_beratung','Kollegiale Beratung','Qualitätssicherung'],['netzwerk','Netzwerkarbeit','4.2 Netzwerkarbeit'],['fortbildung','Fortbildung','Qualitätssicherung'],['pausenpraesenz','Pausenpräsenz','4.3 Prävention'],['verwaltung','Verwaltung','Verwaltung'],['sonstiges','Sonstiges','']],
  dauer_kurz:[[5,'5 Min.'],[10,'10 Min.'],[15,'15 Min.'],[30,'30 Min.']],
- dauer:[[15,'15 Min.'],[30,'30 Min.'],[45,'45 Min.'],[60,'60 Min.'],[90,'90 Min.']]
+ dauer:[[5,'5 Min.'],[10,'10 Min.'],[15,'15 Min.'],[30,'30 Min.'],[45,'45 Min.'],[60,'60 Min.'],[90,'90 Min.']]
 }}];
 function kategorien(date){const d=String(date||day()).slice(0,10);return KATEGORIEN_VERSIONEN.filter(v=>v.gueltigAb<=d).at(-1)||KATEGORIEN_VERSIONEN[0];}
 function katListe(merkmal,date){return (kategorien(date).merkmale[merkmal]||[]).map(([id,label,feld])=>({id,label,feld:feld||''}));}
