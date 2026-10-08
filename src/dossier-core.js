@@ -245,14 +245,14 @@ function safetyHint(text){const fachverfahren=fachverfahren_match({content:Strin
 /* ===== 0.15: Kategorien für die Statistik – feste IDs, Anzeigetexte getrennt, Version je Schuljahr (ab 1.8.) =====
    Änderungen an den Listen nur zum Schuljahreswechsel: neue Version mit neuem gueltigAb anlegen, alte stehen lassen. */
 const KATEGORIEN_VERSIONEN=[{version:'2026/27',gueltigAb:'2026-08-01',merkmale:{
- kontaktart:[['kurzkontakt','Kurzkontakt'],['beratungsgespraech','Beratungsgespräch'],['krisengespraech','Krisengespräch'],['gruppe','Gruppe'],['klasse','Klasse']],
+ kontaktart:[['kurzkontakt','Kurzkontakt'],['beratungsgespraech','Beratungsgespräch'],['informationsaustausch','Informationsaustausch'],['krisengespraech','Krisengespräch'],['gruppe','Gruppe'],['klasse','Klasse']],
  zugangsweg:[['schueler_selbst','Kind selbst'],['lehrkraft','Lehrkraft'],['pm','PM'],['eltern','Eltern'],['schulleitung','Schulleitung'],['mitschueler','Mitschüler:in'],['ssa','SSA'],['anfrageportal','Anfrageportal'],['extern','Extern']],
- beteiligte:[['schueler','Schüler:in'],['eltern','Eltern'],['lehrkraft','Lehrkraft'],['schulleitung','Schulleitung'],['jugendamt','Jugendamt'],['fachstelle_andere','Andere Fachstelle']],
+ beteiligte:[['schueler','Schüler:in'],['ssa','Schulsozialarbeit'],['eltern','Eltern'],['lehrkraft','Lehrkraft'],['schulleitung','Schulleitung'],['jugendamt','Jugendamt'],['fachstelle_andere','Andere Fachstelle']],
  thema:[['konflikt_mobbing','Konflikt / Mobbing','4.3 Gewalt- und Konfliktprävention'],['familie','Familie','4.2 Beratung'],['fehlzeiten_schulangst','Fehlzeiten / Schulangst','4.3 Schulverweigerung/Absentismus'],['emotionen_krise','Gefühle / Krise','4.2 Beratung'],['lernen_motivation','Lernen / Motivation','4.2 Beratung'],['verhalten_unterricht','Verhalten im Unterricht','4.3 Gewalt- und Konfliktprävention'],['medien','Medien','4.3 Gesundheitsförderung'],['sucht','Sucht','4.3 Gesundheitsförderung'],['gesundheit','Gesundheit','4.3 Gesundheitsförderung'],['berufsorientierung','Berufsorientierung','4.4 Berufsorientierung'],['kinderschutz','Kinderschutz','4.2 Beratung'],['sonstiges','Sonstiges','']],
  ergebnis:[['weiter_begleitet','Weiter begleitet'],['abgeschlossen','Abgeschlossen'],['weitervermittelt','Weitervermittelt'],['massnahme_vereinbart','Maßnahme vereinbart']],
  taetigkeit:[['klassenprojekt_praevention','Klassenprojekt / Prävention','4.3 Prävention'],['konferenz','Konferenz','4.2 Kooperation'],['elternabend','Elternabend','4.2 Beratung Erziehungsberechtigte'],['lehrkraefteberatung','Beratung von Lehrkräften','4.2 Beratung Lehrkräfte'],['kollegiale_beratung','Kollegiale Beratung','Qualitätssicherung'],['netzwerk','Netzwerkarbeit','4.2 Netzwerkarbeit'],['fortbildung','Fortbildung','Qualitätssicherung'],['pausenpraesenz','Pausenpräsenz','4.3 Prävention'],['verwaltung','Verwaltung','Verwaltung'],['sonstiges','Sonstiges','']],
  dauer_kurz:[[5,'5 Min.'],[10,'10 Min.'],[15,'15 Min.'],[30,'30 Min.']],
- dauer:[[15,'15 Min.'],[30,'30 Min.'],[45,'45 Min.'],[60,'60 Min.'],[90,'90 Min.']]
+ dauer:[[5,'5 Min.'],[10,'10 Min.'],[15,'15 Min.'],[30,'30 Min.'],[45,'45 Min.'],[60,'60 Min.'],[90,'90 Min.']]
 }}];
 function kategorien(date){const d=String(date||day()).slice(0,10);return KATEGORIEN_VERSIONEN.filter(v=>v.gueltigAb<=d).at(-1)||KATEGORIEN_VERSIONEN[0];}
 function katListe(merkmal,date){return (kategorien(date).merkmale[merkmal]||[]).map(([id,label,feld])=>({id,label,feld:feld||''}));}
@@ -608,7 +608,8 @@ function saveAuftrag(state,studentId,input){
 }
 function noChildNeedText(noNeed,text){return noNeed?'Kind hat (noch) kein eigenes Anliegen.':text;}
 function safetyCheck(state,entryId,input){
- const e=state.journal.find(x=>x.id===entryId);if(!e)throw Error('Chronikeintrag fehlt.');
+ const legacyBuckets=[state.contacts,state.groupTalks,state.trainingRoom,state.classActivities,state.schoolSignals,state.casePlans,state.statusHistory,state.events,state.portalRequests,state.verfahrenLaeufe,state.auftraege,state.relatedPersons];
+ const e=state.journal.find(x=>x.id===entryId)||legacyBuckets.filter(Array.isArray).flat().find(x=>x?.id===entryId);if(!e)throw Error('Dokumentationseintrag fehlt.');
  e.safetyCheck={...input,checkedAt:new Date().toISOString()};return e.safetyCheck;
 }
 function ideasForEntry(state,entryId){
