@@ -608,7 +608,8 @@ function saveAuftrag(state,studentId,input){
 }
 function noChildNeedText(noNeed,text){return noNeed?'Kind hat (noch) kein eigenes Anliegen.':text;}
 function safetyCheck(state,entryId,input){
- const e=state.journal.find(x=>x.id===entryId);if(!e)throw Error('Chronikeintrag fehlt.');
+ const legacyBuckets=[state.contacts,state.groupTalks,state.trainingRoom,state.classActivities,state.schoolSignals,state.casePlans,state.statusHistory,state.events,state.portalRequests,state.verfahrenLaeufe,state.auftraege,state.relatedPersons];
+ const e=state.journal.find(x=>x.id===entryId)||legacyBuckets.filter(Array.isArray).flat().find(x=>x?.id===entryId);if(!e)throw Error('Dokumentationseintrag fehlt.');
  e.safetyCheck={...input,checkedAt:new Date().toISOString()};return e.safetyCheck;
 }
 function ideasForEntry(state,entryId){
