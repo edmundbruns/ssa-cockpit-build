@@ -437,7 +437,6 @@ function renderStatistikNeu(){
  <h2>Berichte zur Weitergabe</h2>${berichteHtml()}</details>`;
 }
 function statZumBereich(id){const details=document.getElementById('stat-details');if(details)details.open=true;document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});}
-}
 function statKreuzHtml(evs,f,zk){
  const opt=sel=>Object.entries(STAT_MERKMALE).filter(([m])=>m!=='arbeitsbereich').map(([m,l])=>`<option value="${m}" ${sel===m?'selected':''}>${DE(l)}</option>`).join('');
  const kt=Dossier.kreuztabelle(evs,statKreuz.a,statKreuz.b,statKreuz.einheit,f,zk),z=v=>String(v).replace('.',',');
