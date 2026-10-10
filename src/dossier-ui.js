@@ -568,7 +568,7 @@ const dossierTopicBlock=dossierFachverfahrenHtml;
 const dossierNextStepBlock=dossierWorkflowHtml;
 const dossierLocalSuggestions=dossierSuggestionHtml;
 function dossierUnwrapSuggestion(html){return String(html||'').replace(/^<details[^>]*><summary>[\s\S]*?<\/summary>/,'').replace(/<\/details>$/,'');}
-dossierFachverfahrenHtml=function(){return '';};
+dossierFachverfahrenHtml=function(e){return e.kiAnalysis?dossierKiReflectionHtml(e):'';};
 dossierWorkflowHtml=function(){return '';};
 dossierSuggestionHtml=function(){return '';};
 const dossierShowStudentClean=showStudent;
