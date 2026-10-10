@@ -37,7 +37,7 @@ assert(responseField.required);
 assert(w.document.querySelector('#dossierEditBody button[onclick*="requestSubmit"]'),'Direkter Speichern-Button fehlt');
 const beforePlainTasks=w.testState().tasks.length;
 const beforePlainSuggestions=guided.actionSuggestions.length;
-const plainResponse='Vorläufige KI-Reflexion zu diesem Eintrag. Fachlich prüfen.\\n\\n1. Kurz verstanden\\n- Das Kind sucht Unterstützung.\\n\\n3. Das solltest du als Nächstes tun\\n- Handlung: Eine kurze Absprache treffen.\\n- Zuständigkeit: Betreuungsteam, als Vorschlag.\\n- Zeitpunkt: Ohne festgelegte Frist.\\n<script>window.unsafeAi=true</script>';
+const plainResponse='Vorläufige KI-Reflexion zu diesem Eintrag. Fachlich prüfen.\n\n1. Kurz verstanden\n- Das Kind sucht Unterstützung.\n\n3. Das solltest du als Nächstes tun\n- Handlung: Eine kurze Absprache treffen.\n- Zuständigkeit: Betreuungsteam, als Vorschlag.\n- Zeitpunkt: Ohne festgelegte Frist.\n<script>window.unsafeAi=true</script>';
 await form({kiResponse:plainResponse});
 assert.equal(guided.kiAnalysis.format,'text');
 assert.equal(guided.kiAnalysis.response,plainResponse);
