@@ -201,7 +201,7 @@ async function dossierKiImportResponse(eid,raw){
  await dossierSave();closeModal('dossierEditModal');dossierRefresh();toast('KI-Reflexion gespeichert. Handlungsschritte bleiben einzelne, ungeprüfte Vorschläge.');
 }
 
-function dossierKiReflectionHtml(e){
+function dossierFachverfahrenHtml(e){
  const topics=e.oberThemen||[],procedures=e.fachverfahren||[],ai=e.kiAnalysis;
  if(!topics.length&&!procedures.length&&!ai)return '';
  const safeItem=x=>DE(typeof x==='string'?x:JSON.stringify(x));
@@ -560,6 +560,7 @@ function dossierGlobalSearch(){
  const input=document.getElementById('dossierGlobalQuery'),out=document.getElementById('dossierGlobalResults');
  input.oninput=()=>{const q=input.value.trim().toLocaleLowerCase('de');if(!q){out.innerHTML='<p class="subtle">Bitte Suchbegriff eingeben.</p>';return;}const rows=[];for(const s of data.students){const events=Dossier.timeline(data,s.id,legacyStudentEvents(s.id));if((s.first+' '+s.last+' '+s.className).toLocaleLowerCase('de').includes(q))rows.push('<p>👤 <button class="linkbutton" onclick="showStudent(\''+DE(s.id)+'\')">'+DE(s.first+' '+s.last)+'</button> · '+DE(s.className||'')+'</p>');for(const e of events)if((e.title+' '+e.content+' '+e.eventKind+' '+(e.fachverfahren||[]).map(x=>x.title||x.id).join(' ')).toLocaleLowerCase('de').includes(q))rows.push('<p>🕒 <button class="linkbutton" onclick="showStudent(\''+DE(s.id)+'\');dossierJump(\''+DE(e.key)+'\')">'+DE(e.title||e.eventKind)+'</button> · '+DE(s.first+' '+s.last)+'</p>');for(const t of data.tasks)if((t.title+' '+(t.assignedTo||'')).toLocaleLowerCase('de').includes(q)&&Dossier.ids(data,t).includes(s.id))rows.push('<p>✓ '+DE(t.title)+' · '+DE(s.first+' '+s.last)+'</p>');}for(const d of data.documentEvents||[])if(String(d.name||'').toLocaleLowerCase('de').includes(q))rows.push('<p>📎 '+DE(d.name)+'</p>');out.innerHTML=rows.slice(0,80).join('')||'<p class="subtle">Keine Treffer.</p>';};
 }
+const dossierKiReflectionHtml=dossierFachverfahrenHtml;
 dossierFachverfahrenHtml=function(e){if(e.kiAnalysis)return dossierKiReflectionHtml(e);const topics=e.oberThemen||[],procedures=e.fachverfahren||[],ai=e.kiAnalysis,states=ai?.massnahmenstatus||[];if(!topics.length&&!procedures.length&&!ai&&!states.length)return '';return '<details class="dossier-suggestions dossier-workflow"><summary>Überthema</summary>'+(topics.length?'<p><strong>Überthemen:</strong> '+topics.map(DE).join(' · ')+'</p>':'')+(procedures.length?'<p><strong>Fachverfahren:</strong> '+procedures.map(v=>DE(v.title||v.id)).join(' · ')+'</p>':'')+(states.length?'<p><strong>Maßnahmenstatus:</strong> '+states.map(x=>DE(x.status||x.kategorie||'')+' · '+DE(x.titel||x.title||'')).join(' · ')+'</p>':'')+(ai?.hinweise?.length?'<small>Hinweise zur fachlichen Prüfung: '+ai.hinweise.map(DE).join(' · ')+'</small>':'')+(e.workflowId?'<div class="actions"><button class="btn" onclick="verfahrenStarten(\''+DE(e.workflowId)+'\',\''+DE(e.participantIds?.[0]||'')+'\')">Ablaufplan ausdrücklich starten</button></div>':'')+'</details>';};
 
 /* Überthema und nächste Schritte gehören in eine gemeinsame Kachel. */
