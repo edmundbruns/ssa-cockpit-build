@@ -54,3 +54,16 @@ test('Auswertung bleibt bei mehreren tausend Einträgen schnell',()=>{
  const t0=performance.now(),zk=D.zugangKarte(s),ev=D.ereignisse(s),f={...SJ},evs=D.filterEreignisse(ev,f,zk);D.kennzahlen(evs,f);for(const m of ['kontaktart','thema','zugangsweg','beteiligte','ergebnis','stufe','zweig','monat','mitarbeitend','taetigkeit'])D.aufschluesselung(evs,m,m==='zugangsweg'?'kinder':'kontakte',f,zk);D.kreuztabelle(evs,'thema','stufe','kontakte',f,zk);D.datenqualitaet(evs,zk);
  const ms=performance.now()-t0;assert.ok(ms<800,'Dauer '+Math.round(ms)+' ms');
 });
+
+ test('Schulkindergarten wird erkannt und als eigene Stufe gefiltert',()=>{
+ for(const name of ['SKG','SKG 2','skg','SKG2','Schulkindergarten'])assert.deepEqual(D.stufeZweig(name),{stufe:'SKG',zweig:'GS'});
+ assert.deepEqual(D.stufeZweig('2a'),{stufe:2,zweig:'GS'});
+ const {s}=laden();const child=s.students[0];child.className='SKG';child.enrollments=[];
+ const e=D.addEntry(s,{participantIds:[child.id],date:'2026-10-10',type:'Schülergespräch',title:'Test',content:'Gespräch'});
+ const ev=D.ereignisse(s).filter(x=>x.id==='entry:'+e.id);
+ assert.equal(ev.length,1);assert.equal(ev[0].kinder[0].stufe,'SKG');
+ const f={...SJ,stufe:'SKG'},zk=D.zugangKarte(s);
+ assert.equal(D.filterEreignisse(ev,f,zk).length,1);
+ assert.equal(alsObjekt(D.aufschluesselung(ev,'stufe','kinder',f,zk)).SKG,1);
+ assert.equal(D.wertLabel('stufe','SKG'),'Schulkindergarten (SKG)');
+ });
