@@ -29,4 +29,25 @@ await assert.rejects(w.dossierKiImportResponse(guided.id,JSON.stringify({...aiFi
 w.dossierKiResponseListen({...aiFixture,ober_themen:[{id:'test',bezeichnung:'Test'}],fachverfahren:[{id:'test',bezeichnung:'Test',version:'1.0',passende_kriterien:[]}]});
 console.log('KI-Textlisten, vollständige Anzeige und fehlende Frist ok');
 
+
+w.dossierKiOpen(guided.id);
+assert.match(w.document.getElementById('dossierKiPrompt').value,/nicht als JSON/);
+const responseField=w.document.querySelector('[name=kiResponse]');
+assert(responseField.required);
+assert(w.document.querySelector('#dossierEditBody button[onclick*="requestSubmit"]'),'Direkter Speichern-Button fehlt');
+const beforePlainTasks=w.testState().tasks.length;
+const beforePlainSuggestions=guided.actionSuggestions.length;
+const plainResponse='Vorläufige KI-Reflexion zu diesem Eintrag. Fachlich prüfen.\\n\\n1. Kurz verstanden\\n- Das Kind sucht Unterstützung.\\n\\n3. Das solltest du als Nächstes tun\\n- Handlung: Eine kurze Absprache treffen.\\n- Zuständigkeit: Betreuungsteam, als Vorschlag.\\n- Zeitpunkt: Ohne festgelegte Frist.\\n<script>window.unsafeAi=true</script>';
+await form({kiResponse:plainResponse});
+assert.equal(guided.kiAnalysis.format,'text');
+assert.equal(guided.kiAnalysis.response,plainResponse);
+assert.equal(w.testState().tasks.length,beforePlainTasks);
+assert.equal(guided.actionSuggestions.length,beforePlainSuggestions);
+const plainCard=w.document.getElementById('ds-entry:'+guided.id);
+assert.match(plainCard.textContent,/Eine kurze Absprache treffen/);
+assert(plainCard.querySelector('.dossier-ki-readable li'),'Spiegelstriche fehlen');
+assert.equal(plainCard.querySelector('.dossier-ki-readable script'),null,'KI-Text darf kein HTML ausführen');
+await assert.rejects(w.dossierKiImportResponse(guided.id,'   '),/Bitte zuerst/);
+console.log('Lesbare KI-Textantwort über Formular gespeichert, Listen dargestellt und HTML sicher escaped');
+
 console.log('errors',errors);if(errors.length)process.exitCode=1;dom.window.close();})();
