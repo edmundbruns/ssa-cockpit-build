@@ -53,75 +53,160 @@ function dossierSafetyNoOrder(eid){const e=dossierSafetyRecord(eid);if(!e)return
 function dossierSafetyCheck(eid){const e=dossierSafetyRecord(eid);if(!e)return;dossierPopup('Schutzfrage prüfen',`<p class="subtle" style="margin-top:0">Kurze Checkliste für deine eigene Einschätzung. ${hilfeKnopf('schutzfrage')}</p><div class="notice warning">${DE(Dossier.SAFETY_NOTICE)}</div><div class="checkliste"><label><input type="checkbox" name="acuteDanger"> Besteht akute Gefahr? Dann Kind nicht allein lassen, Schulleitung sofort, bei akuter Lebensgefahr Notruf 112.</label><label><input type="checkbox" name="leadInformed"> Schulleitung informiert? Datum und Uhrzeit fachlich ergänzen.</label><label><input type="checkbox" name="fachberatung"> Beratung durch eine insoweit erfahrene Fachkraft geplant oder erfolgt?</label><label><input type="checkbox" name="guardians"> Sorgeberechtigte einbezogen, soweit der Schutz dadurch nicht gefährdet wird?</label><label><input type="checkbox" name="separated"> Wörtliche Aussagen und Beobachtungen getrennt dokumentiert?</label></div><fieldset class="checkliste" style="margin-top:12px;border:1px solid #bdd5d3;border-radius:8px;padding:10px"><legend><strong>Fachliche Einschätzung</strong></legend><label><input type="checkbox" name="noOrder"> Ich habe die Situation geprüft. Ein Schutzauftrag ist nicht erforderlich.</label><label class="full">Kurze Begründung <small>(optional)</small><textarea class="field" name="safetyRationale" placeholder="Zum Beispiel: Stichworthinweis im anderen Zusammenhang verwendet; Sachverhalt fachlich geklärt."></textarea></label></fieldset>`,async fd=>{if(fd.has('acuteDanger')&&fd.has('noOrder'))throw Error('Bitte prüfe deine Einschätzung: „Akute Gefahr“ und „Kein Schutzauftrag erforderlich“ sind gleichzeitig ausgewählt.');Dossier.safetyCheck(data,eid,{acuteDanger:fd.has('acuteDanger'),leadInformed:fd.has('leadInformed'),fachberatung:fd.has('fachberatung'),guardians:fd.has('guardians'),separated:fd.has('separated'),decision:fd.has('noOrder')?'kein_schutzauftrag':'schutzpruefung',rationale:String(fd.get('safetyRationale')||'').trim(),checkedBy:data.settings.activeUser||'SSA'});await dossierSave();closeModal('dossierEditModal');if(selectedStudentId&&document.getElementById('studentModal')?.classList.contains('open'))dossierRefresh();persistFertig().then(()=>toast(fd.has('noOrder')?'Einschätzung gespeichert: Kein Schutzauftrag erforderlich.':'Schutzprüfung gespeichert. Der Chronikeintrag bleibt unverändert.')).catch(()=>{});});}
 function dossierSuggestionHtml(e){
  const rows=Array.isArray(e.actionSuggestions)?e.actionSuggestions:[],visible=rows.filter(s=>s.status!=='nicht verwendet'),hidden=rows.filter(s=>s.status==='nicht verwendet');if(!rows.length)return e.safetyStatus&&!e.safetyCheck?'':'<div class="dossier-suggestions"><small>Keine offenen nächsten Schritte aus diesem Eintrag.</small></div>';
- const suggestedDate=function(date,days){if(!date||!Number.isFinite(Number(days)))return '';const d=new Date(String(date).slice(0,10)+'T12:00:00');if(Number.isNaN(d.getTime()))return '';d.setDate(d.getDate()+Number(days));return d.toLocaleDateString('de-DE');};
+ const suggestedDate=function(date,days){if(!date||!Number.isInteger(days)||days<0)return '';const d=new Date(String(date).slice(0,10)+'T12:00:00');if(Number.isNaN(d.getTime()))return '';d.setDate(d.getDate()+Number(days));return d.toLocaleDateString('de-DE');};
  const rowHtml=function(s){
   const action=s.status==='offen'?' <div class="actions"><button class="btn primary" onclick="dossierSuggestionUse(\''+DE(e.id)+'\',\''+DE(s.id)+'\')">Schritt übernehmen und anpassen</button><button class="btn" onclick="dossierSuggestionIgnore(\''+DE(e.id)+'\',\''+DE(s.id)+'\')">Nicht verwenden</button><button class="btn danger" onclick="dossierSuggestionDelete(\''+DE(e.id)+'\',\''+DE(s.id)+'\')">Vorschlag löschen</button></div>':' <small>✓ '+(s.status==='übernommen'?'Übernommen. ':'Nicht verwendet. ')+(s.taskId?dossierLink('task:'+s.taskId,'Aufgabe öffnen'):'')+' <button class="linkbutton" onclick="dossierSuggestionDelete(\''+DE(e.id)+'\',\''+DE(s.id)+'\')">Diesen Vorschlag löschen</button></small>';
-  const date=suggestedDate(e.date,s.dueDays),when=s.dueDays===0?'heute':date?`bis ${date}`:s.dueDays===1?'innerhalb eines Tages':s.dueDays!==undefined?`innerhalb von ${DE(s.dueDays)} Tagen`:'';
+  const date=suggestedDate(e.date,s.dueDays),when=s.dueDays===null||s.dueDays===undefined?'':s.dueDays===0?'heute':date?`bis ${date}`:s.dueDays===1?'innerhalb eines Tages':`innerhalb von ${DE(s.dueDays)} Tagen`;
   const network=Array.isArray(s.networkOptions)&&s.networkOptions.length?'<p class="dossier-suggestion-network"><strong>Passende Netzwerke prüfen:</strong><br>'+s.networkOptions.map(n=>DE(n.name)+' · '+DE(n.role||n.kind)).join(' · ')+'</p>':'';
   return '<article class="dossier-suggestion '+DE(s.status||'offen')+'"><strong>'+DE(s.title)+'</strong>'+(s.rationale?'<p><strong>Warum:</strong> '+DE(s.rationale)+'</p>':'')+action.replace('Schritt übernehmen und anpassen','Als Zusage übernehmen')+'</article>';
  };
  return '<details class="dossier-suggestions"><summary>Vorschläge zu nächsten Schritten · '+visible.filter(s=>s.status==='offen').length+' Vorschläge</summary><p class="dossier-suggestion-intro">Diese Vorschläge sind eine Arbeitshilfe. Prüfe sie fachlich. Erst nach deiner Auswahl wird eine Aufgabe oder ein Termin angelegt.</p><div class="actions" style="margin:8px 0"><button class="btn danger" onclick="dossierSuggestionClear(\''+DE(e.id)+'\')">Alle Vorschläge entfernen</button></div>'+(e.safetyCheck?'<div class="notice">Schutzfrage geprüft: '+DE(e.safetyCheck.checkedAt||'')+'</div>':'')+visible.map(rowHtml).join('')+(hidden.length?'<details><summary>'+hidden.length+' verworfene Vorschläge anzeigen</summary>'+hidden.map(rowHtml).join('')+'</details>':'')+'</details>';
 }
-function dossierKiAnonymize(value,e){
- let text=String(value||'');
- for(const sid of e.participantIds||[]){const st=data.students.find(x=>x.id===sid);if(!st)continue;for(const name of [st.first,st.last,[st.first,st.last].filter(Boolean).join(' ')])if(name)text=text.split(name).join('Schüler:in');}
- return text.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,'[E-MAIL]').replace(/(?:\+?49|0)\s?\(?\d{3,5}\)?[\s/-]?\d{3,}/g,'[TELEFON]');
+function dossierKiRedactText(value,names=[],options={}){
+ let text=String(value||'').normalize('NFC');
+ const escapeRe=s=>Array.from(String(s),c=>'\\^$.*+?()[]{}|'.includes(c)?'\\'+c:c).join('');
+ // Remove high-confidence identifiers before replacing names so fragments cannot survive.
+ text=text.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,'[E-MAIL]');
+ text=text.replace(/(?:\+?49|0)\s?\(?\d{3,5}\)?[\s/-]?\d{3,}/g,'[TELEFON]');
+ text=text.replace(/https?:\/\/\S+/gi,'[LINK]');
+ text=text.replace(/\b[\p{L}\p{N}_-][\p{L}\p{N}_ -]*\.(?:pdf|docx?|xlsx?|pptx?|odt|png|jpe?g)\b/giu,'[DOKUMENT]');
+ text=text.replace(/\b[\p{L}-]+(?:straße|str\.|weg|allee|platz)\s+\d+[a-z]?\b/giu,'[ANSCHRIFT]');
+ text=text.replace(/\b\d{4}-\d{1,2}-\d{1,2}\b|\b\d{1,2}[./]\d{1,2}[./]\d{2,4}\b/gu,'[DATUM]');
+ text=text.replace(/\b(?:0?[1-9]|[12]\d|3[01])[./](?:0?[1-9]|1[0-2])(?:[./]\d{2,4})?\.?\b/gu,'[DATUM]');
+ text=text.replace(/\b\d{1,2}\.\s*(?:Januar|Februar|März|April|Mai|Juni|Juli|August|September|Sept\.?|Oktober|November|Dezember)(?:\s+\d{4})?\b/giu,'[DATUM]');
+ text=text.replace(/\b(?:Januar|Februar|März|April|Mai|Juni|Juli|August|September|Sept\.?|Oktober|November|Dezember)\s+20\d{2}\b/giu,'[ZEITRAUM]');
+ text=text.replace(/\b20\d{2}\s*[/–-]\s*\d{2,4}\b/gu,'[SCHULJAHR]');
+ const unique=[...new Set((names||[]).map(x=>String(x||'').trim()).filter(x=>x.length>1))].sort((a,b)=>b.length-a.length);
+ for(const name of unique){
+  const re=new RegExp('(^|[^\\p{L}])'+escapeRe(name)+'(?=$|[^\\p{L}])','giu');
+  text=text.replace(re,'$1[PERSON]');
+ }
+ text=text.replace(/\b(?:Frau|Herr|Dr\.?|Prof\.?)\s+[\p{Lu}][\p{L}'’.-]*(?:\s+[\p{Lu}][\p{L}'’.-]*)?/gu,'[PERSON]');
+ if(!options.includeMedical){
+  text=text.replace(/[^.!?\n]*(?:\bSPZ\b|\bKJP\b|logopäd\w*|ergotherap\w*|operation\w*|ärzt\w*|medizin\w*|diagnost\w*|befund\w*|medikament\w*|therapeut\w*|psychisch\w*|psychiatr\w*|klinisch\w*|krankheit\w*|behinderung\w*|gesundheitlich\w*|testbericht\w*|abklärung\w*|\bADHS\b|\bADS\b|\bLRS\b|\bDyskalkulie\b|\bAutismus\b)[^.!?\n]*(?:[.!?]+|$)/giu,'[GESUNDHEITSANGABE AUSGELASSEN.]');
+ }
+ return text.replace(/[ \t]{2,}/g,' ').trim();
 }
+
+function dossierKiKnownNames(entry){
+ const names=[];
+ const add=v=>{if(typeof v==='string'&&v.trim().length>1)names.push(v.trim());};
+ const walk=(value,key='')=>{
+  if(typeof value==='string'){
+   if(/(?:name|person|guardian|parent|mutter|vater|sorge|kontakt|mitarbeit|teacher|lehrkraft)/i.test(key))add(value);
+  }else if(Array.isArray(value))value.forEach(v=>walk(v,key));
+  else if(value&&typeof value==='object')for(const [k,v] of Object.entries(value))walk(v,k);
+ };
+ for(const st of data.students||[]){
+  add(st.first);add(st.last);add([st.first,st.last].filter(Boolean).join(' '));add(st.guardian1);add(st.guardian2);
+  walk(st.family,'family');
+ }
+ for(const n of data.settings?.ssaTeam||[])add(n);
+ for(const n of Object.values(data.settings?.classLeads||{}))add(n);
+ for(const [oldName,newName] of Object.entries(data.settings?.mitarbeitendZuordnung||{})){add(oldName);add(newName);}
+ return [...new Set(names)];
+}
+function dossierKiAnonymize(value,e,options={}){
+ return dossierKiRedactText(value,dossierKiKnownNames(e),options);
+}
+function dossierKiDokument(item){
+ return /dokument|anhang|datei/i.test(String(item.type||item.eventKind||''))||/\.(?:pdf|docx?|xlsx?|pptx?|odt|png|jpe?g)$/i.test(String(item.title||''));
+}
+function dossierKiZeitpunkt(index){return 'Ereignis '+(index+1);}
 function dossierKiChronology(e){
  const sid=(e.participantIds||[])[0]||selectedStudentId;
  const events=sid?Dossier.timeline(data,sid,legacyStudentEvents(sid)):[e];
- return events.map(item=>{const safeItem={...item,participantIds:[...new Set([...(item.participantIds||[]),sid].filter(Boolean))]};return {datum:item.date||'',schuljahr:item.context?.schoolYear||item.schoolYear||'',damalige_klasse:item.context?.className||item.className||'unbekannt',eintragstyp:item.type||item.eventKind||'',titel:dossierKiAnonymize(item.title||'',safeItem),inhalt:dossierKiAnonymize(dossierLegacyContent(item),safeItem),fachverfahren:(item.fachverfahren||[]).map(v=>v.title||v.id).filter(Boolean),oberthemen:Array.isArray(item.oberThemen)?item.oberThemen:[],status:item.status||'',quelle:item.source||item.sourceKey||''};});
+ const stages=events.map(item=>{
+  const cls=String(item.context?.className||item.className||'');
+  const grade=Number((cls.match(/^\d+/)||[])[0]);
+  return /skg/i.test(cls)?'Vorschulbereich':grade&&grade<=4?'Grundschulbereich':grade>=5?'Sekundarbereich':'nicht angegeben';
+ });
+ return events.map((item,index)=>{
+  const safeItem={...item,participantIds:[...new Set([...(item.participantIds||[]),sid].filter(Boolean))]};
+  const isDocument=dossierKiDokument(item);
+  const content=isDocument?'[Dokumenttitel und Dokumentinhalt werden nicht übertragen.]':dossierKiAnonymize(dossierLegacyContent(item),safeItem);
+  return {zeitpunkt:dossierKiZeitpunkt(index),bereich:stages[index],eintragstyp:dossierKiAnonymize(item.type||item.eventKind||'',safeItem),titel:isDocument?'Dokumentereignis':dossierKiAnonymize(item.title||'',safeItem),inhalt:content,fachverfahren:(item.fachverfahren||[]).map(v=>dossierKiAnonymize(v.title||v.id,safeItem)).filter(Boolean),oberthemen:Array.isArray(item.oberThemen)?item.oberThemen:[],status:dossierKiAnonymize(item.status||'',safeItem)};
+ });
 }
 function dossierKiPayload(e){
- const field=k=>dossierKiAnonymize(e[k],e);
- return {schema_version:'1.0',analysemodus:'vollstaendige_chronologie',chronikeintrag_ausloeser:{datum:e.date||'',eintragstyp:e.type||e.eventKind||'',titel:field('title'),inhalt:field('content')},chronologie_vollstaendig:dossierKiChronology(e),bisherige_fachverfahren:(e.fachverfahren||[]).map(v=>({id:v.id,bezeichnung:v.title,version:v.version})),schulinterne_angebote:['Schulsozialarbeit','Klassenleitung','Beratungslehrkraft','Schulpsychologie','Sozialtraining','Trainingsraum'],hinweis:'Nur fachliche Vorschlaege erzeugen. Keine Diagnose, keine automatische Ampeländerung, keine Kontaktaufnahme. Die Chronologie darf nicht gekürzt oder als Einzelereignis bewertet werden.'};
+ const timeline=dossierKiChronology(e);
+ const sid=(e.participantIds||[])[0]||selectedStudentId;
+ const events=sid?Dossier.timeline(data,sid,legacyStudentEvents(sid)):[e];
+ const eventIndex=events.findIndex(item=>item.id===e.id);
+ return {schema_version:'1.1',analysemodus:'vollstaendige_chronologie',ausloesender_eintrag:timeline[eventIndex>=0?eventIndex:timeline.length-1]?.zeitpunkt||'Auslösendes Ereignis',chronologie:timeline,bisherige_fachverfahren:(e.fachverfahren||[]).map(v=>({id:v.id,bezeichnung:dossierKiAnonymize(v.title||'',e),version:v.version})),schulinterne_angebote:['Schulsozialarbeit','Klassenleitung','Beratungslehrkraft','Schulpsychologie','Sozialtraining','Trainingsraum'],hinweis:'Die Eingabe wurde automatisch datensparsam aufbereitet, ist aber nicht garantiert anonym. Medizinische und therapeutische Einzelangaben wurden standardmäßig ausgelassen. Prüfe den Text vor jeder externen Nutzung.'};
 }
+
 function dossierKiPrompt(e){
- const schema='{"schema_version":"1.0","status":"ok","ober_themen":[],"fachverfahren":[{"id":"","bezeichnung":"","version":"1.0","passende_kriterien":[]}],"naechste_schritte":[{"titel":"","beschreibung":"","zustaendigkeit":"","frist_tage":0}],"moegliche_fachstellen":[],"massnahmenstatus":[],"hinweise":[]}';
- return 'ARBEITSAUFTRAG FÜR DIE KI\\nDu bist ein fachlicher Analyseassistent für das SSA-Cockpit.\\n\\nAnalysiere jetzt die vollständige anonymisierte Chronologie im folgenden EINGABE-Objekt. Berücksichtige alle Ereignisse, Informationen, Rückmeldungen, Fachverfahren, Aufgaben und geplanten Termine in ihrer zeitlichen Entwicklung. Leite daraus höchstens drei konkrete nächste Schritte ab. Ergänze keine Tatsachen, stelle keine Diagnose, ändere keine Ampelbewertung und veranlasse keine Kontaktaufnahme.\\n\\nWICHTIG: Dies ist kein Datei-Upload, zu dem du eine Rückfrage stellen sollst. Führe den Arbeitsauftrag sofort aus. Frage nicht, was mit der Eingabe geschehen soll.\\n\\nAUSGABE-REGELN\\n1. Antworte ausschließlich mit einem gültigen JSON-Objekt.\\n2. Verwende exakt die acht Schlüssel schema_version, status, ober_themen, fachverfahren, naechste_schritte, moegliche_fachstellen, massnahmenstatus und hinweise.\\n3. Gib keinen Markdown-Codeblock, keine Einleitung, keine Erklärung und keinen Text vor oder nach dem JSON aus.\\n3. Verwende für status ausschließlich ok, nicht_ausreichend oder sicherheitspruefung. Bei fehlenden wesentlichen Angaben nutze nicht_ausreichend und nenne die Lücken in hinweise.\\n4. Verwende leere Listen, wenn es keine passenden Themen, Verfahren, Schritte, Fachstellen oder Maßnahmenhinweise gibt.\\n5. naechste_schritte enthält höchstens drei Vorschläge. Jeder Vorschlag enthält titel, beschreibung, zustaendigkeit und frist_tage als Zahl.\\n6. fachverfahren enthält id, bezeichnung, version und passende_kriterien als Liste.\\n7. Nutze nur Fachstellen und Angebote aus dem übergebenen Kontext.\\n\\nAUSGABE-MUSTER (Struktur beibehalten, Inhalte fachlich aus der Chronologie ableiten):\\n'+schema+'\\n\\nEINGABE:\\n'+JSON.stringify(dossierKiPayload(e),null,2);
+ const schema={schema_version:'1.1',status:'ok',ober_themen:[],fachverfahren:[],ressourcen:[],beobachtungen:[],fremdangaben:[],hypothesen_prueffragen:[],offene_fragen:[],naechste_schritte:[{titel:'',beschreibung:'',zustaendigkeit:'',frist_tage:null}],moegliche_fachstellen:[],gespraechsimpulse:[],schutzaspekte:[],massnahmenstatus:[],hinweise:[]};
+ return 'ARBEITSAUFTRAG FÜR DIE KI\nDu unterstützt eine Fachkraft der Schulsozialarbeit bei einer fallbezogenen Reflexion. Analysiere die bereitgestellte Chronologie als Arbeitshilfe. Die Eingabe ist automatisch datensparsam aufbereitet, aber nicht garantiert anonym.\n\nFACHLICHE GRENZEN\n- Stelle keine Diagnose, behaupte keine Ursache und erfinde keine Tatsachen.\n- Trenne dokumentierte schulische Beobachtungen klar von Angaben des Kindes, der Familie oder anderer Personen. Benenne die jeweilige Quelle nur als Rolle, nie mit Namen.\n- Formuliere Hypothesen ausschließlich als offene, überprüfbare Fragen und nenne, worauf sie sich stützen.\n- Behandle Schutzaspekte als Prüfanlässe. Entscheide weder, ob eine Gefährdung vorliegt, noch ob ein Schutzauftrag besteht. Verweise bei möglichen Anhaltspunkten auf das schulische Schutzkonzept und die zuständige Fachkraft.\n- Wiederhole keine Namen, Kontaktdaten, Dateinamen, genauen Datumsangaben oder unnötigen medizinischen Einzelheiten. Füge keine identifizierenden Details hinzu.\n- Nenne höchstens drei konkrete nächste Schritte. Verwende Rollen statt Personennamen. Setze frist_tage nur, wenn ein Zeitpunkt aus dem dokumentierten Verlauf eindeutig hervorgeht; sonst null. Erfinde keine Frist.\n- Nenne Fachstellen nur, wenn sie aus dem Eingabekontext hervorgehen oder für den Fall nachvollziehbar passend sind. Kennzeichne sie als mögliche Option, nicht als automatische Empfehlung.\n- Wenn Informationen fehlen oder Aussagen widersprüchlich sind, sage das ausdrücklich und schlage höchstens drei gezielte Klärungsfragen vor.\n\nAUSGABEFORMAT\nAntworte ausschließlich mit einem gültigen JSON-Objekt nach dem folgenden Schema. Verwende alle Schlüssel exakt. Listen dürfen leer sein. Schreibe keine Einleitung, keinen Markdown-Codeblock und keinen Text außerhalb des JSON.\n'+JSON.stringify(schema,null,2)+'\n\nEINGABE:\n'+JSON.stringify(dossierKiPayload(e),null,2);
 }
+
 function dossierKiId(){return 'ki-'+(globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2));}
 function dossierKiOpen(eid){
  const e=data.journal.find(x=>x.id===eid);if(!e)return;
  const prompt=dossierKiPrompt(e);
- const body='<div class="notice">Die Eingabe ist anonymisiert. Prüfe die Antwort der externen KI fachlich, bevor du sie übernimmst.</div><label class="full"><strong>KI-Arbeitsprompt</strong><textarea id="dossierKiPrompt" class="field" rows="14" readonly>'+DE(prompt)+'</textarea></label><div class="actions"><button type="button" class="btn" onclick="navigator.clipboard?.writeText(document.getElementById(\'dossierKiPrompt\').value).then(()=>toast(\'KI-Arbeitsprompt kopiert.\'))">Prompt kopieren</button></div><label class="full"><strong>Strukturierte KI-Antwort einfügen</strong><textarea class="field" name="kiResponse" rows="12" placeholder="{ &quot;schema_version&quot;:&quot;1.0&quot;, &quot;status&quot;:&quot;ok&quot;, &quot;ober_themen&quot;:[], &quot;fachverfahren&quot;:[], &quot;naechste_schritte&quot;:[], &quot;moegliche_fachstellen&quot;:[], &quot;massnahmenstatus&quot;:[], &quot;hinweise&quot;:[] }"></textarea></label><small>Die vollständige Chronologie wurde anonymisiert übergeben. Eingefügt werden nur passende Oberthemen, Fachverfahren und konkrete nächste Schritte. Aufgaben entstehen erst nach deiner Auswahl.</small>';
- dossierPopup('KI-Analyse für Chronikeintrag',body,async fd=>{await dossierKiImportResponse(eid,fd.get('kiResponse'));});
+ const body='<div class="notice warning"><strong>Datenschutzprüfung erforderlich:</strong> Der automatisch reduzierte Text ist nicht garantiert anonym. Prüfe und bearbeite Namen, Dokumenthinweise, Daten und besondere Angaben vor jeder externen Nutzung. Erkannte Gesundheitsangaben werden standardmäßig ausgelassen. Nur in einem für diesen Zweck zugelassenen KI-Dienst verwenden.</div><label class="full"><strong>KI-Arbeitsprompt prüfen und bei Bedarf bearbeiten</strong><textarea id="dossierKiPrompt" class="field" rows="14" aria-label="Datensparsam aufbereiteter KI-Arbeitsprompt">'+DE(prompt)+'</textarea></label><label class="full"><input type="checkbox" id="kiPrivacyReviewed"> Ich habe den Prompt geprüft und nicht benötigte personenbezogene Angaben entfernt.</label><div class="actions"><button type="button" class="btn" onclick="const c=document.getElementById(\'kiPrivacyReviewed\');if(!c?.checked){toast(\'Bitte zuerst den Prompt prüfen und die Datenschutzprüfung bestätigen.\');return;}navigator.clipboard?.writeText(document.getElementById(\'dossierKiPrompt\').value).then(()=>toast(\'Geprüfter Prompt kopiert.\'))">Geprüften Prompt kopieren</button></div><label class="full"><strong>Antwort im Cockpit-JSON-Format 1.1 einfügen</strong><textarea class="field" name="kiResponse" rows="12" placeholder="{ &quot;schema_version&quot;:&quot;1.1&quot;, &quot;status&quot;:&quot;ok&quot;, &quot;ober_themen&quot;:[], &quot;fachverfahren&quot;:[], &quot;ressourcen&quot;:[], &quot;beobachtungen&quot;:[], &quot;fremdangaben&quot;:[], &quot;hypothesen_prueffragen&quot;:[], &quot;offene_fragen&quot;:[], &quot;naechste_schritte&quot;:[], &quot;moegliche_fachstellen&quot;:[], &quot;gespraechsimpulse&quot;:[], &quot;schutzaspekte&quot;:[], &quot;massnahmenstatus&quot;:[], &quot;hinweise&quot;:[] }"></textarea></label><small>Reflexionsinhalte werden am Chronikeintrag gespeichert. Handlungsschritte bleiben ungeprüfte Vorschläge und werden erst einzeln nach deiner Auswahl zu Aufgaben.</small>';
+ dossierPopup('KI-Reflexion für Chronikeintrag',body,async fd=>{await dossierKiImportResponse(eid,fd.get('kiResponse'));});
 }
 function dossierKiResponseListen(parsed){
  const stepsInput=parsed?.naechste_schritte??parsed?.naechsteSchritte??parsed?.next_steps;
  const topicsInput=parsed?.ober_themen??parsed?.oberThemen;
  const proceduresInput=parsed?.fachverfahren;
  const statusInput=parsed?.massnahmenstatus??parsed?.massnahmen_status;
- if(!parsed||parsed.schema_version!=='1.0'||!['ok','nicht_ausreichend','sicherheitspruefung'].includes(parsed.status)||!Array.isArray(stepsInput)||!Array.isArray(topicsInput)||!Array.isArray(proceduresInput)||!Array.isArray(statusInput)||!Array.isArray(parsed.moegliche_fachstellen)||!Array.isArray(parsed.hinweise))throw new Error('Die KI-Antwort passt nicht zum Cockpit-Format 1.0. Erforderlich sind schema_version „1.0“, ein gültiger status und die Listen ober_themen, fachverfahren, naechste_schritte, moegliche_fachstellen, massnahmenstatus und hinweise. Bitte die Antwort mit dem Beispiel im Feld vergleichen.');
- return {stepsInput,topicsInput,proceduresInput,statusInput};
+ const baseLists=[topicsInput,proceduresInput,stepsInput,parsed?.moegliche_fachstellen,statusInput,parsed?.hinweise];
+ const v=parsed?.schema_version;
+ const newer=['ressourcen','beobachtungen','fremdangaben','hypothesen_prueffragen','offene_fragen','gespraechsimpulse','schutzaspekte'];
+ const expected11=['schema_version','status','ober_themen','fachverfahren',...newer,'naechste_schritte','moegliche_fachstellen','massnahmenstatus','hinweise'];
+ const extraKeys=v==='1.1'&&parsed&&Object.keys(parsed).some(k=>!expected11.includes(k));
+ const malformedSteps=Array.isArray(stepsInput)&&stepsInput.some(x=>{
+  if(!x||typeof x!=='object'||Array.isArray(x)||!String(v==='1.1'?x.titel:(x.titel||x.title)||'').trim())return true;
+  const beschreibung=v==='1.1'?x.beschreibung:(x.beschreibung??x.begruendung??x.description);
+  const zust=v==='1.1'?x.zustaendigkeit:(x.zustaendigkeit??x.responsibility);
+  const frist=x.frist_tage;
+  const fristOk=v==='1.1'?(frist===null||(Number.isInteger(frist)&&frist>=0)):(frist===null||frist===undefined||(Number.isInteger(frist)&&frist>=0)||/^\d+$/.test(String(frist)));
+  return (v==='1.1'&&(typeof beschreibung!=='string'||typeof zust!=='string'||!fristOk||Object.keys(x).some(k=>!['titel','beschreibung','zustaendigkeit','frist_tage'].includes(k))))||(v==='1.0'&&!fristOk);
+ });
+ const malformedTopics=Array.isArray(topicsInput)&&topicsInput.some(x=>!x||typeof x!=='object'||Array.isArray(x)||(v==='1.1'?(typeof x.id!=='string'||typeof x.bezeichnung!=='string'):!String(x.bezeichnung||x.id||x.title||'').trim()));
+ const malformedProcedures=Array.isArray(proceduresInput)&&proceduresInput.some(x=>!x||typeof x!=='object'||Array.isArray(x)||(v==='1.1'?(typeof x.id!=='string'||typeof x.bezeichnung!=='string'||typeof x.version!=='string'||!Array.isArray(x.passende_kriterien)):!String(x.bezeichnung||x.id||x.title||'').trim()));
+ if(!parsed||!['1.0','1.1'].includes(v)||!['ok','nicht_ausreichend','sicherheitspruefung'].includes(parsed.status)||baseLists.some(x=>!Array.isArray(x))||stepsInput.length>3||malformedSteps||malformedTopics||malformedProcedures||extraKeys||(v==='1.1'&&newer.some(k=>!Array.isArray(parsed[k])||parsed[k].some(x=>typeof x!=='string'))))throw new Error('Die KI-Antwort passt nicht zum Cockpit-Format 1.1. Erforderlich sind ausschließlich die Schemafelder, höchstens drei gültige nächste Schritte und die im Beispiel gezeigten Listen. Ältere Antworten im Format 1.0 bleiben ebenfalls lesbar.');
+ return {stepsInput,topicsInput,proceduresInput,statusInput,analysis:Object.fromEntries(newer.map(k=>[k,Array.isArray(parsed[k])?parsed[k]:[]]))};
 }
+function dossierKiDueDays(value){
+ if(value===null||value===undefined||value==='')return null;
+ const n=Number(value);
+ return Number.isInteger(n)&&n>=0?n:null;
+}
+
 async function dossierKiImportResponse(eid,raw){
  let parsed;
  try{
-  let text=String(raw??'').normalize('NFC').replace(/^\\uFEFF/,'').trim();
-  text=text.replace(/^\\s*\`\`\`(?:json)?\\s*/i,'').replace(/\\s*\`\`\`\\s*$/,'').trim();
-  const candidates=[text];
-  const first=text.indexOf('{'),last=text.lastIndexOf('}');
+  let text=String(raw??'').normalize('NFC').replace(/^\uFEFF/,'').trim();
+  text=text.replace(/^\s*\`\`\`(?:json)?\s*/i,'').replace(/\s*\`\`\`\s*$/,'').trim();
+  const candidates=[text],first=text.indexOf('{'),last=text.lastIndexOf('}');
   if(first>=0&&last>first&&text.slice(first,last+1)!==text)candidates.push(text.slice(first,last+1));
   let error;
-  for(const candidate of candidates){
-   try{parsed=JSON.parse(candidate);if(typeof parsed==='string')parsed=JSON.parse(parsed);break;}catch(err){error=err;}
-  }
+  for(const candidate of candidates){try{parsed=JSON.parse(candidate);if(typeof parsed==='string')parsed=JSON.parse(parsed);break;}catch(err){error=err;}}
   if(!parsed)throw error||new Error('JSON fehlt');
  }catch(err){throw new Error('Die KI-Antwort konnte nicht als JSON gelesen werden. Bitte nur das JSON-Ergebnis einfügen.');}
- const {stepsInput,topicsInput,proceduresInput,statusInput}=dossierKiResponseListen(parsed);
+ const {stepsInput,topicsInput,proceduresInput,statusInput,analysis}=dossierKiResponseListen(parsed);
  const e=data.journal.find(x=>x.id===eid);if(!e)throw new Error('Chronikeintrag nicht gefunden.');
- const suggestions=stepsInput.slice(0,3).filter(x=>x&&String(x.titel||x.title||'').trim()).map(x=>({id:dossierKiId(),title:String(x.titel||x.title).trim(),rationale:String(x.beschreibung||x.begruendung||x.description||'').trim(),taskType:String(x.zustaendigkeit||x.responsibility||'Nächster Schritt'),dueDays:Number.isFinite(Number(x.frist_tage))?Math.max(0,Number(x.frist_tage)):3,status:'offen',source:'Externe KI',createdAt:new Date().toISOString()}));
+ const textList=(list,max)=>list.filter(x=>typeof x==='string'&&x.trim()).slice(0,max).map(x=>x.trim());
+ const suggestions=stepsInput.slice(0,3).filter(x=>x&&String(x.titel||x.title||'').trim()).map(x=>({id:dossierKiId(),title:String(x.titel||x.title).trim(),rationale:String(x.beschreibung||x.begruendung||x.description||'').trim(),taskType:String(x.zustaendigkeit||x.responsibility||'Nächster Schritt'),dueDays:dossierKiDueDays(x.frist_tage),status:'offen',source:'Externe KI',createdAt:new Date().toISOString()}));
  const fach=proceduresInput.slice(0,8).filter(x=>x&&String(x.id||x.bezeichnung||x.title||'').trim()).map(x=>({id:String(x.id||x.bezeichnung||x.title),title:String(x.bezeichnung||x.title||x.id),version:String(x.version||'1.0'),matchedKeywords:Array.isArray(x.passende_kriterien)?x.passende_kriterien:[]}));
  const topics=topicsInput.slice(0,8).filter(x=>x&&String(x.bezeichnung||x.id||x.title||'').trim()).map(x=>String(x.bezeichnung||x.title||x.id));
- Dossier.editEntry(data,e,{oberThemen:[...new Set(topics)],fachverfahren:fach,actionSuggestions:[...(e.actionSuggestions||[]).filter(x=>x.status==='übernommen'),...suggestions],kiAnalysis:{status:parsed.status||'ok',massnahmenstatus:statusInput.slice(0,12),hinweise:Array.isArray(parsed.hinweise)?parsed.hinweise.slice(0,8):[],moeglicheFachstellen:Array.isArray(parsed.moegliche_fachstellen)?parsed.moegliche_fachstellen.slice(0,8):[],at:new Date().toISOString()}},data.settings.activeUser||'SSA');
- await dossierSave();closeModal('dossierEditModal');dossierRefresh();toast('KI-Auswertung geprüft und als Vorschläge gespeichert.');
+ const analysisSafe=Object.fromEntries(Object.entries(analysis).map(([k,v])=>[k,textList(v,12)]));
+ Dossier.editEntry(data,e,{oberThemen:[...new Set(topics)],fachverfahren:fach,actionSuggestions:[...(e.actionSuggestions||[]).filter(x=>x.status==='übernommen'),...suggestions],kiAnalysis:{schemaVersion:parsed.schema_version,status:parsed.status||'ok',...analysisSafe,massnahmenstatus:textList(statusInput,12),hinweise:textList(parsed.hinweise,12),moeglicheFachstellen:textList(parsed.moegliche_fachstellen,8),at:new Date().toISOString()}},data.settings.activeUser||'SSA');
+ await dossierSave();closeModal('dossierEditModal');dossierRefresh();toast('KI-Reflexion gespeichert. Handlungsschritte bleiben einzelne, ungeprüfte Vorschläge.');
 }
+
 function dossierFachverfahrenHtml(e){
- const topics=e.oberThemen||[], procedures=e.fachverfahren||[], ai=e.kiAnalysis;
+ const topics=e.oberThemen||[],procedures=e.fachverfahren||[],ai=e.kiAnalysis;
  if(!topics.length&&!procedures.length&&!ai)return '';
- return '<details class="dossier-suggestions dossier-workflow"><summary>Überthema</summary>'+(topics.length?'<p><strong>Überthemen:</strong> '+topics.map(DE).join(' · ')+'</p>':'')+(procedures.length?'<p><strong>Fachverfahren:</strong> '+procedures.map(v=>DE(v.title||v.id)).join(' · ')+'</p>':'')+(ai?.hinweise?.length?'<small>Hinweise zur fachlichen Prüfung: '+ai.hinweise.map(DE).join(' · ')+'</small>':'')+'</details>';
+ const safeItem=x=>DE(typeof x==='string'?x:JSON.stringify(x));
+ const section=(title,items)=>Array.isArray(items)&&items.length?'<p><strong>'+DE(title)+'</strong></p><ul>'+items.map(x=>'<li>'+safeItem(x)+'</li>').join('')+'</ul>':'';
+ return '<details class="dossier-suggestions dossier-workflow"><summary>'+(ai?'KI-Reflexion · fachlich prüfen':'Überthema')+'</summary>'+(ai?'<p><strong>Status:</strong> '+DE(ai.status||'ok')+'. Die KI-Ausgabe ist ein Reflexionsvorschlag, keine fachliche Entscheidung.</p>':'')+(topics.length?'<p><strong>Überthemen:</strong> '+topics.map(DE).join(' · ')+'</p>':'')+(procedures.length?'<p><strong>Fachverfahren:</strong> '+procedures.map(v=>DE(v.title||v.id)).join(' · ')+'</p>':'')+section('Ressourcen',ai?.ressourcen)+section('Dokumentierte Beobachtungen',ai?.beobachtungen)+section('Angaben anderer Beteiligter',ai?.fremdangaben)+section('Prüffragen zu möglichen Hypothesen',ai?.hypothesen_prueffragen)+section('Offene Fragen',ai?.offene_fragen)+section('Gesprächsimpulse',ai?.gespraechsimpulse)+section('Zu prüfende Schutzaspekte',ai?.schutzaspekte)+section('Mögliche Fachstellen',ai?.moeglicheFachstellen)+section('Hinweise',ai?.hinweise)+section('Maßnahmenstatus',ai?.massnahmenstatus)+'</details>';
 }
+
 // Stichworttreffer sind Hinweise auf ein Verfahren, keine fachliche Feststellung.
 const dossierWorkflowRules=[['kinderschutz',/kindeswohl|kinderschutz|vernachlässig|gefährdung/],['selfharm',/suizid|selbstverletz|selbstgefährd/],['sexualisierte-gewalt',/sexualisier|sexuell.*gewalt/],['violence',/waffe|bedrohung|körperliche gewalt/],['mobbing',/mobbing|cybermobbing|wiederholte ausgrenzung/],['absence',/fehlzeit|schulvermeid|schulabsent|unentschuldig/],['psychisch',/angst|psychische belastung|rückzug/],['konflikt',/konflikt|streit|mediation/]];
 function dossierWorkflowMatches(e){const text=[e.type,e.title,e.content].join(' ').toLocaleLowerCase('de');return dossierWorkflowRules.filter(([id,rule])=>rule.test(text)&&WORKFLOWS.some(w=>w.id===id)).map(([id])=>id);}
@@ -273,7 +358,7 @@ function dossierSuggestionFind(eid,sugid){const e=data.journal.find(e=>e.id===ei
 async function dossierSuggestionIgnore(eid,sugid){const {s}=dossierSuggestionFind(eid,sugid);if(!s)return;s.status='nicht verwendet';s.decidedAt=new Date().toISOString();await dossierSave();dossierRefresh();}
 async function dossierSuggestionRestore(eid,sugid){const {s}=dossierSuggestionFind(eid,sugid);if(!s)return;s.status='offen';delete s.decidedAt;await dossierSave();dossierRefresh();}
 function dossierSuggestedDue(days){if(!Number.isInteger(days))return '';const date=new Date(today()+'T12:00:00');for(let i=0;i<days;){date.setDate(date.getDate()+1);if(date.getDay()!==0&&date.getDay()!==6)i++;}return date.toISOString().slice(0,10);}
-function dossierSuggestionUse(eid,sugid){const {e,s}=dossierSuggestionFind(eid,sugid);if(!e||!s)return;dossierPopup('Konkreten nächsten Schritt anpassen',`<div class="dossier-grid">${dossierText('title','Was genau soll geschehen?',s.title,true)}${dossierField('assignedTo','Wer übernimmt den Schritt?',Dossier.aktiveMitarbeitende(data),'text',true)}${dossierField('due','Vorgeschlagener Termin (änderbar)',dossierSuggestedDue(s.dueDays),'date')}${dossierText('expectedResult','Woran erkennst du die Umsetzung?',s.rationale)}<p class="full">Der Termin ist ein Vorschlag. Erst mit „Übernehmen“ wird die Aufgabe angelegt und direkt mit diesem Chronikeintrag verknüpft.</p></div>`,async fd=>{const f=Object.fromEntries(fd),t=Dossier.addTask(data,{...f,participantIds:e.participantIds,sourceEntryKey:'entry:'+e.id,taskType:s.taskType,caseId:'',priority:'Normal'});s.status='übernommen';s.taskId=t.id;s.decidedAt=new Date().toISOString();await dossierSave();closeModal('dossierEditModal');dossierRefresh();});document.querySelector('#dossierEditModal [type=submit]').textContent='Übernehmen';}
+function dossierSuggestionUse(eid,sugid){const {e,s}=dossierSuggestionFind(eid,sugid);if(!e||!s)return;dossierPopup('Konkreten nächsten Schritt anpassen',`<div class="dossier-grid">${dossierText('title','Was genau soll geschehen?',s.title,true)}${dossierField('assignedTo','Wer übernimmt den Schritt?',Dossier.aktiveMitarbeitende(data),'text',true)}${dossierField('due','Fälligkeit (optional, leer = ohne Termin)',dossierSuggestedDue(s.dueDays),'date')}${dossierText('expectedResult','Woran erkennst du die Umsetzung?',s.rationale)}<p class="full">Der Termin ist ein Vorschlag. Erst mit „Übernehmen“ wird die Aufgabe angelegt und direkt mit diesem Chronikeintrag verknüpft.</p></div>`,async fd=>{const f=Object.fromEntries(fd),t=Dossier.addTask(data,{...f,participantIds:e.participantIds,sourceEntryKey:'entry:'+e.id,taskType:s.taskType,caseId:'',priority:'Normal'});s.status='übernommen';s.taskId=t.id;s.decidedAt=new Date().toISOString();await dossierSave();closeModal('dossierEditModal');dossierRefresh();});document.querySelector('#dossierEditModal [type=submit]').textContent='Übernehmen';}
 async function dossierPin(eid){const e=data.journal.find(e=>e.id===eid);if(!e)return;e.pinnedFor=e.pinnedFor||[];e.pinHistory=e.pinHistory||[];const was=e.pinnedFor.includes(selectedStudentId);e.pinnedFor=was?e.pinnedFor.filter(s=>s!==selectedStudentId):[...e.pinnedFor,selectedStudentId];e.pinHistory.push({at:new Date().toISOString(),studentId:selectedStudentId,pinned:!was});await dossierSave();dossierRefresh();}
 function dossierStep(key,type='Nächster Schritt'){
  const origin=dossierRecord(key),participantIds=origin?Dossier.ids(data,origin):[selectedStudentId];

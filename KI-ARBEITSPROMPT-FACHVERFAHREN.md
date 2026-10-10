@@ -1,58 +1,62 @@
 # KI-Arbeitshilfe für das SSA-Cockpit
 
-## Zweck
+## Zweck und Ablauf
 
-Das Cockpit erzeugt pro Chronikeintrag einen Prompt mit der vollständigen anonymisierten Chronologie des ausgewählten Falls. Kopiere den Prompt in ein KI-System und füge dessen JSON-Antwort anschließend im Cockpit ein.
+Das Cockpit erstellt zu einem Chronikeintrag einen datensparsam aufbereiteten Prompt mit dem Fallverlauf. Der Text wird nicht automatisch an einen KI-Anbieter gesendet. Vor dem Kopieren muss die Fachkraft den bearbeitbaren Prompt prüfen und verbleibende Angaben selbst entfernen. Die automatische Aufbereitung ist **keine garantierte Anonymisierung**.
 
-Die Dokumentation und die Cockpit-Funktion verwenden dasselbe Antwortformat. Ergänze keine zusätzlichen JSON-Schlüssel.
+Dokumentereignisse werden ohne Dateinamen und Dokumentinhalt übertragen. Direkte Daten wie gespeicherte Schüler:innen- und Teamnamen, bestimmte Kontaktdaten, genaue Datumsangaben und erkannte medizinische oder therapeutische Einzelsätze werden automatisch reduziert. Freitext kann trotzdem Angaben enthalten, die eine Person erkennbar machen. Erkannte Gesundheitsangaben werden standardmäßig ausgelassen; sie sollen nur dann manuell ergänzt werden, wenn sie für die konkrete Reflexionsfrage notwendig sind.
 
-## Grenzen der Arbeitshilfe
+Verwende externe KI-Dienste nur, wenn deren Nutzung für diesen Zweck von der zuständigen Stelle freigegeben ist. Prüfe den Prompt vor jeder Übergabe erneut.
 
-- Ergänze keine Tatsachen, die nicht in der Chronologie stehen.
-- Stelle keine Diagnose und ändere keine fachliche Ampel.
-- Veranlasse keine Kontaktaufnahme.
-- Formuliere höchstens drei konkrete, überprüfbare nächste Schritte.
-- Wenn wesentliche Angaben fehlen, verwende den Status `nicht_ausreichend` und nenne die Lücken in `hinweise`.
-- Vorschläge werden erst nach Prüfung und ausdrücklicher Auswahl in Cockpit-Aufgaben übernommen.
-- Die fachliche Entscheidung bleibt bei der Schulsozialarbeiterin oder dem Schulsozialarbeiter.
+## Fachliche Grenzen
 
-## Verbindliches Antwortformat
+- Erfinde keine Tatsachen und behaupte keine Ursachen.
+- Trenne eigene schulische Beobachtungen von Angaben des Kindes, der Familie und anderer Beteiligter.
+- Formuliere Hypothesen als offene, überprüfbare Fragen.
+- Stelle keine Diagnose und triff keine fachliche oder automatische Ampelentscheidung.
+- Beschreibe Schutzaspekte nur als Prüfanlässe. Eine Schutzprüfung und ihre fachliche Einordnung bleiben bei der zuständigen Fachkraft.
+- Wiederhole keine Namen, Kontaktdaten, Dateinamen oder unnötigen Gesundheitsangaben.
+- Nenne höchstens drei konkrete nächste Schritte. Verwende Rollen statt Personennamen.
+- Setze eine Frist nur, wenn sie aus dem dokumentierten Verlauf eindeutig hervorgeht. Sonst muss `frist_tage` `null` sein.
+- Vorschläge werden zunächst als ungeprüfte Vorschläge gespeichert. Erst eine ausdrückliche Auswahl legt eine Aufgabe an.
+- Fehlende Informationen und Widersprüche müssen ausdrücklich benannt werden.
 
-Antworte ausschließlich mit einem gültigen JSON-Objekt. Verwende exakt diese acht Schlüssel:
+## Verbindliches Antwortformat 1.1
 
+Antworte ausschließlich mit einem gültigen JSON-Objekt und verwende exakt diese Schlüssel:
+
+```json
+{
+  "schema_version": "1.1",
+  "status": "ok",
+  "ober_themen": [],
+  "fachverfahren": [],
+  "ressourcen": [],
+  "beobachtungen": [],
+  "fremdangaben": [],
+  "hypothesen_prueffragen": [],
+  "offene_fragen": [],
+  "naechste_schritte": [
     {
-      "schema_version": "1.0",
-      "status": "ok",
-      "ober_themen": [],
-      "fachverfahren": [],
-      "naechste_schritte": [],
-      "moegliche_fachstellen": [],
-      "massnahmenstatus": [],
-      "hinweise": []
+      "titel": "",
+      "beschreibung": "",
+      "zustaendigkeit": "",
+      "frist_tage": null
     }
+  ],
+  "moegliche_fachstellen": [],
+  "gespraechsimpulse": [],
+  "schutzaspekte": [],
+  "massnahmenstatus": [],
+  "hinweise": []
+}
+```
 
-Felder:
+- `status`: `ok`, `nicht_ausreichend` oder `sicherheitspruefung`.
+- `ober_themen`: Objekte mit `id` und `bezeichnung`, soweit sicher zuordenbar.
+- `fachverfahren`: Objekte mit `id`, `bezeichnung`, `version` und `passende_kriterien` als Liste.
+- `ressourcen`, `beobachtungen`, `fremdangaben`, `hypothesen_prueffragen`, `offene_fragen`, `gespraechsimpulse`, `schutzaspekte`, `massnahmenstatus` und `hinweise`: kurze Textlisten. Bei Hypothesen nur prüfbare Fragen eintragen.
+- `naechste_schritte`: höchstens drei Objekte. `frist_tage` ist eine nichtnegative Zahl nur dann, wenn ein konkreter Zeitpunkt im Verlauf steht; andernfalls `null`.
+- `moegliche_fachstellen`: Liste möglicher Stellen, keine automatische Vermittlung oder Kontaktaufnahme.
 
-- `schema_version`: immer `"1.0"`.
-- `status`: `"ok"`, `"nicht_ausreichend"` oder `"sicherheitspruefung"`.
-- `ober_themen`: Liste passender Themenobjekte mit `id` und `bezeichnung`.
-- `fachverfahren`: Liste von Objekten mit `id`, `bezeichnung`, `version` und `passende_kriterien` als Liste.
-- `naechste_schritte`: höchstens drei Objekte mit `titel`, `beschreibung`, `zustaendigkeit` und `frist_tage` als Zahl. Nenne eine Rolle, keine erfundene Person.
-- `moegliche_fachstellen`: Liste passender interner oder externer Stellen aus dem übergebenen Kontext.
-- `massnahmenstatus`: Liste kurzer Hinweise zum Stand dokumentierter Maßnahmen.
-- `hinweise`: Liste mit fehlenden Informationen, Unsicherheiten oder fachlichen Grenzen.
-
-## Beispiel bei unzureichenden Angaben
-
-    {
-      "schema_version": "1.0",
-      "status": "nicht_ausreichend",
-      "ober_themen": [],
-      "fachverfahren": [],
-      "naechste_schritte": [],
-      "moegliche_fachstellen": [],
-      "massnahmenstatus": [],
-      "hinweise": ["Der dokumentierte Verlauf enthält noch zu wenige Angaben für einen konkreten nächsten Schritt."]
-    }
-
-Gib keinen Markdown-Codeblock, keine Einleitung und keinen Text außerhalb des JSON aus. Jede vorgeschlagene Handlung muss sich auf dokumentierte Informationen beziehen.
+Das Cockpit kann Antworten im bisherigen Format 1.0 weiterhin importieren. Neue Antworten sollen Format 1.1 verwenden. Die Reflexionsfelder werden am Chronikeintrag angezeigt. KI-Handlungsvorschläge werden nicht ohne Auswahl zu Aufgaben.
