@@ -43,7 +43,7 @@ test('weist unvollständige oder ungültige Schemas verständlich zurück',()=>{
   {...valid10,schema_version:'2.0'},
   {...valid10,status:'unbekannt'},
   {...valid10,hinweise:null}
- ])assert.throws(()=>validate(candidate),/Cockpit-Format 1\.[01]/);
+ ])assert.throws(()=>validate(candidate),/KI-Antwort:/);
 });
 
 test('erfindet bei fehlender Frist keinen Termin',()=>{
@@ -96,7 +96,7 @@ test('Prompt begrenzt Reflexion auf den Eintrag und macht fehlenden Kontext sich
 
 test('Datenschutzdialog verspricht keine vollständige Anonymisierung und erlaubt die Sichtprüfung',()=>{
  assert.match(source,/nicht garantiert anonym/);
- assert.match(source,/KI-Arbeitsprompt prüfen und bei Bedarf bearbeiten/);
+ assert.match(source,/1\. Anfrage prüfen, kopieren und der KI geben/);
  assert.match(source,/Antwort wird nach dem Speichern an dieser Kachel/);
  assert.match(source,/KI-Antwort speichern/);
  assert.match(source,/dossier-modal #dossierEditForm\{display:flex/);
@@ -105,7 +105,16 @@ test('Datenschutzdialog verspricht keine vollständige Anonymisierung und erlaub
 });
 
 test('neue Reflexionsfelder werden im Aktenverlauf beschriftet angezeigt',()=>{
- for(const label of ['Ressourcen','Dokumentierte Beobachtungen','Angaben anderer Beteiligter','Prüffragen zu möglichen Hypothesen','Offene Fragen','Gesprächsimpulse','Zu prüfende Schutzaspekte'])assert.ok(source.includes(label),label);
+ for(const label of ['Was hilft bereits?','Dokumentierte Beobachtungen','Angaben anderer Beteiligter','Mögliche Erklärungen prüfen','Was sollte ich klären?','Fragen für das Gespräch','Was muss ich zum Schutz prüfen?'])assert.ok(source.includes(label),label);
  assert.match(source,/Eintrag reflektieren/);
  assert.doesNotMatch(source,/dossierTags|timelineTags|dossierTagFilter|dossierPin|pinnedFor|Anheften|Stichwörter für Suche/);
+});
+
+test('akzeptiert einfache KI-Textlisten und benennt das fehlerhafte Feld',()=>{
+ const result=validate({...valid11,ober_themen:['Belastung'],fachverfahren:['Gespräch']});
+ assert.equal(result.topicsInput[0],'Belastung');
+ assert.equal(result.proceduresInput[0],'Gespräch');
+ assert.throws(()=>validate({...valid11,ober_themen:[42]}),/ober_themen/);
+ assert.throws(()=>validate({...valid11,fachverfahren:['']}),/fachverfahren/);
+ assert.throws(()=>validate({...valid11,ressourcen:null}),/ressourcen/);
 });
