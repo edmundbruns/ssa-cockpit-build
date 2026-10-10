@@ -118,3 +118,17 @@ test('akzeptiert einfache KI-Textlisten und benennt das fehlerhafte Feld',()=>{
  assert.throws(()=>validate({...valid11,fachverfahren:['']}),/fachverfahren/);
  assert.throws(()=>validate({...valid11,ressourcen:null}),/ressourcen/);
 });
+
+test('Eintragsprompt verlangt einfache Handlungsschritte statt JSON und erfindet keine Ortsressourcen',()=>{
+ const start=source.indexOf('function dossierKiPrompt('),end=source.indexOf('function dossierKiId(',start);
+ const promptContext={dossierKiPayload:()=>({eintrag:{inhalt:'Fiktives Beispiel'}})};
+ vm.runInNewContext(source.slice(start,end)+';globalThis.prompt=dossierKiPrompt;',promptContext);
+ const prompt=promptContext.prompt({});
+ assert.match(prompt,/nicht als JSON/);
+ assert.match(prompt,/Spiegelstrichen/);
+ assert.match(prompt,/höchstens drei priorisierte nächste Schritte/i);
+ assert.match(prompt,/Ein bestätigtes Schul- und Sozialraumprofil/);
+ assert.match(prompt,/keine Falltexte oder identifizierenden Details/);
+ assert.match(prompt,/triff keine verbindliche fachliche oder rechtliche Entscheidung/);
+ assert.doesNotMatch(prompt,/Antworte ausschließlich mit einem gültigen JSON/);
+});
