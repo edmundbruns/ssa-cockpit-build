@@ -1,6 +1,6 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Version 0.24.6. Die Fehlzeitenquote kann für einen frei gewählten Zeitraum berechnet werden. Der Klassenvergleich zeigt alle Klassen, auch ohne Fehlzeiteintrag. Der Klassenvergleich zeigt alle Klassen, auch ohne Fehlzeiteintrag. Klassen-Wochenpläne liefern den Unterrichtsminuten-Nenner; der WebUntis-Import speichert Tageswerte und sperrt unvollständige E-Mail-Auswertungen. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
+Version 0.24.6. Die Fehlzeitenquote kann für einen frei gewählten Zeitraum berechnet werden. Der Klassenvergleich zeigt alle Klassen, auch ohne Fehlzeiteintrag. Klassen-Wochenpläne liefern den Unterrichtsminuten-Nenner; der WebUntis-Import speichert Tageswerte und sperrt unvollständige E-Mail-Auswertungen. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
 
 Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
@@ -9,9 +9,18 @@ Die lokale Migrationsdatei mit personenbezogenen Schuldaten ist nicht Bestandtei
 Unter „Gesprächsbogen drucken“ stehen vier fachlich unterschiedliche DIN-A4-Varianten nach der bereitgestellten Druckvorlage zur Auswahl. Der unveränderte Originalbogen lässt sich dort ebenfalls öffnen. Kurztitel, Informationsquelle und Gesprächsanlass bieten optionale Schnellauswahlen bei freier Eingabe. Projekt- und Fachkraftvorschläge sind lokale, fallabhängige Optionen; nur bestätigte Vorschläge werden Aufgaben.
 
 
+## Schnellstart
+
+1. Öffne **Heute** und prüfe Überfälliges, Termine und Zusagen.
+2. Öffne die Schülerakte und erfasse Gespräch oder Kurzkontakt. Datum, Art, Kind und Inhalt sind Pflicht.
+3. Ergänze Thema und Dauer für eine vollständigere Themen- und Arbeitszeitauswertung.
+4. Halte den nächsten Schritt als Aufgabe oder Zusage mit Zuständigkeit und Termin fest.
+5. Lies den Verlauf in der Chronik. In der Auswertung helfen Einstiegsfragen zu Reichweite, Themen und Arbeitszeit.
+6. Bei Bedarf erzeugst du in der Akte einen KI-Arbeitsprompt. Prüfe die Antwort und übernimm Vorschläge einzeln.
+
 ## Aktueller Arbeitsablauf
 
-Das Handbuch steht in `HANDBUCH-0.24.0.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
+Das Handbuch steht in `HANDBUCH-0.24.6.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
 
 
 ## Neu in 0.12.2: Dialoge und Speichern
