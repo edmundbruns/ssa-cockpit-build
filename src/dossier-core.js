@@ -1,7 +1,7 @@
 /* Dauerhafte Schülerakten. Reine Datenfunktionen, auch unter Node testbar. */
 (function(root){
 'use strict';
-const collections=['contacts','groupTalks','classActivities','trainingRoom','schoolSignals','casePlans','statusHistory','outcomeAssessments','documentEvents','portalRequests','events','verfahrenLaeufe','journal','assessments','yearTransitions','auftraege','quickContacts'];
+const collections=['contacts','groupTalks','classActivities','trainingRoom','schoolSignals','casePlans','statusHistory','outcomeAssessments','documentEvents','portalRequests','events','verfahrenLaeufe','journal','assessments','yearTransitions','auftraege','quickContacts','aiReflections'];
 const SAFETY_NOTICE='Das Programm erkennt keine Gefährdung. Maßgeblich sind deine Einschätzung und das Schutzkonzept der Schule.';
 const uid=prefix=>prefix+'-'+(globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2));
 const day=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
@@ -680,6 +680,8 @@ function timeline(state,sid,legacy=[]){
  for(const e of state.journal.filter(e=>!e.deletedAt&&e.participantIds.includes(sid)))items.push({...e,key:'entry:'+e.id,eventKind:e.type,context:recordContext(state,e,sid),individualNote:e.individualNotes?.[sid]||''});
  for(const e of state.assessments.filter(e=>e.studentId===sid))items.push({...e,key:'assessment:'+e.id,eventKind:'Fachliche Ampelbewertung',title:e.color,content:e.reason,responsible:e.author,context:recordContext(state,e,sid)});
  for(const e of state.yearTransitions.filter(e=>e.studentId===sid))items.push({...e,key:'year:'+e.id,eventKind:'Schuljahresverlauf',content:e.reason,context:recordContext(state,e,sid)});
+ // KI-Ausgaben bleiben von Chronik- und Kontaktstatistiken getrennt.
+ for(const e of state.aiReflections||[])if(e.studentId===sid)items.push({...e,key:'ai-reflection:'+e.id,eventKind:'KI-Reflexion zum Gesamtfall',title:'KI-Reflexion',content:e.response||'',aiReflection:true,date:e.createdDate||recordDate(e),createdAt:e.createdAt,context:recordContext(state,e,sid)});
  for(const e of state.relatedPersons||[])if(e.studentId===sid)items.push({...e,key:'related:'+e.id,date:recordDate(e)||'',eventKind:'Bezugsperson / Netzwerk',title:e.name||'Kontakt',content:[e.role,e.agreements,e.informationScope].filter(Boolean).join(' · '),context:recordContext(state,e,sid)});
  for(const a of state.auftraege||[])if(a.studentId===sid)items.push({...a,key:'auftrag:'+a.id,eventKind:'Auftragsklärung',title:'Auftrag: '+a.assignedOrder,content:['Auftrag von: '+a.requester,a.childNeed?'Anliegen des Kindes: '+a.childNeed:'',a.requesterNeed?'Anliegen der auftraggebenden Person: '+a.requesterNeed:''].filter(Boolean).join('\n'),context:recordContext(state,a,sid)});
  for(const t of work(state,sid))items.push({...t,key:'task:'+t.id,task:true,date:t.due||'',eventKind:'Nächster Schritt',content:t.result||t.expectedResult||'',planned:!t.done,context:recordContext(state,t,sid)});
