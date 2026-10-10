@@ -50,4 +50,34 @@ assert.equal(plainCard.querySelector('.dossier-ki-readable script'),null,'KI-Tex
 await assert.rejects(w.dossierKiImportResponse(guided.id,'   '),/Bitte zuerst/);
 console.log('Lesbare KI-Textantwort über Formular gespeichert, Listen dargestellt und HTML sicher escaped');
 
+
+w.openAiPrompt();
+const fullPrompt=w.document.getElementById('aiPromptText').value;
+assert.match(fullPrompt,/gesamten bereitgestellten Fallverlauf/);
+assert.match(fullPrompt,/Höchstens 350 Wörter/);
+assert.match(fullPrompt,/Diese nächsten Schritte schlage ich vor/);
+assert.match(fullPrompt,/Wer könnte es übernehmen/);
+assert.doesNotMatch(fullPrompt,/unsafeAi/,'Gespeicherte KI-Reflexion darf nicht als neue Fallbeobachtung in den Prompt fließen');
+const countBeforeFullAi=w.testState().tasks.length;
+const fullAnswer='Vorläufige KI-Gesamtreflexion. Fachlich prüfen.\n\n1. Worum geht es jetzt?\n- Einen verlässlichen Schulbeginn unterstützen.\n\n2. Diese nächsten Schritte schlage ich vor\n- Vereinbare einen festen Übergabepunkt.\n- Prüfe mit dem Kind, was morgens hilft.\n\n3. Das hilft dabei\n- Eine vertraute schulische Bezugsperson.\n\n4. Das müssen wir noch klären\n- Welche Absprache gilt aktuell?';
+w.document.getElementById('aiResponseText').value=fullAnswer;
+await w.saveAiPromptResponse();
+const fullReflection=w.testState().aiReflections.at(-1);
+assert.equal(fullReflection.studentId,'test-a');
+assert.equal(fullReflection.response,fullAnswer);
+assert.equal(w.testState().tasks.length,countBeforeFullAi);
+const fullCard=w.document.getElementById('ds-ai-reflection:'+fullReflection.id);
+assert(fullCard.classList.contains('category-ai-reflection'));
+assert(fullCard.querySelector('details[open]'),'Gesamtreflexion soll direkt lesbar sein');
+assert(fullCard.querySelectorAll('.dossier-ki-readable li').length>=5);
+assert.equal(fullCard.querySelector('.preview'),null,'KI-Text soll nicht doppelt als Vorschau erscheinen');
+const stepButton=Array.from(fullCard.querySelectorAll('button')).find(b=>b.textContent==='Nächsten Schritt festhalten');
+assert(stepButton);
+stepButton.click();
+await form({title:'Übergabepunkt abstimmen',assignedTo:'SSA',due:'',expectedResult:'Die Absprache ist dem Kind verständlich.'});
+assert.equal(w.testState().tasks.length,countBeforeFullAi+1);
+assert.equal(w.testState().tasks.at(-1).sourceEntryKey,'ai-reflection:'+fullReflection.id);
+assert.equal(w.testState().tasks.at(-1).due,'');
+console.log('Kurze Gesamtreflexion, lesbare Listen und bewusste Aufgabenübernahme ohne Termin ok');
+
 console.log('errors',errors);if(errors.length)process.exitCode=1;dom.window.close();})();
