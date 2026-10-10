@@ -73,7 +73,7 @@ assert(fullCard.querySelectorAll('.dossier-ki-readable li').length>=5);
 assert.equal(fullCard.querySelector('.preview'),null,'KI-Text soll nicht doppelt als Vorschau erscheinen');
 const stepButton=Array.from(fullCard.querySelectorAll('button')).find(b=>b.textContent==='Nächsten Schritt festhalten');
 assert(stepButton);
-stepButton.click();
+w.eval(stepButton.getAttribute('onclick'));
 await form({title:'Übergabepunkt abstimmen',assignedTo:'SSA',due:'',expectedResult:'Die Absprache ist dem Kind verständlich.'});
 assert.equal(w.testState().tasks.length,countBeforeFullAi+1);
 assert.equal(w.testState().tasks.at(-1).sourceEntryKey,'ai-reflection:'+fullReflection.id);
