@@ -346,12 +346,14 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  await waitSaved();console.log('0.16 statistik ok');
  }
 
- // 13. „Kachel bearbeiten“ unter „Weitere Aktionen“
+ // 13. Chronikeinträge ohne doppelte Bearbeiten-Aktion
  {
  run(`document.querySelectorAll('.modal.open').forEach(m=>{if(m.id&&!['nachtragModal'].includes(m.id))closeModal(m.id);else m.remove()});selectedStudentId='s1';showStudent('s1')`);
  const eid=run(`data.journal.find(e=>e.participantIds.includes('s1')&&e.type!=='Kurznotiz'&&!e.deletedAt).id`);
- const card=w.document.getElementById('ds-entry:'+eid);const knopf=[...card.querySelectorAll('.dossier-card-actions button')].find(b=>/Kachel bearbeiten/.test(b.textContent));
- assert(knopf,'„Kachel bearbeiten“ in „Weitere Aktionen“');knopf.click();
+ const card=w.document.getElementById('ds-entry:'+eid);
+ assert.equal([...card.querySelectorAll('.dossier-card-actions button')].filter(b=>/Kachel bearbeiten|Teilinhalte löschen/.test(b.textContent)).length,0,'keine doppelten Bearbeiten- oder Teilinhalte-löschen-Aktionen');
+ const knopf=[...card.querySelectorAll('.dossier-card-quick-actions button')].find(b=>b.textContent.trim()==='Bearbeiten');
+ assert(knopf,'direkte Bearbeiten-Schaltfläche');knopf.click();
  const ef=w.document.getElementById('dossierEditForm');assert(w.document.getElementById('dossierEditModal').classList.contains('open'));assert.equal(ef.elements.content.value,run(`data.journal.find(e=>e.id==='${eid}').content`),'Formular mit dem Eintrag');
  ef.elements.content.value=ef.elements.content.value+' (nachträglich ergänzt)';ef.requestSubmit();await sleep(30);
  assert.match(run(`data.journal.find(e=>e.id==='${eid}').content`),/nachträglich ergänzt/);assert(run(`data.journal.find(e=>e.id==='${eid}').revisions.length`)>=1,'Änderung mit Historie');
