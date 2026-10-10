@@ -257,7 +257,7 @@ const KATEGORIEN_VERSIONEN=[{version:'2026/27',gueltigAb:'2026-08-01',merkmale:{
 function kategorien(date){const d=String(date||day()).slice(0,10);return KATEGORIEN_VERSIONEN.filter(v=>v.gueltigAb<=d).at(-1)||KATEGORIEN_VERSIONEN[0];}
 function katListe(merkmal,date){return (kategorien(date).merkmale[merkmal]||[]).map(([id,label,feld])=>({id,label,feld:feld||''}));}
 function katLabel(merkmal,id){if(id==null||id==='')return 'nicht erfasst';for(const v of KATEGORIEN_VERSIONEN){const x=(v.merkmale[merkmal]||[]).find(e=>String(e[0])===String(id));if(x)return x[1];}return String(id);}
-function stufeZweig(className){const m=String(className||'').match(/^\s*(\d{1,2})/);const stufe=m?Number(m[1]):null;return {stufe,zweig:stufe==null?'':stufe<=4?'GS':stufe<=10?'OBS':''};}
+function stufeZweig(className){if(/^\s*(?:SKG(?=\b|\d)|Schulkindergarten\b)/i.test(String(className||'')))return {stufe:'SKG',zweig:'GS'};const m=String(className||'').match(/^\s*(\d{1,2})/);const stufe=m?Number(m[1]):null;return {stufe,zweig:stufe==null?'':stufe<=4?'GS':stufe<=10?'OBS':''};}
 function klassenSnapshot(state,participantIds,date){const out={};for(const sid of participantIds||[]){const c=context(state,sid,date).className||'';out[sid]={klasse:c,...stufeZweig(c)};}return out;}
 function statErfassen(state,input,participantIds,date){
  const k=kategorien(date),ok=(m,v)=>(k.merkmale[m]||[]).some(e=>String(e[0])===String(v));
@@ -883,7 +883,7 @@ const ARBEITSBEREICHE={einzelfall:'Einzelfall',gruppen_klassen:'Gruppen und Klas
 const GRENZE_LISTE=3,GRENZE_KREUZ=5,FOLGE='•';
 function wertLabel(merkmal,id){
  if(id===NICHT_ERFASST||id==null||id==='')return 'nicht erfasst';
- if(merkmal==='stufe')return 'Jahrgang '+id;
+ if(merkmal==='stufe')return id==='SKG'?'Schulkindergarten (SKG)':'Jahrgang '+id;
  if(merkmal==='zweig')return id==='GS'?'Grundschule':id==='OBS'?'Oberschule':String(id);
  if(merkmal==='arbeitsbereich')return ARBEITSBEREICHE[id]||String(id);
  if(merkmal==='schuljahr')return 'Schuljahr '+id;
@@ -928,7 +928,7 @@ function wertKopf(m){return {kontaktart:'Art des Kontakts',thema:'Thema',zugangs
 function ohneGeschuetzte(rows){return rows.filter(r=>!GESCHUETZTE_THEMEN.includes(r.id));}
 // Klassenstufe → Schulzweig, wenn mehr als die Hälfte der Zahlen unterdrückt würde
 function stufeOderZweig(evs,f,zk,titel){
- const st=aufschluesselung(evs,'stufe','kinder',f,zk).sort((a,b)=>(a.id===NICHT_ERFASST)-(b.id===NICHT_ERFASST)||Number(a.id)-Number(b.id));
+ const st=aufschluesselung(evs,'stufe','kinder',f,zk).sort((a,b)=>(a.id===NICHT_ERFASST)-(b.id===NICHT_ERFASST)||(a.id==='SKG'?0:Number(a.id))-(b.id==='SKG'?0:Number(b.id)));
  const a=anonymMatrix(st.map(r=>[r.wert]),{spaltenSummen:true});
  if(a.nichtNull&&a.zellenUnterdrueckt*2>a.nichtNull){const zw=aufschluesselung(evs,'zweig','kinder',f,zk);return {abschnitt:listeAbschnitt(titel+' Schulzweig','zweig',zw,{einheit:'Kinder'}),hinweis:'Klassenstufen wurden zu Schulzweigen zusammengefasst, weil zu viele Zahlen zu klein waren.'};}
  return {abschnitt:listeAbschnitt(titel+' Klassenstufe','stufe',st,{einheit:'Kinder'}),hinweis:''};
