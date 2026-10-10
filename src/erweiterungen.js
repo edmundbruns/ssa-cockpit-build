@@ -318,7 +318,17 @@ function statBlockHtml(e,{info,selected,old,type}){
  ${chipsHtml('thema','thema',{multi:true,auswahl:st?.themen||[],datum})}
  ${chipsHtml('beteiligte','beteiligte',{multi:true,auswahl:beteiligteVor,datum})}
  ${chipsHtml('dauer','dauer_min',{auswahl:dauerVor?[dauerVor]:[],datum,liste:dauerListe(dauerVor)})}
- ${chipsHtml('ergebnis','ergebnis',{auswahl:st?.ergebnis?[st.ergebnis]:[],datum})}</details>`;
+ ${chipsHtml('ergebnis','ergebnis',{auswahl:st?.ergebnis?[st.ergebnis]:[],datum})}<p class="subtle dossier-stat-quality" id="dossierStatVollstaendigkeit" role="status" aria-live="polite"></p></details>`;
+}
+function dossierStatVollstaendigkeit(form){
+ const box=form?.querySelector('#dossierStatVollstaendigkeit');if(!box)return;
+ const fehl=[];
+ if(!form.querySelector('[name="thema"]:checked'))fehl.push('Thema für die Themenauswertung');
+ if(!form.querySelector('[name="dauer_min"]:checked'))fehl.push('Dauer für die Arbeitsstunden');
+ const zugang=form.querySelector('[name="zugangsweg"]');
+ if(zugang&&!form.querySelector('[name="zugangsweg"]:checked'))fehl.push('Zugangsweg für die Zugangsstatistik');
+ box.textContent=fehl.length?'Für eine vollständigere Auswertung fehlt noch: '+fehl.join('; ')+'.':'Die wichtigsten Angaben für die Auswertung sind vollständig. Ergebnis und Beteiligte kannst du bei Bedarf ergänzen.';
+ box.classList.toggle('ok',!fehl.length);
 }
 function dauerListe(vorhanden){const l=Dossier.katListe('dauer');if(vorhanden&&!l.some(x=>Number(x.id)===Number(vorhanden)))l.push({id:vorhanden,label:vorhanden+' Min.'});return l.sort((a,b)=>Number(a.id)-Number(b.id));}
 // Liest die Chips aus dem Formular; liefert null, wenn der Eintrag kein Kontakt ist
@@ -407,8 +417,9 @@ function renderStatistikNeu(){
  ${statF.zeitraum==='frei'?`<label class="stat-filter"><span>von</span><input class="field" type="date" value="${DE(statF.von)}" onchange="statF.von=this.value;renderStatistikNeu()"></label><label class="stat-filter"><span>bis</span><input class="field" type="date" value="${DE(statF.bis)}" onchange="statF.bis=this.value;renderStatistikNeu()"></label>`:''}
  ${statSelect('stufe','Klassenstufe',stufen.map(s=>[String(s),'Klasse '+s]))}${statSelect('zweig','Schulzweig',[['GS','Grundschule'],['OBS','Oberschule']])}${statSelect('thema','Thema',[...kat('thema'),[Dossier.NICHT_ERFASST,'nicht erfasst']])}${statSelect('zugangsweg','Zugangsweg',[...kat('zugangsweg'),[Dossier.NICHT_ERFASST,'nicht erfasst']])}${statSelect('kontaktart','Art',kat('kontaktart'))}${statSelect('ergebnis','Ergebnis',[...kat('ergebnis'),[Dossier.NICHT_ERFASST,'nicht erfasst']])}${statSelect('taetigkeit','Tätigkeit',kat('taetigkeit'))}${statSelect('mitarbeitend','Mitarbeitende',mitarbeitende.map(m=>[m,m]))}</div>
  <p class="subtle stat-zeitraum">Ausgewertet: ${DE(z.text)}${aktiv?' · '+aktiv+' Filter aktiv':''}. Alle Zahlen darunter beziehen sich auf diese Auswahl.</p></section>
- <p class="subtle">Zeitraum: ${DE(z.text)}. Die erreichten Kinder werden pro Schuljahr einmal gezählt; Mehrfachnennungen bei Themen und Beteiligten sind möglich.</p><div class="grid kpis stat-kpis">${kachel('Erreichte Schüler:innen',k.erreichteSchueler,'Kinder, je Schuljahr einmal','erreichteSchueler',k.anonymeKurzkontakte?` · dazu ${k.anonymeKurzkontakte} anonyme Kurzkontakte`:'')}${kachel('Einzelfälle',k.einzelfaelle,'Kinder mit Beratungs- oder Krisengespräch','einzelfaelle')}${kachel('Kontakte',k.kontakte,'Einträge','kontakte')}${kachel('Stunden',k.stunden,'Summe der Dauer ÷ 60','stunden',k.ohneDauer?` · ${k.ohneDauer} ohne Dauer`:'')}${kachel('Erreichte Personen',k.erreichtePersonen,'Einzelkontakt 1, Gruppe/Klasse Teilnehmende','erreichtePersonen')}</div>
- <h2>Themen und Zugänge</h2><div class="stat-raster">
+ <section class="card stat-start"><h2>Womit möchtest du anfangen?</h2><p>Wähle eine Frage. Zeitraum und aktive Filter oben gelten für alle Zahlen.</p><div class="actions"><button class="btn" onclick="statZumBereich('stat-reichweite')">Wen habe ich erreicht?</button><button class="btn" onclick="statZumBereich('stat-themen')">Womit habe ich gearbeitet?</button><button class="btn" onclick="statZumBereich('stat-zeit')">Wofür ging meine Zeit drauf?</button></div></section>
+ <p class="subtle">Zeitraum: ${DE(z.text)}. Die erreichten Kinder werden pro Schuljahr einmal gezählt; Mehrfachnennungen bei Themen und Beteiligten sind möglich.</p><div class="grid kpis stat-kpis" id="stat-reichweite">${kachel('Erreichte Schüler:innen',k.erreichteSchueler,'Kinder, je Schuljahr einmal','erreichteSchueler',k.anonymeKurzkontakte?` · dazu ${k.anonymeKurzkontakte} anonyme Kurzkontakte`:'')}${kachel('Einzelfälle',k.einzelfaelle,'Kinder mit Beratungs- oder Krisengespräch','einzelfaelle')}${kachel('Kontakte',k.kontakte,'Einträge','kontakte')}${kachel('Stunden',k.stunden,'Summe der Dauer ÷ 60','stunden',k.ohneDauer?` · ${k.ohneDauer} ohne Dauer`:'')}${kachel('Erreichte Personen',k.erreichtePersonen,'Einzelkontakt 1, Gruppe/Klasse Teilnehmende','erreichtePersonen')}</div>
+ <details class="card stat-details" id="stat-details"><summary>Weitere Auswertungen nach Thema, Klasse und Zeit öffnen</summary><h2 id="stat-themen">Womit habe ich gearbeitet? Themen und Zugänge</h2><div class="stat-raster">
  ${statBalkenTabelle('Art des Kontakts','kontaktart',Dossier.aufschluesselung(evs,'kontaktart','kontakte',f,zk),'kontakte','kontaktart')}
  ${statBalkenTabelle('Themen','thema',Dossier.aufschluesselung(evs,'thema','kontakte',f,zk),'kontakte','thema')}
  ${statBalkenTabelle('Zugangsweg','zugangsweg',Dossier.aufschluesselung(evs,'zugangsweg','kinder',f,zk),'kinder','zugangsweg')}
@@ -416,14 +427,16 @@ function renderStatistikNeu(){
  ${statBalkenTabelle('Ergebnis der Gespräche','ergebnis',Dossier.aufschluesselung(evs,'ergebnis','kontakte',f,zk),'kontakte','ergebnis')}
  ${statBalkenTabelle('Klassenstufe','stufe',Dossier.aufschluesselung(evs,'stufe','kinder',f,zk).sort((a,b)=>(a.id===Dossier.NICHT_ERFASST)-(b.id===Dossier.NICHT_ERFASST)||Number(a.id)-Number(b.id)),'kinder','')}
  ${statBalkenTabelle('Schulzweig','zweig',Dossier.aufschluesselung(evs,'zweig','kinder',f,zk),'kinder','')}
- <h2 style="grid-column:1/-1">Verlauf und Arbeitsbereiche</h2>
+ <h2 id="stat-zeit" style="grid-column:1/-1">Wofür ging meine Zeit drauf? Verlauf und Arbeitsbereiche</h2>
  ${statBalkenTabelle('Kontakte im Verlauf','monat',Dossier.aufschluesselung(evs.filter(e=>e.art==='kontakt'),'monat','kontakte',f,zk).sort((a,b)=>a.id.localeCompare(b.id)),'kontakte','')}
  ${statBalkenTabelle('Arbeitszeit nach Bereich','arbeitsbereich',Dossier.aufschluesselung(evs,'arbeitsbereich','stunden',f,zk),'stunden','stunden')}
  ${statBalkenTabelle('Tätigkeiten ohne Fall','taetigkeit',Dossier.aufschluesselung(evs,'taetigkeit','stunden',f,zk),'stunden','taetigkeit')}
  ${statBalkenTabelle('Kontakte nach Mitarbeitenden','mitarbeitend',Dossier.aufschluesselung(evs.filter(e=>e.art==='kontakt'),'mitarbeitend','kontakte',f,zk),'kontakte','ssaTeam').replace('</section>','<p class="subtle">Frühere Schreibweisen sind zusammengefasst. <button class="linkknopf" onclick="teamZuordnungOeffnen()">Zuordnung ansehen</button></p></section>')}
- </div>
- <h2 style="grid-column:1/-1">Datenqualität und Berichte</h2><section class="card stat-kreuz" id="statKreuzBereich">${statKreuzHtml(evs,f,zk)}</section>
- <h2>Datenqualität und Berichte</h2>${berichteHtml()}`;
+ </div></details>
+ <details class="card stat-details"><summary>Kreuztabelle und Berichte anzeigen</summary><section class="card stat-kreuz" id="statKreuzBereich">${statKreuzHtml(evs,f,zk)}</section>
+ <h2>Berichte zur Weitergabe</h2>${berichteHtml()}</details>`;
+}
+function statZumBereich(id){const details=document.getElementById('stat-details');if(details)details.open=true;document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'});}
 }
 function statKreuzHtml(evs,f,zk){
  const opt=sel=>Object.entries(STAT_MERKMALE).filter(([m])=>m!=='arbeitsbereich').map(([m,l])=>`<option value="${m}" ${sel===m?'selected':''}>${DE(l)}</option>`).join('');
