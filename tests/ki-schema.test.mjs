@@ -77,21 +77,35 @@ const events=[
 const payloadContext={data:{students:[person],settings:{ssaTeam:[]}},selectedStudentId:'x1',legacyStudentEvents:()=>events,Dossier:{timeline:()=>events},dossierLegacyContent:e=>e.content};
 vm.runInNewContext(payloadSource+';globalThis.makePayload=dossierKiPayload;',payloadContext);
 
-test('reduziert den Payload auf beschriftete Ereignisse und überträgt keine Dokumentinhalte',()=>{
+test('reflektiert ausschließlich den gewählten Eintrag und überträgt keine Dokumentinhalte',()=>{
  const payload=JSON.stringify(payloadContext.makePayload(events[0]));
- for(const value of ['PERSON_A','PERSON_B','Beispielinhalt','2026-09-14','2026-09-15'])assert.equal(payload.includes(value),false,value+' darf nicht übertragen werden');
+ for(const value of ['PERSON_A','PERSON_B','Beispielinhalt','2026-09-14','2026-09-15','Dokumenteintrag'])assert.equal(payload.includes(value),false,value+' darf nicht übertragen werden');
+ assert.match(payload,/\"analysemodus\":\"einzeleintrag\"/);
  assert.match(payload,/Ein allgemeiner Beispieltext/);
- assert.match(payload,/Ereignis 1/);
- assert.match(payload,/Dokumentinhalt werden nicht übertragen/);
+ assert.equal(payload.includes('chronologie'),false);
+ const documentPayload=JSON.stringify(payloadContext.makePayload(events[1]));
+ assert.equal(documentPayload.includes('Beispielinhalt'),false);
+ assert.match(documentPayload,/Dokumenttitel und Dokumentinhalt werden nicht übertragen/);
+});
+
+test('Prompt begrenzt Reflexion auf den Eintrag und macht fehlenden Kontext sichtbar',()=>{
+ assert.match(source,/Reflexion genau eines Chronikeintrags/);
+ assert.match(source,/Zusammenhänge, frühere Absprachen und Entwicklungen können deshalb fehlen/);
+ assert.match(source,/Beziehe dich ausschließlich auf den Eintrag/);
 });
 
 test('Datenschutzdialog verspricht keine vollständige Anonymisierung und erlaubt die Sichtprüfung',()=>{
  assert.match(source,/nicht garantiert anonym/);
  assert.match(source,/KI-Arbeitsprompt prüfen und bei Bedarf bearbeiten/);
+ assert.match(source,/Antwort wird nach dem Speichern an dieser Kachel/);
+ assert.match(source,/KI-Antwort speichern/);
+ assert.match(source,/dossier-modal #dossierEditForm\{display:flex/);
  assert.match(source,/kiPrivacyReviewed/);
  assert.doesNotMatch(source,/Die Eingabe ist anonymisiert/);
 });
 
 test('neue Reflexionsfelder werden im Aktenverlauf beschriftet angezeigt',()=>{
  for(const label of ['Ressourcen','Dokumentierte Beobachtungen','Angaben anderer Beteiligter','Prüffragen zu möglichen Hypothesen','Offene Fragen','Gesprächsimpulse','Zu prüfende Schutzaspekte'])assert.ok(source.includes(label),label);
+ assert.match(source,/Eintrag reflektieren/);
+ assert.doesNotMatch(source,/dossierTags|timelineTags|dossierTagFilter|dossierPin|pinnedFor|Anheften|Stichwörter für Suche/);
 });

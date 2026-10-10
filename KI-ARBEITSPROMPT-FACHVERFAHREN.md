@@ -2,9 +2,11 @@
 
 ## Zweck und Ablauf
 
-Das Cockpit erstellt zu einem Chronikeintrag einen datensparsam aufbereiteten Prompt mit dem Fallverlauf. Der Text wird nicht automatisch an einen KI-Anbieter gesendet. Vor dem Kopieren muss die Fachkraft den bearbeitbaren Prompt prüfen und verbleibende Angaben selbst entfernen. Die automatische Aufbereitung ist **keine garantierte Anonymisierung**.
+Über **„Eintrag reflektieren“** erstellt das Cockpit einen datensparsam aufbereiteten Prompt ausschließlich für die geöffnete Chronik-Kachel. Der übrige Fallverlauf wird nicht mitgesendet. Dadurch kann wichtiger Kontext fehlen. Der Prompt fordert die KI auf, diese Grenze zu benennen und keine Vorgeschichte zu unterstellen. Der Text wird nicht automatisch an einen KI-Anbieter gesendet. Vor dem Kopieren muss die Fachkraft den bearbeitbaren Prompt prüfen und verbleibende Angaben selbst entfernen. Die automatische Aufbereitung ist **keine garantierte Anonymisierung**.
 
-Dokumentereignisse werden ohne Dateinamen und Dokumentinhalt übertragen. Direkte Daten wie gespeicherte Schüler:innen- und Teamnamen, bestimmte Kontaktdaten, genaue Datumsangaben und erkannte medizinische oder therapeutische Einzelsätze werden automatisch reduziert. Freitext kann trotzdem Angaben enthalten, die eine Person erkennbar machen. Erkannte Gesundheitsangaben werden standardmäßig ausgelassen; sie sollen nur dann manuell ergänzt werden, wenn sie für die konkrete Reflexionsfrage notwendig sind.
+Die Antwort wird nach Prüfung und Speicherung an derselben Kachel unter **„KI-Reflexion · fachlich prüfen“** angezeigt. Handlungsschritte bleiben Vorschläge. Erst eine ausdrückliche Auswahl legt eine Aufgabe an. Der separate KI-Arbeitsprompt auf Ebene der Schülerakte kann den Fallverlauf betrachten.
+
+Dokumenteinträge werden ohne Dateinamen und Dokumentinhalt übertragen. Direkte Daten wie gespeicherte Schüler:innen- und Teamnamen, bestimmte Kontaktdaten, genaue Datumsangaben und erkannte medizinische oder therapeutische Einzelsätze werden automatisch reduziert. Freitext kann trotzdem Angaben enthalten, die eine Person erkennbar machen. Erkannte Gesundheitsangaben werden standardmäßig ausgelassen; sie sollen nur dann manuell ergänzt werden, wenn sie für die konkrete Reflexionsfrage notwendig sind.
 
 Verwende externe KI-Dienste nur, wenn deren Nutzung für diesen Zweck von der zuständigen Stelle freigegeben ist. Prüfe den Prompt vor jeder Übergabe erneut.
 
@@ -59,4 +61,4 @@ Antworte ausschließlich mit einem gültigen JSON-Objekt und verwende exakt dies
 - `naechste_schritte`: höchstens drei Objekte. `frist_tage` ist eine nichtnegative Zahl nur dann, wenn ein konkreter Zeitpunkt im Verlauf steht; andernfalls `null`.
 - `moegliche_fachstellen`: Liste möglicher Stellen, keine automatische Vermittlung oder Kontaktaufnahme.
 
-Das Cockpit kann Antworten im bisherigen Format 1.0 weiterhin importieren. Neue Antworten sollen Format 1.1 verwenden. Die Reflexionsfelder werden am Chronikeintrag angezeigt. KI-Handlungsvorschläge werden nicht ohne Auswahl zu Aufgaben.
+Das Cockpit kann Antworten im bisherigen Format 1.0 weiterhin importieren. Neue Antworten sollen Format 1.1 verwenden. Die Reflexionsfelder der Eintragsreflexion werden an der ausgewählten Chronik-Kachel angezeigt. KI-Handlungsvorschläge werden nicht ohne Auswahl zu Aufgaben.
