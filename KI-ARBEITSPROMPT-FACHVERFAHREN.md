@@ -1,88 +1,58 @@
-# KI-Arbeitsprompt für das SSA-Cockpit
+# KI-Arbeitshilfe für das SSA-Cockpit
 
 ## Zweck
 
-Analysiere den anonymisierten Chronikeintrag und ordne ihm passende Oberthemen und Fachverfahren zu. Erzeuge ausschließlich konkrete, überprüfbare nächste Schritte. Die Antwort wird direkt vom SSA-Cockpit verarbeitet.
+Das Cockpit erzeugt pro Chronikeintrag einen Prompt mit der vollständigen anonymisierten Chronologie des ausgewählten Falls. Kopiere den Prompt in ein KI-System und füge dessen JSON-Antwort anschließend im Cockpit ein.
 
-## Datenschutz und Grenzen
+Die Dokumentation und die Cockpit-Funktion verwenden dasselbe Antwortformat. Ergänze keine zusätzlichen JSON-Schlüssel.
 
-- Verwende ausschließlich die übergebenen anonymisierten Daten.
-- Ergänze keine Namen, Diagnosen, Ereignisse oder Bewertungen.
-- Trenne dokumentierte Fakten von fachlichen Hypothesen.
-- Leite keine Kindeswohlgefährdung, Diagnose oder Schuld aus einzelnen Stichworten ab.
-- Empfiehl niemals automatisch eine Kontaktaufnahme. Benenne nur eine mögliche zuständige Stelle.
-- Bei akuten Schutz- oder Notfallhinweisen markiere die Dringlichkeit und verweise auf die schulischen Schutzwege.
-- Wenn die Daten nicht ausreichen, gib eine Rückfrage oder "nicht_ausreichend" zurück.
-- Liefere ausschließlich gültiges JSON. Kein Markdown und keine Erläuterung außerhalb des JSON.
+## Grenzen der Arbeitshilfe
 
-## Eingabe
+- Ergänze keine Tatsachen, die nicht in der Chronologie stehen.
+- Stelle keine Diagnose und ändere keine fachliche Ampel.
+- Veranlasse keine Kontaktaufnahme.
+- Formuliere höchstens drei konkrete, überprüfbare nächste Schritte.
+- Wenn wesentliche Angaben fehlen, verwende den Status `nicht_ausreichend` und nenne die Lücken in `hinweise`.
+- Vorschläge werden erst nach Prüfung und ausdrücklicher Auswahl in Cockpit-Aufgaben übernommen.
+- Die fachliche Entscheidung bleibt bei der Schulsozialarbeiterin oder dem Schulsozialarbeiter.
 
-Das Cockpit übergibt:
+## Verbindliches Antwortformat
 
-- chronikeintrag: Datum, Eintragstyp, Anlass, Beobachtung, Einschätzung, Vereinbarung, Ziel und Ergebnis
-- bisherige_fachverfahren: bereits zugeordnete Verfahren
-- schulinterne_angebote: verfügbare Rollen und Angebote
-- externe_fachstellen: regionale Fachstellen ohne automatische Kontaktaufnahme
-- verfahrenskatalog: Kurzbeschreibungen und Versionen der hinterlegten Standards
+Antworte ausschließlich mit einem gültigen JSON-Objekt. Verwende exakt diese acht Schlüssel:
 
-## Antwortformat
-
-{
-  "schema_version": "1.0",
-  "status": "ok|nicht_ausreichend|sicherheitspruefung",
-  "ober_themen": [
     {
-      "id": "stabile-katalog-id",
-      "bezeichnung": "Oberthema",
-      "begruendung": "Nur aus dem Eintrag abgeleitete Begründung",
-      "sicherheit": 0.0
+      "schema_version": "1.0",
+      "status": "ok",
+      "ober_themen": [],
+      "fachverfahren": [],
+      "naechste_schritte": [],
+      "moegliche_fachstellen": [],
+      "massnahmenstatus": [],
+      "hinweise": []
     }
-  ],
-  "fachverfahren": [
-    {
-      "id": "stabile-verfahrens-id",
-      "bezeichnung": "Name des Fachverfahrens",
-      "version": "Katalogversion",
-      "passende_kriterien": [
-        "im Eintrag tatsächlich erkennbare Kriterien"
-      ],
-      "fehlende_informationen": [
-        "für eine sichere Einordnung noch benötigte Information"
-      ]
-    }
-  ],
-  "naechste_schritte": [
-    {
-      "titel": "Konkrete Handlung",
-      "beschreibung": "Was soll praktisch getan werden?",
-      "zustaendigkeit": "Rolle oder Stelle, keine erfundene Person",
-      "frist_tage": 0,
-      "prioritaet": "sofort|hoch|normal|niedrig",
-      "begruendung": "Bezug zum Chronikeintrag",
-      "benoetigt_einwilligung": true,
-      "status": "vorschlag"
-    }
-  ],
-  "moegliche_fachstellen": [
-    {
-      "name": "Interne oder externe Stelle aus dem übergebenen Katalog",
-      "anlass": "Wofür könnte sie fachlich passend sein?",
-      "kontakt_ausloesen": false
-    }
-  ],
-  "hinweise": [
-    "Fachliche Hinweise und Grenzen"
-  ]
-}
 
-## Qualitätsregeln
+Felder:
 
-1. Erzeuge höchstens drei nächste Schritte.
-2. Ein nächster Schritt muss konkret, zeitlich und zuständigkeitsbezogen sein.
-3. Beziehe dich immer auf den vorhandenen Chronikeintrag.
-4. Keine Floskeln wie "weitere Maßnahmen prüfen", wenn eine konkretere Formulierung möglich ist.
-5. Eine externe Stelle darf nur vorgeschlagen werden, wenn der Anlass erkennbar passt.
-6. Keine automatische Ampeländerung. Eine erneute Einschätzung darf nur als Vorschlag erscheinen.
-7. Der Status "sicherheitspruefung" darf nur bei konkreten Schutz- oder Notfallhinweisen verwendet werden.
-8. Nicht ausgewählte Vorschläge werden nicht als Chronikeintrag gespeichert.
-9. Übernommene Vorschläge werden als Folgeaufgabe am ursprünglichen Chronikeintrag gespeichert.
+- `schema_version`: immer `"1.0"`.
+- `status`: `"ok"`, `"nicht_ausreichend"` oder `"sicherheitspruefung"`.
+- `ober_themen`: Liste passender Themenobjekte mit `id` und `bezeichnung`.
+- `fachverfahren`: Liste von Objekten mit `id`, `bezeichnung`, `version` und `passende_kriterien` als Liste.
+- `naechste_schritte`: höchstens drei Objekte mit `titel`, `beschreibung`, `zustaendigkeit` und `frist_tage` als Zahl. Nenne eine Rolle, keine erfundene Person.
+- `moegliche_fachstellen`: Liste passender interner oder externer Stellen aus dem übergebenen Kontext.
+- `massnahmenstatus`: Liste kurzer Hinweise zum Stand dokumentierter Maßnahmen.
+- `hinweise`: Liste mit fehlenden Informationen, Unsicherheiten oder fachlichen Grenzen.
+
+## Beispiel bei unzureichenden Angaben
+
+    {
+      "schema_version": "1.0",
+      "status": "nicht_ausreichend",
+      "ober_themen": [],
+      "fachverfahren": [],
+      "naechste_schritte": [],
+      "moegliche_fachstellen": [],
+      "massnahmenstatus": [],
+      "hinweise": ["Der dokumentierte Verlauf enthält noch zu wenige Angaben für einen konkreten nächsten Schritt."]
+    }
+
+Gib keinen Markdown-Codeblock, keine Einleitung und keinen Text außerhalb des JSON aus. Jede vorgeschlagene Handlung muss sich auf dokumentierte Informationen beziehen.
