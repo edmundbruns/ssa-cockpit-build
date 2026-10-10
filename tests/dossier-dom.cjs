@@ -78,6 +78,22 @@ await form({title:'Übergabepunkt abstimmen',assignedTo:'SSA',due:'',expectedRes
 assert.equal(w.testState().tasks.length,countBeforeFullAi+1);
 assert.equal(w.testState().tasks.at(-1).sourceEntryKey,'ai-reflection:'+fullReflection.id);
 assert.equal(w.testState().tasks.at(-1).due,'');
+const singleCard=w.document.getElementById('ds-entry:'+guided.id);
+const singleStep=Array.from(singleCard.querySelectorAll('.dossier-suggestions button')).find(b=>b.textContent==='Nächsten Schritt festhalten');
+assert(singleStep,'Einzelreflexion braucht eine bewusste Aufgabenaktion');
+w.eval(singleStep.getAttribute('onclick'));
+await form({title:'Kurze Absprache treffen',assignedTo:'SSA',due:'',expectedResult:'Absprache ist verständlich.'});
+const retainedTasks=w.testState().tasks.length;
+assert.equal(w.testState().tasks.at(-1).sourceEntryKey,'entry:'+guided.id);
+w.confirm=()=>false;await w.dossierKiDelete('entry:'+guided.id);assert(guided.kiAnalysis);
+w.confirm=()=>true;await w.dossierKiDelete('entry:'+guided.id);
+assert.equal(guided.kiAnalysis,undefined);assert(w.testState().journal.includes(guided));
+assert(w.document.getElementById('ds-entry:'+guided.id));
+const fullDelete=Array.from(w.document.getElementById('ds-ai-reflection:'+fullReflection.id).querySelectorAll('button')).find(b=>b.textContent==='KI-Reflexion löschen');
+assert(fullDelete);await w.dossierKiDelete('ai-reflection:'+fullReflection.id);
+assert(!w.testState().aiReflections.some(e=>e.id===fullReflection.id));
+assert.equal(w.document.getElementById('ds-ai-reflection:'+fullReflection.id),null);
+assert.equal(w.testState().tasks.length,retainedTasks);
 console.log('Kurze Gesamtreflexion, lesbare Listen und bewusste Aufgabenübernahme ohne Termin ok');
 
 console.log('errors',errors);if(errors.length)process.exitCode=1;dom.window.close();})();
