@@ -12,7 +12,7 @@ Unter „Gesprächsbogen drucken“ stehen vier fachlich unterschiedliche DIN-A4
 ## Korrekturen in 0.24.7
 
 - Änderungen fachlicher Texte berechnen Schutzhinweise neu. Eine frühere Schutzprüfung bleibt in der Historie; inhaltlich geänderte Einträge müssen erneut geprüft werden. Kleine Satzzeichenkorrekturen oder ein korrigiertes Urheberfeld lösen keine neue Prüfung aus.
-- Fallsuche, Gesamtfall-Prompt und der untere Druckknopf verwenden die vollständige Chronik. Die Abschlussprüfung berücksichtigt auch neue Gespräche und Aufgaben mit direkter Zuordnung zum Kind.
+- Fallsuche, Gesamtfall-Prompt und der untere Druckknopf verwenden die vollständige Chronik. Die Abschlussprüfung berücksichtigt auch neue Gespräche und Aufgaben mit direkter Zuordnung zum Kind. Der KI-Prompt unterscheidet geplante Gespräche, offene und erledigte Aufgaben; geplante Termine werden einmal übermittelt.
 - Ein WebUntis-Korrekturimport setzt nicht mehr gezählte Abwesenheiten auf 0. Für Personen in der Datei ersetzt der Import die Werte im erkannten Zeitraum; andere Personen bleiben unverändert. Die Vorschau erläutert diesen Umfang. Ungültige Daten werden vor dem Bestätigen zurückgewiesen.
 - Einzel- und Gesamtprompt nutzen dieselbe lokale Textaufbereitung. Auch registrierte Lehrkräfte, Bezugspersonen und Überthemen werden bereinigt. Schutzbezogene Textstellen in medizinischen Angaben bleiben als ausdrücklich zu prüfende Auszüge erhalten. Die Sichtprüfung vor externer Nutzung bleibt erforderlich.
 - Gelöschte Chronikeinträge zählen nicht in der bisherigen Statistik. Die interne CSV übernimmt deren Zeitraum- und Klassenfilter und zählt verknüpfte Trainingsraumvorgänge einmal.

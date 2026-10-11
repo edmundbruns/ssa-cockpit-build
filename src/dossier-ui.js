@@ -145,6 +145,10 @@ function dossierKiAnonymize(value,e,options={}){
 function dossierKiDokument(item){
  return /dokument|anhang|datei/i.test(String(item.type||item.eventKind||''))||/\.(?:pdf|docx?|xlsx?|pptx?|odt|png|jpe?g)$/i.test(String(item.title||''));
 }
+function dossierKiEventStatus(e){
+ if(e.task)return e.done?(e.status||'erledigt'):(e.status||'offen');
+ return e.planned?'Geplant, Durchführung noch nicht bestätigt':e.status||'Dokumentiert';
+}
 function dossierKiPayload(e){
  const isDocument=dossierKiDokument(e);
  const safeEntry={
@@ -153,7 +157,7 @@ function dossierKiPayload(e){
   inhalt:isDocument?'[Dokumenttitel und Dokumentinhalt werden nicht übertragen.]':dossierKiAnonymize(dossierKiEntryContent(e),e),
   ueberthemen:Array.isArray(e.oberThemen)?e.oberThemen.slice(0,8).map(v=>dossierKiAnonymize(typeof v==='string'?v:v?.title||v?.bezeichnung||v?.id||'',e)).filter(Boolean):[],
   fachverfahren:(e.fachverfahren||[]).slice(0,8).map(v=>dossierKiAnonymize(v.title||v.id,e)).filter(Boolean),
-  status:dossierKiAnonymize(e.status||'',e)
+  status:dossierKiAnonymize(dossierKiEventStatus(e),e)
  };
  return {schema_version:'1.1',analysemodus:'einzeleintrag',eintrag:safeEntry,kontexthinweis:'Es wird nur dieser Chronikeintrag übergeben. Der übrige Fallverlauf wird nicht mitgesendet. Zusammenhänge, frühere Absprachen und Entwicklungen können deshalb fehlen und dürfen nicht unterstellt werden.',hinweis:'Die Eingabe wurde automatisch datensparsam aufbereitet, ist aber nicht garantiert anonym. Medizinische und therapeutische Einzelangaben wurden standardmäßig ausgelassen. Prüfe den Text vor jeder externen Nutzung.'};
 }

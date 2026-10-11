@@ -107,6 +107,29 @@ test('Einzelprompt enthält nur fachliche Felder und die individuelle Notiz des 
  assert.equal(JSON.stringify(k.payload({...entry,type:'Dokument',title:'datei.pdf'})).includes('GEMEINSAMER_INHALT'),false);
 });
 
+test('Gesamtprompt kennzeichnet Planung und Aufgabenstatus, ohne Termine doppelt oder alte KI-Ausgaben zu senden',()=>{
+ const k=kiContext();
+ k.currentCaseForStudent=()=>({status:'Klärungsphase',reason:'Gespräch'});
+ k.caseTimeline=()=>[
+  {key:'entry:plan',type:'Schülergespräch',title:'PLAN_BELEG',content:'Gespräch vorbereiten',planned:true,participantIds:['a']},
+  {key:'appointment:plan',type:'Geplanter Termin',title:'PLAN_BELEG',content:'Durchführung noch nicht bestätigt'},
+  {key:'task:offen',eventKind:'Nächster Schritt',title:'OFFENE_AUFGABE',task:true,done:false,status:'offen'},
+  {key:'task:fertig',eventKind:'Nächster Schritt',title:'ERLEDIGTE_AUFGABE',task:true,done:true,status:'erledigt'},
+  {key:'ai-reflection:alt',aiReflection:true,content:'ALTE_KI_AUSGABE'},
+  {key:'legacy:doc',eventKind:'Dokument',content:'DOKUMENTINHALT'}
+ ];
+ const start=html.indexOf('function redactFullCaseText('),end=html.indexOf('\nfunction openAiPrompt(',start);
+ vm.runInNewContext(html.slice(start,end)+';globalThis.fullPrompt=buildAiPrompt;',k);
+ const prompt=k.fullPrompt('a');
+ assert.equal(prompt.split('PLAN_BELEG').length-1,1);
+ assert.match(prompt,/Geplant, Durchführung noch nicht bestätigt/);
+ assert.match(prompt,/Nächster Schritt \(offen\)\. OFFENE_AUFGABE/);
+ assert.match(prompt,/Nächster Schritt \(erledigt\)\. ERLEDIGTE_AUFGABE/);
+ assert.equal(prompt.includes('ALTE_KI_AUSGABE'),false);
+ assert.equal(prompt.includes('DOKUMENTINHALT'),false);
+ assert.match(k.payload(k.caseTimeline()[0]).eintrag.status,/Geplant/);
+});
+
 function importContext(){
  const state=fixture(),context={data:state,Date,Map,Set,Number,Array,String,Math,Error,clean:v=>String(v||''),fmt:v=>v,id:D.uid,numberGerman:v=>Number(String(v||'').replace(',','.'))||0};
  const from=html.indexOf('function applyWebUntisClass('),to=html.indexOf('function detectDelimitedSeparator(',from);
