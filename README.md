@@ -1,6 +1,6 @@
 # SSA-Cockpit Ludgerusschule Desktop
 
-Version 0.24.6. Die Fehlzeitenquote kann für einen frei gewählten Zeitraum berechnet werden. Der Klassenvergleich zeigt alle Klassen, auch ohne Fehlzeiteintrag. Klassen-Wochenpläne liefern den Unterrichtsminuten-Nenner; der WebUntis-Import speichert Tageswerte und sperrt unvollständige E-Mail-Auswertungen. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
+Version 0.24.7. Die Fehlzeitenquote kann für einen frei gewählten Zeitraum berechnet werden. Der Klassenvergleich zeigt alle Klassen, auch ohne Fehlzeiteintrag. Klassen-Wochenpläne liefern den Unterrichtsminuten-Nenner; der WebUntis-Import speichert Tageswerte und sperrt unvollständige E-Mail-Auswertungen. Der Windows-Installer (NSIS) entsteht über den GitHub-Actions-Workflow `Windows Installer`.
 
 Die Anwendung speichert Falldaten und Anhänge lokal in einem verschlüsselten Datentresor. Dateien können bestehenden Chronikeinträgen nachträglich zugeordnet werden. Verlaufsberichte lassen sich als DOCX herunterladen oder als PDF drucken. Lokale Handlungsvorschläge und die Textüberarbeitung sind regelbasiert und werden nur nach einer ausdrücklichen Bestätigung übernommen. Es wird kein externes KI-Modell verwendet. Sprachmemos und OCR sind nicht Bestandteil dieser Version.
 
@@ -8,6 +8,17 @@ Die lokale Migrationsdatei mit personenbezogenen Schuldaten ist nicht Bestandtei
 
 Unter „Gesprächsbogen drucken“ stehen vier fachlich unterschiedliche DIN-A4-Varianten nach der bereitgestellten Druckvorlage zur Auswahl. Der unveränderte Originalbogen lässt sich dort ebenfalls öffnen. Kurztitel, Informationsquelle und Gesprächsanlass bieten optionale Schnellauswahlen bei freier Eingabe. Projekt- und Fachkraftvorschläge sind lokale, fallabhängige Optionen; nur bestätigte Vorschläge werden Aufgaben.
 
+
+## Korrekturen in 0.24.7
+
+- Änderungen fachlicher Texte berechnen Schutzhinweise neu. Eine frühere Schutzprüfung bleibt in der Historie; inhaltlich geänderte Einträge müssen erneut geprüft werden. Kleine Satzzeichenkorrekturen oder ein korrigiertes Urheberfeld lösen keine neue Prüfung aus.
+- Fallsuche, Gesamtfall-Prompt und der untere Druckknopf verwenden die vollständige Chronik. Die Abschlussprüfung berücksichtigt auch neue Gespräche und Aufgaben mit direkter Zuordnung zum Kind.
+- Ein WebUntis-Korrekturimport setzt nicht mehr gezählte Abwesenheiten auf 0. Für Personen in der Datei ersetzt der Import die Werte im erkannten Zeitraum; andere Personen bleiben unverändert. Die Vorschau erläutert diesen Umfang. Ungültige Daten werden vor dem Bestätigen zurückgewiesen.
+- Einzel- und Gesamtprompt nutzen dieselbe lokale Textaufbereitung. Auch registrierte Lehrkräfte, Bezugspersonen und Überthemen werden bereinigt. Schutzbezogene Textstellen in medizinischen Angaben bleiben als ausdrücklich zu prüfende Auszüge erhalten. Die Sichtprüfung vor externer Nutzung bleibt erforderlich.
+- Gelöschte Chronikeinträge zählen nicht in der bisherigen Statistik. Die interne CSV übernimmt deren Zeitraum- und Klassenfilter und zählt verknüpfte Trainingsraumvorgänge einmal.
+- Dateien bleiben nach Entfernung ihrer Ursprungskachel als eigene Kachel erreichbar. Entfernungshistorien enthalten keine verschachtelten Kopien früherer Historien.
+- „Dokumentiert von“ und weitere bearbeitbare Angaben werden gespeichert. Die Historie nennt getrennt die tatsächlich bearbeitende Person.
+- Anonyme Kurzkontakte bieten SKG und die Jahrgänge 1 bis 10 an.
 
 ## Schnellstart
 
@@ -20,7 +31,7 @@ Unter „Gesprächsbogen drucken“ stehen vier fachlich unterschiedliche DIN-A4
 
 ## Aktueller Arbeitsablauf
 
-Das Handbuch steht in `HANDBUCH-0.24.6.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
+Das Handbuch steht in `HANDBUCH-0.24.7.md` und im Programm unter „Handbuch“. Schnellvorlagen, Aufgabenfilter, Dokumentprüfung und WebUntis-Importprüfung sind miteinander verknüpft. Dokumente können direkt aus Chronikkacheln geöffnet werden. Sprachmemo und OCR sind nicht Bestandteil dieser Version.
 
 
 ## Neu in 0.12.2: Dialoge und Speichern

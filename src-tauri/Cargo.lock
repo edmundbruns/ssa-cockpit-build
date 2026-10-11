@@ -3408,7 +3408,7 @@ dependencies = [
 
 [[package]]
 name = "ssa-cockpit-ludgerusschule"
-version = "0.24.6"
+version = "0.24.7"
 dependencies = [
  "aes-gcm",
  "argon2",
