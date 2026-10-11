@@ -221,8 +221,9 @@ const VERNACHLAESSIGUNG_MUSTER=[
  [/(?:^|[^\p{L}])(?:mama|mutter|papa|vater)\s+(?:ist\s+|sei\s+|liegt\s+)?(?:viel|oft|immer|den\s+ganzen\s+tag|nur)\s+(?:im\s+bett|am\s+schlafen|betrunken)/iu,'Eltern oft nicht ansprechbar']
 ];
 const SCHUTZ_VERFAHREN=['selbstgefaehrdung','gewalt-bedrohung','kinderschutz'];
+function fachverfahrenText(entry){return [entry.type,entry.title,entry.content,entry.childView,entry.otherView,entry.observation,entry.assessment,entry.agreement,entry.goal,entry.result,entry.decision].filter(Boolean).join(' ').normalize('NFC');}
 function fachverfahren_match(entry,state){
- const hay=[entry.type,entry.title,entry.content,entry.observation,entry.assessment,entry.agreement,entry.goal,entry.result].filter(Boolean).join(' ').normalize('NFC');
+ const hay=fachverfahrenText(entry);
  const hit=(keyword)=>{const escaped=String(keyword).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');const re=new RegExp('(?:^|[^\\p{L}\\p{N}])'+escaped+'[\\p{L}\\p{N}]*','iu');const m=re.exec(hay);if(!m)return false;const before=hay.slice(0,m.index).split(/[^\p{L}\p{N}]+/u).filter(Boolean).slice(-3);const negated=!SCHUTZ_OHNE_VERNEINUNG.has(currentProcedure)&&before.some(w=>/^(nicht|kein|keine|keinen|keiner|nie|niemals|ohne)$/iu.test(w));const after=hay.slice(m.index+m[0].length,m.index+m[0].length+45);if(/^kindeswohl$/iu.test(keyword)&&/(?:ist|sei|wäre|war)?\s*nicht\s+gefährdet/iu.test(after))return false;return !negated;};
  let currentProcedure='';
  const matches=FACHVERFAHREN_KATALOG.map(v=>{currentProcedure=v.id;const matchedKeywords=v.keywords.filter(hit);return matchedKeywords.length?{...v,matchedKeywords}:null}).filter(Boolean);
@@ -233,9 +234,9 @@ function fachverfahren_match(entry,state){
 }
 function schutzTreffer(entry,fachverfahren){
  const hits=fachverfahren.filter(v=>SCHUTZ_VERFAHREN.includes(v.id)).flatMap(v=>v.matchedKeywords||[]);
- if(/(?:angst|fürchte|furcht).{0,35}(?:nach\s+hause|zu\s+hause)/iu.test([entry.title,entry.content,entry.observation,entry.assessment].filter(Boolean).join(' ')))hits.push('Angst vor Zuhause');
+ if(/(?:angst|fürchte|furcht).{0,35}(?:nach\s+hause|zu\s+hause)/iu.test(fachverfahrenText(entry)))hits.push('Angst vor Zuhause');
  // 0.24: leise Hinweise auf Vernachlässigung – „ohne“ ist hier kein Verneinungswort
- const text=[entry.title,entry.content,entry.observation,entry.assessment].filter(Boolean).join(' ');
+ const text=fachverfahrenText(entry);
  for(const [re,label] of VERNACHLAESSIGUNG_MUSTER)if(re.test(text))hits.push(label);
  return [...new Set(hits)];
 }
@@ -610,7 +611,7 @@ function noChildNeedText(noNeed,text){return noNeed?'Kind hat (noch) kein eigene
 function safetyCheck(state,entryId,input){
  const legacyBuckets=[state.contacts,state.groupTalks,state.trainingRoom,state.classActivities,state.schoolSignals,state.casePlans,state.statusHistory,state.events,state.portalRequests,state.verfahrenLaeufe,state.auftraege,state.relatedPersons];
  const e=state.journal.find(x=>x.id===entryId)||legacyBuckets.filter(Array.isArray).flat().find(x=>x?.id===entryId);if(!e)throw Error('Dokumentationseintrag fehlt.');
- e.safetyCheck={...input,checkedAt:new Date().toISOString()};return e.safetyCheck;
+ e.safetyCheck={...input,checkedAt:new Date().toISOString()};delete e.safetyCheckInvalidatedAt;return e.safetyCheck;
 }
 function ideasForEntry(state,entryId){
  const e=state.journal.find(x=>x.id===entryId);if(!e)throw Error('Chronikeintrag fehlt.');
@@ -625,7 +626,30 @@ function ideasForEntry(state,entryId){
 function markNoFurtherStep(state,entryId){
  const e=state.journal.find(x=>x.id===entryId);if(!e)throw Error('Chronikeintrag fehlt.');if(e.safetyStatus||(e.fachverfahren||[]).some(v=>['selbstgefaehrdung','gewalt-bedrohung','kinderschutz'].includes(v.id)))throw Error('Bei einer Schutzfrage ist eine fachliche Prüfung erforderlich.');e.noFurtherStep=true;e.noFurtherStepAt=new Date().toISOString();e.noFurtherStepText='Bewusst kein weiterer Schritt, Tür bleibt offen';return e;
 }
-function editEntry(state,e,changes,author){if(changes.date&&!iso(changes.date))throw Error('Datum prüfen.');if(e.generalInfo&&changes.type&&changes.type!==e.type)throw Error('Art einer allgemeinen Mitteilung nicht nachträglich ändern.');e.revisions=e.revisions||[];const before=structuredClone(e);delete before.revisions;e.revisions.push({at:new Date().toISOString(),author,before});for(const k of ['content','title','type','date','time','channel','people','source','childView','otherView','observation','assessment','agreement','goal','result','decision','planned','plannedDate','individualNotes','workflowId','oberThemen','fachverfahren','actionSuggestions','kiAnalysis','stat','duration'])if(k in changes)e[k]=changes[k];if(changes.date&&changes.date!==before.date){e.schoolYear=schoolYear(e.date);e.studentContexts={};e.className='';stamp(state,e);}}
+function editEntry(state,e,changes,author){
+ if('date' in changes&&!iso(changes.date))throw Error('Datum prüfen.');
+ if('content' in changes&&!String(changes.content||'').trim())throw Error('Inhalt angeben.');
+ if(e.generalInfo&&changes.type&&changes.type!==e.type)throw Error('Art einer allgemeinen Mitteilung nicht nachträglich ändern.');
+ const before=structuredClone(e);delete before.revisions;
+ const at=new Date().toISOString();e.revisions=e.revisions||[];e.revisions.push({at,author,before});
+ const fields=['content','title','type','date','time','channel','people','source','childView','otherView','observation','assessment','agreement','goal','result','decision','planned','plannedDate','individualNotes','workflowId','oberThemen','fachverfahren','actionSuggestions','kiAnalysis','stat','duration','responsible','referenceDate','since','facilitators','dateBasis'];
+ for(const k of fields)if(k in changes)e[k]=changes[k];
+ // Cosmetic corrections and metadata changes do not invalidate a human review.
+ const meaningful=v=>String(v||'').normalize('NFC').toLocaleLowerCase('de-DE').replace(/[^\p{L}\p{N}]+/gu,' ').trim();
+ const textFields=['content','title','type','people','source','childView','otherView','observation','assessment','agreement','goal','result','decision'];
+ const notes=r=>Object.entries(r.individualNotes||{}).sort(([a],[b])=>a.localeCompare(b)).map(([sid,v])=>sid+':'+meaningful(v)).join('|');
+ const textChanged=textFields.some(k=>meaningful(before[k])!==meaningful(e[k]))||notes(before)!==notes(e);
+ if(textChanged){
+  const matches=fachverfahren_match(e,state);
+  e.oberThemen=[...new Set(matches.map(v=>v.topic))];
+  e.fachverfahren=matches.map(v=>({id:v.id,title:v.topic,version:v.version,matchedKeywords:v.matchedKeywords}));
+  e.safetyStatus=schutzTreffer(e,matches).length?'Mögliche Schutzfrage laut Stichworten, bitte selbst prüfen':'';
+  if(before.safetyCheck){delete e.safetyCheck;e.safetyCheckInvalidatedAt=at;e.safetyStatus=e.safetyStatus||'Text geändert. Frühere Schutzprüfung bitte erneut prüfen.';}
+  if(e.safetyStatus){delete e.noFurtherStep;delete e.noFurtherStepAt;delete e.noFurtherStepText;}
+ }
+ if(changes.date&&changes.date!==before.date){e.schoolYear=schoolYear(e.date);e.studentContexts={};e.className='';stamp(state,e);}
+ return e;
+}
 function addTask(state,input){
  if(!String(input.title||'').trim()||!String(input.assignedTo||'').trim())throw Error('Aufgabe und Zuständigkeit angeben.');
  if(input.due&&!iso(input.due))throw Error('Termin prüfen.');
@@ -676,7 +700,15 @@ function work(state,sid){return state.tasks.filter(t=>ids(state,t).includes(sid)
 function timeline(state,sid,legacy=[]){
  // Fallstatus-Einträge steuern das Fallboard. Sie sind keine eigenen fachlichen
  // Ereignisse und würden dort echte Kontakte oder Aufgaben doppelt darstellen.
- const items=legacy.filter(e=>e.eventKind!=='Fallstatus'&&!(e.eventKind==='Dokument'&&e.attachmentId&&e.sourceEntryKey)&&!(e.eventKind==='Trainingsraum'&&e.journalEntryId&&state.journal.some(j=>j.id===e.journalEntryId))&&!state.tasks.some(t=>t.id===e.id)).map(e=>({...e,key:'legacy:'+e.id,legacy:true,context:recordContext(state,e,sid)}));
+ const originVisible=key=>{
+  const [kind,...rest]=String(key||'').split(':'),eid=rest.join(':');
+  if(kind==='entry')return state.journal.some(j=>j.id===eid&&!j.deletedAt&&ids(state,j).includes(sid));
+  if(kind==='task')return work(state,sid).some(t=>t.id===eid);
+  if(kind==='legacy')return legacy.some(e=>e.id===eid&&e.eventKind!=='Fallstatus');
+  const buckets={assessment:state.assessments,year:state.yearTransitions,'ai-reflection':state.aiReflections,related:state.relatedPersons,auftrag:state.auftraege};
+  return (buckets[kind]||[]).some(e=>e.id===eid&&ids(state,e).includes(sid));
+ };
+ const items=legacy.filter(e=>e.eventKind!=='Fallstatus'&&!(e.eventKind==='Dokument'&&e.attachmentId&&originVisible(e.sourceEntryKey))&&!(e.eventKind==='Trainingsraum'&&e.journalEntryId&&originVisible('entry:'+e.journalEntryId))&&!state.tasks.some(t=>t.id===e.id)).map(e=>({...e,key:'legacy:'+e.id,legacy:true,context:recordContext(state,e,sid)}));
  for(const e of state.journal.filter(e=>!e.deletedAt&&e.participantIds.includes(sid)))items.push({...e,key:'entry:'+e.id,eventKind:e.type,context:recordContext(state,e,sid),individualNote:e.individualNotes?.[sid]||''});
  for(const e of state.assessments.filter(e=>e.studentId===sid))items.push({...e,key:'assessment:'+e.id,eventKind:'Fachliche Ampelbewertung',title:e.color,content:e.reason,responsible:e.author,context:recordContext(state,e,sid)});
  for(const e of state.yearTransitions.filter(e=>e.studentId===sid))items.push({...e,key:'year:'+e.id,eventKind:'Schuljahresverlauf',content:e.reason,context:recordContext(state,e,sid)});
@@ -690,7 +722,7 @@ function timeline(state,sid,legacy=[]){
  return items.sort((a,b)=>String(a.date||'9999').localeCompare(String(b.date||'9999'))||String(a.time||'').localeCompare(String(b.time||''))||String(a.createdAt||'').localeCompare(String(b.createdAt||'')));
 }
 function journalStats(state,year='',className='all'){
- return state.journal.filter(e=>!e.generalInfo&&!e.planned&&e.type!=='zusätzliche Information'&&e.type!=='Kurznotiz'&&e.type!=='Zusage erledigt'&&(!year||e.schoolYear===year)&& (className==='all'||e.participantIds.some(sid=>{const cl=recordContext(state,e,sid).className;return className.startsWith('jg:')?cl.match(/^\d+/)?.[0]===className.slice(3):cl===className}))).map(e=>({...e,duration:e.duration*Math.max(1,(e.facilitators||[]).length)}));
+ return state.journal.filter(e=>!e.deletedAt&&!e.generalInfo&&!e.planned&&e.type!=='zusätzliche Information'&&e.type!=='Kurznotiz'&&e.type!=='Zusage erledigt'&&(!year||e.schoolYear===year)&& (className==='all'||e.participantIds.some(sid=>{const cl=recordContext(state,e,sid).className;return className.startsWith('jg:')?cl.match(/^\d+/)?.[0]===className.slice(3):cl===className}))).map(e=>({...e,duration:e.duration*Math.max(1,(e.facilitators||[]).length)}));
 }
 function restore(raw,sanitize){const state=sanitize(raw);for(const [i,e]of (state.journal||[]).entries()){const original=raw.journal?.[i];if(!original)continue;for(const key of ['content','childView','otherView','observation','assessment','agreement','goal','result','source','people'])if(typeof original[key]==='string')e[key]=original[key];if(original.individualNotes&&typeof original.individualNotes==='object')for(const key of Object.keys(e.individualNotes||{}))if(typeof original.individualNotes[key]==='string')e.individualNotes[key]=original.individualNotes[key];}return state;}
 /* Namenssuche (0.21): unabhängig von Reihenfolge, Komma, Groß-/Kleinschreibung, Akzenten und unsichtbaren Zeichen aus Excel */
@@ -1013,5 +1045,5 @@ function weitergabeProtokollieren(state,{bericht,zeitraum,empfaenger,zweck='',fo
  const w={id:uid('weitergabe'),am:new Date().toISOString(),bericht:String(bericht||''),zeitraum:String(zeitraum||''),empfaenger:e,zweck:String(zweck||'').trim(),format,von:aktiveMitarbeitende(state)};
  state.weitergaben.push(w);return w;
 }
-root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,safetyHint,KATEGORIEN_VERSIONEN,kategorien,katListe,katLabel,stufeZweig,statErfassen,statMerkmale,zugangswegFuer,zugangswegSetzen,addTaetigkeit,ereignisse,zugangKarte,filterEreignisse,kennzahlen,aufschluesselung,kreuztabelle,datenqualitaet,statNachtragen,werteVon,NICHT_ERFASST,addStudent,similarStudents,suchNorm,suchPasst,schuelerSuche,jahrKlassen,klasseUebernehmen,alleKlassenUebernehmen,klasseAbgang,planeGespraech,geplanteGespraeche,gespraechVerschieben,gespraechAbsagen,gespraechErledigt,THEMEN_STICHWORTE,themenVorschlag,sperrHinweise,wertungsHinweise,gruppenTextHinweis,auftragPruefen,AUFBEWAHRUNG_STANDARD,aufbewahrungJahre,abgangsDatum,loeschfaellig,akteLoeschen,GESCHUETZTE_THEMEN,BERICHTE,wertLabel,anonymMatrix,kennzahlAnzeige,standardbericht,berichtCsv,weitergabeProtokollieren,SSA_TEAM_STANDARD,ssaTeam,mitarbeitendKanonisch,mitarbeitendSchreibweisen,mitarbeitendZuordnen,aktiveMitarbeitende,zusageErledigtEintragen,SAFETY_NOTICE};
+root.Dossier={restore,uid,iso,schoolYear,validYear,classValid,nextClass,ids,context,recordContext,stamp,normalize,lookup,preview,validate,apply,archive,localSuggestions,addEntry,editEntry,addTask,setTask,assess,currentAssessment,work,timeline,caseTimeline:timeline,journalStats,quickContact,addPromise,completePromise,saveAuftrag,safetyCheck,ideasForEntry,markNoFurtherStep,safetyHint,KATEGORIEN_VERSIONEN,kategorien,katListe,katLabel,stufeZweig,statErfassen,statMerkmale,zugangswegFuer,zugangswegSetzen,addTaetigkeit,ereignisse,zugangKarte,filterEreignisse,kennzahlen,aufschluesselung,kreuztabelle,datenqualitaet,statNachtragen,werteVon,NICHT_ERFASST,addStudent,similarStudents,suchNorm,suchPasst,schuelerSuche,jahrKlassen,klasseUebernehmen,alleKlassenUebernehmen,klasseAbgang,planeGespraech,geplanteGespraeche,gespraechVerschieben,gespraechAbsagen,gespraechErledigt,THEMEN_STICHWORTE,themenVorschlag,sperrHinweise,wertungsHinweise,gruppenTextHinweis,auftragPruefen,AUFBEWAHRUNG_STANDARD,aufbewahrungJahre,abgangsDatum,loeschfaellig,akteLoeschen,GESCHUETZTE_THEMEN,BERICHTE,wertLabel,anonymMatrix,kennzahlAnzeige,standardbericht,berichtCsv,weitergabeProtokollieren,SSA_TEAM_STANDARD,ssaTeam,mitarbeitendKanonisch,mitarbeitendSchreibweisen,mitarbeitendZuordnen,aktiveMitarbeitende,zusageErledigtEintragen,SAFETY_NOTICE};
 })(globalThis);
