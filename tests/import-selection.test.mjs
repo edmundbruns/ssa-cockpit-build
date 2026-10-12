@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+const html=fs.readFileSync(new URL('../src/index.html',import.meta.url),'utf8');
+function load(name,ctx){vm.createContext(ctx);vm.runInContext(html.split('\n').find(x=>x.startsWith(`function ${name}(`)),ctx);return ctx;}
+async function importRows(rows,answers){let pending;const original=[{sourceKey:'synthetic-old',minutes:45}];const ctx=load('importTimetable',{data:{timetableLessons:original,settings:{}},alert:()=>{},appConfirm:async()=>answers.shift(),parseDelimited:()=>rows,headerKey:x=>x.replaceAll('_',''),parseSignalDate:x=>x==='2026-09-01'?x:'',clean:x=>x,timetableMinutes:(_s,_e,n)=>Number(n),id:()=> 'synthetic-new',fmt:x=>x,save:()=>{},go:()=>{},FileReader:class{readAsText(){this.result='synthetic';pending=this.onload()}}});ctx.importTimetable({target:{files:[{name:'synthetic.csv',size:100}],value:'x'}});await pending;return {ctx,original};}
+const headers=['DATUM','KLASSE','DAUERMINUTEN'];
+test('Ungültiger Ersatzimport erhält bestehenden Stundenplan',async()=>{const {ctx,original}=await importRows([headers,['invalid','5a','45']],[true]);assert.equal(ctx.data.timetableLessons,original);assert.equal(original.length,1);});
+test('Gültiger Ersatzimport übernimmt ausschließlich neue Einträge',async()=>{const {ctx}=await importRows([headers,['2026-09-01','5a','90']],[true]);assert.equal(ctx.data.timetableLessons.length,1);assert.equal(ctx.data.timetableLessons[0].minutes,90);});
+test('Import kann ohne Änderung abgebrochen werden',async()=>{const {ctx,original}=await importRows([headers,['2026-09-01','5a','90']],[false,false]);assert.equal(ctx.data.timetableLessons,original);});
+test('Hinzufügen erhält alte Einträge',async()=>{const {ctx}=await importRows([headers,['2026-09-01','5a','90']],[false,true]);assert.equal(ctx.data.timetableLessons.length,2);});
+test('Personensuche setzt mehrdeutige und erfolglose Auswahl zurück',()=>{const elements={target:{value:'old'},status:{textContent:''}};let hits=[];const ctx=load('jumpToStudent',{data:{students:[]},document:{getElementById:x=>elements[x]},Dossier:{schuelerSuche:()=>hits}});hits=[{id:'a',first:'Anna',last:'Beispiel',className:'5a'}];ctx.jumpToStudent('Anna','target','status');assert.equal(elements.target.value,'a');hits=[...hits,{id:'b'}];ctx.jumpToStudent('Anna','target','status');assert.equal(elements.target.value,'');hits=[];elements.target.value='a';ctx.jumpToStudent('Niemand','target','status');assert.equal(elements.target.value,'');elements.target.value='a';ctx.jumpToStudent('A','target','status');assert.equal(elements.target.value,'');});

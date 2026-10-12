@@ -15,13 +15,11 @@ jobs:
           node-version: 22
           cache: npm
       - uses: dtolnay/rust-toolchain@stable
-      - name: Cargo.lock erzeugen
-        run: cargo generate-lockfile --manifest-path src-tauri/Cargo.toml
       - run: npm ci
       - run: npm test
       - run: npm run test:ui
-      - run: cargo test --manifest-path src-tauri/Cargo.toml --no-default-features --features bundled-sqlite
-      - run: npx tauri build --bundles nsis
+      - run: cargo test --locked --manifest-path src-tauri/Cargo.toml --no-default-features --features bundled-sqlite
+      - run: npx tauri build --bundles nsis -- --locked
       - uses: actions/upload-artifact@v4
         with:
           name: SSA-Cockpit-Windows-Installer
